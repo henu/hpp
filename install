@@ -1,0 +1,313 @@
+#!/bin/sh -e
+
+# Options
+PREFIX="/usr"
+DEPS=""
+
+HEADERS_MAIN=\
+"3dutils.h "\
+"angle.h "\
+"arguments.h "\
+"assert.h "\
+"axis.h "\
+"bitv.h "\
+"byteq.h "\
+"bytev.h "\
+"cast.h "\
+"collisions.h "\
+"color.h "\
+"commandexec.h "\
+"condition.h "\
+"constants.h "\
+"cores.h "\
+"debug.h "\
+"exception.h "\
+"lock.h "\
+"matrix3.h "\
+"matrix4.h "\
+"memwatch.h "\
+"misc.h "\
+"mutex.h "\
+"noncopyable.h "\
+"path.h "\
+"pixelformat.h "\
+"profiler.h "\
+"profilermanager.h "\
+"random.h "\
+"randomizer.h "\
+"rbuf.h "\
+"real.h "\
+"serialize.h "\
+"thread.h "\
+"time.h "\
+"transform2d.h "\
+"transform.h "\
+"trigon.h "\
+"unicode.h "\
+"unicodestring.h "\
+"vector2.h "\
+"vector3.h "\
+"xmldocument.h "\
+"xmlnode.h "\
+"watchdog.h "
+
+HEADERS_3D=\
+"action.h "\
+"actionhandle.h "\
+"boundingsphere.h "\
+"camera.h "\
+"coloredmaterial.h "\
+"datamanagerbase.h "\
+"display.h "\
+"entity.h "\
+"event.h "\
+"eventmanager.h "\
+"genericmaterial.h "\
+"gldebug.h "\
+"glsystem.h "\
+"inc_gl.h "\
+"inc_glx.h "\
+"joystick.h "\
+"key.h "\
+"lamp.h "\
+"lightsource.h "\
+"material.h "\
+"materialmanager.h "\
+"meshmanager.h "\
+"mousekey.h "\
+"movable.h "\
+"rawmaterial.h "\
+"rawmesh.h "\
+"rbuf.h "\
+"rendbuf_enums.h "\
+"rendbuf.h "\
+"renderable.h "\
+"renderindex.h "\
+"renderingenvironment.h "\
+"sdlhandler.h "\
+"shader.h "\
+"shaderprogram.h "\
+"skeleton.h "\
+"state.h "\
+"statemanager.h "\
+"subentity.h "\
+"submesh.h "\
+"test3d.h "\
+"texture.h "\
+"texturemanager.h "\
+"vbomanager.h "\
+"vertexgroupinfluences.h "\
+"videorecorder.h "\
+"viewfrustum.h "\
+"viewport.h "\
+"visibles.h "
+
+HEADERS_IMAGE=\
+"image_draw.h "\
+"image.h "
+
+HEADERS_NCURSES=\
+"ncios.h "
+
+SOURCES_MAIN=\
+"3dconstants.cc "\
+"commandexec.cc "\
+"concurrencywatcher.cc "\
+"memwatch.cc "\
+"profilermanager.cc "
+
+SOURCES_3D=\
+"actionhandle.cc "\
+"display.cc "\
+"eventmanager.cc "\
+"genericmaterial.cc "\
+"glsystem.cc "\
+"joystick.cc "\
+"materialmanager.cc "\
+"meshmanager.cc "\
+"sdlhandler.cc "\
+"statemanager.cc "\
+"test.cc "\
+"texturemanager.cc "\
+"vbomanager.cc "
+
+SOURCES_IMAGE=\
+"image.cc "\
+"image_draw.cc "
+
+SOURCES_NCURSES=\
+"ncios.cc "
+
+# Lib name
+LIBNAME="hpp"
+
+# Compiler flags
+FLAGS="-O3"
+
+# Libs
+LIBS="-lpthread -lrt"
+
+# Combine headers
+#TODO: In future, make options here
+HEADERS=$HEADERS_MAIN
+
+# Combine sources
+#TODO: In future, make options here
+SOURCES=$SOURCES_MAIN
+
+# SVN Revision number
+REVISION=$(svn info 2> /dev/null|grep Revision|cut -d " " -f 2)
+
+# Version
+VERSION=0.$REVISION
+
+# Architecture
+ARCH=$(arch)
+if [ "$ARCH" = "x86_64" ]
+then
+	ARCH="amd64"
+fi
+
+# Debian package maintainer
+DEB_MAINTAINER_NAME="Henrik Heino"
+DEB_MAINTAINER_EMAIL="henu@henu.fi"
+
+# Debian dependencies
+#TODO: In future, make deps from other sections here too!
+DEB_DEPS="libc6-dev"
+
+test()
+{
+	echo "Running integrity tests..."
+	g++ -o /tmp/libhpp_tester test.cc 3dconstants.cc
+	/tmp/libhpp_tester
+	rm /tmp/libhpp_tester
+}
+
+install()
+{
+	echo "Installing to $1..."
+
+	# Headers
+	mkdir -p $1/include/hpp
+	for H_FILE in $HEADERS
+	do
+		cp $H_FILE $1/include/hpp/
+	done
+
+	# Compile sources
+	OBJECTS=""
+	for CC_FILE in $SOURCES
+	do
+		O_FILE=$(echo $CC_FILE|sed "s/\.cc/\.o/g")
+		OBJECTS="$OBJECTS $O_FILE"
+		# Clean old object file
+		rm -f $O_FILE
+		# Compile
+		g++ -fPIC -w -c $FLAGS $CC_FILE
+	done
+	g++ -w -shared $LIBS -o lib$LIBNAME.so $OBJECTS
+
+	# Install lib
+	mkdir -p $1/lib/
+	mv lib$LIBNAME.so $1/lib/
+
+	# Clean object files
+	rm -f $OBJECTS
+
+	# Write .pc file
+	PC_DIR="$1/lib/pkgconfig"
+	mkdir -p $PC_DIR
+	PC_FILE="$PC_DIR/$LIBNAME.pc"
+	rm -f $PC_FILE
+	echo "prefix=$1" >> $PC_FILE
+	echo "exec_prefix=\${prefix}" >> $PC_FILE
+	echo "libdir=\${exec_prefix}/lib" >> $PC_FILE
+	echo "includedir=\${prefix}/include/hpp" >> $PC_FILE
+	echo "" >> $PC_FILE
+	echo "Name: $LIBNAME" >> $PC_FILE
+	echo "Description: General purpose C++ library." >> $PC_FILE
+	echo "Version: 0.1" >> $PC_FILE
+	echo "Requires: $DEPS" >> $PC_FILE
+	echo "Libs: -L\${libdir} -lhpp $LIBS" >> $PC_FILE
+	echo "Cflags: " >> $PC_FILE
+
+}
+
+uninstall()
+{
+	echo "Uninstalling from $1..."
+
+	# Headers
+	for H_FILE in $HEADERS
+	do
+		rm -f $1/include/hpp/$H_FILE
+	done
+	rmdir $1/include/hpp 2> /dev/null || true
+
+	# Lib
+	rm -f $1/lib/lib$LIBNAME.so
+
+	# .pc file
+	PC_FILE="$1/lib/pkgconfig/$LIBNAME.pc"
+	rm -f $PC_FILE
+
+}
+
+if [ "$1" = "uninstall" ]
+then
+	uninstall $PREFIX
+elif [ "$1" = "deb" ]
+then
+	# Prepare
+	test
+	DEB_TEMP="debinstall"
+	DEB_TEMP_PREFIX=$DEB_TEMP/data/$PREFIX
+	mkdir -p $DEB_TEMP_PREFIX
+	install $DEB_TEMP_PREFIX
+
+	# Pack filesystem data
+	cd $DEB_TEMP/data
+	tar czf ../data.tar.gz *
+	cd ..
+
+	# Create control files
+	mkdir -p control
+	cd data
+	find *|xargs md5sum 2> /dev/null > ../control/md5sums || true
+	INSTALLED_SIZE=$(du -s|cut -f 1)
+	cd ..
+	cd control
+	echo "Package: lib$LIBNAME-dev" > control
+	echo "Version: $VERSION" >> control
+	echo "Architecture: $ARCH" >> control
+	echo "Maintainer: $DEB_MAINTAINER_NAME <$DEB_MAINTAINER_EMAIL>" >> control
+	echo "Installed-Size: $INSTALLED_SIZE" >> control
+	echo "Depends: $DEB_DEPS" >> control
+	echo "Section: libdevel" >> control
+	echo "Priority: optional" >> control
+	echo "Homepage: http://www.henu.fi/" >> control
+	echo "Description: LibHPP" >> control
+	echo " LibHPP(Henu Plus Plus) is my collection of C++ libs." >> control
+	tar czf ../control.tar.gz *
+	cd ..
+
+	# Create other package files
+	echo "2.0" > debian-binary
+
+	# Make package
+	DEB_FILE=lib$LIBNAME-dev_$VERSION_$ARCH.deb
+	echo "Creating $DEB_FILE"
+	ar r ../$DEB_FILE debian-binary control.tar.gz data.tar.gz 2> /dev/null
+	cd ..
+
+	# Clean
+	uninstall $DEB_TEMP_PREFIX
+	rm -rf $DEB_TEMP
+else
+	test
+	install $PREFIX
+fi
+
+echo "Done!"
+

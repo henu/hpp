@@ -1,0 +1,4 @@
+#!/bin/sh -e
+g++ -o tester test.cc 3dconstants.cc
+./tester
+rm tester
