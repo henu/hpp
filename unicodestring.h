@@ -53,9 +53,16 @@ public:
 	inline UnicodeString(UChr const* ustr, size_t len);
 	inline ~UnicodeString(void);
 
+	// Modification operators
 	inline UnicodeString operator=(UnicodeString const& ustr);
-
 	inline UnicodeString operator+(UnicodeString const& ustr) const;
+	inline UnicodeString operator+(UChr c) const;
+
+	// Comparison operators
+	inline bool operator==(UnicodeString const& ustr) const;
+	inline bool operator!=(UnicodeString const& ustr) const { return !(*this == ustr); }
+	inline bool operator<(UnicodeString const& ustr) const;
+	inline bool operator>(UnicodeString const& ustr) const { return ustr < *this; }
 
 	inline UChr& operator[](size_t idx);
 	inline UChr operator[](size_t idx) const;
@@ -68,7 +75,9 @@ public:
 
 	inline bool empty(void) const;
 
-	inline UnicodeString substr(size_type offset, size_type size = npos);
+	inline void clear(void);
+
+	inline UnicodeString substr(size_type offset, size_type size = npos) const;
 
 private:
 
@@ -103,9 +112,15 @@ inline UnicodeString::UnicodeString(std::string const& str)
 	len = reserve;
 	if (reserve > 0) {
 		buf = new UChr[reserve];
-		std::string::const_iterator str_it;
-		for (size_t offset = 0; offset < len; offset ++) {
-			buf[offset] = extractUTF8(str_it, str.end());
+		std::string::const_iterator str_it = str.begin();
+		try {
+			for (size_t offset = 0; offset < len; offset ++) {
+				buf[offset] = extractUTF8(str_it, str.end());
+			}
+		}
+		catch ( ... ) {
+			delete[] buf;
+			throw;
 		}
 		HppAssert(str_it == str.end(), "All UTF-8 characters not extracted!");
 	} else {
@@ -203,6 +218,44 @@ inline UnicodeString UnicodeString::operator+(UnicodeString const& ustr) const
 	return result;
 }
 
+inline UnicodeString UnicodeString::operator+(UChr c) const
+{
+	UnicodeString result;
+	result.reserve = len + 1;
+	result.len = result.reserve;
+	result.buf = new UChr[result.reserve];
+	memcpy(result.buf, buf, sizeof(UChr)*len);
+	result.buf[len] = c;
+	return result;
+}
+
+inline bool UnicodeString::operator==(UnicodeString const& ustr) const
+{
+	if (size() != ustr.size()) return false;
+	const_iterator it = begin();
+	const_iterator ustr_it = ustr.begin();
+	for (size_t ofs = 0; ofs < size(); ofs ++) {
+		if (*it != *ustr_it) return false;
+		it ++;
+		ustr_it ++;
+	}
+	return true;
+}
+
+inline bool UnicodeString::operator<(UnicodeString const& ustr) const
+{
+	const_iterator it = begin();
+	const_iterator ustr_it = ustr.begin();
+	while (true) {
+		if (ustr_it == ustr.end()) return false;
+		if (it == end()) return true;
+		if (*it < *ustr_it) return true;
+		if (*it > *ustr_it) return false;
+		it ++;
+		ustr_it ++;
+	}
+}
+
 inline UChr& UnicodeString::operator[](size_t idx)
 {
 	HppAssert(idx < len, "Overflow!");
@@ -235,8 +288,15 @@ inline bool UnicodeString::empty(void) const
 	return len == 0;
 }
 
+inline void UnicodeString::clear(void)
+{
+	len = 0;
+	reserve = 0;
+	delete[] buf;
+	buf = NULL;
+}
 
-inline UnicodeString UnicodeString::substr(size_type offset, size_type size)
+inline UnicodeString UnicodeString::substr(size_type offset, size_type size) const
 {
 	if (offset >= len) {
 		return UnicodeString();
