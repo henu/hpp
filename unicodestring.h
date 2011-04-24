@@ -4,6 +4,7 @@
 #include "assert.h"
 #include "unicode.h"
 
+#include <string>
 #include <ostream>
 #include <string.h>
 
@@ -14,6 +15,9 @@ class UnicodeString
 {
 
 public:
+
+	typedef std::string::size_type size_type;
+	static const size_type npos = std::string::npos;
 
 	class const_iterator
 	{
@@ -46,9 +50,15 @@ public:
 	inline UnicodeString(char const* c_str);
 	inline UnicodeString(UnicodeString const& ustr);
 	inline UnicodeString(size_t len, UChr c);
+	inline UnicodeString(UChr const* ustr, size_t len);
 	inline ~UnicodeString(void);
 
 	inline UnicodeString operator=(UnicodeString const& ustr);
+
+	inline UnicodeString operator+(UnicodeString const& ustr) const;
+
+	inline UChr& operator[](size_t idx);
+	inline UChr operator[](size_t idx) const;
 
 	// Iterator functions
 	inline const_iterator begin(void) const;
@@ -57,6 +67,8 @@ public:
 	inline size_t size(void) const;
 
 	inline bool empty(void) const;
+
+	inline UnicodeString substr(size_type offset, size_type size = npos);
 
 private:
 
@@ -145,6 +157,18 @@ inline UnicodeString::UnicodeString(size_t len, UChr c)
 	}
 }
 
+inline UnicodeString::UnicodeString(UChr const* ustr, size_t len)
+{
+	reserve = len;
+	this->len = len;
+	if (reserve > 0) {
+		buf = new UChr[reserve];
+		memcpy(buf, ustr, sizeof(UChr)*len);
+	} else {
+		buf = NULL;
+	}
+}
+
 inline UnicodeString::~UnicodeString(void)
 {
 	delete buf;
@@ -164,6 +188,31 @@ inline UnicodeString UnicodeString::operator=(UnicodeString const& ustr)
 		buf = NULL;
 	}
 	return *this;
+}
+
+inline UnicodeString UnicodeString::operator+(UnicodeString const& ustr) const
+{
+	UnicodeString result;
+	if (len + ustr.len > 0) {
+		result.reserve = len + ustr.len;
+		result.len = result.reserve;
+		result.buf = new UChr[result.reserve];
+		memcpy(result.buf, buf, sizeof(UChr)*len);
+		memcpy(result.buf + len, ustr.buf, sizeof(UChr)*ustr.len);
+	}
+	return result;
+}
+
+inline UChr& UnicodeString::operator[](size_t idx)
+{
+	HppAssert(idx < len, "Overflow!");
+	return buf[idx];
+}
+
+inline UChr UnicodeString::operator[](size_t idx) const
+{
+	HppAssert(idx < len, "Overflow!");
+	return buf[idx];
 }
 
 inline UnicodeString::const_iterator UnicodeString::begin(void) const
@@ -186,6 +235,17 @@ inline bool UnicodeString::empty(void) const
 	return len == 0;
 }
 
+
+inline UnicodeString UnicodeString::substr(size_type offset, size_type size)
+{
+	if (offset >= len) {
+		return UnicodeString();
+	}
+	if (size == npos || size >= len - offset) {
+		return UnicodeString(buf + offset, len - offset);
+	}
+	return UnicodeString(buf + offset, size);
+}
 
 
 // ----------------------------------------
