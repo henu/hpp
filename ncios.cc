@@ -21,7 +21,10 @@ int color_in_use = -1;
 // Global NCurses initialization and deinitialization functions
 void initNCurses(void);
 void deinitNCurses(void);
+void reinitNCurses(void);
 void ensureNCursesInitialized(size_t& automatic_inits);
+void initNCursesReal(void);
+void deinitNCursesReal(void);
 void initNCColors(void);
 
 inline short toColorIndex(NC::Color color);
@@ -104,6 +107,11 @@ void NCursesOut::deinit(void)
 	deinitNCurses();
 }
 
+void NCursesOut::reinit(void)
+{
+	reinitNCurses();
+}
+
 size_t NCursesOut::getScreenWidth(void)
 {
 	ensureNCursesInitialized(automatic_inits);
@@ -162,16 +170,7 @@ void NCursesOut::refresh(void)
 void initNCurses(void)
 {
 	if (ncurses_init_count == 0) {
-		setlocale(LC_ALL,"");
-		if ((mainwin = initscr()) == NULL) {
-			throw Exception("Unable to init NCurses!");
-		}
-		getmaxyx(mainwin, mainwin_h, mainwin_w);
-		colors_supported = has_colors();
-		if (colors_supported) {
-			start_color();
-			initNCColors();
-		}
+		initNCursesReal();
 	}
 	ncurses_init_count ++;
 }
@@ -183,11 +182,17 @@ void deinitNCurses(void)
 	}
 	ncurses_init_count --;
 	if (ncurses_init_count == 0) {
-		if (endwin() != OK) {
-			throw Exception("Unable to deinit NCurses!");
-		}
-		color_in_use = -1;
+		deinitNCursesReal();
 	}
+}
+
+void reinitNCurses(void)
+{
+	if (ncurses_init_count == 0) {
+		return;
+	}
+	deinitNCursesReal();
+	initNCursesReal();
 }
 
 void ensureNCursesInitialized(size_t& automatic_inits)
@@ -196,6 +201,28 @@ void ensureNCursesInitialized(size_t& automatic_inits)
 		initNCurses();
 		automatic_inits ++;
 	}
+}
+
+void initNCursesReal(void)
+{
+	setlocale(LC_ALL,"");
+	if ((mainwin = initscr()) == NULL) {
+		throw Exception("Unable to init NCurses!");
+	}
+	getmaxyx(mainwin, mainwin_h, mainwin_w);
+	colors_supported = has_colors();
+	if (colors_supported) {
+		start_color();
+		initNCColors();
+	}
+}
+
+void deinitNCursesReal(void)
+{
+	if (endwin() != OK) {
+		throw Exception("Unable to deinit NCurses!");
+	}
+	color_in_use = -1;
 }
 
 inline short toColorIndex(NC::Color color)

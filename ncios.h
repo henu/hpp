@@ -70,6 +70,10 @@ public:
 	void init(void);
 	void deinit(void);
 
+	// Reinitializes NCurses. This should be called
+	// for example when terminal is resized.
+	void reinit(void);
+
 	// Some getters
 	size_t getScreenWidth(void);
 	size_t getScreenHeight(void);
