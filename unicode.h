@@ -1,6 +1,7 @@
 #ifndef HPP_UNICODE_H
 #define HPP_UNICODE_H
 
+#include "assert.h"
 #include "exception.h"
 
 #include <string>
