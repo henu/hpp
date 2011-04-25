@@ -19,6 +19,32 @@ public:
 	typedef std::string::size_type size_type;
 	static const size_type npos = std::string::npos;
 
+	class iterator
+	{
+		friend class UnicodeString;
+	public:
+		inline ~iterator(void);
+		// Comparison operators
+		inline bool operator==(iterator const& it) const;
+		inline bool operator!=(iterator const& it) const;
+		inline bool operator<(iterator const& it) const;
+		inline bool operator>(iterator const& it) const;
+		inline bool operator<=(iterator const& it) const;
+		inline bool operator>=(iterator const& it) const;
+		// Iterating operators
+		inline iterator operator++(void);
+		inline iterator operator--(void);
+		inline iterator operator++(int);
+		inline iterator operator--(int);
+		inline iterator operator+=(ssize_t amount);
+		inline iterator operator-=(ssize_t amount);
+		// Dereferencing operators
+		inline UChr& operator*(void) const;
+	private:
+		inline iterator(UChr* loc);
+		UChr* loc;
+	};
+
 	class const_iterator
 	{
 		friend class UnicodeString;
@@ -68,6 +94,8 @@ public:
 	inline UChr operator[](size_t idx) const;
 
 	// Iterator functions
+	inline iterator begin(void);
+	inline iterator end(void);
 	inline const_iterator begin(void) const;
 	inline const_iterator end(void) const;
 
@@ -78,6 +106,20 @@ public:
 	inline void clear(void);
 
 	inline UnicodeString substr(size_type offset, size_type size = npos) const;
+
+	// Find functions
+	inline size_type find(UChr c, size_type index = 0) const;
+	inline size_type find_first_not_of(UnicodeString const& chars, size_type index = 0) const;
+	inline size_type find_last_not_of(UnicodeString const& chars, size_type index = npos) const;
+
+	// Special functions
+	// Returns string with whitespaces removed from begin and end
+	inline UnicodeString strip(void) const;
+	// Returns string with letters converted to lower/uppercase
+	inline UnicodeString tolower(void) const;
+	inline UnicodeString toupper(void) const;
+	// Returns STL string
+	inline std::string stl_string(void) const;
 
 private:
 
@@ -268,6 +310,16 @@ inline UChr UnicodeString::operator[](size_t idx) const
 	return buf[idx];
 }
 
+inline UnicodeString::iterator UnicodeString::begin(void)
+{
+	return iterator(buf);
+}
+
+inline UnicodeString::iterator UnicodeString::end(void)
+{
+	return iterator(buf + len);
+}
+
 inline UnicodeString::const_iterator UnicodeString::begin(void) const
 {
 	return const_iterator(buf);
@@ -306,6 +358,193 @@ inline UnicodeString UnicodeString::substr(size_type offset, size_type size) con
 	}
 	return UnicodeString(buf + offset, size);
 }
+
+inline UnicodeString::size_type UnicodeString::find(UChr c, size_type index) const
+{
+	if (index == npos) return npos;
+	while (index < size()) {
+		UChr c2 = (*this)[index];
+		if (c2 == c) {
+			return index;
+		}
+		index ++;
+	}
+	return npos;
+}
+
+inline UnicodeString::size_type UnicodeString::find_first_not_of(UnicodeString const& chars, size_type index) const
+{
+	if (index == npos) return npos;
+	while (index < size()) {
+		UChr c = (*this)[index];
+		if (chars.find(c) == npos) {
+			return index;
+		}
+		index ++;
+	}
+	return npos;
+}
+
+inline UnicodeString::size_type UnicodeString::find_last_not_of(UnicodeString const& chars, size_type index) const
+{
+	if (index == npos || index > size()) index = size();
+	while (index > 0) {
+		index --;
+		UChr c = (*this)[index];
+		if (chars.find(c) == npos) {
+			return index;
+		}
+	}
+	return npos;
+}
+
+inline UnicodeString UnicodeString::strip(void) const
+{
+	UnicodeString const WHITESPACE_CHARACTERS(" \t");
+	size_type whitespace_end = find_first_not_of(WHITESPACE_CHARACTERS);
+	if (whitespace_end == npos) return UnicodeString();
+	size_type whitespace_begin = find_last_not_of(WHITESPACE_CHARACTERS) + 1;
+	HppAssert(whitespace_begin != npos, "NPos should not occure!");
+	return substr(whitespace_end, whitespace_begin - whitespace_end);
+}
+
+inline UnicodeString UnicodeString::tolower(void) const
+{
+	UnicodeString result(*this);
+	for (UnicodeString::iterator result_it = result.begin();
+	     result_it != result.end();
+	     result_it ++) {
+		*result_it = Hpp::tolower(*result_it);
+	}
+	return result;
+}
+
+inline UnicodeString UnicodeString::toupper(void) const
+{
+	UnicodeString result(*this);
+	for (UnicodeString::iterator result_it = result.begin();
+	     result_it != result.end();
+	     result_it ++) {
+		*result_it = Hpp::toupper(*result_it);
+	}
+	return result;
+}
+
+inline std::string UnicodeString::stl_string(void) const
+{
+	std::string result;
+	for (const_iterator it = begin(); it != end(); it ++) {
+		result += uChrToUTF8(*it);
+	}
+	return result;
+}
+
+inline std::ostream& operator<<(std::ostream& strm, UnicodeString const& ustr)
+{
+	std::string str;
+	str.reserve(ustr.size() * 2);
+	for (UnicodeString::const_iterator ustr_it = ustr.begin();
+	     ustr_it != ustr.end();
+	     ustr_it ++) {
+	     	UChr uchr = *ustr_it;
+		str += uChrToUTF8(uchr);
+	}
+	return strm << str;
+}
+
+
+
+// ----------------------------------------
+// ----------------------------------------
+//
+// Implementation of inline members of class UnicodeString::iterator
+//
+// ----------------------------------------
+// ----------------------------------------
+
+inline UnicodeString::iterator::~iterator(void)
+{
+}
+
+inline bool UnicodeString::iterator::operator==(iterator const& it) const
+{
+	return loc == it.loc;
+}
+
+inline bool UnicodeString::iterator::operator!=(iterator const& it) const
+{
+	return loc != it.loc;
+}
+
+inline bool UnicodeString::iterator::operator<(iterator const& it) const
+{
+	return loc < it.loc;
+}
+
+inline bool UnicodeString::iterator::operator>(iterator const& it) const
+{
+	return loc > it.loc;
+}
+
+inline bool UnicodeString::iterator::operator<=(iterator const& it) const
+{
+	return loc <= it.loc;
+}
+
+inline bool UnicodeString::iterator::operator>=(iterator const& it) const
+{
+	return loc >= it.loc;
+}
+
+inline UnicodeString::iterator UnicodeString::iterator::operator++(void)
+{
+	loc ++;
+	return *this;
+}
+
+inline UnicodeString::iterator UnicodeString::iterator::operator--(void)
+{
+	loc --;
+	return *this;
+}
+
+inline UnicodeString::iterator UnicodeString::iterator::operator++(int)
+{
+	iterator result = *this;
+	loc ++;
+	return result;
+}
+
+inline UnicodeString::iterator UnicodeString::iterator::operator--(int)
+{
+	iterator result = *this;
+	loc --;
+	return result;
+}
+
+inline UnicodeString::iterator UnicodeString::iterator::operator+=(ssize_t amount)
+{
+	loc += amount;
+	return *this;
+}
+
+inline UnicodeString::iterator UnicodeString::iterator::operator-=(ssize_t amount)
+{
+	loc -= amount;
+	return *this;
+}
+
+inline UChr& UnicodeString::iterator::operator*(void) const
+{
+	return *loc;
+}
+
+inline UnicodeString::iterator::iterator(UChr* loc) :
+loc(loc)
+{
+}
+
+
 
 
 // ----------------------------------------
@@ -396,19 +635,6 @@ inline UChr UnicodeString::const_iterator::operator*(void) const
 inline UnicodeString::const_iterator::const_iterator(UChr const* loc) :
 loc(loc)
 {
-}
-
-inline std::ostream& operator<<(std::ostream& strm, UnicodeString const& ustr)
-{
-	std::string str;
-	str.reserve(ustr.size() * 2);
-	for (UnicodeString::const_iterator ustr_it = ustr.begin();
-	     ustr_it != ustr.end();
-	     ustr_it ++) {
-	     	UChr uchr = *ustr_it;
-		str += uChrToUTF8(uchr);
-	}
-	return strm << str;
 }
 
 }
