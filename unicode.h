@@ -34,6 +34,10 @@ inline uint8_t sizeUTF8CharLast(Iter1 begin, Iter2 end);
 // Converts single unicode character to UTF8 encoded string
 inline std::string uChrToUTF8(UChr c);
 
+// Letter conversions
+inline UChr tolower(UChr c);
+inline UChr toupper(UChr c);
+
 
 
 // ----------------------------------------
@@ -205,6 +209,24 @@ inline std::string uChrToUTF8(UChr c)
 		result += static_cast< char >(0x80 + (c & 0x3f));
 	}
 	return result;
+}
+
+inline UChr tolower(UChr c)
+{
+// TODO: Support more characters!
+	if (c >= 'A' && c <= 'Z') {
+		return c + 'a' - 'A';
+	}
+	return c;
+}
+
+inline UChr toupper(UChr c)
+{
+// TODO: Support more characters!
+	if (c >= 'a' && c <= 'z') {
+		return c + 'A' - 'z';
+	}
+	return c;
 }
 
 }
