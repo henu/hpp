@@ -1,6 +1,10 @@
 #include "concurrencywatcher.h"
 
 #include "lock.h"
+#include "exception.h"
+
+#include <cstdlib>
+#include <iostream>
 
 namespace Hpp
 {
