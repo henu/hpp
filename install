@@ -110,6 +110,7 @@ HEADERS_NCURSES=\
 "ncios.h "
 
 SOURCES_MAIN=\
+"assert.cc "\
 "3dconstants.cc "\
 "commandexec.cc "\
 "concurrencywatcher.cc "\
