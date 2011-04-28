@@ -4,7 +4,9 @@
 #include "assert.h"
 #include "unicode.h"
 
+#include <algorithm>
 #include <string>
+#include <vector>
 #include <ostream>
 #include <string.h>
 
@@ -83,6 +85,8 @@ public:
 	inline UnicodeString operator=(UnicodeString const& ustr);
 	inline UnicodeString operator+(UnicodeString const& ustr) const;
 	inline UnicodeString operator+(UChr c) const;
+	inline UnicodeString operator+=(UnicodeString const& ustr);
+	inline UnicodeString operator+=(UChr c);
 
 	// Comparison operators
 	inline bool operator==(UnicodeString const& ustr) const;
@@ -120,6 +124,12 @@ public:
 	inline UnicodeString toupper(void) const;
 	// Returns STL string
 	inline std::string stl_string(void) const;
+	// Splits string
+	inline std::vector< UnicodeString > split(UChr separator) const;
+	inline std::vector< UnicodeString > split(UnicodeString const& separator) const;
+	inline std::vector< UnicodeString > split(std::vector< UnicodeString > const& separators) const;
+	inline std::vector< UnicodeString > split(std::vector< UChr > const& separators) const;
+	inline std::vector< UnicodeString > split(void) const;
 
 private:
 
@@ -269,6 +279,38 @@ inline UnicodeString UnicodeString::operator+(UChr c) const
 	memcpy(result.buf, buf, sizeof(UChr)*len);
 	result.buf[len] = c;
 	return result;
+}
+
+inline UnicodeString UnicodeString::operator+=(UnicodeString const& ustr)
+{
+	if (len + ustr.len > 0) {
+		if (reserve < len + ustr.len) {
+			reserve = len + ustr.len;
+			UChr* new_buf = new UChr[reserve];
+			memcpy(new_buf, buf, sizeof(UChr)*len);
+			delete[] buf;
+			buf = new_buf;
+		}
+		memcpy(buf + len, ustr.buf, sizeof(UChr)*ustr.len);
+		len += ustr.len;
+	}
+	return *this;
+}
+
+inline UnicodeString UnicodeString::operator+=(UChr c)
+{
+	if (len + 1 > 0) {
+		if (reserve < len + 1) {
+			reserve *= 2;
+			UChr* new_buf = new UChr[reserve];
+			memcpy(new_buf, buf, sizeof(UChr)*len);
+			delete[] buf;
+			buf = new_buf;
+		}
+		buf[len] = c;
+		len ++;
+	}
+	return *this;
 }
 
 inline bool UnicodeString::operator==(UnicodeString const& ustr) const
@@ -437,6 +479,91 @@ inline std::string UnicodeString::stl_string(void) const
 		result += uChrToUTF8(*it);
 	}
 	return result;
+}
+
+inline std::vector< UnicodeString > UnicodeString::split(UChr separator) const
+{
+	std::vector< UnicodeString > result;
+	UnicodeString subresult;
+	for (const_iterator it = begin(); it != end(); it ++) {
+		UChr c = *it;
+		if (c == separator) {
+			result.push_back(subresult);
+			subresult.clear();
+		} else {
+			subresult += c;
+		}
+	}
+	result.push_back(subresult);
+	return result;
+}
+
+inline std::vector< UnicodeString > UnicodeString::split(UnicodeString const& separator) const
+{
+	std::vector< UnicodeString > result;
+	UnicodeString subresult;
+	for (size_type ofs = 0; ofs < size(); ofs ++) {
+		if (substr(ofs, separator.size()) == separator) {
+			result.push_back(subresult);
+			subresult.clear();
+			ofs += separator.size() - 1;
+		} else {
+			subresult += buf[ofs];
+		}
+	}
+	result.push_back(subresult);
+	return result;
+}
+
+inline std::vector< UnicodeString > UnicodeString::split(std::vector< UChr > const& separators) const
+{
+	std::vector< UnicodeString > result;
+	UnicodeString subresult;
+	for (const_iterator it = begin(); it != end(); it ++) {
+		UChr c = *it;
+		if (std::find(separators.begin(), separators.end(), c) != separators.end()) {
+			result.push_back(subresult);
+			subresult.clear();
+		} else {
+			subresult += c;
+		}
+	}
+	result.push_back(subresult);
+	return result;
+}
+
+inline std::vector< UnicodeString > UnicodeString::split(std::vector< UnicodeString > const& separators) const
+{
+	std::vector< UnicodeString > result;
+	UnicodeString subresult;
+	for (size_type ofs = 0; ofs < size(); ofs ++) {
+		bool separator_found = false;
+		for (std::vector< UnicodeString >::const_iterator separators_it = separators.begin();
+		     separators_it != separators.end();
+		     separators_it ++) {
+			UnicodeString const& separator = *separators_it;
+			if (substr(ofs, separator.size()) == separator) {
+				result.push_back(subresult);
+				subresult.clear();
+				ofs += separator.size() - 1;
+				separator_found = true;
+				break;
+			}
+		}
+		if (!separator_found) {
+			subresult += buf[ofs];
+		}
+	}
+	result.push_back(subresult);
+	return result;
+}
+
+inline std::vector< UnicodeString > UnicodeString::split(void) const
+{
+	std::vector< UChr > ws_chars;
+	ws_chars.push_back(' ');
+	ws_chars.push_back('\t');
+	return split(ws_chars);
 }
 
 inline std::ostream& operator<<(std::ostream& strm, UnicodeString const& ustr)
