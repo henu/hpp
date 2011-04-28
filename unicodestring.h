@@ -40,6 +40,8 @@ public:
 		inline iterator operator--(int);
 		inline iterator operator+=(ssize_t amount);
 		inline iterator operator-=(ssize_t amount);
+		// Arithmetic operations
+		inline size_t operator-(iterator const it);
 		// Dereferencing operators
 		inline UChr& operator*(void) const;
 	private:
@@ -66,6 +68,8 @@ public:
 		inline const_iterator operator--(int);
 		inline const_iterator operator+=(ssize_t amount);
 		inline const_iterator operator-=(ssize_t amount);
+		// Arithmetic operations
+		inline size_t operator-(const_iterator const it);
 		// Dereferencing operators
 		inline UChr operator*(void) const;
 	private:
@@ -109,10 +113,13 @@ public:
 
 	inline void clear(void);
 
+	inline void swap(UnicodeString& ustr);
+
 	inline UnicodeString substr(size_type offset, size_type size = npos) const;
 
 	// Find functions
 	inline size_type find(UChr c, size_type index = 0) const;
+	inline size_type find_first_of(UnicodeString const& chars, size_type index = 0) const;
 	inline size_type find_first_not_of(UnicodeString const& chars, size_type index = 0) const;
 	inline size_type find_last_not_of(UnicodeString const& chars, size_type index = npos) const;
 
@@ -131,6 +138,9 @@ public:
 	inline std::vector< UnicodeString > split(std::vector< UChr > const& separators) const;
 	inline std::vector< UnicodeString > split(void) const;
 
+	// "Constants"
+	inline static UnicodeString getWhitespaceString(void);
+
 private:
 
 	size_t reserve;
@@ -140,6 +150,8 @@ private:
 };
 
 inline std::ostream& operator<<(std::ostream& strm, UnicodeString const& ustr);
+
+inline UnicodeString operator+(char const* c_str, UnicodeString const& ustr);
 
 
 
@@ -299,17 +311,15 @@ inline UnicodeString UnicodeString::operator+=(UnicodeString const& ustr)
 
 inline UnicodeString UnicodeString::operator+=(UChr c)
 {
-	if (len + 1 > 0) {
-		if (reserve < len + 1) {
-			reserve *= 2;
-			UChr* new_buf = new UChr[reserve];
-			memcpy(new_buf, buf, sizeof(UChr)*len);
-			delete[] buf;
-			buf = new_buf;
-		}
-		buf[len] = c;
-		len ++;
+	if (reserve < len + 1) {
+		reserve = 1 + reserve*2;
+		UChr* new_buf = new UChr[reserve];
+		memcpy(new_buf, buf, sizeof(UChr)*len);
+		delete[] buf;
+		buf = new_buf;
 	}
+	buf[len] = c;
+	len ++;
 	return *this;
 }
 
@@ -390,6 +400,19 @@ inline void UnicodeString::clear(void)
 	buf = NULL;
 }
 
+inline void UnicodeString::swap(UnicodeString& ustr)
+{
+	size_t swap_reserve = reserve;
+	size_t swap_len = len;
+	UChr* swap_buf = buf;
+	reserve = ustr.reserve;
+	len = ustr.len;
+	buf = ustr.buf;
+	ustr.reserve = swap_reserve;
+	ustr.len = swap_len;
+	ustr.buf = swap_buf;
+}
+
 inline UnicodeString UnicodeString::substr(size_type offset, size_type size) const
 {
 	if (offset >= len) {
@@ -407,6 +430,19 @@ inline UnicodeString::size_type UnicodeString::find(UChr c, size_type index) con
 	while (index < size()) {
 		UChr c2 = (*this)[index];
 		if (c2 == c) {
+			return index;
+		}
+		index ++;
+	}
+	return npos;
+}
+
+inline UnicodeString::size_type UnicodeString::find_first_of(UnicodeString const& chars, size_type index) const
+{
+	if (index == npos) return npos;
+	while (index < size()) {
+		UChr c = (*this)[index];
+		if (chars.find(c) != npos) {
 			return index;
 		}
 		index ++;
@@ -566,6 +602,11 @@ inline std::vector< UnicodeString > UnicodeString::split(void) const
 	return split(ws_chars);
 }
 
+inline UnicodeString UnicodeString::getWhitespaceString(void)
+{
+	return " \t";
+}
+
 inline std::ostream& operator<<(std::ostream& strm, UnicodeString const& ustr)
 {
 	std::string str;
@@ -579,6 +620,11 @@ inline std::ostream& operator<<(std::ostream& strm, UnicodeString const& ustr)
 	return strm << str;
 }
 
+inline UnicodeString operator+(char const* c_str, UnicodeString const& ustr)
+{
+// TODO: Make faster!
+	return UnicodeString(c_str) + ustr;
+}
 
 
 // ----------------------------------------
@@ -659,6 +705,11 @@ inline UnicodeString::iterator UnicodeString::iterator::operator-=(ssize_t amoun
 {
 	loc -= amount;
 	return *this;
+}
+
+inline size_t UnicodeString::iterator::operator-(UnicodeString::iterator const it)
+{
+	return loc - it.loc;
 }
 
 inline UChr& UnicodeString::iterator::operator*(void) const
@@ -752,6 +803,11 @@ inline UnicodeString::const_iterator UnicodeString::const_iterator::operator-=(s
 {
 	loc -= amount;
 	return *this;
+}
+
+inline size_t UnicodeString::const_iterator::operator-(UnicodeString::const_iterator const it)
+{
+	return loc - it.loc;
 }
 
 inline UChr UnicodeString::const_iterator::operator*(void) const
