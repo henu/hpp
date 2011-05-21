@@ -36,13 +36,16 @@ public:
 	inline std::string toString(void) const;
 
 	inline bool isUnknown(void) const { return type == UNKNOWN; }
+	inline bool isAbsolute(void) const { return type != UNKNOWN && type != RELATIVE; }
+	inline bool isRelative(void) const { return type == RELATIVE; }
 
 	inline size_t partsSize(void);
 
 	inline std::string operator[](int idx);
 
-	// Adds new part to path
+	// Adds new parts to path
 	inline Path operator/(std::string const& subitem) const;
+	inline Path operator/(Path const& p) const;
 
 	// Adds characters to the last part of path
 	inline Path operator+(std::string const& add) const;
@@ -289,13 +292,29 @@ inline void Path::ensureAbsoluteOrRelative(void)
 inline Path Path::operator/(std::string const& subitem) const
 {
 	if (isUnknown()) {
-		throw Exception("Unable to modify path, because it is unknown!");
+		throw Exception("Cannot concatenate to unknown path!");
 	}
 	if (subitem.empty()) {
 		throw Exception("Unable to modify path, because subdir/file is empty!");
 	}
 	Path result(*this);
 	result.parts.push_back(subitem);
+	return result;
+}
+
+inline Path Path::operator/(Path const& p) const
+{
+	if (isUnknown()) {
+		throw Exception("Cannot concatenate to unknown path!");
+	}
+	if (p.isUnknown()) {
+		throw Exception("Cannot concatenate an unknown path!");
+	}
+	if (!p.isRelative()) {
+		throw Exception("Concatenation must be done to relative path!");
+	}
+	Path result(*this);
+	result.parts.insert(result.parts.end(), p.parts.begin(), p.parts.end());
 	return result;
 }
 
