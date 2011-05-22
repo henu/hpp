@@ -1,11 +1,15 @@
 #ifndef HPP_XMLNODE_H
 #define HPP_XMLNODE_H
 
+#include "unicodestring.h"
 #include "assert.h"
+#include "exception.h"
 
+#include <vector>
 #include <string>
 #include <map>
 #include <cstring>
+#include <ostream>
 
 namespace Hpp
 {
@@ -36,6 +40,14 @@ public:
 
 	// Attribute handling. This is only allowed for normal nodes
 	inline void setAttribute(std::string const& name, std::string const& value);
+	inline void setAttribute(std::string const& name, Hpp::UnicodeString const& value) { setAttribute(name, value.stl_string()); }
+	inline void setAttribute(std::string const& name, char const* value) { setAttribute(name, std::string(value)); }
+	inline void setAttribute(Hpp::UnicodeString const& name, std::string const& value) { setAttribute(name.stl_string(), value); }
+	inline void setAttribute(Hpp::UnicodeString const& name, Hpp::UnicodeString const& value) { setAttribute(name.stl_string(), value.stl_string()); }
+	inline void setAttribute(Hpp::UnicodeString const& name, char const* value) { setAttribute(name.stl_string(), std::string(value)); }
+	inline void setAttribute(char const* name, std::string const& value) { setAttribute(std::string(name), value); }
+	inline void setAttribute(char const* name, Hpp::UnicodeString const& value) { setAttribute(std::string(name), value.stl_string()); }
+	inline void setAttribute(char const* name, char const* value) { setAttribute(std::string(name), std::string(value)); }
 	inline std::string getAttribute(std::string const& name) const;
 	inline bool attributeExists(std::string const& name) const;
 

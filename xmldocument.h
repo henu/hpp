@@ -67,7 +67,12 @@ inline XMLDocument::~XMLDocument(void)
 
 inline void XMLDocument::save(Path const& path)
 {
-	std::ofstream file(path.toString().c_str());
+	std::string path_str = path.toString();
+
+	std::ofstream file(path_str.c_str());
+	if (!file.is_open()) {
+		throw Hpp::Exception("Unable to open file \"" + path_str + "\"!");
+	}
 
 	serialize(file, 0);
 
