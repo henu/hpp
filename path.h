@@ -3,11 +3,14 @@
 
 #include "assert.h"
 #include "exception.h"
+#include "misc.h"
 
 #include <string>
 #include <vector>
 #include <cstdlib>
 #include <fstream>
+#include <unistd.h>
+#include <climits>
 #include <sys/stat.h>
 #ifdef WIN32
 #include <io.h>
@@ -38,6 +41,8 @@ public:
 	inline bool isUnknown(void) const { return type == UNKNOWN; }
 	inline bool isAbsolute(void) const { return type != UNKNOWN && type != RELATIVE; }
 	inline bool isRelative(void) const { return type == RELATIVE; }
+
+	inline void convertToAbsolute(void);
 
 	inline size_t partsSize(void);
 
@@ -222,6 +227,72 @@ inline std::string Path::toString(void) const
 	return result;
 }
 
+inline void Path::convertToAbsolute(void)
+{
+// TODO: Make to work on windows!
+#ifdef WIN32
+HppAssert(false, "Not implemented yet!");
+#endif
+	HppAssert(type != UNKNOWN, "Type cannot be unknown when ensuring absolute/relative.");
+	std::string parts_begin_str;
+	switch (type) {
+	case RELATIVE:
+		{
+			char cwd[PATH_MAX];
+			if (getcwd(cwd, PATH_MAX) == NULL) {
+				throw Hpp::Exception("Unable to convert path to absolute, because current directory could not be obtained!");
+			}
+			parts_begin_str = cwd;
+		}
+	case ABSOLUTE:
+		return;
+	case HOME:
+		#ifndef WIN32
+		parts_begin_str = getenv("HOME");
+		#else
+		char path_cstr[MAX_PATH];
+		SHGetFolderPath(0, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+		parts_begin_str = path_cstr;
+		#endif
+		break;
+	case CONFIG:
+		#ifndef WIN32
+		parts_begin_str = getenv("HOME");
+		parts_begin_str += "/.config";
+		#else
+		char path_cstr[MAX_PATH];
+		SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+		parts_begin_str = path_cstr;
+		#endif
+		break;
+	case UNKNOWN:
+		HppAssert(false, "");
+	}
+
+	// Fix Bill's evil characters
+	#ifndef WIN32
+	for (std::string::iterator parts_begin_str_it = parts_begin_str.begin();
+	     parts_begin_str_it != parts_begin_str.end();
+	     parts_begin_str_it ++) {
+		if (*parts_begin_str_it == '\\') {
+			*parts_begin_str_it = '/';
+		}
+	}
+	#endif
+
+	type = RELATIVE;
+	Parts parts_begin = explode(parts_begin_str, '/');
+	Parts parts_begin_fixed;
+	for (Parts::const_iterator parts_begin_it = parts_begin.begin();
+	     parts_begin_it != parts_begin.end();
+	     parts_begin_it ++) {
+	     	if (!parts_begin_it->empty()) {
+			parts_begin_fixed.push_back(*parts_begin_it);
+	     	}
+	}
+	parts.insert(parts.begin(), parts_begin_fixed.begin(), parts_begin_fixed.end());
+}
+
 inline size_t Path::partsSize(void)
 {
 	if (isUnknown()) {
@@ -238,10 +309,10 @@ inline std::string Path::operator[](int idx)
 	}
 	ensureAbsoluteOrRelative();
 	if (idx < 0) {
-		throw Exception("Unable to get path part, becaue of underflow!");
+		throw Exception("Unable to get path part, because of underflow!");
 	}
 	if (idx >= (int)parts.size()) {
-		throw Exception("Unable to get path part, becaue of overflow!");
+		throw Exception("Unable to get path part, because of overflow!");
 	}
 	return parts[idx];
 }
@@ -346,33 +417,34 @@ inline Path Path::operator+=(std::string const& add)
 inline void ensurePathExists(Path const& p)
 {
 	if (p.isUnknown()) {
-		throw Exception("Unable to ensure that path exists, because path is unknown!");
+		throw Exception("Unable to ensure existence of unknown path!");
 	}
 	Path p2(p);
-	HppAssert(p2.partsSize() > 0, "Fail!");
-	std::string p_str = "";
+	p2.convertToAbsolute();
 
-	for (size_t parts_id = 0; parts_id < p2.partsSize(); parts_id ++) {
-		p_str += p2[0];
-		if (p_str.empty()) {
-			continue;
-		}
+// TODO: Make to work on windows!
+#ifdef WIN32
+HppAssert(false, "Not implemented yet!");
+#endif
+	std::string p_test("/");
+	for (size_t part_id = 0; part_id < p2.partsSize(); part_id ++) {
+
+		std::string part = p2[part_id];
+		p_test += part + "/";
 
 		// Ensure current path part exists.
 		struct stat sttmp;
-		if (stat(p_str.c_str(), &sttmp) == -1) {
+		if (stat(p_test.c_str(), &sttmp) == -1) {
 			#ifndef WIN32
-			if (mkdir(p_str.c_str(), 0700) == -1) {
-				throw Exception("Unable to create directory \"" + p_str + "\"!");
+			if (mkdir(p_test.c_str(), 0700) == -1) {
+				throw Exception("Unable to create directory \"" + p_test + "\"!");
 			}
 			#else
-			mkdir(p_str.c_str());
+			mkdir(p_test.c_str());
 			#endif
 		} else if (!S_ISDIR(sttmp.st_mode)) {
-			throw Exception("\"" + p_str + "\" is not a directory!");
+			throw Exception("\"" + p_test + "\" is not a directory!");
 		}
-
-		p_str += '/';
 
 	}
 }
