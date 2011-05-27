@@ -44,9 +44,9 @@ public:
 
 	inline void convertToAbsolute(void);
 
-	inline size_t partsSize(void);
+	inline size_t partsSize(void) const;
 
-	inline std::string operator[](int idx);
+	inline std::string operator[](int idx) const;
 
 	// Adds new parts to path
 	inline Path operator/(std::string const& subitem) const;
@@ -293,28 +293,30 @@ HppAssert(false, "Not implemented yet!");
 	parts.insert(parts.begin(), parts_begin_fixed.begin(), parts_begin_fixed.end());
 }
 
-inline size_t Path::partsSize(void)
+inline size_t Path::partsSize(void) const
 {
 	if (isUnknown()) {
 		throw Exception("Unable to get size of path parts, because path is unknown!");
 	}
-	ensureAbsoluteOrRelative();
-	return parts.size();
+	Path p2(*this);
+	p2.ensureAbsoluteOrRelative();
+	return p2.parts.size();
 }
 
-inline std::string Path::operator[](int idx)
+inline std::string Path::operator[](int idx) const
 {
 	if (isUnknown()) {
 		throw Exception("Unable to get path part, because path is unknown!");
 	}
-	ensureAbsoluteOrRelative();
 	if (idx < 0) {
 		throw Exception("Unable to get path part, because of underflow!");
 	}
-	if (idx >= (int)parts.size()) {
+	Path p2(*this);
+	p2.ensureAbsoluteOrRelative();
+	if (idx >= (int)p2.parts.size()) {
 		throw Exception("Unable to get path part, because of overflow!");
 	}
-	return parts[idx];
+	return p2.parts[idx];
 }
 
 inline void Path::ensureAbsoluteOrRelative(void)
