@@ -180,7 +180,7 @@ DEB_DEPS="libc6-dev"
 test()
 {
 	echo "Running integrity tests..."
-	g++ -o /tmp/libhpp_tester test.cc 3dconstants.cc
+	g++ -o /tmp/libhpp_tester test.cc 3dconstants.cc assert.cc
 	/tmp/libhpp_tester
 	rm /tmp/libhpp_tester
 }
