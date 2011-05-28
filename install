@@ -297,7 +297,7 @@ then
 	echo "2.0" > debian-binary
 
 	# Make package
-	DEB_FILE=lib$LIBNAME-dev_$VERSION_$ARCH.deb
+	DEB_FILE=lib${LIBNAME}-dev_${VERSION}_${ARCH}.deb
 	echo "Creating $DEB_FILE"
 	ar r ../$DEB_FILE debian-binary control.tar.gz data.tar.gz 2> /dev/null
 	cd ..
