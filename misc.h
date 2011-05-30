@@ -6,6 +6,9 @@
 #include "trigon.h"
 
 #include <algorithm>
+#include <string>
+
+#define HppFuncStr() (std::string(__FUNCTION__) + ": ")
 
 namespace Hpp
 {
