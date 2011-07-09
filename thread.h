@@ -15,6 +15,7 @@
 #endif
 #include <stdexcept>
 #include <stdint.h>
+#include <iostream>
 
 
 namespace Hpp
@@ -246,6 +247,14 @@ inline DWORD WINAPI Thread::threadRunner(LPVOID runinfo_raw)
 	catch ( ... ) {
 		*error = "Unknown error!";
 		result = 4;
+	}
+
+	if (!error->empty()) {
+		// If there is no ERROR callback, then print error.
+// TODO: Implement error callback!
+		if (true) {
+			std::cerr << "ERROR: " << *error << std::endl;
+		}
 	}
 
 	#ifdef HPP_USE_SDL_MUTEX
