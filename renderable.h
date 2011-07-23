@@ -85,7 +85,6 @@ typedef std::vector< Renderable* > Renderables;
 inline Renderable::Renderable(void) :
 poss(NULL),
 nrms(NULL),
-uvs(NULL),
 clrs(NULL),
 tris(NULL),
 mat(NULL)
