@@ -6,6 +6,7 @@
 #include "real.h"
 
 #include <vector>
+#include <ostream>
 
 namespace Hpp
 {
@@ -23,7 +24,7 @@ public:
 	inline void set(Vector3 const& pos, Real radius) { this->pos = pos; this->radius = radius; }
 	inline void setPosition(Vector3 const& pos) { this->pos = pos; }
 	inline void setRadius(Real radius) { this->radius = radius; }
-	inline void setInifnite(void) { this->radius = -1; }
+	inline void setInfinite(void) { this->radius = -1; }
 	inline void setNothing(void) { this->radius = 0.0; }
 
 	inline Vector3 getPosition(void) const { return pos; }
@@ -46,6 +47,8 @@ private:
 };
 typedef std::vector< Boundingsphere > Boundingspheres;
 
+inline std::ostream& operator<<(std::ostream& strm, Boundingsphere const& bs);
+
 inline void Boundingsphere::applyTransform(Transform const& transf)
 {
 	pos = transf.applyToPosition(pos);
@@ -64,6 +67,16 @@ inline bool Boundingsphere::rayHits(Hpp::Vector3 const& begin, Hpp::Vector3 cons
 		nearestPointToRay(pos, begin, dir, NULL, NULL, &ray_dst_to_pos);
 		return ray_dst_to_pos < radius;
 	}
+}
+
+inline std::ostream& operator<<(std::ostream& strm, Boundingsphere const& bs)
+{
+	if (bs.isInfinite()) {
+		strm << "INF";
+	} else {
+		strm << bs.getPosition() << " / " << bs.getRadius();
+	}
+	return strm;
 }
 
 }
