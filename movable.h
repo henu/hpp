@@ -49,7 +49,11 @@ public:
 	// only called if this Movable does not have parent.
 	inline void updateTotalBoundingsphere(void);
 
-	inline Boundingsphere getTotalBoundingsphere(void);
+	// Boundingsphere must be visible when this is called
+	inline Boundingsphere getTotalBoundingsphere(void) const;
+
+	inline void setVisible(bool visible = true);
+	inline bool getVisible(void) const { return visible; }
 
 private:
 
@@ -94,6 +98,10 @@ private:
 	Boundingsphere totalbs;
 	bool totalbs_uptodate;
 
+	// Is Movable visible or not. If its not visible, then it wont appear
+	// in recursive boundingvolume and its transform will not be updated.
+	bool visible;
+
 	// Regular boundingsphere
 	Boundingsphere bs;
 
@@ -127,6 +135,7 @@ inline Movable::Movable(void) :
 parent(NULL),
 transf_abs_uptodate(NO),
 totalbs_uptodate(false),
+visible(true),
 bs(Boundingsphere::nothing())
 {
 }
@@ -187,6 +196,10 @@ inline void Movable::updateAbsoluteTransform(void)
 
 inline void Movable::updateTotalBoundingsphere(void)
 {
+	// If hidden, then do nothing
+	if (!visible) {
+		return;
+	}
 	HppAssert(!parent, "No parent is allowed!");
 	if (totalbs_uptodate) {
 		return;
@@ -194,14 +207,36 @@ inline void Movable::updateTotalBoundingsphere(void)
 	updateTotalBoundingsphereRecursive();
 }
 
-inline Boundingsphere Movable::getTotalBoundingsphere(void)
+inline Boundingsphere Movable::getTotalBoundingsphere(void) const
 {
+	HppAssert(visible, "If total boundingsphere is wanted, then Movable must be visible!");
 	HppAssert(totalbs_uptodate, "Total boundingsphere is not up-to-date!");
 	return totalbs;
 }
 
+inline void Movable::setVisible(bool visible)
+{
+	// If there is no change, then do nothing
+	if (this->visible == visible) {
+		return;
+	}
+	this->visible = visible;
+	// After this and all its children has been hidden/revealed,
+	// bounding sphere needs recalculation.
+	markTotalBoundingsphereToNeedRecalculation();
+	// If revealed, then it is good idea to recalculate transformation
+	if (visible) {
+		transformChanged();
+	}
+}
+
 inline void Movable::transformChanged(void)
 {
+	// If hidden, then do nothing
+	if (!visible) {
+		return;
+	}
+
 	// If already obsolete, then do nothing
 	if (transf_abs_uptodate == NO) return;
 
@@ -210,7 +245,7 @@ inline void Movable::transformChanged(void)
 	     children_it != children.end();
 	     children_it ++) {
 	     	Movable* child = *children_it;
-	     	if (child->transf_abs_uptodate != NO) {
+	     	if (child->visible && child->transf_abs_uptodate != NO) {
 	     		child->transformChangedRecursive();
 	     	}
 	}
@@ -230,6 +265,10 @@ inline void Movable::transformChanged(void)
 inline void Movable::setBoundingsphere(Boundingsphere const& bs)
 {
 	this->bs = bs;
+	// If hidden, then do nothing more
+	if (!visible) {
+		return;
+	}
 	markTotalBoundingsphereToNeedRecalculation();
 }
 
@@ -246,6 +285,10 @@ inline void Movable::registerChild(Movable* child)
 	}
 	#endif
 	children.insert(child);
+	// If hidden, then do nothing more
+	if (!visible) {
+		return;
+	}
 	markTotalBoundingsphereToNeedRecalculation();
 }
 
@@ -254,11 +297,20 @@ inline void Movable::unregisterChild(Movable* child)
 	HppAssert(child, "Cannot be NULL!");
 	HppAssert(children.find(child) != children.end(), "That child does not exist!");
 	children.erase(child);
+	// If hidden, then do nothing more
+	if (!visible) {
+		return;
+	}
 	markTotalBoundingsphereToNeedRecalculation();
 }
 
 inline void Movable::getAllVisibles(Visibles& result, Viewfrustums const& vfrusts, Viewfrustums const& ofrusts) const
 {
+	// If hidden, then do nothing
+	if (!visible) {
+		return;
+	}
+
 	HppAssert(totalbs_uptodate, "Total boundingsphere is not up-to-date!");
 
 	// If total boundingsphere is zero sized, then give up
@@ -361,6 +413,10 @@ inline void Movable::checkIfAllChildrenHasAbsoluteTransformsUpToDate(void)
 	     children_it != children.end();
 	     children_it ++) {
 	     	Movable* child = *children_it;
+	     	// Skip children that are hidden
+	     	if (!child->visible) {
+			continue;
+	     	}
 	     	if (child->transf_abs_uptodate != YES) {
 	     		all_up_to_date = false;
 	     		break;
@@ -377,6 +433,11 @@ inline void Movable::checkIfAllChildrenHasAbsoluteTransformsUpToDate(void)
 
 inline void Movable::updateAbsoluteTransform(Transform const& parent_transf_abs)
 {
+	// If hidden, then do nothing
+	if (!visible) {
+		return;
+	}
+
 	HppAssert(!parent || parent->transf_abs_uptodate != NO, "Parent transform must be up-to-date!");
 	HppAssert(transf_abs_uptodate != YES, "Must not be YES!");
 
@@ -405,6 +466,7 @@ inline void Movable::updateAbsoluteTransform(Transform const& parent_transf_abs)
 inline void Movable::transformChangedRecursive(void)
 {
 	HppAssert(transf_abs_uptodate != NO, "Must not be NO!");
+	HppAssert(visible, "Movable must be visible!");
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
 	     children_it ++) {
@@ -418,6 +480,10 @@ inline void Movable::transformChangedRecursive(void)
 
 inline void Movable::updateTotalBoundingsphereRecursive(void)
 {
+	// If hidden, then do nothing
+	if (!visible) {
+		return;
+	}
 	// First ensure children have their total boundingspheres up-to-date
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
@@ -450,6 +516,10 @@ inline void Movable::updateTotalBoundingsphereRecursive(void)
 		     children_it != children.end();
 		     children_it ++) {
 			Movable* child = *children_it;
+			// Skip children that are hidden
+			if (!child->visible) {
+				continue;
+			}
 			Boundingsphere child_bs = child->getTotalBoundingsphere();
 			if (child_bs.isInfinite()) {
 				totalbs_infinite = true;
