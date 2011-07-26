@@ -38,6 +38,17 @@ inline std::vector< std::string > explode(std::string const& str, char separator
 // Removes whitespace from beginning and end of string
 inline std::string trim(std::string const& str, std::string ws = " \t\n");
 
+// Power function for integers
+inline ssize_t ipow(ssize_t a, size_t n);
+
+// Converts camera fov angles between X and Y.
+inline Angle fovYToFovX(Angle const& fov_y, Real display_w, Real display_h);
+inline Angle fovXToFovY(Angle const& fov_x, Real display_w, Real display_h);
+
+// ----------------------------------------
+// Implementation of functions
+// ----------------------------------------
+
 template< typename Type >
 inline Type clamp(Type min, Type max, Type val)
 {
@@ -45,10 +56,6 @@ inline Type clamp(Type min, Type max, Type val)
 	if (val > max) return max;
 	return val;
 }
-
-// Converts camera fov angles between X and Y.
-inline Angle fovYToFovX(Angle const& fov_y, Real display_w, Real display_h);
-inline Angle fovXToFovY(Angle const& fov_x, Real display_w, Real display_h);
 
 inline std::vector< ByteV > explode(ByteV const& v, char separator)
 {
@@ -101,6 +108,25 @@ inline std::string trim(std::string const& str, std::string ws)
 	}
 	HppAssert(non_ws_end != std::string::npos, "Fail!");
 	return str.substr(non_ws_begin, non_ws_end + 1 - non_ws_begin);
+}
+
+inline ssize_t ipow(ssize_t a, size_t n)
+{
+	ssize_t result = 1;
+	while (n > 0) {
+		// If n is odd, then multiply and reduce n
+		if (n % 2 == 1) {
+			result *= a;
+			n --;
+		}
+		// n is even, so it can be halved
+		// if a is multiplied with itself.
+		else {
+			n /= 2;
+			a *= a;
+		}
+	}
+	return result;
 }
 
 inline Angle fovYToFovX(Angle const& fov_y, Real display_w, Real display_h)
