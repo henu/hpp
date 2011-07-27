@@ -135,11 +135,6 @@ void Display::open(uint32_t width,
 	instance.width = width;
 	instance.height = height;
 
-	// Enable and set some GL things
-	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
 	// Set window title
 	SDL_WM_SetCaption(title.c_str(), title.c_str());
 
