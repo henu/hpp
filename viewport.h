@@ -39,11 +39,13 @@ public:
 	// 2D rendering stuff
 	inline void init2DRendering(void) const;
 	inline void deinit2DRendering(void) const;
+	// position is measured from the left bottom corner of viewport
 	inline void renderSprite(Texture const& tex,
 	                         Vector2 const& pos,
 	                         Vector2 const& size,
 	                         Vector2 const& tex_pos = Vector2(0, 0),
 	                         Vector2 const& tex_size = Vector2(1, 1),
+	                         Color const& color = Color(1, 1, 1),
 	                         Angle const& rotation = Angle::fromRadians(0),
 	                         Vector2 const& rot_pos = Vector2(0, 0)) const;
 
@@ -167,6 +169,7 @@ inline void Viewport::renderSprite(Texture const& tex,
                                    Vector2 const& size,
                                    Vector2 const& tex_pos,
                                    Vector2 const& tex_size,
+                                   Color const& color,
                                    Angle const& rotation,
                                    Vector2 const& rot_pos) const
 {
@@ -175,23 +178,27 @@ inline void Viewport::renderSprite(Texture const& tex,
 (void)rot_pos;
 	HppCheckForCorrectThread();
 
+	Vector2 real_pos = pos + Vector2(x, y);
+
 	// Bind texture
 	glBindTexture(GL_TEXTURE_2D, tex.getGlTexture());
 
 	HppCheckGlErrors();
 	glBegin(GL_QUADS);
 
+	glColor3f(color.red, color.green, color.blue);
+
 	glTexCoord2f(tex_pos.x, tex_pos.y);
-	glVertex2f(pos.x, pos.y);
+	glVertex2f(real_pos.x, real_pos.y);
 
 	glTexCoord2f(tex_pos.x + tex_size.x, tex_pos.y);
-	glVertex2f(pos.x + size.x, pos.y);
+	glVertex2f(real_pos.x + size.x, real_pos.y);
 
 	glTexCoord2f(tex_pos.x + tex_size.x, tex_pos.y + tex_size.y);
-	glVertex2f(pos.x + size.x, pos.y + size.y);
+	glVertex2f(real_pos.x + size.x, real_pos.y + size.y);
 
 	glTexCoord2f(tex_pos.x, tex_pos.y + tex_size.y);
-	glVertex2f(pos.x, pos.y + size.y);
+	glVertex2f(real_pos.x, real_pos.y + size.y);
 
 	glEnd();
 	HppCheckGlErrors();
