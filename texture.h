@@ -333,7 +333,7 @@ inline void Texture::addPixeldata(uint16_t width, uint16_t height,
 	HppAssert(loaded(), "Texture is not loaded!");
 	HppCheckForCorrectThread();
 // TODO: Code this to use the new pixelstuff also!
-HppAssert(!tempdata, "Not implemented yet!");
+HppAssert(!tempdata, "Adding pixeldata with tempdata not implemented yet!");
 
 	// Get specs from  current texture
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -424,7 +424,7 @@ HppAssert(!tempdata, "Not implemented yet!");
 	pdata.width = tex_width;
 	pdata.height = tex_height;
 	pdata.bytes_per_pixel = bytes_per_pixel;
-	pdata.alpha = (format == GL_ALPHA) || (format == GL_RGBA) || (format == GL_LUMINANCE_ALPHA);
+	pdata.alpha = (gl_format == GL_ALPHA) || (gl_format == GL_RGBA) || (gl_format == GL_LUMINANCE_ALPHA);
 	pdata.min_filter = min_filter;
 	tryToUsePixeldata(pdata);
 
@@ -502,12 +502,6 @@ inline Texture::Pixeldata Texture::load(Path const& path, ByteV const& data, boo
 		force_alpha = true;
 		break;
 	case ALPHA:
-/*
-		force_grayscale = true;
-		force_alpha = false;
-		force_no_alpha = true;
-		iformat = Elibimage::Image::GRAYSCALE;
-*/
 		force_grayscale = false;
 		force_alpha = false;
 		force_no_alpha = false;
