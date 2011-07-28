@@ -65,6 +65,7 @@ HEADERS_3D=\
 "genericmaterial.h "\
 "gldebug.h "\
 "glsystem.h "\
+"font.h "\
 "inc_gl.h "\
 "inc_glx.h "\
 "joystick.h "\
@@ -123,6 +124,7 @@ SOURCES_3D=\
 "eventmanager.cc "\
 "genericmaterial.cc "\
 "glsystem.cc "\
+"font.cc "\
 "joystick.cc "\
 "materialmanager.cc "\
 "meshmanager.cc "\
