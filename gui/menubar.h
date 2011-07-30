@@ -31,13 +31,15 @@ private:
 
 	// Called by friend class Engine
 	void updatePosAndSize(Renderer* rend, int32_t x, int32_t y, uint32_t width);
-	void render(Renderer* rend);
 
 private:
 
 	typedef std::vector< Menu* > Menus;
 
 	Menus menus;
+
+	// Virtual functions for Widget
+	virtual void doRendering(Renderer* rend);
 
 };
 

@@ -28,7 +28,7 @@ uint32_t Menu::getLabelWidth(Renderer* rend)
 	return rend->getMenuLabelWidth(label);
 }
 
-void Menu::render(Renderer* rend)
+void Menu::doRendering(Renderer* rend)
 {
 	// Label
 	rend->renderMenuLabel(this, label, isMouseOver());

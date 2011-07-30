@@ -16,6 +16,7 @@ namespace Gui
 {
 
 class Engine;
+class Renderer;
 
 class Widget
 {
@@ -51,6 +52,9 @@ private:
 	void setEngine(Engine* engine);
 	inline void setParent(Widget* parent);
 
+	// Called by Engine
+	inline void render(Renderer* rend);
+
 	// Called by Engine and other Widgets. Second function returns Widget
 	// that was under mouse or NULL if no Widget could be found.
 	inline bool mouseOver(int32_t mouse_x, int32_t mouse_y) const;
@@ -83,11 +87,14 @@ private:
 	inline void registerChild(Widget* child);
 	inline void unregisterChild(Widget* child);
 
+	// Real rendering function
+	inline virtual void doRendering(Renderer* rend) { (void)rend; }
+
 	// Real handler for events
-	virtual void onMouseOver(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
-	virtual void onMouseOut(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
-	virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return false; }
-	virtual bool onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return false; }
+	inline virtual void onMouseOver(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
+	inline virtual void onMouseOut(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
+	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return false; }
+	inline virtual bool onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return false; }
 
 };
 
@@ -109,6 +116,20 @@ inline void Widget::setParent(Widget* parent)
 	this->parent = parent;
 	if (parent) {
 		this->parent->registerChild(this);
+	}
+}
+
+inline void Widget::render(Renderer* rend)
+{
+	if (state == HIDDEN) {
+		return;
+	}
+	doRendering(rend);
+	for (Children::iterator children_it = children.begin();
+	     children_it != children.end();
+	     children_it ++) {
+		Widget* child = *children_it;
+		child->render(rend);
 	}
 }
 

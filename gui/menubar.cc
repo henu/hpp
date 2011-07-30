@@ -40,17 +40,10 @@ void Menubar::updatePosAndSize(Renderer* rend, int32_t x, int32_t y, uint32_t wi
 	}
 }
 
-void Menubar::render(Renderer* rend)
+void Menubar::doRendering(Renderer* rend)
 {
 	// Background
 	rend->renderMenubarBackground(this);
-	// Menu items
-	for (Menus::iterator menus_it = menus.begin();
-	     menus_it != menus.end();
-	     menus_it ++) {
-		Menu* menu = *menus_it;
-		menu->render(rend);
-	}
 }
 
 }

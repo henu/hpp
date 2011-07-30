@@ -38,7 +38,6 @@ private:
 	// Called by friend class Menubar
 	void updatePosAndSize(Renderer* rend, int32_t x, int32_t y);
 	uint32_t getLabelWidth(Renderer* rend);
-	void render(Renderer* rend);
 
 private:
 
@@ -47,6 +46,9 @@ private:
 	UnicodeString label;
 
 	Menuitems items;
+
+	// Virtual functions for Widget
+	virtual void doRendering(Renderer* rend);
 
 };
 
