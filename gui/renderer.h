@@ -30,7 +30,7 @@ public:
 
 	// Rendering functions
 	virtual void renderMenubarBackground(Menubar const* menubar) = 0;
-	virtual void renderMenuLabel(Menu const* menu, UnicodeString const& label) = 0;
+	virtual void renderMenuLabel(Menu const* menu, UnicodeString const& label, bool mouse_over) = 0;
 
 	// Some getters
 	virtual uint32_t getMenubarHeight(void) = 0;

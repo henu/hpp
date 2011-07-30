@@ -125,6 +125,7 @@ SOURCES_MAIN=\
 "gui/menubar.cc "\
 "gui/menuitem.cc "\
 "gui/menuseparator.cc "\
+"gui/widget.cc "\
 "assert.cc "\
 "3dconstants.cc "\
 "commandexec.cc "\

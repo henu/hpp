@@ -59,7 +59,7 @@ private:
 	virtual void initRendering(void);
 	virtual void deinitRendering(void);
 	virtual void renderMenubarBackground(Menubar const* menubar);
-	virtual void renderMenuLabel(Menu const* menu, UnicodeString const& label);
+	virtual void renderMenuLabel(Menu const* menu, UnicodeString const& label, bool mouse_over);
 	virtual uint32_t getMenubarHeight(void);
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label);
 

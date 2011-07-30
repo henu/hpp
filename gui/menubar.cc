@@ -21,6 +21,7 @@ Menubar::~Menubar(void)
 
 void Menubar::addMenu(Menu* menu)
 {
+	setChildEngine(menu);
 	menus.push_back(menu);
 }
 

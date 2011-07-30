@@ -14,6 +14,7 @@ namespace Gui
 
 Engine::Engine(void) :
 pos_or_size_changed(true),
+mouseover_widget(NULL),
 menubar(NULL)
 {
 }
@@ -46,6 +47,47 @@ void Engine::setMenubar(Menubar* menubar)
 	this->menubar = menubar;
 	menubar->setParent(NULL);
 	menubar->setEngine(this);
+}
+
+bool Engine::mouseEvent(Event const& event)
+{
+	mouse_lastpos_x = event.x;
+	mouse_lastpos_y = event.y;
+
+	// Try to get widget over mouse
+	Widget* widget_under_mouse = NULL;
+	if (menubar) {
+		widget_under_mouse = menubar->mouseOverRecursive(event.x, event.y);
+	}
+// TODO: Code finding widgets from windows!
+	if (widget_under_mouse) {
+		widget_under_mouse->mouseEvent(event);
+	}
+	// If no widget was found, then make sure
+	// no Widget thinks its under mouse.
+	else {
+		setMouseOver(NULL);
+	}
+	return false;
+}
+
+void Engine::setMouseOver(Widget* widget)
+{
+	if (mouseover_widget) {
+		mouseover_widget->setMouseOut(mouse_lastpos_x, mouse_lastpos_y);
+	}
+	mouseover_widget = widget;
+	// If widget was destroyed (widget == NULL), then do
+	// new check of which object would be over mouse
+	if (!widget) {
+		Widget* widget_under_mouse = NULL;
+		if (menubar) {
+			widget_under_mouse = menubar->mouseOverRecursive(mouse_lastpos_x, mouse_lastpos_y);
+		}
+		if (widget_under_mouse) {
+			widget_under_mouse->setMouseOut(mouse_lastpos_x, mouse_lastpos_y);
+		}
+	}
 }
 
 }

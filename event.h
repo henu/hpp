@@ -30,6 +30,7 @@ struct Event
 	uint16_t unicode;
 
 	// For MOUSEMOVE, MOUSEKEYDOWN and MOUSEKEYUP
+// TODO: Support mouse coordinates outside screen as well!
 	uint16_t x;
 	uint16_t y;
 	int16_t x_rel;

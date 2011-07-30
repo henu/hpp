@@ -90,13 +90,20 @@ void ViewportRenderer::renderMenubarBackground(Menubar const* menubar)
 	                       Vector2(width / (Real)tex_menubar_width, 1.0));
 }
 
-void ViewportRenderer::renderMenuLabel(Menu const* menu, UnicodeString const& label)
+void ViewportRenderer::renderMenuLabel(Menu const* menu, UnicodeString const& label, bool mouse_over)
 {
 	Real x = menu->getPositionX();
 	Real y = menu->getPositionY();
 	Real width = menu->getWidth();
 
 	Real tex_menulabel_height = tex_menu_selection.getHeight();
+
+	Color color;
+	if (mouse_over) {
+		color = Color(1, 1, 1);
+	} else {
+		color = Color(0, 0, 0);
+	}
 
 	// Render possible selection background
 // TODO: If menu is selected, then render selection background for it!
@@ -106,7 +113,7 @@ void ViewportRenderer::renderMenuLabel(Menu const* menu, UnicodeString const& la
 
 	font.renderString(label,
 	                  font_menu_size,
-	                  Hpp::Color(0, 0, 0),
+	                  color,
 	                  viewport,
 	                  Vector2(x + (width - label_width) / 2.0, viewport->getHeight() - y - tex_menulabel_height + (tex_menulabel_height - font_menu_size) / 2.0));
 }
