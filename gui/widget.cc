@@ -11,11 +11,25 @@ namespace Gui
 Widget::~Widget(void)
 {
 	setParent(NULL);
-	if (!children.empty()) {
-		throw Exception("There are still children at one of widgets when it is being destroyed!");
+	for (Children::iterator children_it = children.begin();
+	     children_it != children.end();
+	     children_it ++) {
+		Widget* child = *children_it;
+		child->setParent(NULL);
 	}
 	if (engine) {
-		engine->setMouseOver(NULL);
+		engine->unregisterWidget(this);
+	}
+}
+
+void Widget::setEngine(Engine* engine)
+{
+	if (this->engine) {
+		this->engine->unregisterWidget(this);
+	}
+	this->engine = engine;
+	if (engine) {
+		this->engine->registerWidget(this);
 	}
 }
 

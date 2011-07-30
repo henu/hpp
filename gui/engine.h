@@ -2,6 +2,9 @@
 #define HPP_GUI_ENGINE_H
 
 #include "../event.h"
+#include "../assert.h"
+
+#include <set>
 
 namespace Hpp
 {
@@ -35,9 +38,17 @@ public:
 private:
 
 	// Called by Widget
+	void registerWidget(Widget* widget);
+	void unregisterWidget(Widget* widget);
+
+	// Called by Widget
 	void setMouseOver(Widget* widget);
 
 private:
+
+	typedef std::set< Widget* > Widgets;
+
+	Widgets widgets;
 
 	bool pos_or_size_changed;
 
@@ -45,6 +56,8 @@ private:
 	int32_t mouse_lastpos_x, mouse_lastpos_y;
 
 	Menubar* menubar;
+
+	void checkForNewMouseOver(void);
 
 };
 

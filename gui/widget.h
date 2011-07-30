@@ -48,7 +48,7 @@ protected:
 private:
 
 	// Called by Engine and other Widgets
-	inline void setEngine(Engine* engine) { this->engine = engine; }
+	void setEngine(Engine* engine);
 	inline void setParent(Widget* parent);
 
 	// Called by Engine and other Widgets. Second function returns Widget
@@ -62,6 +62,7 @@ private:
 
 	// Called by Engine
 	inline void setMouseOut(int32_t mouse_x, int32_t mouse_y) { HppAssert(mouse_over, "Unable to set mouse out, because mouse is not over!"); mouse_over = false; onMouseOut(mouse_x, mouse_y); }
+	inline void setMouseOver(int32_t mouse_x, int32_t mouse_y) { HppAssert(!mouse_over, "Unable to set mouse over, because mouse is already over!"); mouse_over = true; onMouseOver(mouse_x, mouse_y); }
 
 private:
 

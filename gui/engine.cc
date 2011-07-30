@@ -71,22 +71,46 @@ bool Engine::mouseEvent(Event const& event)
 	return false;
 }
 
+void Engine::registerWidget(Widget* widget)
+{
+	HppAssert(widgets.find(widget) == widgets.end(), "Widget is already registered to Engine!");
+	widgets.insert(widget);
+}
+
+void Engine::unregisterWidget(Widget* widget)
+{
+	HppAssert(widgets.find(widget) != widgets.end(), "Widget is not registered to Engine!");
+	widgets.erase(widget);
+	if (mouseover_widget == widget) {
+		mouseover_widget = NULL;
+		checkForNewMouseOver();
+	}
+}
+
 void Engine::setMouseOver(Widget* widget)
 {
 	if (mouseover_widget) {
 		mouseover_widget->setMouseOut(mouse_lastpos_x, mouse_lastpos_y);
 	}
 	mouseover_widget = widget;
-	// If widget was destroyed (widget == NULL), then do
-	// new check of which object would be over mouse
-	if (!widget) {
-		Widget* widget_under_mouse = NULL;
-		if (menubar) {
-			widget_under_mouse = menubar->mouseOverRecursive(mouse_lastpos_x, mouse_lastpos_y);
-		}
-		if (widget_under_mouse) {
-			widget_under_mouse->setMouseOut(mouse_lastpos_x, mouse_lastpos_y);
-		}
+// TODO: Code this!
+/*
+// If widget was destroyed (widget == NULL), then do
+// new check of which object would be over mouse
+if (!widget) {
+	checkForNewMouseOver();
+}
+*/
+}
+
+void Engine::checkForNewMouseOver(void)
+{
+	Widget* widget_under_mouse = NULL;
+	if (menubar) {
+		widget_under_mouse = menubar->mouseOverRecursive(mouse_lastpos_x, mouse_lastpos_y);
+	}
+	if (widget_under_mouse) {
+		widget_under_mouse->setMouseOver(mouse_lastpos_x, mouse_lastpos_y);
 	}
 }
 
