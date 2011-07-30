@@ -4,6 +4,7 @@
 #include "streambuf.h"
 
 #include <ostream>
+#include <istream>
 
 namespace Hpp
 {
