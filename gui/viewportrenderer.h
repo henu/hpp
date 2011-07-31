@@ -27,9 +27,6 @@ public:
 
 	// Texture loading functions
 	void loadTextureMenubarBg(Path const& path);
-	void loadTextureMenuSelection(Path const& path);
-	void loadTextureMenuSelectionLeftend(Path const& path);
-	void loadTextureMenuSelectionRightend(Path const& path);
 	void loadTextureMenuseparator(Path const& path);
 	void loadTextureMenuseparatorLeftend(Path const& path);
 	void loadTextureMenuseparatorRightend(Path const& path);
@@ -49,9 +46,6 @@ private:
 
 	// Textures
 	Texture tex_menubar_bg;
-	Texture tex_menu_selection;
-	Texture tex_menu_selection_leftend;
-	Texture tex_menu_selection_rightend;
 	Texture tex_menuseparator;
 	Texture tex_menuseparator_leftend;
 	Texture tex_menuseparator_rightend;
@@ -63,6 +57,7 @@ private:
 	uint32_t font_menuitem_size;
 
 	// Padding
+	Real padding_menu_h;
 	Real padding_menuitem_h, padding_menuitem_v;
 
 	// Virtual functions required by superclass Renderer

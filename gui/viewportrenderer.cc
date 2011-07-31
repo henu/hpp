@@ -30,6 +30,7 @@ void ViewportRenderer::setFontSize(uint32_t font_size)
 	font_menu_size = font_size;
 	font_menuitem_size = font_size;
 	// Tune some padding values
+	padding_menu_h = font_menu_size * 0.5;
 	padding_menuitem_h = font_menuitem_size * 0.5;
 	padding_menuitem_v = font_menuitem_size * 0.125;
 }
@@ -37,21 +38,6 @@ void ViewportRenderer::setFontSize(uint32_t font_size)
 void ViewportRenderer::loadTextureMenubarBg(Path const& path)
 {
 	tex_menubar_bg.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureMenuSelection(Path const& path)
-{
-	tex_menu_selection.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureMenuSelectionLeftend(Path const& path)
-{
-	tex_menu_selection_leftend.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureMenuSelectionRightend(Path const& path)
-{
-	tex_menu_selection_rightend.loadFromFile(path, DEFAULT);
 }
 
 void ViewportRenderer::loadTextureMenuseparator(Path const& path)
@@ -122,8 +108,7 @@ void ViewportRenderer::renderMenuLabel(Menu const* menu, UnicodeString const& la
 	Real x = menu->getPositionX();
 	Real y = menu->getPositionY();
 	Real width = menu->getWidth();
-
-	Real tex_menulabel_height = tex_menu_selection.getHeight();
+	Real height = menu->getHeight();
 
 	Color color;
 	if (mouse_over) {
@@ -139,7 +124,7 @@ void ViewportRenderer::renderMenuLabel(Menu const* menu, UnicodeString const& la
 	                  font_menu_size,
 	                  color,
 	                  viewport,
-	                  Vector2(x + (width - label_width) / 2.0, viewport->getHeight() - y - tex_menulabel_height + (tex_menulabel_height - font_menu_size) / 2.0));
+	                  Vector2(x + (width - label_width) / 2.0, viewport->getHeight() - y - height + (height - font_menu_size) / 2.0));
 }
 
 void ViewportRenderer::renderMenuseparator(Menuseparator const* menusep)
@@ -206,7 +191,7 @@ uint32_t ViewportRenderer::getMenubarHeight(void) const
 
 uint32_t ViewportRenderer::getMenuLabelWidth(UnicodeString const& label) const
 {
-	return tex_menu_selection_leftend.getWidth() + tex_menu_selection_rightend.getWidth() + font.getStringWidth(label, font_menu_size);
+	return font.getStringWidth(label, font_menu_size) + padding_menu_h*2;
 }
 
 uint32_t ViewportRenderer::getMenuseparatorMinWidth(void) const
