@@ -1,13 +1,15 @@
 #ifndef HPP_GUI_MENUITEMBASE_H
 #define HPP_GUI_MENUITEMBASE_H
 
+#include "widget.h"
+
 namespace Hpp
 {
 
 namespace Gui
 {
 
-class Menuitembase
+class Menuitembase : public Widget
 {
 
 public:

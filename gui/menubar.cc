@@ -21,12 +21,13 @@ Menubar::~Menubar(void)
 
 void Menubar::addMenu(Menu* menu)
 {
-	setChildEngine(menu);
+	addChild(menu);
 	menus.push_back(menu);
 }
 
-void Menubar::updatePosAndSize(Renderer* rend, int32_t x, int32_t y, uint32_t width)
+void Menubar::updatePosAndSize(int32_t x, int32_t y, uint32_t width)
 {
+	Renderer* rend = getRenderer();
 	setPosition(x, y);
 	setSize(width, rend->getMenubarHeight());
 	// Update menu items too
@@ -40,10 +41,10 @@ void Menubar::updatePosAndSize(Renderer* rend, int32_t x, int32_t y, uint32_t wi
 	}
 }
 
-void Menubar::doRendering(Renderer* rend)
+void Menubar::doRendering(void)
 {
 	// Background
-	rend->renderMenubarBackground(this);
+	getRenderer()->renderMenubarBackground(this);
 }
 
 }

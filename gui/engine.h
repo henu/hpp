@@ -28,7 +28,11 @@ public:
 	Engine(void);
 	~Engine(void);
 
-	void render(Renderer* rend);
+	inline void setRenderer(Renderer* rend) { this->rend = rend; }
+	inline Renderer const* getRenderer(void) const { return rend; }
+	inline Renderer* getRenderer(void) { return rend; }
+
+	void render(void);
 
 	void setMenubar(Menubar* menubar);
 
@@ -47,6 +51,8 @@ private:
 private:
 
 	typedef std::set< Widget* > Widgets;
+
+	Renderer* rend;
 
 	Widgets widgets;
 

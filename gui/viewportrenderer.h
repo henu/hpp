@@ -30,6 +30,10 @@ public:
 	void loadTextureMenuSelection(Path const& path);
 	void loadTextureMenuSelectionLeftend(Path const& path);
 	void loadTextureMenuSelectionRightend(Path const& path);
+	void loadTextureMenuseparator(Path const& path);
+	void loadTextureMenuseparatorLeftend(Path const& path);
+	void loadTextureMenuseparatorRightend(Path const& path);
+	void loadTextureMenuitemBg(Path const& path);
 
 	// Font loading functions. Multiple fonts can be used. The firstly
 	// loaded font will always be preferred, but if some character is not
@@ -48,10 +52,18 @@ private:
 	Texture tex_menu_selection;
 	Texture tex_menu_selection_leftend;
 	Texture tex_menu_selection_rightend;
+	Texture tex_menuseparator;
+	Texture tex_menuseparator_leftend;
+	Texture tex_menuseparator_rightend;
+	Texture tex_menuitem_bg;
 
 	// Font and its sizes
 	Font font;
 	uint32_t font_menu_size;
+	uint32_t font_menuitem_size;
+
+	// Padding
+	Real padding_menuitem_h, padding_menuitem_v;
 
 	// Virtual functions required by superclass Renderer
 	virtual uint32_t getWidth(void) const;
@@ -60,8 +72,14 @@ private:
 	virtual void deinitRendering(void);
 	virtual void renderMenubarBackground(Menubar const* menubar);
 	virtual void renderMenuLabel(Menu const* menu, UnicodeString const& label, bool mouse_over);
-	virtual uint32_t getMenubarHeight(void);
-	virtual uint32_t getMenuLabelWidth(UnicodeString const& label);
+	virtual void renderMenuseparator(Menuseparator const* menusep);
+	virtual void renderMenuitem(Menuitem const* menuitem, UnicodeString const& label, bool mouse_over);
+	virtual uint32_t getMenubarHeight(void) const;
+	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
+	virtual uint32_t getMenuseparatorMinWidth(void) const;
+	virtual uint32_t getMenuseparatorHeight(void) const;
+	virtual uint32_t getMenuitemWidth(UnicodeString const& label) const;
+	virtual uint32_t getMenuitemHeight(void) const;
 
 };
 

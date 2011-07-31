@@ -11,6 +11,8 @@ namespace Hpp
 namespace Gui
 {
 
+class Menuitem;
+class Menuseparator;
 class Menubar;
 class Menu;
 
@@ -30,11 +32,17 @@ public:
 
 	// Rendering functions
 	virtual void renderMenubarBackground(Menubar const* menubar) = 0;
+	virtual void renderMenuseparator(Menuseparator const* menusep) = 0;
 	virtual void renderMenuLabel(Menu const* menu, UnicodeString const& label, bool mouse_over) = 0;
+	virtual void renderMenuitem(Menuitem const* menuitem, UnicodeString const& label, bool mouse_over) = 0;
 
-	// Some getters
-	virtual uint32_t getMenubarHeight(void) = 0;
-	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) = 0;
+	// Some dimension getters
+	virtual uint32_t getMenubarHeight(void) const = 0;
+	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const = 0;
+	virtual uint32_t getMenuseparatorMinWidth(void) const = 0;
+	virtual uint32_t getMenuseparatorHeight(void) const = 0;
+	virtual uint32_t getMenuitemWidth(UnicodeString const& label) const = 0;
+	virtual uint32_t getMenuitemHeight(void) const = 0;
 
 private:
 

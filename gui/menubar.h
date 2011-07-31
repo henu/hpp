@@ -13,7 +13,6 @@ namespace Gui
 {
 
 class Menu;
-class Renderer;
 
 class Menubar : public Widget
 {
@@ -30,7 +29,7 @@ public:
 private:
 
 	// Called by friend class Engine
-	void updatePosAndSize(Renderer* rend, int32_t x, int32_t y, uint32_t width);
+	void updatePosAndSize(int32_t x, int32_t y, uint32_t width);
 
 private:
 
@@ -39,7 +38,7 @@ private:
 	Menus menus;
 
 	// Virtual functions for Widget
-	virtual void doRendering(Renderer* rend);
+	virtual void doRendering(void);
 
 };
 

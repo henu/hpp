@@ -22,6 +22,18 @@ Widget::~Widget(void)
 	}
 }
 
+Renderer const* Widget::getRenderer(void) const
+{
+	HppAssert(engine, "Unable to get Renderer, because Engine is not found!");
+	return engine->getRenderer();
+}
+
+Renderer* Widget::getRenderer(void)
+{
+	HppAssert(engine, "Unable to get Renderer, because Engine is not found!");
+	return engine->getRenderer();
+}
+
 void Widget::setEngine(Engine* engine)
 {
 	if (this->engine) {
@@ -30,6 +42,13 @@ void Widget::setEngine(Engine* engine)
 	this->engine = engine;
 	if (engine) {
 		this->engine->registerWidget(this);
+	}
+	// Set also for children
+	for (Children::iterator children_it = children.begin();
+	     children_it != children.end();
+	     children_it ++) {
+		Widget* child = *children_it;
+		child->setEngine(engine);
 	}
 }
 

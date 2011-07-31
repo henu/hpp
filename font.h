@@ -47,7 +47,7 @@ public:
 	// Loads new source
 	inline void loadMore(Path const& path);
 
-	inline Real getStringWidth(UnicodeString const& str, Real font_size);
+	inline Real getStringWidth(UnicodeString const& str, Real font_size) const;
 
 	// Position is measured inside viewport
 	inline void renderString(UnicodeString const& str,
@@ -88,15 +88,15 @@ private:
 	uint16_t texture_width;
 
 	// Textures that are being used as a storage for glyphs
-	Texture* tex;
-	Textures old_texs;
+	mutable Texture* tex;
+	mutable Textures old_texs;
 	// Texture using specs
-	uint16_t tex_pos_x;
-	uint16_t tex_pos_y;
-	uint16_t tex_row_maxheight;
+	mutable uint16_t tex_pos_x;
+	mutable uint16_t tex_pos_y;
+	mutable uint16_t tex_row_maxheight;
 
 	// Loaded characters
-	Characters chrs;
+	mutable Characters chrs;
 
 	// Static counter for Fonts and static Freetype handle.
 	// Freetype handle is initialized when first Font is
@@ -115,7 +115,7 @@ private:
 
 	// Ensures that specific character exists. If character does not exist,
 	// then it is created.
-	inline void ensureCharacterExists(UChr chr);
+	inline void ensureCharacterExists(UChr chr) const;
 
 	// Clears all textures and characters
 	inline void clear(void);
@@ -205,7 +205,7 @@ inline void Font::loadMore(Path const& path)
 	sources.push_back(new_source);
 }
 
-inline Real Font::getStringWidth(UnicodeString const& str, Real font_size)
+inline Real Font::getStringWidth(UnicodeString const& str, Real font_size) const
 {
 	Real result = 0.0;
 	for (UnicodeString::const_iterator str_it = str.begin();
@@ -213,7 +213,7 @@ inline Real Font::getStringWidth(UnicodeString const& str, Real font_size)
 	     str_it ++) {
 		UChr chr = *str_it;
 		ensureCharacterExists(chr);
-		result += chrs[chr].adv * (font_size / font_default_size);
+		result += chrs.find(chr)->second.adv * (font_size / font_default_size);
 	}
 	return result;
 }
@@ -250,7 +250,7 @@ inline void Font::renderString(UnicodeString const& str,
 	}
 }
 
-inline void Font::ensureCharacterExists(UChr chr)
+inline void Font::ensureCharacterExists(UChr chr) const
 {
 
 	if (chrs.find(chr) != chrs.end()) {
@@ -268,7 +268,7 @@ inline void Font::ensureCharacterExists(UChr chr)
 
 	// Try to find glyph from sources
 	FT_UInt glyph_index = 0;
-	Sources::iterator sources_it = sources.begin();
+	Sources::const_iterator sources_it = sources.begin();
 	FT_Face source;
 	while (sources_it != sources.end()) {
 		source = *sources_it;

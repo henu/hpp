@@ -11,6 +11,8 @@ namespace Gui
 
 Menu::Menu(void)
 {
+	content.hide();
+	addChild(&content);
 }
 
 Menu::~Menu(void)
@@ -28,10 +30,28 @@ uint32_t Menu::getLabelWidth(Renderer* rend)
 	return rend->getMenuLabelWidth(label);
 }
 
-void Menu::doRendering(Renderer* rend)
+bool Menu::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key)
+{
+	(void)mouse_x;
+	(void)mouse_y;
+	if (mouse_key == Mousekey::LEFT) {
+		content.reveal();
+	}
+	return true;
+}
+
+void Menu::onChildSizeChange(void)
+{
+	setChildPosition(&content, getPositionX(), getPositionY() + getHeight());
+	uint32_t content_width = content.getMaxWidth();
+	uint32_t content_height = content.getMinHeight(content_width);
+	setChildSize(&content, content_width, content_height);
+}
+
+void Menu::doRendering(void)
 {
 	// Label
-	rend->renderMenuLabel(this, label, isMouseOver());
+	getRenderer()->renderMenuLabel(this, label, isMouseOver());
 }
 
 }

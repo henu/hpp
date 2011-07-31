@@ -13,6 +13,7 @@ namespace Gui
 {
 
 Engine::Engine(void) :
+rend(NULL),
 pos_or_size_changed(true),
 mouseover_widget(NULL),
 menubar(NULL)
@@ -23,12 +24,12 @@ Engine::~Engine(void)
 {
 }
 
-void Engine::render(Renderer* rend)
+void Engine::render(void)
 {
 	// If position or size has changed, then update all child widgets
 	if (pos_or_size_changed) {
 		if (menubar) {
-			menubar->updatePosAndSize(rend, 0, 0, rend->getWidth());
+			menubar->updatePosAndSize(0, 0, rend->getWidth());
 		}
 		pos_or_size_changed = false;
 	}
@@ -36,7 +37,7 @@ void Engine::render(Renderer* rend)
 	rend->initRendering();
 
 	if (menubar) {
-		menubar->render(rend);
+		menubar->render();
 	}
 
 	rend->deinitRendering();
@@ -45,8 +46,8 @@ void Engine::render(Renderer* rend)
 void Engine::setMenubar(Menubar* menubar)
 {
 	this->menubar = menubar;
-	menubar->setParent(NULL);
 	menubar->setEngine(this);
+	menubar->setParent(NULL);
 }
 
 bool Engine::mouseEvent(Event const& event)
@@ -93,14 +94,6 @@ void Engine::setMouseOver(Widget* widget)
 		mouseover_widget->setMouseOut(mouse_lastpos_x, mouse_lastpos_y);
 	}
 	mouseover_widget = widget;
-// TODO: Code this!
-/*
-// If widget was destroyed (widget == NULL), then do
-// new check of which object would be over mouse
-if (!widget) {
-	checkForNewMouseOver();
-}
-*/
 }
 
 void Engine::checkForNewMouseOver(void)

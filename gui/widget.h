@@ -33,18 +33,36 @@ public:
 	inline int32_t getWidth(void) const { return width; }
 	inline int32_t getHeight(void) const { return height; }
 
+	// Size getters
+	inline virtual uint32_t getMinWidth(void) const { return 0; }
+	inline virtual uint32_t getMaxWidth(void) const { return 0; }
+	inline virtual uint32_t getMinHeight(uint32_t width) const { (void)width; return 0; }
+
 protected:
 
-	inline void setPosition(int32_t x, int32_t y) { this->x = x; this->y = y; }
-	inline void setSize(uint32_t width, uint32_t height) { this->width = width; this->height = height; }
+	enum State { ENABLED, DISABLED, HIDDEN };
+
+	inline void setPosition(int32_t x, int32_t y) { this->x = x; this->y = y; onPositionChange(); }
+	inline void setSize(uint32_t width, uint32_t height) { this->width = width; this->height = height; onSizeChange(); }
+
+	// Some events
+	inline void markSizeChanged();
 
 	inline Engine* getEngine(void) { return engine; }
 
-	// Sets engine and parent of child
-	inline void setChildEngine(Widget* child) { child->setEngine(engine); child->setParent(this); }
+	// Registers child
+	inline void addChild(Widget* child) { child->setEngine(engine); child->setParent(this); }
+
+	inline void setChildPosition(Widget* child, int32_t x, int32_t y);
+	inline void setChildSize(Widget* child, uint32_t width, uint32_t height);
 
 	// Some getters
 	inline bool isMouseOver(void) const { return mouse_over; }
+	Renderer const* getRenderer(void) const;
+	Renderer* getRenderer(void);
+
+	// Setters
+	inline void setState(State state);
 
 private:
 
@@ -53,7 +71,7 @@ private:
 	inline void setParent(Widget* parent);
 
 	// Called by Engine
-	inline void render(Renderer* rend);
+	inline void render(void);
 
 	// Called by Engine and other Widgets. Second function returns Widget
 	// that was under mouse or NULL if no Widget could be found.
@@ -72,8 +90,6 @@ private:
 
 	typedef std::set< Widget* > Children;
 
-	enum State { ENABLED, DISABLED, HIDDEN };
-
 	Engine* engine;
 	Widget* parent;
 	Children children;
@@ -88,13 +104,16 @@ private:
 	inline void unregisterChild(Widget* child);
 
 	// Real rendering function
-	inline virtual void doRendering(Renderer* rend) { (void)rend; }
+	inline virtual void doRendering(void) { }
 
 	// Real handler for events
 	inline virtual void onMouseOver(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
 	inline virtual void onMouseOut(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
 	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return false; }
 	inline virtual bool onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return false; }
+	inline virtual void onChildSizeChange(void) { }
+	inline virtual void onPositionChange(void) { }
+	inline virtual void onSizeChange(void) { }
 
 };
 
@@ -119,17 +138,46 @@ inline void Widget::setParent(Widget* parent)
 	}
 }
 
-inline void Widget::render(Renderer* rend)
+inline void Widget::markSizeChanged()
+{
+	if (parent) {
+		parent->onChildSizeChange();
+	}
+}
+
+inline void Widget::setChildPosition(Widget* child, int32_t x, int32_t y)
+{
+	HppAssert(children.find(child) != children.end(), "Unable to change child position, because it is really not our child!");
+	child->setPosition(x, y);
+}
+
+inline void Widget::setChildSize(Widget* child, uint32_t width, uint32_t height)
+{
+	HppAssert(children.find(child) != children.end(), "Unable to change child size, because it is really not our child!");
+	child->setSize(width, height);
+}
+
+inline void Widget::setState(State state)
+{
+	// If visibility will change, then inform parent about it
+	if ((this->state != HIDDEN && state == HIDDEN) ||
+	    (this->state == HIDDEN && state != HIDDEN)) {
+		markSizeChanged();
+	}
+	this->state = state;
+}
+
+inline void Widget::render(void)
 {
 	if (state == HIDDEN) {
 		return;
 	}
-	doRendering(rend);
+	doRendering();
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
 	     children_it ++) {
 		Widget* child = *children_it;
-		child->render(rend);
+		child->render();
 	}
 }
 
