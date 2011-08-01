@@ -60,9 +60,13 @@ protected:
 	inline bool isMouseOver(void) const { return mouse_over; }
 	Renderer const* getRenderer(void) const;
 	Renderer* getRenderer(void);
+	inline bool isMyChild(Widget const* widget) const;
 
 	// Setters
 	inline void setState(State state);
+
+	// Listens for mouse clicks to another Widgets
+	void listenMouseClicks(Mousekey::KeycodeFlags flags);
 
 private:
 
@@ -111,6 +115,7 @@ private:
 	inline virtual void onMouseOut(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
 	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return false; }
 	inline virtual bool onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return false; }
+	inline virtual void onMouseKeyDownOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)widget; (void)mouse_x; (void)mouse_y; (void)mouse_key; }
 	inline virtual void onChildSizeChange(void) { }
 	inline virtual void onPositionChange(void) { }
 	inline virtual void onSizeChange(void) { }
@@ -155,6 +160,22 @@ inline void Widget::setChildSize(Widget* child, uint32_t width, uint32_t height)
 {
 	HppAssert(children.find(child) != children.end(), "Unable to change child size, because it is really not our child!");
 	child->setSize(width, height);
+}
+
+inline bool Widget::isMyChild(Widget const* widget) const
+{
+	if (children.find((Widget*)widget) != children.end()) {
+		return true;
+	}
+	for (Children::const_iterator children_it = children.begin();
+	     children_it != children.end();
+	     children_it ++) {
+		Widget const* child = *children_it;
+		if (child->isMyChild(widget)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 inline void Widget::setState(State state)

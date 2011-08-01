@@ -5,6 +5,7 @@
 #include "../assert.h"
 
 #include <set>
+#include <map>
 
 namespace Hpp
 {
@@ -47,14 +48,27 @@ private:
 
 	// Called by Widget
 	void setMouseOver(Widget* widget);
+	void registerMouseClickListener(Widget* widget, Mousekey::KeycodeFlags flags);
 
 private:
 
+	// ----------------------------------------
+	// Private types
+	// ----------------------------------------
+
 	typedef std::set< Widget* > Widgets;
+
+	typedef std::map< Widget*, Mousekey::KeycodeFlags > MouseClickListeners;
+
+
+	// ----------------------------------------
+	// Data
+	// ----------------------------------------
 
 	Renderer* rend;
 
 	Widgets widgets;
+	MouseClickListeners mouseclicklisteners;
 
 	bool pos_or_size_changed;
 
@@ -62,6 +76,11 @@ private:
 	int32_t mouse_lastpos_x, mouse_lastpos_y;
 
 	Menubar* menubar;
+
+
+	// ----------------------------------------
+	// Private functions
+	// ----------------------------------------
 
 	void checkForNewMouseOver(void);
 

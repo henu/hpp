@@ -46,6 +46,7 @@ private:
 
 	// Virtual functions for Widget
 	virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
+	virtual void onMouseKeyDownOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	virtual void onChildSizeChange(void);
 	virtual void doRendering(void);
 

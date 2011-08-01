@@ -34,6 +34,11 @@ Renderer* Widget::getRenderer(void)
 	return engine->getRenderer();
 }
 
+void Widget::listenMouseClicks(Mousekey::KeycodeFlags flags)
+{
+	engine->registerMouseClickListener(this, flags);
+}
+
 void Widget::setEngine(Engine* engine)
 {
 	if (this->engine) {
@@ -73,11 +78,11 @@ bool Widget::mouseEvent(Event const& event)
 		engine->setMouseOver(this);
 	}
 	// Check if button was pressed
-	if (event.MOUSE_KEY_DOWN) {
+	if (event.type == Event::MOUSE_KEY_DOWN) {
 		if (onMouseKeyDown(event.x, event.y, event.mousekey)) {
 			return true;
 		}
-	} else if (event.MOUSE_KEY_UP) {
+	} else if (event.type == Event::MOUSE_KEY_UP) {
 		if (onMouseKeyUp(event.x, event.y, event.mousekey)) {
 			return true;
 		}
