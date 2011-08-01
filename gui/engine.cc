@@ -80,7 +80,7 @@ bool Engine::mouseEvent(Event const& event)
 
 	// Use event
 	if (widget_under_mouse) {
-		widget_under_mouse->mouseEvent(event);
+		return widget_under_mouse->mouseEvent(event);
 	}
 	// If no widget was found, then make sure
 	// no Widget thinks its under mouse.
