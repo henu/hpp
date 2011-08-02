@@ -64,7 +64,7 @@ bool Engine::mouseEvent(Event const& event)
 
 	// Check if some Widget is interested about these events
 	if (event.type == Event::MOUSE_KEY_DOWN) {
-		for (MouseClickListeners::iterator mouseclicklisteners_it = mouseclicklisteners.begin();
+		for (MouseEventListeners::iterator mouseclicklisteners_it = mouseclicklisteners.begin();
 		     mouseclicklisteners_it != mouseclicklisteners.end();
 		     mouseclicklisteners_it ++) {
 			Mousekey::KeycodeFlags flags = mouseclicklisteners_it->second;
@@ -74,6 +74,19 @@ bool Engine::mouseEvent(Event const& event)
 			    (event.mousekey == Mousekey::WHEEL_UP && (flags & Mousekey::FLAG_WHEEL_UP)) ||
 			    (event.mousekey == Mousekey::WHEEL_DOWN && (flags & Mousekey::FLAG_WHEEL_DOWN))) {
 				mouseclicklisteners_it->first->onMouseKeyDownOther(widget_under_mouse, event.x, event.y, event.mousekey);
+			}
+		}
+	} else if (event.type == Event::MOUSE_KEY_UP) {
+		for (MouseEventListeners::iterator mousereleaselisteners_it = mousereleaselisteners.begin();
+		     mousereleaselisteners_it != mousereleaselisteners.end();
+		     mousereleaselisteners_it ++) {
+			Mousekey::KeycodeFlags flags = mousereleaselisteners_it->second;
+			if ((event.mousekey == Mousekey::LEFT && (flags & Mousekey::FLAG_LEFT)) ||
+			    (event.mousekey == Mousekey::MIDDLE && (flags & Mousekey::FLAG_MIDDLE)) ||
+			    (event.mousekey == Mousekey::RIGHT && (flags & Mousekey::FLAG_RIGHT)) ||
+			    (event.mousekey == Mousekey::WHEEL_UP && (flags & Mousekey::FLAG_WHEEL_UP)) ||
+			    (event.mousekey == Mousekey::WHEEL_DOWN && (flags & Mousekey::FLAG_WHEEL_DOWN))) {
+				mousereleaselisteners_it->first->onMouseKeyUpOther(widget_under_mouse, event.x, event.y, event.mousekey);
 			}
 		}
 	}
@@ -100,8 +113,9 @@ void Engine::unregisterWidget(Widget* widget)
 {
 	HppAssert(widgets.find(widget) != widgets.end(), "Widget is not registered to Engine!");
 	widgets.erase(widget);
-	// Check if this Widget is listening for mouse clicks
+	// Check if this Widget is listening for mouse events
 	mouseclicklisteners.erase(widget);
+	mousereleaselisteners.erase(widget);
 	// Check if this Widget was under mouse
 	if (mouseover_widget == widget) {
 		mouseover_widget = NULL;
@@ -123,6 +137,15 @@ void Engine::registerMouseClickListener(Widget* widget, Mousekey::KeycodeFlags f
 		mouseclicklisteners.erase(widget);
 	} else {
 		mouseclicklisteners[widget] = flags;
+	}
+}
+
+void Engine::registerMouseReleaseListener(Widget* widget, Mousekey::KeycodeFlags flags)
+{
+	if (flags == 0) {
+		mousereleaselisteners.erase(widget);
+	} else {
+		mousereleaselisteners[widget] = flags;
 	}
 }
 

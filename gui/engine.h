@@ -49,6 +49,7 @@ private:
 	// Called by Widget
 	void setMouseOver(Widget* widget);
 	void registerMouseClickListener(Widget* widget, Mousekey::KeycodeFlags flags);
+	void registerMouseReleaseListener(Widget* widget, Mousekey::KeycodeFlags flags);
 
 private:
 
@@ -58,7 +59,7 @@ private:
 
 	typedef std::set< Widget* > Widgets;
 
-	typedef std::map< Widget*, Mousekey::KeycodeFlags > MouseClickListeners;
+	typedef std::map< Widget*, Mousekey::KeycodeFlags > MouseEventListeners;
 
 
 	// ----------------------------------------
@@ -68,7 +69,8 @@ private:
 	Renderer* rend;
 
 	Widgets widgets;
-	MouseClickListeners mouseclicklisteners;
+	MouseEventListeners mouseclicklisteners;
+	MouseEventListeners mousereleaselisteners;
 
 	bool pos_or_size_changed;
 

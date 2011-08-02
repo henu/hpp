@@ -39,6 +39,11 @@ void Widget::listenMouseClicks(Mousekey::KeycodeFlags flags)
 	engine->registerMouseClickListener(this, flags);
 }
 
+void Widget::listenMouseReleases(Mousekey::KeycodeFlags flags)
+{
+	engine->registerMouseReleaseListener(this, flags);
+}
+
 void Widget::setEngine(Engine* engine)
 {
 	if (this->engine) {

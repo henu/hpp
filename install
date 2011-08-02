@@ -5,6 +5,7 @@ PREFIX="/usr"
 DEPS=""
 
 HEADERS_MAIN=\
+"gui/callback.h "\
 "gui/engine.h "\
 "gui/menu.h "\
 "gui/menubar.h "\
