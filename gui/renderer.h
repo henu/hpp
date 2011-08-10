@@ -1,6 +1,8 @@
 #ifndef HPP_GUI_RENDERER_H
 #define HPP_GUI_RENDERER_H
 
+#include "engine.h"
+
 #include "../unicodestring.h"
 
 #include <stdint.h>
@@ -15,14 +17,17 @@ class Menuitem;
 class Menuseparator;
 class Menubar;
 class Menu;
+class Window;
 
 class Renderer
 {
 
+	friend class Engine;
+
 public:
 
-	inline Renderer(void) { }
-	inline virtual ~Renderer(void) { }
+	inline Renderer(void);
+	inline virtual ~Renderer(void);
 
 	virtual uint32_t getWidth(void) const = 0;
 	virtual uint32_t getHeight(void) const = 0;
@@ -31,10 +36,11 @@ public:
 	virtual void deinitRendering(void) = 0;
 
 	// Rendering functions
-	virtual void renderMenubarBackground(Menubar const* menubar) = 0;
-	virtual void renderMenuseparator(Menuseparator const* menusep) = 0;
-	virtual void renderMenuLabel(Menu const* menu, UnicodeString const& label, bool mouse_over) = 0;
-	virtual void renderMenuitem(Menuitem const* menuitem, UnicodeString const& label, bool mouse_over) = 0;
+	virtual void renderMenubarBackground(int32_t x_origin, int32_t y_origin, Menubar const* menubar) = 0;
+	virtual void renderMenuseparator(int32_t x_origin, int32_t y_origin, Menuseparator const* menusep) = 0;
+	virtual void renderMenuLabel(int32_t x_origin, int32_t y_origin, Menu const* menu, UnicodeString const& label, bool mouse_over) = 0;
+	virtual void renderMenuitem(int32_t x_origin, int32_t y_origin, Menuitem const* menuitem, UnicodeString const& label, bool mouse_over) = 0;
+	virtual void renderWindow(int32_t x_origin, int32_t y_origin, Window const* window, UnicodeString const& title) = 0;
 
 	// Some dimension getters
 	virtual uint32_t getMenubarHeight(void) const = 0;
@@ -46,7 +52,37 @@ public:
 
 private:
 
+	// Called by Engine
+	inline void setEngine(Engine* engine) { this->engine = engine; }
+
+protected:
+
+	inline void sizeChanged(void);
+
+private:
+
+	Engine* engine;
+
 };
+
+inline Renderer::Renderer(void) :
+engine(NULL)
+{
+}
+
+inline Renderer::~Renderer(void)
+{
+	if (engine) {
+		engine->rendererIsBeingDestroyed();
+	}
+}
+
+inline void Renderer::sizeChanged(void)
+{
+	if (engine) {
+		engine->sizeOfRendererChanged();
+	}
+}
 
 }
 

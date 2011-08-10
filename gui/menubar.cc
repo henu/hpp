@@ -23,28 +23,28 @@ void Menubar::addMenu(Menu* menu)
 {
 	addChild(menu);
 	menus.push_back(menu);
+	updateSizeAndPositionOfMenus();
 }
 
-void Menubar::updatePosAndSize(int32_t x, int32_t y, uint32_t width)
+void Menubar::doRendering(int32_t x_origin, int32_t y_origin)
 {
-	Renderer* rend = getRenderer();
-	setPosition(x, y);
-	setSize(width, rend->getMenubarHeight());
-	// Update menu items too
-	int32_t menu_x = x;
+	// Background
+	getRenderer()->renderMenubarBackground(x_origin, y_origin, this);
+}
+
+void Menubar::updateSizeAndPositionOfMenus(void)
+{
+	int32_t menu_x = 0;
 	for (Menus::iterator menus_it = menus.begin();
 	     menus_it != menus.end();
 	     menus_it ++) {
 		Menu* menu = *menus_it;
-		menu->updatePosAndSize(rend, menu_x, y);
-		menu_x += menu->getLabelWidth(rend);
+		setChildPosition(menu, menu_x, 0);
+		uint32_t menu_width = menu->getMaxWidth();
+		uint32_t menu_height = menu->getMinHeight(0);
+		setChildSize(menu, menu_width, menu_height);
+		menu_x += menu_width;
 	}
-}
-
-void Menubar::doRendering(void)
-{
-	// Background
-	getRenderer()->renderMenubarBackground(this);
 }
 
 }

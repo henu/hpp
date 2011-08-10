@@ -15,13 +15,10 @@ namespace Gui
 {
 
 class Renderer;
-class Menubar;
 class Menuitembase;
 
 class Menu : public Widget
 {
-
-friend class Menubar;
 
 public:
 
@@ -32,11 +29,9 @@ public:
 
 	inline void addItem(Menuitembase* item) { content.addItem(item); }
 
-private:
-
-	// Called by friend class Menubar
-	void updatePosAndSize(Renderer* rend, int32_t x, int32_t y);
-	uint32_t getLabelWidth(Renderer* rend);
+	// Virtual functions for Widget
+	virtual uint32_t getMaxWidth(void) const;
+	virtual uint32_t getMinHeight(uint32_t width) const;
 
 private:
 
@@ -48,7 +43,7 @@ private:
 	virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	virtual void onMouseKeyDownOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	virtual void onChildSizeChange(void);
-	virtual void doRendering(void);
+	virtual void doRendering(int32_t x_origin, int32_t y_origin);
 
 };
 

@@ -55,9 +55,9 @@ void Menuitem::onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t mouse_
 	}
 }
 
-void Menuitem::doRendering(void)
+void Menuitem::doRendering(int32_t x_origin, int32_t y_origin)
 {
-	getRenderer()->renderMenuitem(this, label, isMouseOver());
+	getRenderer()->renderMenuitem(x_origin, y_origin, this, label, isMouseOver());
 }
 
 }

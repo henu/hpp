@@ -18,22 +18,27 @@ namespace Gui
 class Widget;
 class Renderer;
 class Menubar;
+class Window;
+class Windowarea;
 
 class Engine
 {
 
 	friend class Widget;
+	friend class Renderer;
 
 public:
 
 	Engine(void);
 	~Engine(void);
 
-	inline void setRenderer(Renderer* rend) { this->rend = rend; }
+	void setRenderer(Renderer* rend);
 	inline Renderer const* getRenderer(void) const { return rend; }
 	inline Renderer* getRenderer(void) { return rend; }
 
 	void render(void);
+
+	void addWindow(Window* window);
 
 	void setMenubar(Menubar* menubar);
 
@@ -41,6 +46,10 @@ public:
 	bool mouseEvent(Event const& event);
 
 private:
+
+	// ----------------------------------------
+	// Functions for friends
+	// ----------------------------------------
 
 	// Called by Widget
 	void registerWidget(Widget* widget);
@@ -50,6 +59,10 @@ private:
 	void setMouseOver(Widget* widget);
 	void registerMouseClickListener(Widget* widget, Mousekey::KeycodeFlags flags);
 	void registerMouseReleaseListener(Widget* widget, Mousekey::KeycodeFlags flags);
+
+	// Called by Renderer
+	inline void sizeOfRendererChanged(void) { updateSizes(); }
+	inline void rendererIsBeingDestroyed(void) { rend = NULL; }
 
 private:
 
@@ -61,7 +74,6 @@ private:
 
 	typedef std::map< Widget*, Mousekey::KeycodeFlags > MouseEventListeners;
 
-
 	// ----------------------------------------
 	// Data
 	// ----------------------------------------
@@ -72,11 +84,10 @@ private:
 	MouseEventListeners mouseclicklisteners;
 	MouseEventListeners mousereleaselisteners;
 
-	bool pos_or_size_changed;
-
 	Widget* mouseover_widget;
 	int32_t mouse_lastpos_x, mouse_lastpos_y;
 
+	Windowarea* windowarea;
 	Menubar* menubar;
 
 
@@ -85,6 +96,10 @@ private:
 	// ----------------------------------------
 
 	void checkForNewMouseOver(void);
+
+	// Update sizes of Widgets. This is called when area or
+	// renderer is changed or when menubar is added/removed
+	void updateSizes(void);
 
 };
 

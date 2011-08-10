@@ -18,16 +18,17 @@ Menu::~Menu(void)
 {
 }
 
-void Menu::updatePosAndSize(Renderer* rend, int32_t x, int32_t y)
+uint32_t Menu::getMaxWidth(void) const
 {
-	setPosition(x, y);
-	setSize(rend->getMenuLabelWidth(label), rend->getMenubarHeight());
+	return getRenderer()->getMenuLabelWidth(label);
 }
 
-uint32_t Menu::getLabelWidth(Renderer* rend)
+uint32_t Menu::getMinHeight(uint32_t width) const
 {
-	return rend->getMenuLabelWidth(label);
+	(void)width;
+	return getRenderer()->getMenubarHeight();
 }
+
 
 bool Menu::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key)
 {
@@ -58,16 +59,16 @@ void Menu::onMouseKeyDownOther(Widget* widget, int32_t mouse_x, int32_t mouse_y,
 
 void Menu::onChildSizeChange(void)
 {
-	setChildPosition(&content, getPositionX(), getPositionY() + getHeight());
+	setChildPosition(&content, 0, getHeight());
 	uint32_t content_width = content.getMaxWidth();
 	uint32_t content_height = content.getMinHeight(content_width);
 	setChildSize(&content, content_width, content_height);
 }
 
-void Menu::doRendering(void)
+void Menu::doRendering(int32_t x_origin, int32_t y_origin)
 {
 	// Label
-	getRenderer()->renderMenuLabel(this, label, isMouseOver());
+	getRenderer()->renderMenuLabel(x_origin, y_origin, this, label, isMouseOver());
 }
 
 }

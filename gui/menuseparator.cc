@@ -27,9 +27,9 @@ uint32_t Menuseparator::getMinHeight(uint32_t width) const
 	return getRenderer()->getMenuseparatorHeight();
 }
 
-void Menuseparator::doRendering(void)
+void Menuseparator::doRendering(int32_t x_origin, int32_t y_origin)
 {
-	getRenderer()->renderMenuseparator(this);
+	getRenderer()->renderMenuseparator(x_origin, y_origin, this);
 }
 
 }

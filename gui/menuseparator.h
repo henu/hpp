@@ -22,7 +22,7 @@ private:
 	// Virtual functions for Widget
 	virtual uint32_t getMaxWidth(void) const;
 	virtual uint32_t getMinHeight(uint32_t width) const;
-	virtual void doRendering(void);
+	virtual void doRendering(int32_t x_origin, int32_t y_origin);
 
 };
 

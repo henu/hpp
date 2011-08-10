@@ -38,15 +38,38 @@ public:
 	inline virtual uint32_t getMaxWidth(void) const { return 0; }
 	inline virtual uint32_t getMinHeight(uint32_t width) const { (void)width; return 0; }
 
+private:
+
+	// Called by Engine and other Widgets
+	void setEngine(Engine* engine);
+	inline void setParent(Widget* parent);
+
+	// Called by Engine
+	inline void render(int32_t x_origin, int32_t y_origin);
+
+	// Called by Engine and other Widgets. Second function returns Widget
+	// that was under mouse or NULL if no Widget could be found.
+	inline bool mouseOver(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const;
+	inline Widget const* mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const;
+	inline Widget* mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y);
+
+	// Called by Engine and other Widgets
+	bool mouseEvent(Event const& event);
+
+	// Called by Engine
+	inline void setMouseOut(int32_t mouse_x, int32_t mouse_y) { HppAssert(mouse_over, "Unable to set mouse out, because mouse is not over!"); mouse_over = false; onMouseOut(mouse_x, mouse_y); }
+	inline void setMouseOver(int32_t mouse_x, int32_t mouse_y) { HppAssert(!mouse_over, "Unable to set mouse over, because mouse is already over!"); mouse_over = true; onMouseOver(mouse_x, mouse_y); }
+
 protected:
 
 	enum State { ENABLED, DISABLED, HIDDEN };
 
-	inline void setPosition(int32_t x, int32_t y) { this->x = x; this->y = y; onPositionChange(); }
-	inline void setSize(uint32_t width, uint32_t height) { this->width = width; this->height = height; onSizeChange(); }
+	inline void setPosition(int32_t x, int32_t y);
+	inline void setSize(uint32_t width, uint32_t height);
 
-	// Some events
-	inline void markSizeChanged();
+	// This functions is called, when content of child changes,
+	// so that it also might change its size.
+	inline void markSizeChanged(void);
 
 	inline Engine* getEngine(void) { return engine; }
 
@@ -71,28 +94,6 @@ protected:
 
 private:
 
-	// Called by Engine and other Widgets
-	void setEngine(Engine* engine);
-	inline void setParent(Widget* parent);
-
-	// Called by Engine
-	inline void render(void);
-
-	// Called by Engine and other Widgets. Second function returns Widget
-	// that was under mouse or NULL if no Widget could be found.
-	inline bool mouseOver(int32_t mouse_x, int32_t mouse_y) const;
-	inline Widget const* mouseOverRecursive(int32_t mouse_x, int32_t mouse_y) const;
-	inline Widget* mouseOverRecursive(int32_t mouse_x, int32_t mouse_y);
-
-	// Called by Engine and other Widgets
-	bool mouseEvent(Event const& event);
-
-	// Called by Engine
-	inline void setMouseOut(int32_t mouse_x, int32_t mouse_y) { HppAssert(mouse_over, "Unable to set mouse out, because mouse is not over!"); mouse_over = false; onMouseOut(mouse_x, mouse_y); }
-	inline void setMouseOver(int32_t mouse_x, int32_t mouse_y) { HppAssert(!mouse_over, "Unable to set mouse over, because mouse is already over!"); mouse_over = true; onMouseOver(mouse_x, mouse_y); }
-
-private:
-
 	typedef std::set< Widget* > Children;
 
 	Engine* engine;
@@ -109,7 +110,7 @@ private:
 	inline void unregisterChild(Widget* child);
 
 	// Real rendering function
-	inline virtual void doRendering(void) { }
+	inline virtual void doRendering(int32_t x_origin, int32_t y_origin) { (void)x_origin; (void)y_origin; }
 
 	// Real handler for events
 	inline virtual void onMouseOver(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
@@ -145,7 +146,27 @@ inline void Widget::setParent(Widget* parent)
 	}
 }
 
-inline void Widget::markSizeChanged()
+inline void Widget::setPosition(int32_t x, int32_t y)
+{
+	bool position_really_changed = (x != this->x || y != this->y);
+	this->x = x;
+	this->y = y;
+	if (position_really_changed) {
+		onPositionChange();
+	}
+}
+
+inline void Widget::setSize(uint32_t width, uint32_t height)
+{
+	bool size_really_changed = (width != this->width || height != this->height);
+	this->width = width;
+	this->height = height;
+	if (size_really_changed) {
+		onSizeChange();
+	}
+}
+
+inline void Widget::markSizeChanged(void)
 {
 	if (parent) {
 		parent->onChildSizeChange();
@@ -155,7 +176,8 @@ inline void Widget::markSizeChanged()
 inline void Widget::setChildPosition(Widget* child, int32_t x, int32_t y)
 {
 	HppAssert(children.find(child) != children.end(), "Unable to change child position, because it is really not our child!");
-	child->setPosition(x, y);
+	child->x = x;
+	child->y = y;
 }
 
 inline void Widget::setChildSize(Widget* child, uint32_t width, uint32_t height)
@@ -190,59 +212,61 @@ inline void Widget::setState(State state)
 	this->state = state;
 }
 
-inline void Widget::render(void)
+inline void Widget::render(int32_t x_origin, int32_t y_origin)
 {
 	if (state == HIDDEN) {
 		return;
 	}
-	doRendering();
+	x_origin += getPositionX();
+	y_origin += getPositionY();
+	doRendering(x_origin, y_origin);
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
 	     children_it ++) {
 		Widget* child = *children_it;
-		child->render();
+		child->render(x_origin, y_origin);
 	}
 }
 
-inline bool Widget::mouseOver(int32_t mouse_x, int32_t mouse_y) const
+inline bool Widget::mouseOver(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const
 {
 	if (state == ENABLED &&
-	    mouse_x >= (int32_t)x && mouse_x < (int32_t)(x + width) &&
-	    mouse_y >= (int32_t)y && mouse_y < (int32_t)(y + height)) {
+	    mouse_x >= x_origin + x && mouse_x < x_origin + x + (int32_t)width &&
+	    mouse_y >= y_origin + y && mouse_y < y_origin + y + (int32_t)height) {
 		return true;
 	}
 	return false;
 }
 
-inline Widget const* Widget::mouseOverRecursive(int32_t mouse_x, int32_t mouse_y) const
+inline Widget const* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const
 {
 	for (Children::const_iterator children_it = children.begin();
 	     children_it != children.end();
 	     children_it ++) {
 		Widget const* child = *children_it;
-		Widget const* widget_under_mouse = child->mouseOverRecursive(mouse_x, mouse_y);
+		Widget const* widget_under_mouse = child->mouseOverRecursive(x_origin + x, y_origin + y, mouse_x, mouse_y);
 		if (widget_under_mouse) {
 			return widget_under_mouse;
 		}
 	}
-	if (mouseOver(mouse_x, mouse_y)) {
+	if (mouseOver(x_origin, y_origin, mouse_x, mouse_y)) {
 		return this;
 	}
 	return NULL;
 }
 
-inline Widget* Widget::mouseOverRecursive(int32_t mouse_x, int32_t mouse_y)
+inline Widget* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y)
 {
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
 	     children_it ++) {
 		Widget* child = *children_it;
-		Widget* widget_under_mouse = child->mouseOverRecursive(mouse_x, mouse_y);
+		Widget* widget_under_mouse = child->mouseOverRecursive(x_origin + x, y_origin + y, mouse_x, mouse_y);
 		if (widget_under_mouse) {
 			return widget_under_mouse;
 		}
 	}
-	if (mouseOver(mouse_x, mouse_y)) {
+	if (mouseOver(x_origin, y_origin, mouse_x, mouse_y)) {
 		return this;
 	}
 	return NULL;

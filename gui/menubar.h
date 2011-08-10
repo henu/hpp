@@ -28,17 +28,16 @@ public:
 
 private:
 
-	// Called by friend class Engine
-	void updatePosAndSize(int32_t x, int32_t y, uint32_t width);
-
-private:
-
 	typedef std::vector< Menu* > Menus;
 
 	Menus menus;
 
 	// Virtual functions for Widget
-	virtual void doRendering(void);
+	virtual void doRendering(int32_t x_origin, int32_t y_origin);
+	inline virtual void onChildSizeChange(void) { updateSizeAndPositionOfMenus(); }
+	inline virtual void onSizeChange(void) { updateSizeAndPositionOfMenus(); }
+
+	void updateSizeAndPositionOfMenus(void);
 
 };
 

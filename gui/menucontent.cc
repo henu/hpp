@@ -50,15 +50,14 @@ uint32_t Menucontent::getMinHeight(uint32_t width) const
 
 void Menucontent::onSizeChange(void)
 {
-	int32_t x = getPositionX();
-	int32_t y = getPositionY();
+	int32_t y = 0;
 	uint32_t width = getWidth();
 	for (Menuitems::iterator items_it = items.begin();
 	     items_it != items.end();
 	     items_it ++) {
 		Menuitembase* item = *items_it;
 		uint32_t item_height = item->getMinHeight(width);
-		setChildPosition(item, x, y);
+		setChildPosition(item, 0, y);
 		setChildSize(item, width, item_height);
 		y += item->getMinHeight(width);
 	}

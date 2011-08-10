@@ -2,8 +2,11 @@
 
 #include "renderer.h"
 #include "menubar.h"
+#include "windowarea.h"
+
 #include "../viewport.h"
 
+#include <algorithm>
 #include <cstdlib>
 
 namespace Hpp
@@ -14,31 +17,40 @@ namespace Gui
 
 Engine::Engine(void) :
 rend(NULL),
-pos_or_size_changed(true),
 mouseover_widget(NULL),
 menubar(NULL)
 {
+	windowarea = new Windowarea();
+	windowarea->setEngine(this);
+	windowarea->setParent(NULL);
 }
 
 Engine::~Engine(void)
 {
+	delete windowarea;
+}
+
+void Engine::setRenderer(Renderer* rend)
+{
+	if (this->rend) {
+		rend->setEngine(NULL);
+	}
+	this->rend = rend;
+	if (rend) {
+		rend->setEngine(this);
+		updateSizes();
+	}
 }
 
 void Engine::render(void)
 {
-	// If position or size has changed, then update all child widgets
-	if (pos_or_size_changed) {
-		if (menubar) {
-			menubar->updatePosAndSize(0, 0, rend->getWidth());
-		}
-		pos_or_size_changed = false;
-	}
-
 	rend->initRendering();
 
 	if (menubar) {
-		menubar->render();
+		menubar->render(0, 0);
 	}
+
+	windowarea->render(0, 0);
 
 	rend->deinitRendering();
 }
@@ -48,6 +60,7 @@ void Engine::setMenubar(Menubar* menubar)
 	this->menubar = menubar;
 	menubar->setEngine(this);
 	menubar->setParent(NULL);
+	updateSizes();
 }
 
 bool Engine::mouseEvent(Event const& event)
@@ -58,7 +71,7 @@ bool Engine::mouseEvent(Event const& event)
 	// Try to get widget over mouse
 	Widget* widget_under_mouse = NULL;
 	if (menubar) {
-		widget_under_mouse = menubar->mouseOverRecursive(event.x, event.y);
+		widget_under_mouse = menubar->mouseOverRecursive(0, 0, event.x, event.y);
 	}
 // TODO: Code finding widgets from windows!
 
@@ -123,6 +136,11 @@ void Engine::unregisterWidget(Widget* widget)
 	}
 }
 
+void Engine::addWindow(Window* window)
+{
+	windowarea->addWindow(window);
+}
+
 void Engine::setMouseOver(Widget* widget)
 {
 	if (mouseover_widget) {
@@ -153,11 +171,27 @@ void Engine::checkForNewMouseOver(void)
 {
 	Widget* widget_under_mouse = NULL;
 	if (menubar) {
-		widget_under_mouse = menubar->mouseOverRecursive(mouse_lastpos_x, mouse_lastpos_y);
+		widget_under_mouse = menubar->mouseOverRecursive(0, 0, mouse_lastpos_x, mouse_lastpos_y);
 	}
 	if (widget_under_mouse) {
 		widget_under_mouse->setMouseOver(mouse_lastpos_x, mouse_lastpos_y);
 	}
+}
+
+void Engine::updateSizes(void)
+{
+	// If there is no Renderer, then do nothing
+	if (!rend) {
+		return;
+	}
+
+	uint32_t windowarea_y = 0;
+	if (menubar) {
+		menubar->setSize(rend->getWidth(), rend->getMenubarHeight());
+		menubar->setPosition(0, 0);
+	}
+	windowarea->setPosition(0, windowarea_y);
+	windowarea->setSize(rend->getWidth(), rend->getHeight() - windowarea_y);
 }
 
 }
