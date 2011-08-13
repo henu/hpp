@@ -24,13 +24,17 @@ Widget::~Widget(void)
 
 Renderer const* Widget::getRenderer(void) const
 {
-	HppAssert(engine, "Unable to get Renderer, because Engine is not found!");
+	if (!engine) {
+		return NULL;
+	}
 	return engine->getRenderer();
 }
 
 Renderer* Widget::getRenderer(void)
 {
-	HppAssert(engine, "Unable to get Renderer, because Engine is not found!");
+	if (!engine) {
+		return NULL;
+	}
 	return engine->getRenderer();
 }
 
@@ -60,6 +64,8 @@ void Widget::setEngine(Engine* engine)
 		Widget* child = *children_it;
 		child->setEngine(engine);
 	}
+	// Update environment
+	updateEnvironment();
 }
 
 bool Widget::mouseEvent(Event const& event)

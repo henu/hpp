@@ -189,9 +189,11 @@ void Engine::updateSizes(void)
 	if (menubar) {
 		menubar->setSize(rend->getWidth(), rend->getMenubarHeight());
 		menubar->setPosition(0, 0);
+		menubar->updateEnvironment();
 	}
 	windowarea->setPosition(0, windowarea_y);
 	windowarea->setSize(rend->getWidth(), rend->getHeight() - windowarea_y);
+	windowarea->updateEnvironment();
 }
 
 }

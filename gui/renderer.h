@@ -18,6 +18,7 @@ class Menuseparator;
 class Menubar;
 class Menu;
 class Window;
+class Label;
 
 class Renderer
 {
@@ -41,6 +42,7 @@ public:
 	virtual void renderMenuLabel(int32_t x_origin, int32_t y_origin, Menu const* menu, UnicodeString const& label, bool mouse_over) = 0;
 	virtual void renderMenuitem(int32_t x_origin, int32_t y_origin, Menuitem const* menuitem, UnicodeString const& label, bool mouse_over) = 0;
 	virtual void renderWindow(int32_t x_origin, int32_t y_origin, Window const* window, UnicodeString const& title) = 0;
+	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str) = 0;
 
 	// Some dimension getters
 	virtual uint32_t getMenubarHeight(void) const = 0;
@@ -49,6 +51,12 @@ public:
 	virtual uint32_t getMenuseparatorHeight(void) const = 0;
 	virtual uint32_t getMenuitemWidth(UnicodeString const& label) const = 0;
 	virtual uint32_t getMenuitemHeight(void) const = 0;
+	virtual uint32_t getWindowTitlebarHeight(void) const = 0;
+	virtual uint32_t getWindowEdgeLeftWidth(void) const = 0;
+	virtual uint32_t getWindowEdgeRightWidth(void) const = 0;
+	virtual uint32_t getWindowEdgeBottomHeight(void) const = 0;
+	virtual uint32_t getLabelWidth(UnicodeString const& label) const = 0;
+	virtual uint32_t getLabelHeight(void) const = 0;
 
 private:
 

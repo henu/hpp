@@ -31,6 +31,7 @@ public:
 	void loadTextureMenuseparatorLeftend(Path const& path);
 	void loadTextureMenuseparatorRightend(Path const& path);
 	void loadTextureMenuitemBg(Path const& path);
+	void loadTextureWindowBg(Path const& path);
 	void loadTextureWindowEdgeTop(Path const& path);
 	void loadTextureWindowEdgeTopLeft(Path const& path);
 	void loadTextureWindowEdgeTopRight(Path const& path);
@@ -58,6 +59,7 @@ private:
 	Texture tex_menuseparator_leftend;
 	Texture tex_menuseparator_rightend;
 	Texture tex_menuitem_bg;
+	Texture tex_window_bg;
 	Texture tex_window_edge_top;
 	Texture tex_window_edge_topleft;
 	Texture tex_window_edge_topright;
@@ -72,6 +74,7 @@ private:
 	uint32_t font_menu_size;
 	uint32_t font_menuitem_size;
 	uint32_t font_titlebar_size;
+	uint32_t font_label_size;
 
 	// Padding
 	Real padding_menu_h;
@@ -87,12 +90,19 @@ private:
 	virtual void renderMenuseparator(int32_t x_origin, int32_t y_origin, Menuseparator const* menusep);
 	virtual void renderMenuitem(int32_t x_origin, int32_t y_origin, Menuitem const* menuitem, UnicodeString const& label, bool mouse_over);
 	virtual void renderWindow(int32_t x_origin, int32_t y_origin, Window const* window, UnicodeString const& title);
+	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str);
 	virtual uint32_t getMenubarHeight(void) const;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuseparatorMinWidth(void) const;
 	virtual uint32_t getMenuseparatorHeight(void) const;
 	virtual uint32_t getMenuitemWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuitemHeight(void) const;
+	virtual uint32_t getWindowTitlebarHeight(void) const;
+	virtual uint32_t getWindowEdgeLeftWidth(void) const;
+	virtual uint32_t getWindowEdgeRightWidth(void) const;
+	virtual uint32_t getWindowEdgeBottomHeight(void) const;
+	virtual uint32_t getLabelWidth(UnicodeString const& label) const;
+	virtual uint32_t getLabelHeight(void) const;
 
 };
 

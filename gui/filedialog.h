@@ -2,6 +2,8 @@
 #define HPP_GUI_FILEDIALOG_H
 
 #include "window.h"
+#include "vectorcontainer.h"
+#include "label.h"
 
 #include <string>
 
@@ -32,12 +34,27 @@ private:
 	std::string fileext;
 	bool selectmultiple;
 
+	// Widgets
+	Vectorcontainer maincontainer;
+	Vectorcontainer filenamecontainer;
+	Label filenamelabel;
+
 };
 
 inline Filedialog::Filedialog(void) :
 type(SAVE),
 selectmultiple(false)
 {
+	// Main container
+	maincontainer.setDirection(Vectorcontainer::VERTICAL);
+	setContent(&maincontainer);
+	// Filename container
+	filenamecontainer.setDirection(Vectorcontainer::HORIZONTAL);
+	maincontainer.addWidget(&filenamecontainer);
+	// Filename label
+	filenamelabel.setLabel("Filename:");
+	filenamecontainer.addWidget(&filenamelabel);
+
 }
 
 inline Filedialog::~Filedialog(void)

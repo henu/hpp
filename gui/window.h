@@ -35,6 +35,8 @@ public:
 	inline void hide(void) { setState(HIDDEN); }
 	inline void reveal(void) { setState(ENABLED); }
 
+	inline void setContent(Widget* widget);
+
 private:
 
 	// Called by friend class Windowaread
@@ -43,6 +45,8 @@ private:
 private:
 
 	Windowarea* windowarea;
+
+	Widget* content;
 
 	// Position relative to parent
 	int32_t x_rel, y_rel;
@@ -56,6 +60,10 @@ private:
 
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
+	inline virtual void onSizeChange(void);
+	inline virtual void onEnvironmentUpdated(void);
+
+	inline void updateContentSizeAndPosition(void);
 
 };
 
@@ -88,9 +96,45 @@ inline void Window::setPositionCenter(void)
 	setPosition(((int32_t)windowarea_width - (int32_t)getWidth()) / 2, ((int32_t)windowarea_height - (int32_t)getHeight()) / 2);
 }
 
+inline void Window::setContent(Widget* widget)
+{
+HppAssert(!content, "Removing of content is not implemented yet!");
+	content = widget;
+	if (widget) {
+		addChild(widget);
+		updateContentSizeAndPosition();
+	}
+}
+
 inline void Window::doRendering(int32_t x_origin, int32_t y_origin)
 {
 	getRenderer()->renderWindow(x_origin, y_origin, this, title);
+}
+
+inline void Window::onSizeChange(void)
+{
+	updateContentSizeAndPosition();
+}
+
+inline void Window::onEnvironmentUpdated(void)
+{
+	updateContentSizeAndPosition();
+}
+
+inline void Window::updateContentSizeAndPosition(void)
+{
+	Renderer* rend = getRenderer();
+	if (rend && content) {
+		uint32_t titlebar_height = rend->getWindowTitlebarHeight();
+		uint32_t edge_left_width = rend->getWindowEdgeLeftWidth();
+		uint32_t edge_right_width = rend->getWindowEdgeRightWidth();
+		uint32_t edge_bottom_height = rend->getWindowEdgeBottomHeight();
+		setChildPosition(content, edge_left_width, titlebar_height);
+		if (getWidth() >= edge_left_width + edge_right_width &&
+		    getHeight() >= titlebar_height + edge_bottom_height) {
+			setChildSize(content, getWidth() - edge_left_width - edge_right_width, getHeight() - titlebar_height - edge_bottom_height);
+		}
+	}
 }
 
 }

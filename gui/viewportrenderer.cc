@@ -5,6 +5,7 @@
 #include "menu.h"
 #include "menubar.h"
 #include "window.h"
+#include "label.h"
 
 #include "../viewport.h"
 #include "../assert.h"
@@ -31,6 +32,7 @@ void ViewportRenderer::setFontSize(uint32_t font_size)
 	font_menu_size = font_size;
 	font_menuitem_size = font_size;
 	font_titlebar_size = font_size * 0.86;
+	font_label_size = font_size * 0.86;
 	// Tune some padding values
 	padding_menu_h = font_menu_size * 0.5;
 	padding_menuitem_h = font_menuitem_size * 0.5;
@@ -60,6 +62,11 @@ void ViewportRenderer::loadTextureMenuseparatorRightend(Path const& path)
 void ViewportRenderer::loadTextureMenuitemBg(Path const& path)
 {
 	tex_menuitem_bg.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureWindowBg(Path const& path)
+{
+	tex_window_bg.loadFromFile(path, DEFAULT);
 }
 
 void ViewportRenderer::loadTextureWindowEdgeTop(Path const& path)
@@ -278,11 +285,35 @@ void ViewportRenderer::renderWindow(int32_t x_origin, int32_t y_origin, Window c
 	                       Vector2(0.0, 0.0),
 	                       Vector2(1.0, 1.0));
 
+	// Render background
+	viewport->renderSprite(tex_window_bg,
+	                       Vector2(x_origin + edge_left_width, viewport->getHeight() - y_origin - window_height + edge_bottom_height),
+	                       Vector2(window_width - edge_left_width - edge_right_width, window_height - titlebar_height - edge_bottom_height),
+	                       Vector2(0.0, 0.0),
+	                       Vector2((window_width - edge_left_width - edge_right_width) / tex_window_bg.getWidth(), (window_height - titlebar_height - edge_bottom_height) / tex_window_bg.getWidth()));
+
 	// Title
 	Color color(0.25, 0.25, 0.25);
 	font.renderString(title, font_titlebar_size, color, viewport,
 	                  Vector2(x_origin + (window_width - font.getStringWidth(title, font_titlebar_size)) / 2.0, viewport->getHeight() - y_origin - titlebar_height + (titlebar_height - font_titlebar_size) / 2.0));
 
+}
+
+void ViewportRenderer::renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str)
+{
+	Real width = label->getWidth();
+	Real height = label->getHeight();
+
+	Color color(0, 0, 0);
+
+	// Render label
+	Real label_width = font.getStringWidth(label_str, font_label_size);
+
+	font.renderString(label_str,
+	                  font_label_size,
+	                  color,
+	                  viewport,
+	                  Vector2(x_origin + (width - label_width) / 2.0, viewport->getHeight() - y_origin - height + (height - font_label_size) / 2.0));
 }
 
 uint32_t ViewportRenderer::getMenubarHeight(void) const
@@ -313,6 +344,36 @@ uint32_t ViewportRenderer::getMenuitemWidth(UnicodeString const& label) const
 uint32_t ViewportRenderer::getMenuitemHeight(void) const
 {
 	return round(font_menuitem_size + padding_menuitem_v * 2.0);
+}
+
+uint32_t ViewportRenderer::getWindowTitlebarHeight(void) const
+{
+	return tex_window_edge_top.getHeight();
+}
+
+uint32_t ViewportRenderer::getWindowEdgeLeftWidth(void) const
+{
+	return tex_window_edge_left.getWidth();
+}
+
+uint32_t ViewportRenderer::getWindowEdgeRightWidth(void) const
+{
+	return tex_window_edge_right.getWidth();
+}
+
+uint32_t ViewportRenderer::getWindowEdgeBottomHeight(void) const
+{
+	return tex_window_edge_bottom.getHeight();
+}
+
+uint32_t ViewportRenderer::getLabelWidth(UnicodeString const& label) const
+{
+	return font.getStringWidth(label, font_label_size);
+}
+
+uint32_t ViewportRenderer::getLabelHeight(void) const
+{
+	return font_label_size;
 }
 
 }

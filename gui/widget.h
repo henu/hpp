@@ -30,8 +30,8 @@ public:
 
 	inline int32_t getPositionX(void) const { return x; }
 	inline int32_t getPositionY(void) const { return y; }
-	inline int32_t getWidth(void) const { return width; }
-	inline int32_t getHeight(void) const { return height; }
+	inline uint32_t getWidth(void) const { return width; }
+	inline uint32_t getHeight(void) const { return height; }
 
 	// Size getters
 	inline virtual uint32_t getMinWidth(void) const { return 0; }
@@ -43,6 +43,10 @@ private:
 	// Called by Engine and other Widgets
 	void setEngine(Engine* engine);
 	inline void setParent(Widget* parent);
+
+	// Called by Engine when Engine or Renderer is changed
+	// and all dimensions must be recalculated.
+	inline void updateEnvironment(void);
 
 	// Called by Engine
 	inline void render(int32_t x_origin, int32_t y_origin);
@@ -122,6 +126,7 @@ private:
 	inline virtual void onChildSizeChange(void) { }
 	inline virtual void onPositionChange(void) { }
 	inline virtual void onSizeChange(void) { }
+	inline virtual void onEnvironmentUpdated(void) { }
 
 };
 
@@ -143,6 +148,22 @@ inline void Widget::setParent(Widget* parent)
 	this->parent = parent;
 	if (parent) {
 		this->parent->registerChild(this);
+	}
+}
+
+inline void Widget::updateEnvironment(void)
+{
+	if (state == HIDDEN) {
+		return;
+	}
+	// Fire event
+	onEnvironmentUpdated();
+	// Update children too
+	for (Children::iterator children_it = children.begin();
+	     children_it != children.end();
+	     children_it ++) {
+		Widget* child = *children_it;
+		child->updateEnvironment();
 	}
 }
 
