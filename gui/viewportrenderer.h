@@ -40,6 +40,15 @@ public:
 	void loadTextureWindowEdgeBottom(Path const& path);
 	void loadTextureWindowEdgeBottomLeft(Path const& path);
 	void loadTextureWindowEdgeBottomRight(Path const& path);
+	void loadTextureFieldBg(Path const& path);
+	void loadTextureFieldEdgeTop(Path const& path);
+	void loadTextureFieldEdgeTopLeft(Path const& path);
+	void loadTextureFieldEdgeTopRight(Path const& path);
+	void loadTextureFieldEdgeLeft(Path const& path);
+	void loadTextureFieldEdgeRight(Path const& path);
+	void loadTextureFieldEdgeBottom(Path const& path);
+	void loadTextureFieldEdgeBottomLeft(Path const& path);
+	void loadTextureFieldEdgeBottomRight(Path const& path);
 
 	// Font loading functions. Multiple fonts can be used. The firstly
 	// loaded font will always be preferred, but if some character is not
@@ -50,6 +59,8 @@ public:
 	inline void setViewport(Viewport const* viewport) { this->viewport = viewport; sizeChanged(); }
 
 private:
+
+	enum Alignment { LEFT, RIGHT, TOP, BOTTOM, CENTER };
 
 	Viewport const* viewport;
 
@@ -68,6 +79,15 @@ private:
 	Texture tex_window_edge_bottom;
 	Texture tex_window_edge_bottomleft;
 	Texture tex_window_edge_bottomright;
+	Texture tex_field_bg;
+	Texture tex_field_edge_top;
+	Texture tex_field_edge_topleft;
+	Texture tex_field_edge_topright;
+	Texture tex_field_edge_left;
+	Texture tex_field_edge_right;
+	Texture tex_field_edge_bottom;
+	Texture tex_field_edge_bottomleft;
+	Texture tex_field_edge_bottomright;
 
 	// Font and its sizes
 	Font font;
@@ -75,10 +95,17 @@ private:
 	uint32_t font_menuitem_size;
 	uint32_t font_titlebar_size;
 	uint32_t font_label_size;
+	uint32_t font_input_size;
 
-	// Padding
+	// Padding and other sizes
 	Real padding_menu_h;
 	Real padding_menuitem_h, padding_menuitem_v;
+	Real textinput_min_size;
+
+	// Sprite rendering functions
+	Real spr_x_origin, spr_y_origin;
+	Color text_color;
+	Alignment text_align, text_valign;
 
 	// Virtual functions required by superclass Renderer
 	virtual uint32_t getWidth(void) const;
@@ -91,6 +118,7 @@ private:
 	virtual void renderMenuitem(int32_t x_origin, int32_t y_origin, Menuitem const* menuitem, UnicodeString const& label, bool mouse_over);
 	virtual void renderWindow(int32_t x_origin, int32_t y_origin, Window const* window, UnicodeString const& title);
 	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str);
+	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput, UnicodeString const& value);
 	virtual uint32_t getMenubarHeight(void) const;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuseparatorMinWidth(void) const;
@@ -103,6 +131,17 @@ private:
 	virtual uint32_t getWindowEdgeBottomHeight(void) const;
 	virtual uint32_t getLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getLabelHeight(void) const;
+	virtual uint32_t getMinimumTextinputWidth(void) const;
+	virtual uint32_t getTextinputHeight(void) const;
+
+	// Fixed sprite rendering functions. These use coordinate
+	// system from topleft, rather than from bottomleft.
+	void prepareSprites(Real x_origin, Real y_origin);
+	inline void textSetColor(Color const& color) { text_color = color; }
+	inline void textSetHorizontalAlign(Alignment align) { text_align = align; }
+	inline void textSetVerticalAlign(Alignment align) { text_valign = align; }
+	void renderSprite(Texture& tex, Vector2 const& pos, Vector2 const& size);
+	void renderString(UnicodeString const& str, Real fontsize, Vector2 const& pos, Vector2 const& size);
 
 };
 

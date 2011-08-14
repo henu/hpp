@@ -19,6 +19,7 @@ class Menubar;
 class Menu;
 class Window;
 class Label;
+class Textinput;
 
 class Renderer
 {
@@ -43,6 +44,7 @@ public:
 	virtual void renderMenuitem(int32_t x_origin, int32_t y_origin, Menuitem const* menuitem, UnicodeString const& label, bool mouse_over) = 0;
 	virtual void renderWindow(int32_t x_origin, int32_t y_origin, Window const* window, UnicodeString const& title) = 0;
 	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str) = 0;
+	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput, UnicodeString const& value) = 0;
 
 	// Some dimension getters
 	virtual uint32_t getMenubarHeight(void) const = 0;
@@ -57,6 +59,8 @@ public:
 	virtual uint32_t getWindowEdgeBottomHeight(void) const = 0;
 	virtual uint32_t getLabelWidth(UnicodeString const& label) const = 0;
 	virtual uint32_t getLabelHeight(void) const = 0;
+	virtual uint32_t getMinimumTextinputWidth(void) const = 0;
+	virtual uint32_t getTextinputHeight(void) const = 0;
 
 private:
 

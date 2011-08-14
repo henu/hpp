@@ -6,6 +6,7 @@
 #include "menubar.h"
 #include "window.h"
 #include "label.h"
+#include "textinput.h"
 
 #include "../viewport.h"
 #include "../assert.h"
@@ -18,7 +19,12 @@ namespace Gui
 {
 
 ViewportRenderer::ViewportRenderer(Viewport const* viewport) :
-viewport(viewport)
+viewport(viewport),
+spr_x_origin(0.0),
+spr_y_origin(0.0),
+text_color(0, 0, 0),
+text_align(CENTER),
+text_valign(CENTER)
 {
 }
 
@@ -33,10 +39,13 @@ void ViewportRenderer::setFontSize(uint32_t font_size)
 	font_menuitem_size = font_size;
 	font_titlebar_size = font_size * 0.86;
 	font_label_size = font_size * 0.86;
+	font_input_size = font_size * 0.86;
 	// Tune some padding values
 	padding_menu_h = font_menu_size * 0.5;
 	padding_menuitem_h = font_menuitem_size * 0.5;
 	padding_menuitem_v = font_menuitem_size * 0.125;
+	// Tune other values
+	textinput_min_size = font_input_size * 5;
 }
 
 void ViewportRenderer::loadTextureMenubarBg(Path const& path)
@@ -107,6 +116,51 @@ void ViewportRenderer::loadTextureWindowEdgeBottomLeft(Path const& path)
 void ViewportRenderer::loadTextureWindowEdgeBottomRight(Path const& path)
 {
 	tex_window_edge_bottomright.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureFieldBg(Path const& path)
+{
+	tex_field_bg.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureFieldEdgeTop(Path const& path)
+{
+	tex_field_edge_top.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureFieldEdgeTopLeft(Path const& path)
+{
+	tex_field_edge_topleft.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureFieldEdgeTopRight(Path const& path)
+{
+	tex_field_edge_topright.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureFieldEdgeLeft(Path const& path)
+{
+	tex_field_edge_left.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureFieldEdgeRight(Path const& path)
+{
+	tex_field_edge_right.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureFieldEdgeBottom(Path const& path)
+{
+	tex_field_edge_bottom.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureFieldEdgeBottomLeft(Path const& path)
+{
+	tex_field_edge_bottomleft.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureFieldEdgeBottomRight(Path const& path)
+{
+	tex_field_edge_bottomright.loadFromFile(path, DEFAULT);
 }
 
 void ViewportRenderer::loadFont(Path const& path)
@@ -316,6 +370,58 @@ void ViewportRenderer::renderLabel(int32_t x_origin, int32_t y_origin, Label con
 	                  Vector2(x_origin + (width - label_width) / 2.0, viewport->getHeight() - y_origin - height + (height - font_label_size) / 2.0));
 }
 
+void ViewportRenderer::renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput, UnicodeString const& value)
+{
+	prepareSprites(x_origin, y_origin);
+	Real textinput_width = textinput->getWidth();
+
+	Real edge_top_height = tex_field_edge_top.getHeight();
+	Real edge_left_width = tex_field_edge_left.getWidth();
+	Real edge_right_width = tex_field_edge_right.getWidth();
+	Real edge_bottom_height = tex_field_edge_bottom.getHeight();
+
+	Real content_height = font_input_size;
+
+	// Top edge
+	renderSprite(tex_field_edge_topleft,
+	             Vector2(0, 0),
+	             Vector2(edge_left_width, edge_top_height));
+	renderSprite(tex_field_edge_top,
+	             Vector2(edge_left_width, 0),
+	             Vector2(textinput_width - edge_left_width - edge_right_width, edge_top_height));
+	renderSprite(tex_field_edge_topright,
+	             Vector2(textinput_width - edge_right_width, 0),
+	             Vector2(edge_right_width, edge_top_height));
+	// Middle edges and content
+	renderSprite(tex_field_edge_left,
+	             Vector2(0, edge_top_height),
+	             Vector2(edge_left_width, content_height));
+	renderSprite(tex_field_bg,
+	             Vector2(edge_left_width, edge_top_height),
+	             Vector2(textinput_width - edge_left_width - edge_right_width, content_height));
+	renderSprite(tex_field_edge_right,
+	             Vector2(textinput_width - edge_right_width, edge_top_height),
+	             Vector2(edge_right_width, content_height));
+	// Top edge
+	renderSprite(tex_field_edge_bottomleft,
+	             Vector2(0, edge_top_height + content_height),
+	             Vector2(edge_left_width, edge_bottom_height));
+	renderSprite(tex_field_edge_bottom,
+	             Vector2(edge_left_width, edge_top_height + content_height),
+	             Vector2(textinput_width - edge_left_width - edge_right_width, edge_bottom_height));
+	renderSprite(tex_field_edge_bottomright,
+	             Vector2(textinput_width - edge_right_width, edge_top_height + content_height),
+	             Vector2(edge_right_width, edge_bottom_height));
+
+	// Value
+	textSetColor(Color(0, 0, 0));
+	textSetHorizontalAlign(LEFT);
+	textSetVerticalAlign(CENTER);
+	renderString(value, font_input_size,
+	             Vector2(edge_left_width, edge_top_height),
+	             Vector2(textinput_width - edge_left_width - edge_right_width, content_height));
+}
+
 uint32_t ViewportRenderer::getMenubarHeight(void) const
 {
 	return tex_menubar_bg.getHeight();
@@ -374,6 +480,55 @@ uint32_t ViewportRenderer::getLabelWidth(UnicodeString const& label) const
 uint32_t ViewportRenderer::getLabelHeight(void) const
 {
 	return font_label_size;
+}
+
+uint32_t ViewportRenderer::getMinimumTextinputWidth(void) const
+{
+	return tex_field_edge_left.getWidth() + tex_field_edge_right.getWidth() + textinput_min_size;
+}
+
+uint32_t ViewportRenderer::getTextinputHeight(void) const
+{
+	return tex_field_edge_top.getHeight() + tex_field_edge_bottom.getHeight() + font_input_size;
+}
+
+void ViewportRenderer::prepareSprites(Real x_origin, Real y_origin)
+{
+	spr_x_origin = x_origin;
+	spr_y_origin = y_origin;
+}
+
+void ViewportRenderer::renderSprite(Texture& tex, Vector2 const& pos, Vector2 const& size)
+{
+	viewport->renderSprite(tex,
+	                       Vector2(spr_x_origin + pos.x, viewport->getHeight() - spr_y_origin - size.y - pos.y),
+	                       size,
+	                       Vector2(0.0, 0.0),
+	                       Vector2(size.x / tex.getWidth(), size.y / tex.getHeight()));
+}
+
+void ViewportRenderer::renderString(UnicodeString const& str, Real fontsize, Vector2 const& pos, Vector2 const& size)
+{
+	Real str_width = font.getStringWidth(str, fontsize);
+	Vector2 pos_rel;
+	if (text_align == CENTER) {
+		pos_rel.x = (size.x - str_width) / 2.0;
+	} else if (text_align == RIGHT) {
+		pos_rel.x = size.x - str_width;
+	} else {
+		pos_rel.x = 0;
+	}
+	if (text_valign == CENTER) {
+		pos_rel.y = (size.y - fontsize) / 2.0;
+	} else if (text_valign == BOTTOM) {
+		pos_rel.y = size.y - fontsize;
+	} else {
+		pos_rel.y = 0;
+	}
+
+	font.renderString(str, fontsize, text_color,
+	                  viewport,
+	                  Vector2(spr_x_origin + pos.x + pos_rel.x, viewport->getHeight() - spr_y_origin - fontsize - pos.y - pos_rel.y));
 }
 
 }

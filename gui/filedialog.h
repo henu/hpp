@@ -4,6 +4,7 @@
 #include "window.h"
 #include "vectorcontainer.h"
 #include "label.h"
+#include "textinput.h"
 
 #include <string>
 
@@ -38,6 +39,7 @@ private:
 	Vectorcontainer maincontainer;
 	Vectorcontainer filenamecontainer;
 	Label filenamelabel;
+	Textinput filenameinput;
 
 };
 
@@ -54,6 +56,8 @@ selectmultiple(false)
 	// Filename label
 	filenamelabel.setLabel("Filename:");
 	filenamecontainer.addWidget(&filenamelabel);
+	// Filename label
+	filenamecontainer.addWidget(&filenameinput);
 
 }
 
