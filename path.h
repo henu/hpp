@@ -12,10 +12,12 @@
 #include <unistd.h>
 #include <climits>
 #include <sys/stat.h>
+#include <sys/types.h>
 #ifdef WIN32
 #include <io.h>
 #include <shlobj.h>
 #endif
+#include <dirent.h>
 
 namespace Hpp
 {
@@ -77,6 +79,17 @@ private:
 inline void ensurePathExists(Path const& p);
 
 inline bool fileExists(Path const& p);
+
+struct FolderChild
+{
+	enum Type { FILE, FOLDER, UNKNOWN };
+	std::string name;
+	Type type;
+};
+typedef std::vector< FolderChild > FolderChildren;
+
+inline void listFolderChildren(FolderChildren& result, Path const& path);
+inline bool compareFolderChildren(FolderChild const& child1, FolderChild const& child2);
 
 
 // ----------------------------------------
@@ -472,6 +485,52 @@ inline bool fileExists(Path const& p)
 	}
 	file.close();
 	return false;
+}
+
+inline void listFolderChildren(FolderChildren& result, Path const& path)
+{
+	result.clear();
+
+	DIR* dir = opendir(path.toString().c_str());
+	if (dir == NULL) {
+		throw Exception("Unable to open folder \"" + path.toString() + "\"!");
+	}
+
+	struct dirent* dir_ent;
+	while ((dir_ent = readdir(dir)) != NULL) {
+		FolderChild new_child;
+		new_child.name = dir_ent->d_name;
+		switch (dir_ent->d_type) {
+		case DT_DIR:
+			new_child.type = FolderChild::FOLDER;
+			break;
+		case DT_REG:
+			new_child.type = FolderChild::FILE;
+			break;
+		default:
+			new_child.type = FolderChild::UNKNOWN;
+			break;
+		}
+		result.push_back(new_child);
+	}
+
+	if (closedir(dir) != 0)
+	{
+		throw Exception("Unable to close folder \"" + path.toString() + "\"!");
+	}
+
+	std::sort(result.begin(), result.end(), compareFolderChildren);
+
+}
+
+inline bool compareFolderChildren(FolderChild const& child1, FolderChild const& child2)
+{
+	if (child1.type == FolderChild::FOLDER && child2.type != FolderChild::FOLDER) {
+		return true;
+	} else if (child1.type != FolderChild::FOLDER && child2.type == FolderChild::FOLDER) {
+		return false;
+	}
+	return child1.name < child2.name;
 }
 
 }
