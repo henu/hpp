@@ -4,6 +4,7 @@
 #include "engine.h"
 
 #include "../unicodestring.h"
+#include "../path.h"
 
 #include <stdint.h>
 
@@ -48,7 +49,7 @@ public:
 	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str) = 0;
 	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput, UnicodeString const& value) = 0;
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed) = 0;
-	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview) = 0;
+	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview, FolderChildren const& items) = 0;
 
 	// Some dimension getters
 	virtual uint32_t getMenubarHeight(void) const = 0;

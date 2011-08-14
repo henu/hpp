@@ -198,6 +198,16 @@ void ViewportRenderer::loadTextureButtonPressedRight(Path const& path)
 	tex_button_pressed_right.loadFromFile(path, DEFAULT);
 }
 
+void ViewportRenderer::loadTextureFolder(Path const& path)
+{
+	tex_folder.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureFile(Path const& path)
+{
+	tex_file.loadFromFile(path, DEFAULT);
+}
+
 void ViewportRenderer::loadFont(Path const& path)
 {
 	font.loadMore(path);
@@ -492,7 +502,7 @@ void ViewportRenderer::renderButton(int32_t x_origin, int32_t y_origin, Button c
 	             Vector2(button_width, button_height));
 }
 
-void ViewportRenderer::renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview)
+void ViewportRenderer::renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview, FolderChildren const& items)
 {
 	prepareSprites(x_origin, y_origin);
 	Real folderview_width = folderview->getWidth();
@@ -529,6 +539,26 @@ void ViewportRenderer::renderFolderview(int32_t x_origin, int32_t y_origin, Fold
 	             Vector2(folderview_width - edge_left_width - edge_right_width, edge_bottom_height));
 	renderSprite(tex_field_edge_bottomright,
 	             Vector2(folderview_width - edge_right_width, folderview_height - edge_bottom_height));
+
+	// Items
+	Real pos_y = 0;
+	setFontSize(font_input_size);
+	textSetColor(Color(0, 0, 0));
+	textSetHorizontalAlign(LEFT);
+	textSetVerticalAlign(CENTER);
+	for (FolderChildren::const_iterator items_it = items.begin();
+	     items_it != items.end();
+	     items_it ++) {
+		FolderChild const& item = *items_it;
+		if (item.type == FolderChild::FOLDER) {
+			renderSprite(tex_folder, Vector2(edge_left_width, edge_top_height + pos_y));
+		} else {
+			renderSprite(tex_file, Vector2(edge_left_width, edge_top_height + pos_y));
+		}
+		renderString(item.name, font_input_size, Vector2(edge_left_width + tex_folder.getWidth(), edge_top_height + pos_y), Vector2(folderview_width - edge_left_width - edge_right_width, tex_folder.getHeight()));
+		pos_y += tex_folder.getHeight();
+	}
+
 }
 
 uint32_t ViewportRenderer::getMenubarHeight(void) const
@@ -618,7 +648,7 @@ uint32_t ViewportRenderer::getMinimumFolderviewWidth(void) const
 
 uint32_t ViewportRenderer::getFolderviewHeight(void) const
 {
-	return tex_field_edge_top.getHeight() + tex_field_edge_bottom.getHeight() + font_input_size * folderview_min_rows;
+	return tex_field_edge_top.getHeight() + tex_field_edge_bottom.getHeight() + tex_folder.getHeight() * folderview_min_rows;
 }
 
 void ViewportRenderer::prepareSprites(Real x_origin, Real y_origin)

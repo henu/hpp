@@ -30,20 +30,14 @@ public:
 
 private:
 
-	enum Itemtype { DIR, FOLDER };
-	struct Item
-	{
-		UnicodeString name;
-		Itemtype type;
-	};
-	typedef std::vector< Item > Items;
-
 	Path path;
-	Items items;
+	FolderChildren items;
 
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
 	inline virtual void onEnvironmentUpdated(void);
+
+	inline void reloadFolderContents(void);
 
 };
 
@@ -58,7 +52,7 @@ inline Folderview::~Folderview(void)
 inline void Folderview::setFolder(Path const& path)
 {
 	this->path = path;
-// TODO: Update items!
+	reloadFolderContents();
 }
 
 inline uint32_t Folderview::getMaxWidth(void) const
@@ -87,12 +81,17 @@ inline void Folderview::doRendering(int32_t x_origin, int32_t y_origin)
 {
 	Renderer* rend = getRenderer();
 	if (!rend) return;
-	return rend->renderFolderview(x_origin, y_origin, this);
+	return rend->renderFolderview(x_origin, y_origin, this, items);
 }
 
 inline void Folderview::onEnvironmentUpdated(void)
 {
 	markSizeChanged();
+}
+
+inline void Folderview::reloadFolderContents(void)
+{
+	listFolderChildren(items, path);
 }
 
 }

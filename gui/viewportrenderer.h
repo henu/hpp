@@ -55,6 +55,8 @@ public:
 	void loadTextureButtonPressedLeft(Path const& path);
 	void loadTextureButtonPressed(Path const& path);
 	void loadTextureButtonPressedRight(Path const& path);
+	void loadTextureFolder(Path const& path);
+	void loadTextureFile(Path const& path);
 
 	// Font loading functions. Multiple fonts can be used. The firstly
 	// loaded font will always be preferred, but if some character is not
@@ -100,6 +102,8 @@ private:
 	Texture tex_button_pressed_left;
 	Texture tex_button_pressed;
 	Texture tex_button_pressed_right;
+	Texture tex_folder;
+	Texture tex_file;
 
 	// Font and its sizes
 	Font font;
@@ -135,7 +139,7 @@ private:
 	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str);
 	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput, UnicodeString const& value);
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed);
-	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview);
+	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview, FolderChildren const& items);
 	virtual uint32_t getMenubarHeight(void) const;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuseparatorMinWidth(void) const;
