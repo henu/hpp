@@ -7,6 +7,7 @@
 #include "window.h"
 #include "label.h"
 #include "textinput.h"
+#include "button.h"
 
 #include "../viewport.h"
 #include "../assert.h"
@@ -40,6 +41,7 @@ void ViewportRenderer::setFontSize(uint32_t font_size)
 	font_titlebar_size = font_size * 0.86;
 	font_label_size = font_size * 0.86;
 	font_input_size = font_size * 0.86;
+	font_button_size = font_size;
 	// Tune some padding values
 	padding_menu_h = font_menu_size * 0.5;
 	padding_menuitem_h = font_menuitem_size * 0.5;
@@ -161,6 +163,36 @@ void ViewportRenderer::loadTextureFieldEdgeBottomLeft(Path const& path)
 void ViewportRenderer::loadTextureFieldEdgeBottomRight(Path const& path)
 {
 	tex_field_edge_bottomright.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureButtonLeft(Path const& path)
+{
+	tex_button_left.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureButton(Path const& path)
+{
+	tex_button.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureButtonRight(Path const& path)
+{
+	tex_button_right.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureButtonPressedLeft(Path const& path)
+{
+	tex_button_pressed_left.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureButtonPressed(Path const& path)
+{
+	tex_button_pressed.loadFromFile(path, DEFAULT);
+}
+
+void ViewportRenderer::loadTextureButtonPressedRight(Path const& path)
+{
+	tex_button_pressed_right.loadFromFile(path, DEFAULT);
 }
 
 void ViewportRenderer::loadFont(Path const& path)
@@ -422,6 +454,41 @@ void ViewportRenderer::renderTextinput(int32_t x_origin, int32_t y_origin, Texti
 	             Vector2(textinput_width - edge_left_width - edge_right_width, content_height));
 }
 
+void ViewportRenderer::renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed)
+{
+	prepareSprites(x_origin, y_origin);
+	Real button_width = button->getWidth();
+	Real button_height = button->getHeight();
+
+	Real button_left_width = tex_button_left.getWidth();
+	Real button_right_width = tex_button_right.getWidth();
+
+	if (!pressed) {
+		renderSprite(tex_button_left,
+		             Vector2(0, 0));
+		renderSprite(tex_button,
+		             Vector2(button_left_width, 0),
+		             Vector2(button_width - button_left_width - button_right_width, 0));
+		renderSprite(tex_button_right,
+		             Vector2(button_width - button_right_width, 0));
+		textSetColor(Color(0.15, 0.15, 0.15));
+	} else {
+		renderSprite(tex_button_pressed_left,
+		             Vector2(0, 0));
+		renderSprite(tex_button_pressed,
+		             Vector2(button_left_width, 0),
+		             Vector2(button_width - button_left_width - button_right_width, 0));
+		renderSprite(tex_button_pressed_right,
+		             Vector2(button_width - button_right_width, 0));
+		textSetColor(Color(0.05, 0.05, 0.05));
+	}
+	textSetHorizontalAlign(CENTER);
+	textSetVerticalAlign(CENTER);
+	renderString(label, font_button_size,
+	             Vector2(0, 0),
+	             Vector2(button_width, button_height));
+}
+
 uint32_t ViewportRenderer::getMenubarHeight(void) const
 {
 	return tex_menubar_bg.getHeight();
@@ -492,6 +559,16 @@ uint32_t ViewportRenderer::getTextinputHeight(void) const
 	return tex_field_edge_top.getHeight() + tex_field_edge_bottom.getHeight() + font_input_size;
 }
 
+uint32_t ViewportRenderer::getButtonWidth(UnicodeString const& label) const
+{
+	return tex_button_left.getWidth() + font.getStringWidth(label, font_button_size) + tex_button_right.getWidth();
+}
+
+uint32_t ViewportRenderer::getButtonHeight(void) const
+{
+	return tex_button.getHeight();
+}
+
 void ViewportRenderer::prepareSprites(Real x_origin, Real y_origin)
 {
 	spr_x_origin = x_origin;
@@ -500,11 +577,22 @@ void ViewportRenderer::prepareSprites(Real x_origin, Real y_origin)
 
 void ViewportRenderer::renderSprite(Texture& tex, Vector2 const& pos, Vector2 const& size)
 {
+	Vector2 size2;
+	if (size.x == 0) {
+	 	size2.x = tex.getWidth();
+	} else {
+		size2.x = size.x;
+	}
+	if (size.y == 0) {
+	 	size2.y = tex.getHeight();
+	} else {
+		size2.y = size.y;
+	}
 	viewport->renderSprite(tex,
-	                       Vector2(spr_x_origin + pos.x, viewport->getHeight() - spr_y_origin - size.y - pos.y),
-	                       size,
+	                       Vector2(spr_x_origin + pos.x, viewport->getHeight() - spr_y_origin - size2.y - pos.y),
+	                       size2,
 	                       Vector2(0.0, 0.0),
-	                       Vector2(size.x / tex.getWidth(), size.y / tex.getHeight()));
+	                       Vector2(size2.x / tex.getWidth(), size2.y / tex.getHeight()));
 }
 
 void ViewportRenderer::renderString(UnicodeString const& str, Real fontsize, Vector2 const& pos, Vector2 const& size)

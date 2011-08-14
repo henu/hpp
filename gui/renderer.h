@@ -20,6 +20,7 @@ class Menu;
 class Window;
 class Label;
 class Textinput;
+class Button;
 
 class Renderer
 {
@@ -45,6 +46,7 @@ public:
 	virtual void renderWindow(int32_t x_origin, int32_t y_origin, Window const* window, UnicodeString const& title) = 0;
 	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str) = 0;
 	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput, UnicodeString const& value) = 0;
+	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed) = 0;
 
 	// Some dimension getters
 	virtual uint32_t getMenubarHeight(void) const = 0;
@@ -61,6 +63,8 @@ public:
 	virtual uint32_t getLabelHeight(void) const = 0;
 	virtual uint32_t getMinimumTextinputWidth(void) const = 0;
 	virtual uint32_t getTextinputHeight(void) const = 0;
+	virtual uint32_t getButtonWidth(UnicodeString const& label) const = 0;
+	virtual uint32_t getButtonHeight(void) const = 0;
 
 private:
 

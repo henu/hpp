@@ -3,6 +3,7 @@
 
 #include "window.h"
 #include "vectorcontainer.h"
+#include "button.h"
 #include "label.h"
 #include "textinput.h"
 
@@ -42,10 +43,10 @@ private:
 	Label filenamelabel;
 	Textinput filenameinput;
 // TODO: Change to correct types!
-	Label newfolderbutton;
+	Button newfolderbutton;
 	Label folderview;
-	Label cancelbutton;
-	Label savebutton;
+	Button cancelbutton;
+	Button savebutton;
 
 };
 
