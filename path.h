@@ -36,7 +36,7 @@ public:
 	inline Path(Path const& p);
 	inline Path operator=(Path const& p);
 
-	inline std::string toString(void) const;
+	inline std::string toString(bool compact = false) const;
 
 	inline bool isUnknown(void) const { return type == UNKNOWN; }
 	inline bool isAbsolute(void) const { return type != UNKNOWN && type != RELATIVE; }
@@ -169,7 +169,7 @@ inline Path Path::operator=(Path const& p)
 	return *this;
 }
 
-inline std::string Path::toString(void) const
+inline std::string Path::toString(bool compact) const
 {
 	std::string result;
 	switch (type) {
@@ -183,7 +183,11 @@ inline std::string Path::toString(void) const
 		break;
 	case HOME:
 		#ifndef WIN32
-		result = getenv("HOME");
+		if (compact) {
+			result += "~";
+		} else {
+			result = getenv("HOME");
+		}
 		result += '/';
 		#else
 		char path_cstr[MAX_PATH];
@@ -193,7 +197,11 @@ inline std::string Path::toString(void) const
 		break;
 	case CONFIG:
 		#ifndef WIN32
-		result = getenv("HOME");
+		if (compact) {
+			result += "~";
+		} else {
+			result = getenv("HOME");
+		}
 		result += "/.config/";
 		#else
 		char path_cstr[MAX_PATH];
