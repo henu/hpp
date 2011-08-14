@@ -38,8 +38,14 @@ private:
 	// Widgets
 	Vectorcontainer maincontainer;
 	Vectorcontainer filenamecontainer;
+	Vectorcontainer buttonscontainer;
 	Label filenamelabel;
 	Textinput filenameinput;
+// TODO: Change to correct types!
+	Label newfolderbutton;
+	Label folderview;
+	Label cancelbutton;
+	Label savebutton;
 
 };
 
@@ -52,15 +58,32 @@ selectmultiple(false)
 	setContent(&maincontainer);
 	// Filename container
 	filenamecontainer.setDirection(Vectorcontainer::HORIZONTAL);
+	filenamecontainer.setHorizontalExpanding(1);
 	maincontainer.addWidget(&filenamecontainer);
 	// Filename label
 	filenamelabel.setLabel("Filename:");
-	filenamelabel.setVerticalAlignment(Containerwidget::CENTER);
 	filenamecontainer.addWidget(&filenamelabel);
 	// Filename label
 	filenameinput.setHorizontalExpanding(1);
 	filenamecontainer.addWidget(&filenameinput);
-
+	// New folder button
+	newfolderbutton.setLabel("New folder...");
+	newfolderbutton.setHorizontalAlignment(Containerwidget::RIGHT);
+	maincontainer.addWidget(&newfolderbutton);
+	// Folderview
+	folderview.setLabel("FOLDERVIEW HERE!");
+	folderview.setHorizontalExpanding(1);
+	folderview.setVerticalExpanding(1);
+	maincontainer.addWidget(&folderview);
+	// Filename container
+	buttonscontainer.setDirection(Vectorcontainer::HORIZONTAL);
+	buttonscontainer.setHorizontalExpanding(1);
+	maincontainer.addWidget(&buttonscontainer);
+	// Cancel and Save buttons
+	cancelbutton.setLabel("Cancel");
+	savebutton.setLabel("Save");
+	buttonscontainer.addWidget(&cancelbutton);
+	buttonscontainer.addWidget(&savebutton);
 }
 
 inline Filedialog::~Filedialog(void)
