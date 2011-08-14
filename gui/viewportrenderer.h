@@ -114,6 +114,8 @@ private:
 	Real padding_menu_h;
 	Real padding_menuitem_h, padding_menuitem_v;
 	Real textinput_min_size;
+	Real folderview_min_size;
+	uint32_t folderview_min_rows;
 
 	// Sprite rendering functions
 	Real spr_x_origin, spr_y_origin;
@@ -133,6 +135,7 @@ private:
 	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str);
 	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput, UnicodeString const& value);
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed);
+	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview);
 	virtual uint32_t getMenubarHeight(void) const;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuseparatorMinWidth(void) const;
@@ -149,6 +152,8 @@ private:
 	virtual uint32_t getTextinputHeight(void) const;
 	virtual uint32_t getButtonWidth(UnicodeString const& label) const;
 	virtual uint32_t getButtonHeight(void) const;
+	virtual uint32_t getMinimumFolderviewWidth(void) const;
+	virtual uint32_t getFolderviewHeight(void) const;
 
 	// Fixed sprite rendering functions. These use coordinate
 	// system from topleft, rather than from bottomleft.

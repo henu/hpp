@@ -6,6 +6,7 @@
 #include "button.h"
 #include "label.h"
 #include "textinput.h"
+#include "folderview.h"
 
 #include <string>
 
@@ -39,12 +40,14 @@ private:
 	// Widgets
 	Vectorcontainer maincontainer;
 	Vectorcontainer filenamecontainer;
+	Vectorcontainer pathfoldercontainer;
 	Vectorcontainer buttonscontainer;
 	Label filenamelabel;
 	Textinput filenameinput;
 // TODO: Change to correct types!
+	Textinput pathinput;
 	Button newfolderbutton;
-	Label folderview;
+	Folderview folderview;
 	Button cancelbutton;
 	Button savebutton;
 
@@ -54,6 +57,9 @@ inline Filedialog::Filedialog(void) :
 type(SAVE),
 selectmultiple(false)
 {
+	Path maps_path = Path::getConfig() / "hme_mapeditor" / "levels";
+	ensurePathExists(maps_path);
+
 	// Main container
 	maincontainer.setDirection(Vectorcontainer::VERTICAL);
 	setContent(&maincontainer);
@@ -64,19 +70,26 @@ selectmultiple(false)
 	// Filename label
 	filenamelabel.setLabel("Filename:");
 	filenamecontainer.addWidget(&filenamelabel);
-	// Filename label
+	// Filename input
 	filenameinput.setHorizontalExpanding(1);
 	filenamecontainer.addWidget(&filenameinput);
+	// Path and new folder container
+	pathfoldercontainer.setDirection(Vectorcontainer::HORIZONTAL);
+	pathfoldercontainer.setHorizontalExpanding(1);
+	maincontainer.addWidget(&pathfoldercontainer);
+	// Path input
+	pathinput.setValue(maps_path.toString(true));
+	pathinput.setHorizontalExpanding(1);
+	pathfoldercontainer.addWidget(&pathinput);
 	// New folder button
 	newfolderbutton.setLabel("New folder...");
-	newfolderbutton.setHorizontalAlignment(Containerwidget::RIGHT);
-	maincontainer.addWidget(&newfolderbutton);
+	pathfoldercontainer.addWidget(&newfolderbutton);
 	// Folderview
-	folderview.setLabel("FOLDERVIEW HERE!");
 	folderview.setHorizontalExpanding(1);
 	folderview.setVerticalExpanding(1);
+	folderview.setFolder(maps_path);
 	maincontainer.addWidget(&folderview);
-	// Filename container
+	// Buttons container
 	buttonscontainer.setDirection(Vectorcontainer::HORIZONTAL);
 	buttonscontainer.setHorizontalExpanding(1);
 	maincontainer.addWidget(&buttonscontainer);

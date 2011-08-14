@@ -21,6 +21,7 @@ class Window;
 class Label;
 class Textinput;
 class Button;
+class Folderview;
 
 class Renderer
 {
@@ -47,6 +48,7 @@ public:
 	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str) = 0;
 	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput, UnicodeString const& value) = 0;
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed) = 0;
+	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview) = 0;
 
 	// Some dimension getters
 	virtual uint32_t getMenubarHeight(void) const = 0;
@@ -65,6 +67,8 @@ public:
 	virtual uint32_t getTextinputHeight(void) const = 0;
 	virtual uint32_t getButtonWidth(UnicodeString const& label) const = 0;
 	virtual uint32_t getButtonHeight(void) const = 0;
+	virtual uint32_t getMinimumFolderviewWidth(void) const = 0;
+	virtual uint32_t getFolderviewHeight(void) const = 0;
 
 private:
 
