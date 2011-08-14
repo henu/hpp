@@ -1,7 +1,7 @@
 #ifndef HPP_GUI_TEXTINPUT_H
 #define HPP_GUI_TEXTINPUT_H
 
-#include "widget.h"
+#include "containerwidget.h"
 #include "renderer.h"
 
 #include "../unicodestring.h"
@@ -12,7 +12,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Textinput : public Widget
+class Textinput : public Containerwidget
 {
 
 public:

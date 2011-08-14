@@ -55,8 +55,10 @@ selectmultiple(false)
 	maincontainer.addWidget(&filenamecontainer);
 	// Filename label
 	filenamelabel.setLabel("Filename:");
+	filenamelabel.setVerticalAlignment(Containerwidget::CENTER);
 	filenamecontainer.addWidget(&filenamelabel);
 	// Filename label
+	filenameinput.setHorizontalExpanding(1);
 	filenamecontainer.addWidget(&filenameinput);
 
 }

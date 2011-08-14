@@ -1,7 +1,7 @@
 #ifndef HPP_GUI_VECTORCONTAINER_H
 #define HPP_GUI_VECTORCONTAINER_H
 
-#include "widget.h"
+#include "containerwidget.h"
 
 #include <vector>
 
@@ -11,7 +11,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Vectorcontainer : public Widget
+class Vectorcontainer : public Containerwidget
 {
 
 public:
@@ -23,7 +23,7 @@ public:
 
 	inline void setDirection(Direction dir);
 
-	inline void addWidget(Widget* widget);
+	inline void addWidget(Containerwidget* widget);
 
 	inline virtual uint32_t getMinWidth(void) const;
 	inline virtual uint32_t getMaxWidth(void) const;
@@ -31,7 +31,7 @@ public:
 
 private:
 
-	typedef std::vector< Widget* > Widgets;
+	typedef std::vector< Containerwidget* > Widgets;
 
 	Widgets widgets;
 
@@ -60,7 +60,7 @@ inline void Vectorcontainer::setDirection(Direction dir)
 	markSizeChanged();
 }
 
-inline void Vectorcontainer::addWidget(Widget* widget)
+inline void Vectorcontainer::addWidget(Containerwidget* widget)
 {
 	widgets.push_back(widget);
 	addChild(widget);
