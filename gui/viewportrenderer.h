@@ -170,8 +170,8 @@ private:
 	Real padding_menu_h;
 	Real padding_menuitem_h, padding_menuitem_v;
 	Real textinput_min_size;
-	Real folderviewcontents_min_size;
-	uint32_t folderviewcontents_min_rows;
+	Real folderview_min_width;
+	uint32_t folderview_min_rows;
 
 	// Sprite rendering functions
 	Real spr_x_origin, spr_y_origin;
@@ -193,6 +193,7 @@ private:
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed);
 	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview);
 	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items);
+	virtual void renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal);
 	virtual uint32_t getMenubarHeight(void) const;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuseparatorMinWidth(void) const;
@@ -209,8 +210,10 @@ private:
 	virtual uint32_t getTextinputHeight(void) const;
 	virtual uint32_t getButtonWidth(UnicodeString const& label) const;
 	virtual uint32_t getButtonHeight(void) const;
-	virtual uint32_t getMinimumFolderviewContentsWidth(void) const;
-	virtual uint32_t getFolderviewContentsHeight(void) const;
+	virtual uint32_t getMinimumFolderviewWidth(void) const;
+	virtual uint32_t getFolderviewHeight(void) const;
+	virtual uint32_t getMinimumFolderviewContentsWidth(UnicodeString const& label) const;
+	virtual uint32_t getFolderviewContentsHeight(size_t items) const;
 	virtual void getFolderviewEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const;
 	virtual uint32_t getScrollbarWidth(void) const;
 	virtual uint32_t getScrollbarHeight(void) const;

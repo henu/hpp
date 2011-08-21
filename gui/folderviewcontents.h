@@ -57,7 +57,15 @@ inline uint32_t FolderviewContents::getMinWidth(void) const
 	if (!rend) {
 		return 0;
 	}
-	return rend->getMinimumFolderviewContentsWidth();
+	uint32_t min_width = 0;
+	for (FolderChildren::const_iterator items_it = items.begin();
+	     items_it != items.end();
+	     items_it ++) {
+		FolderChild const& item = *items_it;
+		UnicodeString item_name = item.name;
+		min_width = std::max(min_width, rend->getMinimumFolderviewContentsWidth(item_name));
+	}
+	return min_width;
 }
 
 inline uint32_t FolderviewContents::getMinHeight(uint32_t width) const
@@ -67,7 +75,7 @@ inline uint32_t FolderviewContents::getMinHeight(uint32_t width) const
 	if (!rend) {
 		return 0;
 	}
-	return rend->getFolderviewContentsHeight();
+	return rend->getFolderviewContentsHeight(items.size());
 }
 
 inline void FolderviewContents::doRendering(int32_t x_origin, int32_t y_origin)
@@ -82,6 +90,7 @@ inline void FolderviewContents::doRendering(int32_t x_origin, int32_t y_origin)
 inline void FolderviewContents::reloadFolderContents(void)
 {
 	listFolderChildren(items, path);
+	markSizeChanged();
 }
 
 }

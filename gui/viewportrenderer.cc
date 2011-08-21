@@ -10,6 +10,7 @@
 #include "button.h"
 #include "folderview.h"
 #include "folderviewcontents.h"
+#include "scrollbar.h"
 
 #include "../viewport.h"
 #include "../assert.h"
@@ -50,8 +51,8 @@ void ViewportRenderer::setFontSize(uint32_t font_size)
 	padding_menuitem_v = font_menuitem_size * 0.125;
 	// Tune other values
 	textinput_min_size = font_input_size * 5;
-	folderviewcontents_min_size = font_input_size * 20;
-	folderviewcontents_min_rows = 6;
+	folderview_min_width = font_input_size * 20;
+	folderview_min_rows = 6;
 }
 
 void ViewportRenderer::loadFont(Path const& path)
@@ -413,6 +414,29 @@ void ViewportRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_orig
 	}
 }
 
+void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal)
+{
+	prepareSprites(x_origin, y_origin);
+
+	uint32_t scrollbar_width = scrollbar->getWidth();
+	uint32_t scrollbar_height = scrollbar->getHeight();
+
+	if (horizontal) {
+		uint32_t scrollbar_leftend_width = tex_scrollbar_bg_horiz_left.getWidth();
+		uint32_t scrollbar_rightend_width = tex_scrollbar_bg_horiz_right.getWidth();
+		renderSprite(tex_scrollbar_bg_horiz_left, Vector2(0, 0));
+		renderSprite(tex_scrollbar_bg_horiz, Vector2(scrollbar_leftend_width, 0), Vector2(scrollbar_width - scrollbar_leftend_width - scrollbar_rightend_width, scrollbar_height));
+		renderSprite(tex_scrollbar_bg_horiz_right, Vector2(scrollbar_width - scrollbar_rightend_width, 0));
+	} else {
+		uint32_t scrollbar_topend_height = tex_scrollbar_bg_vert_top.getHeight();
+		uint32_t scrollbar_bottomend_height = tex_scrollbar_bg_vert_bottom.getHeight();
+		renderSprite(tex_scrollbar_bg_vert_top, Vector2(0, 0));
+		renderSprite(tex_scrollbar_bg_vert, Vector2(0, scrollbar_topend_height), Vector2(scrollbar_width, scrollbar_height - scrollbar_topend_height - scrollbar_bottomend_height));
+		renderSprite(tex_scrollbar_bg_vert_bottom, Vector2(0, scrollbar_height - scrollbar_bottomend_height));
+	}
+
+}
+
 uint32_t ViewportRenderer::getMenubarHeight(void) const
 {
 	return tex_menubar_bg.getHeight();
@@ -493,14 +517,24 @@ uint32_t ViewportRenderer::getButtonHeight(void) const
 	return tex_button.getHeight();
 }
 
-uint32_t ViewportRenderer::getMinimumFolderviewContentsWidth(void) const
+uint32_t ViewportRenderer::getMinimumFolderviewWidth(void) const
 {
-	return folderviewcontents_min_size;
+	return folderview_min_width;
 }
 
-uint32_t ViewportRenderer::getFolderviewContentsHeight(void) const
+uint32_t ViewportRenderer::getFolderviewHeight(void) const
 {
-	return tex_folder.getHeight() * folderviewcontents_min_rows;
+	return tex_folder.getHeight() * folderview_min_rows + tex_field_edge_top.getHeight() + tex_field_edge_bottom.getHeight();
+}
+
+uint32_t ViewportRenderer::getMinimumFolderviewContentsWidth(UnicodeString const& label) const
+{
+	return tex_folder.getWidth() + font.getStringWidth(label, font_input_size);
+}
+
+uint32_t ViewportRenderer::getFolderviewContentsHeight(size_t items) const
+{
+	return tex_folder.getHeight() * items;
 }
 
 void ViewportRenderer::getFolderviewEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const
@@ -518,7 +552,7 @@ uint32_t ViewportRenderer::getScrollbarWidth(void) const
 
 uint32_t ViewportRenderer::getScrollbarHeight(void) const
 {
-	return tex_scrollbar_bg_vert.getHeight();
+	return tex_scrollbar_bg_horiz.getHeight();
 }
 
 void ViewportRenderer::prepareSprites(Real x_origin, Real y_origin)

@@ -1,6 +1,7 @@
 #ifndef HPP_GUI_SCROLLBOX_H
 #define HPP_GUI_SCROLLBOX_H
 
+#include "scrollbar.h"
 #include "widget.h"
 
 namespace Hpp
@@ -31,7 +32,8 @@ private:
 	Vector2 content_scroll;
 
 	Scrollbartype scrollbar_horiz_type, scrollbar_vert_type;
-	bool scrollbar_horiz, scrollbar_vert;
+	Scrollbar* scrollbar_horiz;
+	Scrollbar* scrollbar_vert;
 
 	// Virtual functions for Widget
 	inline virtual void onChildSizeChange(void);
@@ -54,24 +56,26 @@ content_height(0),
 content_scroll(0, 0),
 scrollbar_horiz_type(NEVER),
 scrollbar_vert_type(NEVER),
-scrollbar_horiz(false),
-scrollbar_vert(false)
+scrollbar_horiz(NULL),
+scrollbar_vert(NULL)
 {
 }
 
 inline Scrollbox::~Scrollbox(void)
 {
+	delete scrollbar_horiz;
+	delete scrollbar_vert;
 }
 
 inline void Scrollbox::setVerticalScrollbar(Scrollbartype type)
 {
-	scrollbar_horiz_type = type;
+	scrollbar_vert_type = type;
 	updateContent();
 }
 
 inline void Scrollbox::setHorizontalScrollbar(Scrollbartype type)
 {
-	scrollbar_vert_type = type;
+	scrollbar_horiz_type = type;
 	updateContent();
 }
 
@@ -99,7 +103,7 @@ inline void Scrollbox::onEnvironmentUpdated(void)
 
 inline void Scrollbox::updateContent(void)
 {
-	Renderer* rend = getRenderer();
+	Renderer const* rend = getRenderer();
 	if (!content || !rend) {
 		return;
 	}
@@ -108,17 +112,18 @@ inline void Scrollbox::updateContent(void)
 	area_width = getWidth();
 	area_height = getHeight();
 
-	scrollbar_horiz = (scrollbar_horiz_type == ALWAYS);
-	scrollbar_vert = (scrollbar_horiz_type == ALWAYS);
-	if (scrollbar_horiz) area_width -= rend->getScrollbarWidth();
-	if (scrollbar_vert) area_height -= rend->getScrollbarHeight();
+	bool scrollbar_horiz_needed = (scrollbar_horiz_type == ALWAYS);
+	bool scrollbar_vert_needed = (scrollbar_vert_type == ALWAYS);
+	if (scrollbar_horiz_needed) area_width -= rend->getScrollbarWidth();
+	if (scrollbar_vert_needed) area_height -= rend->getScrollbarHeight();
 
-	bool vertical_scrollbar_added = false;
+	bool vertical_scrollbar_added;
 	do {
+		vertical_scrollbar_added = false;
 		// Calculate width, and check if horizontal scrollbar is needed.
 		content_width = std::max(content->getMinWidth(), area_width);
-		if (content_width > area_width && !scrollbar_horiz && scrollbar_horiz_type == ON_DEMAND) {
-			scrollbar_horiz = true;
+		if (content_width > area_width && !scrollbar_horiz_needed && scrollbar_horiz_type == ON_DEMAND) {
+			scrollbar_horiz_needed = true;
 			area_height -= rend->getScrollbarHeight();
 		}
 
@@ -126,13 +131,47 @@ inline void Scrollbox::updateContent(void)
 		// If this brings new scrollbar, then the width must be
 		// calculated again, because new scrollbar changes width.
 		content_height = content->getMinHeight(content_width);
-		if (content_height > area_height && !scrollbar_vert && scrollbar_vert_type == ON_DEMAND) {
-			scrollbar_vert = true;
+		if (content_height > area_height && !scrollbar_vert_needed && scrollbar_vert_type == ON_DEMAND) {
+			scrollbar_vert_needed = true;
 			area_width -= rend->getScrollbarWidth();
 			vertical_scrollbar_added = true;
 		}
 
 	} while (vertical_scrollbar_added);
+
+	// Check if there are two scrollbars. They
+	// require little box to bottomleft.
+	bool two_scrollbars = (scrollbar_horiz_needed && scrollbar_vert_needed);
+
+	// Check if new scrollbars should be added or removed
+	if (!scrollbar_horiz && scrollbar_horiz_needed) {
+		scrollbar_horiz = new Scrollbar(Scrollbar::HORIZONTAL);
+		addChild(scrollbar_horiz);
+	} else if (scrollbar_horiz && !scrollbar_horiz_needed) {
+		delete scrollbar_horiz;
+		scrollbar_horiz = NULL;
+	}
+	if (!scrollbar_vert && scrollbar_vert_needed) {
+		scrollbar_vert = new Scrollbar(Scrollbar::VERTICAL);
+		addChild(scrollbar_vert);
+	} else if (scrollbar_vert && !scrollbar_vert_needed) {
+		delete scrollbar_vert;
+		scrollbar_vert = NULL;
+	}
+
+	// Set sizes of scrollbars
+	if (scrollbar_horiz) {
+		setChildPosition(scrollbar_horiz, 0, getHeight() - rend->getScrollbarHeight());
+		uint32_t scrollbar_width = getWidth();
+		if (two_scrollbars) scrollbar_width -= rend->getScrollbarWidth();
+		setChildSize(scrollbar_horiz, scrollbar_width, rend->getScrollbarHeight());
+	}
+	if (scrollbar_vert) {
+		setChildPosition(scrollbar_vert, getWidth() - rend->getScrollbarWidth(), 0);
+		uint32_t scrollbar_height = getHeight();
+		if (two_scrollbars) scrollbar_height -= rend->getScrollbarHeight();
+		setChildSize(scrollbar_vert, rend->getScrollbarWidth(), scrollbar_height);
+	}
 
 	setChildSize(content, content_width, content_height);
 	updateContentPosition();
@@ -167,5 +206,3 @@ inline void Scrollbox::updateContentPosition(void)
 }
 
 #endif
-
-
