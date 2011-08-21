@@ -12,6 +12,7 @@
 #include "folderviewcontents.h"
 #include "scrollbar.h"
 
+#include "../display.h"
 #include "../viewport.h"
 #include "../assert.h"
 #include <cmath>
@@ -553,6 +554,18 @@ uint32_t ViewportRenderer::getScrollbarWidth(void) const
 uint32_t ViewportRenderer::getScrollbarHeight(void) const
 {
 	return tex_scrollbar_bg_horiz.getHeight();
+}
+
+void ViewportRenderer::setRenderareaLimit(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+{
+	x += viewport->getPositionX();
+	y = viewport->getPositionY() + viewport->getHeight() - y - height;
+	Display::pushScissor(x, y, width, height);
+}
+
+void ViewportRenderer::removeRenderareaLimit(void)
+{
+	Display::popScissor();
 }
 
 void ViewportRenderer::prepareSprites(Real x_origin, Real y_origin)

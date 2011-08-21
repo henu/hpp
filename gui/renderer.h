@@ -84,6 +84,10 @@ private:
 	// Called by Engine
 	inline void setEngine(Engine* engine) { this->engine = engine; }
 
+	// Rendering area limitations. Called by Engine.
+	virtual void setRenderareaLimit(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
+	virtual void removeRenderareaLimit(void) = 0;
+
 protected:
 
 	inline void sizeChanged(void);

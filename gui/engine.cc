@@ -167,6 +167,55 @@ void Engine::registerMouseReleaseListener(Widget* widget, Mousekey::KeycodeFlags
 	}
 }
 
+void Engine::pushRenderarealimit(int32_t x, int32_t y, uint32_t width, uint32_t height)
+{
+	if (rend) {
+		// Tune variables to be at proper area.
+		if (x < 0) {
+			if ((int32_t)width < -x) width = 0;
+			else width += x;
+			x = 0;
+		}
+		if (y < 0) {
+			if ((int32_t)height < -y) height = 0;
+			else height += y;
+			y = 0;
+		}
+		if ((uint32_t)x + width > rend->getWidth()) {
+			if ((uint32_t)x > rend->getWidth()) {
+				x = 0;
+				width = 0;
+			}
+			else width = rend->getWidth() - x;
+		}
+		if ((uint32_t)y + height > rend->getHeight()) {
+			if ((uint32_t)y > rend->getHeight()) {
+				y = 0;
+				height = 0;
+			}
+			else height = rend->getHeight() - y;
+		}
+	} else {
+		x = 0;
+		y = 0;
+		width = 0;
+		height = 0;
+	}
+	Renderarealimit new_limit;
+	new_limit.x = x;
+	new_limit.y = y;
+	new_limit.width = width;
+	new_limit.height = height;
+	renderarealimits.push_back(new_limit);
+	updateTotalRenderarelimit();
+}
+
+void Engine::popRenderarealimit(void)
+{
+	renderarealimits.pop_back();
+	updateTotalRenderarelimit();
+}
+
 void Engine::checkForNewMouseOver(void)
 {
 	Widget* widget_under_mouse = NULL;
@@ -194,6 +243,49 @@ void Engine::updateSizes(void)
 	windowarea->setPosition(0, windowarea_y);
 	windowarea->setSize(rend->getWidth(), rend->getHeight() - windowarea_y);
 	windowarea->updateEnvironment();
+}
+
+void Engine::updateTotalRenderarelimit(void)
+{
+	if (!rend) return;
+
+	uint32_t total_x = 0;
+	uint32_t total_y = 0;
+	uint32_t total_width = rend->getWidth();
+	uint32_t total_height = rend->getHeight();
+
+	for (Renderarealimits::const_iterator renderarealimits_it = renderarealimits.begin();
+	     renderarealimits_it != renderarealimits.end();
+	     renderarealimits_it ++) {
+		Renderarealimit const& renderarealimit = *renderarealimits_it;
+		if (total_x < renderarealimit.x) {
+			if (total_x + total_width < renderarealimit.x) total_width = 0;
+			else total_width -= renderarealimit.x - total_x;
+			total_x = renderarealimit.x;
+		}
+		if (total_y < renderarealimit.y) {
+			if (total_y + total_height < renderarealimit.y) total_height = 0;
+			else total_height -= renderarealimit.y - total_y;
+			total_y = renderarealimit.y;
+		}
+		if (total_x + total_width > renderarealimit.x + renderarealimit.width) {
+			if (renderarealimit.x + renderarealimit.width < total_x) total_width = 0;
+			else total_width = (renderarealimit.x + renderarealimit.width) - total_x;
+		}
+		if (total_y + total_height > renderarealimit.y + renderarealimit.height) {
+			if (renderarealimit.y + renderarealimit.height < total_y) total_height = 0;
+			else total_height = (renderarealimit.y + renderarealimit.height) - total_y;
+		}
+	}
+
+	if (total_x == 0 && total_y == 0 &&
+	    total_width == rend->getWidth() &&
+	    total_height == rend->getHeight()) {
+		rend->removeRenderareaLimit();
+	} else {
+		rend->setRenderareaLimit(total_x, total_y, total_width, total_height);
+	}
+
 }
 
 }

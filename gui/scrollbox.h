@@ -114,8 +114,8 @@ inline void Scrollbox::updateContent(void)
 
 	bool scrollbar_horiz_needed = (scrollbar_horiz_type == ALWAYS);
 	bool scrollbar_vert_needed = (scrollbar_vert_type == ALWAYS);
-	if (scrollbar_horiz_needed) area_width -= rend->getScrollbarWidth();
-	if (scrollbar_vert_needed) area_height -= rend->getScrollbarHeight();
+	if (scrollbar_horiz_needed) area_height -= rend->getScrollbarWidth();
+	if (scrollbar_vert_needed) area_width -= rend->getScrollbarHeight();
 
 	bool vertical_scrollbar_added;
 	do {
@@ -175,6 +175,9 @@ inline void Scrollbox::updateContent(void)
 
 	setChildSize(content, content_width, content_height);
 	updateContentPosition();
+
+	// Limit renderarea
+	setChildRenderarealimit(content, 0, 0, area_width, area_height);
 
 }
 

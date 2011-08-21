@@ -68,6 +68,32 @@ void Widget::setEngine(Engine* engine)
 	updateEnvironment();
 }
 
+void Widget::render(int32_t x_origin, int32_t y_origin)
+{
+	if (state == HIDDEN) {
+		return;
+	}
+
+	// Check if renderarea is limited
+	if (renderarealimit) {
+		engine->pushRenderarealimit(x_origin + renderarealimit_x, y_origin + renderarealimit_y, renderarealimit_width, renderarealimit_height);
+	}
+
+	x_origin += getPositionX();
+	y_origin += getPositionY();
+	doRendering(x_origin, y_origin);
+	for (Children::iterator children_it = children.begin();
+	     children_it != children.end();
+	     children_it ++) {
+		Widget* child = *children_it;
+		child->render(x_origin, y_origin);
+	}
+
+	if (renderarealimit) {
+		engine->popRenderarealimit();
+	}
+}
+
 bool Widget::mouseEvent(Event const& event)
 {
 	// If hidden or disabled, then do nothing

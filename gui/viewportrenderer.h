@@ -217,6 +217,8 @@ private:
 	virtual void getFolderviewEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const;
 	virtual uint32_t getScrollbarWidth(void) const;
 	virtual uint32_t getScrollbarHeight(void) const;
+	virtual void setRenderareaLimit(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+	virtual void removeRenderareaLimit(void);
 
 	// Fixed sprite rendering functions. These use coordinate
 	// system from topleft, rather than from bottomleft.

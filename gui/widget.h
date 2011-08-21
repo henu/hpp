@@ -48,8 +48,9 @@ private:
 	// and all dimensions must be recalculated.
 	inline void updateEnvironment(void);
 
-	// Called by Engine
-	inline void render(int32_t x_origin, int32_t y_origin);
+	// Called by Engine and parent Widgets. Origin means absolute position
+	// of parent, or topleft corner of the total area, if called by Engine.
+	void render(int32_t x_origin, int32_t y_origin);
 
 	// Called by Engine and other Widgets. Second function returns Widget
 	// that was under mouse or NULL if no Widget could be found.
@@ -82,6 +83,8 @@ protected:
 
 	inline void setChildPosition(Widget* child, int32_t x, int32_t y);
 	inline void setChildSize(Widget* child, uint32_t width, uint32_t height);
+	inline void setChildRenderarealimit(Widget* child, int32_t x, int32_t y, uint32_t width, uint32_t height);
+	inline void removeChildRenderarealimit(Widget* child);
 
 	// Some getters
 	inline bool isMouseOver(void) const { return mouse_over; }
@@ -110,8 +113,20 @@ private:
 	uint32_t width, height;
 	bool mouse_over;
 
+	// Renderarea limitation. This is measured in parent's coordinates.
+	bool renderarealimit;
+	int32_t renderarealimit_x;
+	int32_t renderarealimit_y;
+	uint32_t renderarealimit_width;
+	uint32_t renderarealimit_height;
+
 	inline void registerChild(Widget* child);
 	inline void unregisterChild(Widget* child);
+
+	// Set/remove vieware limitation. These are called by
+	// setChildRenderarealimit() and removeChildRenderarealimit().
+	inline void setRenderarealimit(int32_t x, int32_t y, uint32_t width, uint32_t height);
+	inline void removeRenderarealimit(void);
 
 	// Real rendering function
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin) { (void)x_origin; (void)y_origin; }
@@ -136,7 +151,8 @@ parent(NULL),
 state(ENABLED),
 x(0), y(0),
 width(0), height(0),
-mouse_over(false)
+mouse_over(false),
+renderarealimit(false)
 {
 }
 
@@ -207,6 +223,18 @@ inline void Widget::setChildSize(Widget* child, uint32_t width, uint32_t height)
 	child->setSize(width, height);
 }
 
+inline void Widget::setChildRenderarealimit(Widget* child, int32_t x, int32_t y, uint32_t width, uint32_t height)
+{
+	HppAssert(children.find(child) != children.end(), "Unable to limit child renderarea, because it is really not our child!");
+	child->setRenderarealimit(x, y, width, height);
+}
+
+inline void Widget::removeChildRenderarealimit(Widget* child)
+{
+	HppAssert(children.find(child) != children.end(), "Unable to limit child renderarea, because it is really not our child!");
+	child->removeRenderarealimit();
+}
+
 inline bool Widget::isMyChild(Widget const* widget) const
 {
 	if (children.find((Widget*)widget) != children.end()) {
@@ -231,22 +259,6 @@ inline void Widget::setState(State state)
 		markSizeChanged();
 	}
 	this->state = state;
-}
-
-inline void Widget::render(int32_t x_origin, int32_t y_origin)
-{
-	if (state == HIDDEN) {
-		return;
-	}
-	x_origin += getPositionX();
-	y_origin += getPositionY();
-	doRendering(x_origin, y_origin);
-	for (Children::iterator children_it = children.begin();
-	     children_it != children.end();
-	     children_it ++) {
-		Widget* child = *children_it;
-		child->render(x_origin, y_origin);
-	}
 }
 
 inline bool Widget::mouseOver(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const
@@ -303,6 +315,20 @@ inline void Widget::unregisterChild(Widget* child)
 {
 	HppAssert(children.find(child) != children.end(), "Child of Widget not found!");
 	children.erase(child);
+}
+
+inline void Widget::setRenderarealimit(int32_t x, int32_t y, uint32_t width, uint32_t height)
+{
+	renderarealimit = true;
+	renderarealimit_x = x;
+	renderarealimit_y = y;
+	renderarealimit_width = width;
+	renderarealimit_height = height;
+}
+
+inline void Widget::removeRenderarealimit(void)
+{
+	renderarealimit = false;
 }
 
 }
