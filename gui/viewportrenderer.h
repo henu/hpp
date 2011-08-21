@@ -26,37 +26,63 @@ public:
 	void setFontSize(uint32_t font_size);
 
 	// Texture loading functions
-	void loadTextureMenubarBg(Path const& path);
-	void loadTextureMenuseparator(Path const& path);
-	void loadTextureMenuseparatorLeftend(Path const& path);
-	void loadTextureMenuseparatorRightend(Path const& path);
-	void loadTextureMenuitemBg(Path const& path);
-	void loadTextureWindowBg(Path const& path);
-	void loadTextureWindowEdgeTop(Path const& path);
-	void loadTextureWindowEdgeTopLeft(Path const& path);
-	void loadTextureWindowEdgeTopRight(Path const& path);
-	void loadTextureWindowEdgeLeft(Path const& path);
-	void loadTextureWindowEdgeRight(Path const& path);
-	void loadTextureWindowEdgeBottom(Path const& path);
-	void loadTextureWindowEdgeBottomLeft(Path const& path);
-	void loadTextureWindowEdgeBottomRight(Path const& path);
-	void loadTextureFieldBg(Path const& path);
-	void loadTextureFieldEdgeTop(Path const& path);
-	void loadTextureFieldEdgeTopLeft(Path const& path);
-	void loadTextureFieldEdgeTopRight(Path const& path);
-	void loadTextureFieldEdgeLeft(Path const& path);
-	void loadTextureFieldEdgeRight(Path const& path);
-	void loadTextureFieldEdgeBottom(Path const& path);
-	void loadTextureFieldEdgeBottomLeft(Path const& path);
-	void loadTextureFieldEdgeBottomRight(Path const& path);
-	void loadTextureButtonLeft(Path const& path);
-	void loadTextureButton(Path const& path);
-	void loadTextureButtonRight(Path const& path);
-	void loadTextureButtonPressedLeft(Path const& path);
-	void loadTextureButtonPressed(Path const& path);
-	void loadTextureButtonPressedRight(Path const& path);
-	void loadTextureFolder(Path const& path);
-	void loadTextureFile(Path const& path);
+	inline void loadTextureMenubarBg(Path const& path) { tex_menubar_bg.loadFromFile(path, DEFAULT); }
+	inline void loadTextureMenuseparator(Path const& path) { tex_menuseparator.loadFromFile(path, DEFAULT); }
+	inline void loadTextureMenuseparatorLeftend(Path const& path) { tex_menuseparator_leftend.loadFromFile(path, DEFAULT); }
+	inline void loadTextureMenuseparatorRightend(Path const& path) { tex_menuseparator_rightend.loadFromFile(path, DEFAULT); }
+	inline void loadTextureMenuitemBg(Path const& path) { tex_menuitem_bg.loadFromFile(path, DEFAULT); }
+	inline void loadTextureWindowBg(Path const& path) { tex_window_bg.loadFromFile(path, DEFAULT); }
+	inline void loadTextureWindowEdgeTop(Path const& path) { tex_window_edge_top.loadFromFile(path, DEFAULT); }
+	inline void loadTextureWindowEdgeTopLeft(Path const& path) { tex_window_edge_topleft.loadFromFile(path, DEFAULT); }
+	inline void loadTextureWindowEdgeTopRight(Path const& path) { tex_window_edge_topright.loadFromFile(path, DEFAULT); }
+	inline void loadTextureWindowEdgeLeft(Path const& path) { tex_window_edge_left.loadFromFile(path, DEFAULT); }
+	inline void loadTextureWindowEdgeRight(Path const& path) { tex_window_edge_right.loadFromFile(path, DEFAULT); }
+	inline void loadTextureWindowEdgeBottom(Path const& path) { tex_window_edge_bottom.loadFromFile(path, DEFAULT); }
+	inline void loadTextureWindowEdgeBottomLeft(Path const& path) { tex_window_edge_bottomleft.loadFromFile(path, DEFAULT); }
+	inline void loadTextureWindowEdgeBottomRight(Path const& path) { tex_window_edge_bottomright.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldBg(Path const& path) { tex_field_bg.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeTop(Path const& path) { tex_field_edge_top.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeTopLeft(Path const& path) { tex_field_edge_topleft.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeTopRight(Path const& path) { tex_field_edge_topright.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeLeft(Path const& path) { tex_field_edge_left.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeRight(Path const& path) { tex_field_edge_right.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeBottom(Path const& path) { tex_field_edge_bottom.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeBottomLeft(Path const& path) { tex_field_edge_bottomleft.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeBottomRight(Path const& path) { tex_field_edge_bottomright.loadFromFile(path, DEFAULT); }
+	inline void loadTextureButtonLeft(Path const& path) { tex_button_left.loadFromFile(path, DEFAULT); }
+	inline void loadTextureButton(Path const& path) { tex_button.loadFromFile(path, DEFAULT); }
+	inline void loadTextureButtonRight(Path const& path) { tex_button_right.loadFromFile(path, DEFAULT); }
+	inline void loadTextureButtonPressedLeft(Path const& path) { tex_button_pressed_left.loadFromFile(path, DEFAULT); }
+	inline void loadTextureButtonPressed(Path const& path) { tex_button_pressed.loadFromFile(path, DEFAULT); }
+	inline void loadTextureButtonPressedRight(Path const& path) { tex_button_pressed_right.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFolder(Path const& path) { tex_folder.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFile(Path const& path) { tex_file.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarHoriz(Path const& path) { tex_scrollbar_horiz.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarHorizLeft(Path const& path) { tex_scrollbar_horiz_left.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarHorizRight(Path const& path) { tex_scrollbar_horiz_right.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarVert(Path const& path) { tex_scrollbar_vert.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarVertTop(Path const& path) { tex_scrollbar_vert_top.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarVertBottom(Path const& path) { tex_scrollbar_vert_bottom.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarPressedHoriz(Path const& path) { tex_scrollbar_pressed_horiz.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarPressedHorizLeft(Path const& path) { tex_scrollbar_pressed_horiz_left.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarPressedHorizRight(Path const& path) { tex_scrollbar_pressed_horiz_right.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarPressedVert(Path const& path) { tex_scrollbar_pressed_vert.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarPressedVertTop(Path const& path) { tex_scrollbar_pressed_vert_top.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarPressedVertBottom(Path const& path) { tex_scrollbar_pressed_vert_bottom.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarButtonUp(Path const& path) { tex_scrollbar_button_up.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarButtonLeft(Path const& path) { tex_scrollbar_button_left.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarButtonRight(Path const& path) { tex_scrollbar_button_right.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarButtonDown(Path const& path) { tex_scrollbar_button_down.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarButtonPressedUp(Path const& path) { tex_scrollbar_button_pressed_up.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarButtonPressedLeft(Path const& path) { tex_scrollbar_button_pressed_left.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarButtonPressedRight(Path const& path) { tex_scrollbar_button_pressed_right.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarButtonPressedDown(Path const& path) { tex_scrollbar_button_pressed_bottom.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarBgHoriz(Path const& path) { tex_scrollbar_bg_horiz.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarBgHorizLeft(Path const& path) { tex_scrollbar_bg_horiz_left.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarBgHorizRight(Path const& path) { tex_scrollbar_bg_horiz_right.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarBgVert(Path const& path) { tex_scrollbar_bg_vert.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarBgVertTop(Path const& path) { tex_scrollbar_bg_vert_top.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarBgVertBottom(Path const& path) { tex_scrollbar_bg_vert_bottom.loadFromFile(path, DEFAULT); }
 
 	// Font loading functions. Multiple fonts can be used. The firstly
 	// loaded font will always be preferred, but if some character is not
@@ -104,6 +130,32 @@ private:
 	Texture tex_button_pressed_right;
 	Texture tex_folder;
 	Texture tex_file;
+	Texture tex_scrollbar_horiz;
+	Texture tex_scrollbar_horiz_left;
+	Texture tex_scrollbar_horiz_right;
+	Texture tex_scrollbar_vert;
+	Texture tex_scrollbar_vert_top;
+	Texture tex_scrollbar_vert_bottom;
+	Texture tex_scrollbar_pressed_horiz;
+	Texture tex_scrollbar_pressed_horiz_left;
+	Texture tex_scrollbar_pressed_horiz_right;
+	Texture tex_scrollbar_pressed_vert;
+	Texture tex_scrollbar_pressed_vert_top;
+	Texture tex_scrollbar_pressed_vert_bottom;
+	Texture tex_scrollbar_button_up;
+	Texture tex_scrollbar_button_left;
+	Texture tex_scrollbar_button_right;
+	Texture tex_scrollbar_button_down;
+	Texture tex_scrollbar_button_pressed_up;
+	Texture tex_scrollbar_button_pressed_left;
+	Texture tex_scrollbar_button_pressed_right;
+	Texture tex_scrollbar_button_pressed_bottom;
+	Texture tex_scrollbar_bg_horiz;
+	Texture tex_scrollbar_bg_horiz_left;
+	Texture tex_scrollbar_bg_horiz_right;
+	Texture tex_scrollbar_bg_vert;
+	Texture tex_scrollbar_bg_vert_top;
+	Texture tex_scrollbar_bg_vert_bottom;
 
 	// Font and its sizes
 	Font font;
@@ -118,8 +170,8 @@ private:
 	Real padding_menu_h;
 	Real padding_menuitem_h, padding_menuitem_v;
 	Real textinput_min_size;
-	Real folderview_min_size;
-	uint32_t folderview_min_rows;
+	Real folderviewcontents_min_size;
+	uint32_t folderviewcontents_min_rows;
 
 	// Sprite rendering functions
 	Real spr_x_origin, spr_y_origin;
@@ -139,7 +191,8 @@ private:
 	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str);
 	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput, UnicodeString const& value);
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed);
-	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview, FolderChildren const& items);
+	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview);
+	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items);
 	virtual uint32_t getMenubarHeight(void) const;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuseparatorMinWidth(void) const;
@@ -156,8 +209,11 @@ private:
 	virtual uint32_t getTextinputHeight(void) const;
 	virtual uint32_t getButtonWidth(UnicodeString const& label) const;
 	virtual uint32_t getButtonHeight(void) const;
-	virtual uint32_t getMinimumFolderviewWidth(void) const;
-	virtual uint32_t getFolderviewHeight(void) const;
+	virtual uint32_t getMinimumFolderviewContentsWidth(void) const;
+	virtual uint32_t getFolderviewContentsHeight(void) const;
+	virtual void getFolderviewEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const;
+	virtual uint32_t getScrollbarWidth(void) const;
+	virtual uint32_t getScrollbarHeight(void) const;
 
 	// Fixed sprite rendering functions. These use coordinate
 	// system from topleft, rather than from bottomleft.

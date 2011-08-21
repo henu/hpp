@@ -9,6 +9,7 @@
 #include "textinput.h"
 #include "button.h"
 #include "folderview.h"
+#include "folderviewcontents.h"
 
 #include "../viewport.h"
 #include "../assert.h"
@@ -49,163 +50,8 @@ void ViewportRenderer::setFontSize(uint32_t font_size)
 	padding_menuitem_v = font_menuitem_size * 0.125;
 	// Tune other values
 	textinput_min_size = font_input_size * 5;
-	folderview_min_size = font_input_size * 20;
-	folderview_min_rows = 6;
-}
-
-void ViewportRenderer::loadTextureMenubarBg(Path const& path)
-{
-	tex_menubar_bg.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureMenuseparator(Path const& path)
-{
-	tex_menuseparator.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureMenuseparatorLeftend(Path const& path)
-{
-	tex_menuseparator_leftend.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureMenuseparatorRightend(Path const& path)
-{
-	tex_menuseparator_rightend.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureMenuitemBg(Path const& path)
-{
-	tex_menuitem_bg.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureWindowBg(Path const& path)
-{
-	tex_window_bg.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureWindowEdgeTop(Path const& path)
-{
-	tex_window_edge_top.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureWindowEdgeTopLeft(Path const& path)
-{
-	tex_window_edge_topleft.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureWindowEdgeTopRight(Path const& path)
-{
-	tex_window_edge_topright.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureWindowEdgeLeft(Path const& path)
-{
-	tex_window_edge_left.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureWindowEdgeRight(Path const& path)
-{
-	tex_window_edge_right.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureWindowEdgeBottom(Path const& path)
-{
-	tex_window_edge_bottom.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureWindowEdgeBottomLeft(Path const& path)
-{
-	tex_window_edge_bottomleft.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureWindowEdgeBottomRight(Path const& path)
-{
-	tex_window_edge_bottomright.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureFieldBg(Path const& path)
-{
-	tex_field_bg.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureFieldEdgeTop(Path const& path)
-{
-	tex_field_edge_top.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureFieldEdgeTopLeft(Path const& path)
-{
-	tex_field_edge_topleft.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureFieldEdgeTopRight(Path const& path)
-{
-	tex_field_edge_topright.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureFieldEdgeLeft(Path const& path)
-{
-	tex_field_edge_left.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureFieldEdgeRight(Path const& path)
-{
-	tex_field_edge_right.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureFieldEdgeBottom(Path const& path)
-{
-	tex_field_edge_bottom.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureFieldEdgeBottomLeft(Path const& path)
-{
-	tex_field_edge_bottomleft.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureFieldEdgeBottomRight(Path const& path)
-{
-	tex_field_edge_bottomright.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureButtonLeft(Path const& path)
-{
-	tex_button_left.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureButton(Path const& path)
-{
-	tex_button.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureButtonRight(Path const& path)
-{
-	tex_button_right.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureButtonPressedLeft(Path const& path)
-{
-	tex_button_pressed_left.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureButtonPressed(Path const& path)
-{
-	tex_button_pressed.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureButtonPressedRight(Path const& path)
-{
-	tex_button_pressed_right.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureFolder(Path const& path)
-{
-	tex_folder.loadFromFile(path, DEFAULT);
-}
-
-void ViewportRenderer::loadTextureFile(Path const& path)
-{
-	tex_file.loadFromFile(path, DEFAULT);
+	folderviewcontents_min_size = font_input_size * 20;
+	folderviewcontents_min_rows = 6;
 }
 
 void ViewportRenderer::loadFont(Path const& path)
@@ -502,7 +348,7 @@ void ViewportRenderer::renderButton(int32_t x_origin, int32_t y_origin, Button c
 	             Vector2(button_width, button_height));
 }
 
-void ViewportRenderer::renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview, FolderChildren const& items)
+void ViewportRenderer::renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview)
 {
 	prepareSprites(x_origin, y_origin);
 	Real folderview_width = folderview->getWidth();
@@ -540,7 +386,14 @@ void ViewportRenderer::renderFolderview(int32_t x_origin, int32_t y_origin, Fold
 	renderSprite(tex_field_edge_bottomright,
 	             Vector2(folderview_width - edge_right_width, folderview_height - edge_bottom_height));
 
-	// Items
+}
+
+void ViewportRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items)
+{
+	prepareSprites(x_origin, y_origin);
+
+	Real folderviewcontents_width = folderviewcontents->getWidth();
+
 	Real pos_y = 0;
 	setFontSize(font_input_size);
 	textSetColor(Color(0, 0, 0));
@@ -551,14 +404,13 @@ void ViewportRenderer::renderFolderview(int32_t x_origin, int32_t y_origin, Fold
 	     items_it ++) {
 		FolderChild const& item = *items_it;
 		if (item.type == FolderChild::FOLDER) {
-			renderSprite(tex_folder, Vector2(edge_left_width, edge_top_height + pos_y));
+			renderSprite(tex_folder, Vector2(0, pos_y));
 		} else {
-			renderSprite(tex_file, Vector2(edge_left_width, edge_top_height + pos_y));
+			renderSprite(tex_file, Vector2(0, pos_y));
 		}
-		renderString(item.name, font_input_size, Vector2(edge_left_width + tex_folder.getWidth(), edge_top_height + pos_y), Vector2(folderview_width - edge_left_width - edge_right_width, tex_folder.getHeight()));
+		renderString(item.name, font_input_size, Vector2(tex_folder.getWidth(), pos_y), Vector2(folderviewcontents_width, tex_folder.getHeight()));
 		pos_y += tex_folder.getHeight();
 	}
-
 }
 
 uint32_t ViewportRenderer::getMenubarHeight(void) const
@@ -641,14 +493,32 @@ uint32_t ViewportRenderer::getButtonHeight(void) const
 	return tex_button.getHeight();
 }
 
-uint32_t ViewportRenderer::getMinimumFolderviewWidth(void) const
+uint32_t ViewportRenderer::getMinimumFolderviewContentsWidth(void) const
 {
-	return tex_field_edge_left.getWidth() + folderview_min_size + tex_field_edge_right.getWidth();
+	return folderviewcontents_min_size;
 }
 
-uint32_t ViewportRenderer::getFolderviewHeight(void) const
+uint32_t ViewportRenderer::getFolderviewContentsHeight(void) const
 {
-	return tex_field_edge_top.getHeight() + tex_field_edge_bottom.getHeight() + tex_folder.getHeight() * folderview_min_rows;
+	return tex_folder.getHeight() * folderviewcontents_min_rows;
+}
+
+void ViewportRenderer::getFolderviewEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const
+{
+	edge_top = tex_field_edge_top.getHeight();
+	edge_left = tex_field_edge_left.getWidth();
+	edge_right = tex_field_edge_right.getWidth();
+	edge_bottom = tex_field_edge_bottom.getHeight();
+}
+
+uint32_t ViewportRenderer::getScrollbarWidth(void) const
+{
+	return tex_scrollbar_bg_vert.getWidth();
+}
+
+uint32_t ViewportRenderer::getScrollbarHeight(void) const
+{
+	return tex_scrollbar_bg_vert.getHeight();
 }
 
 void ViewportRenderer::prepareSprites(Real x_origin, Real y_origin)
