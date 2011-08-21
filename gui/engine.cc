@@ -73,7 +73,9 @@ bool Engine::mouseEvent(Event const& event)
 	if (menubar) {
 		widget_under_mouse = menubar->mouseOverRecursive(0, 0, event.x, event.y);
 	}
-// TODO: Code finding widgets from windows!
+	if (!widget_under_mouse) {
+		widget_under_mouse = windowarea->mouseOverRecursive(0, 0, event.x, event.y);
+	}
 
 	// Check if some Widget is interested about these events
 	if (event.type == Event::MOUSE_KEY_DOWN) {
@@ -86,7 +88,8 @@ bool Engine::mouseEvent(Event const& event)
 			    (event.mousekey == Mousekey::RIGHT && (flags & Mousekey::FLAG_RIGHT)) ||
 			    (event.mousekey == Mousekey::WHEEL_UP && (flags & Mousekey::FLAG_WHEEL_UP)) ||
 			    (event.mousekey == Mousekey::WHEEL_DOWN && (flags & Mousekey::FLAG_WHEEL_DOWN))) {
-				mouseclicklisteners_it->first->onMouseKeyDownOther(widget_under_mouse, event.x, event.y, event.mousekey);
+				Widget* listener = mouseclicklisteners_it->first;
+				listener->onMouseKeyDownOther(widget_under_mouse, event.x - listener->getAbsolutePositionX(), event.y - listener->getAbsolutePositionY(), event.mousekey);
 			}
 		}
 	} else if (event.type == Event::MOUSE_KEY_UP) {
@@ -99,7 +102,8 @@ bool Engine::mouseEvent(Event const& event)
 			    (event.mousekey == Mousekey::RIGHT && (flags & Mousekey::FLAG_RIGHT)) ||
 			    (event.mousekey == Mousekey::WHEEL_UP && (flags & Mousekey::FLAG_WHEEL_UP)) ||
 			    (event.mousekey == Mousekey::WHEEL_DOWN && (flags & Mousekey::FLAG_WHEEL_DOWN))) {
-				mousereleaselisteners_it->first->onMouseKeyUpOther(widget_under_mouse, event.x, event.y, event.mousekey);
+				Widget* listener = mousereleaselisteners_it->first;
+				listener->onMouseKeyUpOther(widget_under_mouse, event.x - listener->getAbsolutePositionX(), event.y - listener->getAbsolutePositionY(), event.mousekey);
 			}
 		}
 	}

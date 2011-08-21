@@ -100,16 +100,18 @@ bool Widget::mouseEvent(Event const& event)
 	if (state != ENABLED) {
 		return false;
 	}
+	int32_t mouse_x_relative = event.x - getAbsolutePositionX();
+	int32_t mouse_y_relative = event.y - getAbsolutePositionY();
 	if (!mouse_over) {
-		onMouseOver(event.x, event.y);
+		onMouseOver(mouse_x_relative, mouse_y_relative);
 		mouse_over = true;
 		engine->setMouseOver(this);
 	}
 	// Check if button was pressed
 	if (event.type == Event::MOUSE_KEY_DOWN) {
-		return onMouseKeyDown(event.x, event.y, event.mousekey);
+		return onMouseKeyDown(mouse_x_relative, mouse_y_relative, event.mousekey);
 	} else if (event.type == Event::MOUSE_KEY_UP) {
-		return onMouseKeyUp(event.x, event.y, event.mousekey);
+		return onMouseKeyUp(mouse_x_relative, mouse_y_relative, event.mousekey);
 	}
 	return false;
 }

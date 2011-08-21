@@ -30,6 +30,8 @@ public:
 
 	inline int32_t getPositionX(void) const { return x; }
 	inline int32_t getPositionY(void) const { return y; }
+	inline int32_t getAbsolutePositionX(void) const;
+	inline int32_t getAbsolutePositionY(void) const;
 	inline uint32_t getWidth(void) const { return width; }
 	inline uint32_t getHeight(void) const { return height; }
 
@@ -154,6 +156,18 @@ width(0), height(0),
 mouse_over(false),
 renderarealimit(false)
 {
+}
+
+inline int32_t Widget::getAbsolutePositionX(void) const
+{
+	if (!parent) return x;
+	return x + parent->getAbsolutePositionX();
+}
+
+inline int32_t Widget::getAbsolutePositionY(void) const
+{
+	if (!parent) return y;
+	return y + parent->getAbsolutePositionY();
 }
 
 inline void Widget::setParent(Widget* parent)
