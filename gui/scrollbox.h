@@ -165,12 +165,24 @@ inline void Scrollbox::updateContent(void)
 		uint32_t scrollbar_width = getWidth();
 		if (two_scrollbars) scrollbar_width -= rend->getScrollbarWidth();
 		setChildSize(scrollbar_horiz, scrollbar_width, rend->getScrollbarHeight());
+		// Slider
+		if (area_width > content_width) {
+			scrollbar_horiz->setSliderSize(1.0);
+		} else {
+			scrollbar_horiz->setSliderSize(area_width / content_width);
+		}
 	}
 	if (scrollbar_vert) {
 		setChildPosition(scrollbar_vert, getWidth() - rend->getScrollbarWidth(), 0);
 		uint32_t scrollbar_height = getHeight();
 		if (two_scrollbars) scrollbar_height -= rend->getScrollbarHeight();
 		setChildSize(scrollbar_vert, rend->getScrollbarWidth(), scrollbar_height);
+		// Slider
+		if (area_height > content_height) {
+			scrollbar_vert->setSliderSize(1.0);
+		} else {
+			scrollbar_vert->setSliderSize(area_height / content_height);
+		}
 	}
 
 	setChildSize(content, content_width, content_height);

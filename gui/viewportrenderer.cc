@@ -415,7 +415,7 @@ void ViewportRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_orig
 	}
 }
 
-void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed)
+void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed, bool slider_pressed)
 {
 	prepareSprites(x_origin, y_origin);
 
@@ -427,37 +427,83 @@ void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrol
 		uint32_t scrollbar_rightend_width = tex_scrollbar_bg_horiz_right.getWidth();
 		uint32_t scrollbar_button_left_width = tex_scrollbar_button_left.getWidth();
 		uint32_t scrollbar_button_right_width = tex_scrollbar_button_right.getWidth();
+		// Buttons
 		if (up_or_left_key_pressed) {
 			renderSprite(tex_scrollbar_button_pressed_left, Vector2(0, 0));
 		} else {
 			renderSprite(tex_scrollbar_button_left, Vector2(0, 0));
 		}
-		renderSprite(tex_scrollbar_bg_horiz_left, Vector2(scrollbar_button_left_width, 0));
-		renderSprite(tex_scrollbar_bg_horiz, Vector2(scrollbar_button_left_width + scrollbar_leftend_width, 0), Vector2(scrollbar_width - scrollbar_leftend_width - scrollbar_rightend_width - scrollbar_button_left_width - scrollbar_button_right_width, scrollbar_height));
-		renderSprite(tex_scrollbar_bg_horiz_right, Vector2(scrollbar_width - scrollbar_rightend_width - scrollbar_button_right_width, 0));
 		if (down_or_right_key_pressed) {
 			renderSprite(tex_scrollbar_button_pressed_right, Vector2(scrollbar_width - scrollbar_button_right_width, 0));
 		} else {
 			renderSprite(tex_scrollbar_button_right, Vector2(scrollbar_width - scrollbar_button_right_width, 0));
 		}
+		// Background
+		renderSprite(tex_scrollbar_bg_horiz_left, Vector2(scrollbar_button_left_width, 0));
+		renderSprite(tex_scrollbar_bg_horiz, Vector2(scrollbar_button_left_width + scrollbar_leftend_width, 0), Vector2(scrollbar_width - scrollbar_leftend_width - scrollbar_rightend_width - scrollbar_button_left_width - scrollbar_button_right_width, scrollbar_height));
+		renderSprite(tex_scrollbar_bg_horiz_right, Vector2(scrollbar_width - scrollbar_rightend_width - scrollbar_button_right_width, 0));
+		// Slider
+		Texture* tex_left;
+		Texture* tex;
+		Texture* tex_right;
+		if (slider_pressed) {
+			tex_left = &tex_scrollbar_pressed_horiz_left;
+			tex = &tex_scrollbar_pressed_horiz;
+			tex_right = &tex_scrollbar_pressed_horiz_right;
+		} else {
+			tex_left = &tex_scrollbar_horiz_left;
+			tex = &tex_scrollbar_horiz;
+			tex_right = &tex_scrollbar_horiz_right;
+		}
+		uint32_t slider_leftend_width = tex_left->getWidth();
+		uint32_t slider_rightend_width = tex_right->getWidth();
+		uint32_t slider_area = scrollbar_width - scrollbar_button_left_width - scrollbar_button_right_width;
+		Real slider_size = slider_leftend_width + slider_rightend_width + (slider_area - slider_leftend_width - slider_rightend_width) * scrollbar->getSliderSize();
+		Real slider_pos = (slider_area - slider_size) * scrollbar->getValue();
+		renderSprite(*tex_left, Vector2(scrollbar_button_left_width + slider_pos, 0));
+		renderSprite(*tex, Vector2(scrollbar_button_left_width + slider_pos + slider_leftend_width, 0), Vector2(slider_size - slider_leftend_width - slider_rightend_width, 0));
+		renderSprite(*tex_right, Vector2(scrollbar_button_left_width + slider_pos + slider_size - slider_rightend_width, 0));
 	} else {
 		uint32_t scrollbar_topend_height = tex_scrollbar_bg_vert_top.getHeight();
 		uint32_t scrollbar_bottomend_height = tex_scrollbar_bg_vert_bottom.getHeight();
 		uint32_t scrollbar_button_up_height = tex_scrollbar_button_up.getHeight();
 		uint32_t scrollbar_button_down_height = tex_scrollbar_button_down.getHeight();
+		// Buttons
 		if (up_or_left_key_pressed) {
 			renderSprite(tex_scrollbar_button_pressed_up, Vector2(0, 0));
 		} else {
 			renderSprite(tex_scrollbar_button_up, Vector2(0, 0));
 		}
-		renderSprite(tex_scrollbar_bg_vert_top, Vector2(0, scrollbar_button_up_height));
-		renderSprite(tex_scrollbar_bg_vert, Vector2(0, scrollbar_button_up_height + scrollbar_topend_height), Vector2(scrollbar_width, scrollbar_height - scrollbar_topend_height - scrollbar_bottomend_height - scrollbar_button_up_height - scrollbar_button_down_height));
-		renderSprite(tex_scrollbar_bg_vert_bottom, Vector2(0, scrollbar_height - scrollbar_bottomend_height - scrollbar_button_down_height));
 		if (down_or_right_key_pressed) {
 			renderSprite(tex_scrollbar_button_pressed_down, Vector2(0, scrollbar_height - scrollbar_button_down_height));
 		} else {
 			renderSprite(tex_scrollbar_button_down, Vector2(0, scrollbar_height - scrollbar_button_down_height));
 		}
+		// Background
+		renderSprite(tex_scrollbar_bg_vert_top, Vector2(0, scrollbar_button_up_height));
+		renderSprite(tex_scrollbar_bg_vert, Vector2(0, scrollbar_button_up_height + scrollbar_topend_height), Vector2(scrollbar_width, scrollbar_height - scrollbar_topend_height - scrollbar_bottomend_height - scrollbar_button_up_height - scrollbar_button_down_height));
+		renderSprite(tex_scrollbar_bg_vert_bottom, Vector2(0, scrollbar_height - scrollbar_bottomend_height - scrollbar_button_down_height));
+		// Slider
+		Texture* tex_top;
+		Texture* tex;
+		Texture* tex_bottom;
+		if (slider_pressed) {
+			tex_top = &tex_scrollbar_pressed_vert_top;
+			tex = &tex_scrollbar_pressed_vert;
+			tex_bottom = &tex_scrollbar_pressed_vert_bottom;
+		} else {
+			tex_top = &tex_scrollbar_vert_top;
+			tex = &tex_scrollbar_vert;
+			tex_bottom = &tex_scrollbar_vert_bottom;
+		}
+		uint32_t slider_topend_height = tex_top->getHeight();
+		uint32_t slider_bottomend_height = tex_bottom->getHeight();
+		uint32_t slider_area = scrollbar_height - scrollbar_button_up_height - scrollbar_button_down_height;
+		Real slider_size = slider_topend_height + slider_bottomend_height + (slider_area - slider_topend_height - slider_bottomend_height) * scrollbar->getSliderSize();
+		Real slider_pos = (slider_area - slider_size) * scrollbar->getValue();
+		renderSprite(*tex_top, Vector2(0, scrollbar_button_up_height + slider_pos));
+		renderSprite(*tex, Vector2(0, scrollbar_button_up_height + slider_pos + slider_topend_height), Vector2(0, slider_size - slider_topend_height - slider_bottomend_height));
+		renderSprite(*tex_bottom, Vector2(0, scrollbar_button_up_height + slider_pos + slider_size - slider_bottomend_height));
 	}
 
 }

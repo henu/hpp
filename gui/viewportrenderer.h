@@ -193,7 +193,7 @@ private:
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed);
 	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview);
 	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items);
-	virtual void renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed);
+	virtual void renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed, bool slider_pressed);
 	virtual uint32_t getMenubarHeight(void) const;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuseparatorMinWidth(void) const;
