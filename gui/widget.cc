@@ -48,6 +48,11 @@ void Widget::listenMouseReleases(Mousekey::KeycodeFlags flags)
 	engine->registerMouseReleaseListener(this, flags);
 }
 
+void Widget::listenMouseMoves(bool listen)
+{
+	engine->registerMouseMoveListener(this, listen);
+}
+
 void Widget::setEngine(Engine* engine)
 {
 	if (this->engine) {
@@ -102,8 +107,8 @@ bool Widget::mouseEvent(Event const& event)
 	}
 	int32_t mouse_x_relative = event.x - getAbsolutePositionX();
 	int32_t mouse_y_relative = event.y - getAbsolutePositionY();
+	onMouseOver(mouse_x_relative, mouse_y_relative);
 	if (!mouse_over) {
-		onMouseOver(mouse_x_relative, mouse_y_relative);
 		mouse_over = true;
 		engine->setMouseOver(this);
 	}

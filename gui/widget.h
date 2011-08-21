@@ -97,9 +97,10 @@ protected:
 	// Setters
 	inline void setState(State state);
 
-	// Listens for mouse clicks to another Widgets
+	// Listens for mouse clicks, and moves
 	void listenMouseClicks(Mousekey::KeycodeFlags flags);
 	void listenMouseReleases(Mousekey::KeycodeFlags flags);
+	void listenMouseMoves(bool listen = true);
 
 private:
 
@@ -140,6 +141,7 @@ private:
 	inline virtual bool onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return true; }
 	inline virtual void onMouseKeyDownOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)widget; (void)mouse_x; (void)mouse_y; (void)mouse_key; }
 	inline virtual void onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)widget; (void)mouse_x; (void)mouse_y; (void)mouse_key; }
+	inline virtual void onMouseMove(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
 	inline virtual void onChildSizeChange(void) { }
 	inline virtual void onPositionChange(void) { }
 	inline virtual void onSizeChange(void) { }

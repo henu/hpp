@@ -217,6 +217,10 @@ private:
 	virtual void getFolderviewEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const;
 	virtual uint32_t getScrollbarWidth(void) const;
 	virtual uint32_t getScrollbarHeight(void) const;
+	inline virtual uint32_t getScrollbarButtonLeftWidth(void) const { return tex_scrollbar_button_left.getWidth(); };
+	inline virtual uint32_t getScrollbarButtonRightWidth(void) const { return tex_scrollbar_button_right.getWidth(); };
+	inline virtual uint32_t getScrollbarButtonUpHeight(void) const { return tex_scrollbar_button_up.getHeight(); };
+	inline virtual uint32_t getScrollbarButtonDownHeight(void) const { return tex_scrollbar_button_down.getHeight(); };
 	virtual void setRenderareaLimit(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 	virtual void removeRenderareaLimit(void);
 

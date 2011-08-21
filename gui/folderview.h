@@ -47,8 +47,8 @@ private:
 inline Folderview::Folderview(void)
 {
 	addChild(&scrollbox);
-	scrollbox.setVerticalScrollbar(Scrollbox::ALWAYS);
 	scrollbox.setHorizontalScrollbar(Scrollbox::ON_DEMAND);
+	scrollbox.setVerticalScrollbar(Scrollbox::ALWAYS);
 	scrollbox.setContent(&contents);
 }
 
@@ -97,6 +97,12 @@ inline void Folderview::onSizeChange(void)
 
 inline void Folderview::onEnvironmentUpdated(void)
 {
+	Renderer* rend = getRenderer();
+	if (rend) {
+		uint32_t move_amount = rend->getFolderviewContentsHeight(3);
+		scrollbox.setHorizontalScrollbarButtonmove(move_amount);
+		scrollbox.setVerticalScrollbarButtonmove(move_amount);
+	}
 	markSizeChanged();
 }
 

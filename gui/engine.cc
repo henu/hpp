@@ -106,6 +106,13 @@ bool Engine::mouseEvent(Event const& event)
 				listener->onMouseKeyUpOther(widget_under_mouse, event.x - listener->getAbsolutePositionX(), event.y - listener->getAbsolutePositionY(), event.mousekey);
 			}
 		}
+	} else if (event.type == Event::MOUSE_MOVE) {
+		for (Widgets::iterator mousemovelisteners_it = mousemovelisteners.begin();
+		     mousemovelisteners_it != mousemovelisteners.end();
+		     mousemovelisteners_it ++) {
+			Widget* listener = *mousemovelisteners_it;
+			listener->onMouseMove(event.x - listener->getAbsolutePositionX(), event.y - listener->getAbsolutePositionY());
+		}
 	}
 
 	// Use event
@@ -168,6 +175,15 @@ void Engine::registerMouseReleaseListener(Widget* widget, Mousekey::KeycodeFlags
 		mousereleaselisteners.erase(widget);
 	} else {
 		mousereleaselisteners[widget] = flags;
+	}
+}
+
+void Engine::registerMouseMoveListener(Widget* widget, bool listen)
+{
+	if (listen) {
+		mousemovelisteners.insert(widget);
+	} else {
+		mousemovelisteners.erase(widget);
 	}
 }
 

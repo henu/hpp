@@ -2,6 +2,7 @@
 #define HPP_GUI_SCROLLBOX_H
 
 #include "scrollbar.h"
+#include "callback.h"
 #include "widget.h"
 
 namespace Hpp
@@ -20,8 +21,10 @@ public:
 	inline Scrollbox(void);
 	inline virtual ~Scrollbox(void);
 
-	inline void setVerticalScrollbar(Scrollbartype type);
 	inline void setHorizontalScrollbar(Scrollbartype type);
+	inline void setVerticalScrollbar(Scrollbartype type);
+	inline void setHorizontalScrollbarButtonmove(uint32_t amount);
+	inline void setVerticalScrollbarButtonmove(uint32_t amount);
 	inline void setContent(Widget* widget);
 
 private:
@@ -34,6 +37,8 @@ private:
 	Scrollbartype scrollbar_horiz_type, scrollbar_vert_type;
 	Scrollbar* scrollbar_horiz;
 	Scrollbar* scrollbar_vert;
+	uint32_t scrollbar_horiz_buttonmove;
+	uint32_t scrollbar_vert_buttonmove;
 
 	// Virtual functions for Widget
 	inline virtual void onChildSizeChange(void);
@@ -44,6 +49,8 @@ private:
 	inline void updateContent(void);
 
 	inline void updateContentPosition(void);
+
+	inline static void scrollbarValuesChanged(Widget* widget, void* scrollbox_raw);
 
 };
 
@@ -57,7 +64,9 @@ content_scroll(0, 0),
 scrollbar_horiz_type(NEVER),
 scrollbar_vert_type(NEVER),
 scrollbar_horiz(NULL),
-scrollbar_vert(NULL)
+scrollbar_vert(NULL),
+scrollbar_horiz_buttonmove(1),
+scrollbar_vert_buttonmove(1)
 {
 }
 
@@ -67,16 +76,32 @@ inline Scrollbox::~Scrollbox(void)
 	delete scrollbar_vert;
 }
 
+inline void Scrollbox::setHorizontalScrollbar(Scrollbartype type)
+{
+	scrollbar_horiz_type = type;
+	updateContent();
+}
+
 inline void Scrollbox::setVerticalScrollbar(Scrollbartype type)
 {
 	scrollbar_vert_type = type;
 	updateContent();
 }
 
-inline void Scrollbox::setHorizontalScrollbar(Scrollbartype type)
+inline void Scrollbox::setHorizontalScrollbarButtonmove(uint32_t amount)
 {
-	scrollbar_horiz_type = type;
-	updateContent();
+	scrollbar_horiz_buttonmove = amount;
+	if (scrollbar_horiz) {
+		scrollbar_horiz->setButtonMove(amount);
+	}
+}
+
+inline void Scrollbox::setVerticalScrollbarButtonmove(uint32_t amount)
+{
+	scrollbar_vert_buttonmove = amount;
+	if (scrollbar_vert) {
+		scrollbar_vert->setButtonMove(amount);
+	}
 }
 
 inline void Scrollbox::setContent(Widget* widget)
@@ -146,6 +171,7 @@ inline void Scrollbox::updateContent(void)
 	// Check if new scrollbars should be added or removed
 	if (!scrollbar_horiz && scrollbar_horiz_needed) {
 		scrollbar_horiz = new Scrollbar(Scrollbar::HORIZONTAL);
+		scrollbar_horiz->setCallbackFunc(scrollbarValuesChanged, this);
 		addChild(scrollbar_horiz);
 	} else if (scrollbar_horiz && !scrollbar_horiz_needed) {
 		delete scrollbar_horiz;
@@ -153,6 +179,7 @@ inline void Scrollbox::updateContent(void)
 	}
 	if (!scrollbar_vert && scrollbar_vert_needed) {
 		scrollbar_vert = new Scrollbar(Scrollbar::VERTICAL);
+		scrollbar_vert->setCallbackFunc(scrollbarValuesChanged, this);
 		addChild(scrollbar_vert);
 	} else if (scrollbar_vert && !scrollbar_vert_needed) {
 		delete scrollbar_vert;
@@ -169,7 +196,8 @@ inline void Scrollbox::updateContent(void)
 		if (area_width > content_width) {
 			scrollbar_horiz->setSliderSize(1.0);
 		} else {
-			scrollbar_horiz->setSliderSize(area_width / content_width);
+			scrollbar_horiz->setSliderSize(area_width / (Real)content_width);
+			scrollbar_horiz->setButtonMove(scrollbar_horiz_buttonmove / (Real)content_width);
 		}
 	}
 	if (scrollbar_vert) {
@@ -181,7 +209,8 @@ inline void Scrollbox::updateContent(void)
 		if (area_height > content_height) {
 			scrollbar_vert->setSliderSize(1.0);
 		} else {
-			scrollbar_vert->setSliderSize(area_height / content_height);
+			scrollbar_vert->setSliderSize(area_height / (Real)content_height);
+			scrollbar_vert->setButtonMove(scrollbar_vert_buttonmove / (Real)content_height);
 		}
 	}
 
@@ -214,6 +243,19 @@ inline void Scrollbox::updateContentPosition(void)
 		scroll_y = 0;
 	}
 	setChildPosition(content, scroll_x, scroll_y);
+}
+
+inline void Scrollbox::scrollbarValuesChanged(Widget* widget, void* scrollbox_raw)
+{
+	(void)widget;
+	Scrollbox* scrollbox = reinterpret_cast< Scrollbox* >(scrollbox_raw);
+	if (scrollbox->scrollbar_horiz) {
+		scrollbox->content_scroll.x = scrollbox->scrollbar_horiz->getValue();
+	}
+	if (scrollbox->scrollbar_vert) {
+		scrollbox->content_scroll.y = scrollbox->scrollbar_vert->getValue();
+	}
+	scrollbox->updateContentPosition();
 }
 
 }

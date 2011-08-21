@@ -60,6 +60,7 @@ private:
 	void setMouseOver(Widget* widget);
 	void registerMouseClickListener(Widget* widget, Mousekey::KeycodeFlags flags);
 	void registerMouseReleaseListener(Widget* widget, Mousekey::KeycodeFlags flags);
+	void registerMouseMoveListener(Widget* widget, bool listen);
 
 	// Called by Renderer
 	inline void sizeOfRendererChanged(void) { updateSizes(); }
@@ -97,6 +98,7 @@ private:
 	Widgets widgets;
 	MouseEventListeners mouseclicklisteners;
 	MouseEventListeners mousereleaselisteners;
+	Widgets mousemovelisteners;
 
 	Widget* mouseover_widget;
 	int32_t mouse_lastpos_x, mouse_lastpos_y;

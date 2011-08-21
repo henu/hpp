@@ -78,6 +78,10 @@ public:
 	virtual void getFolderviewEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const = 0;
 	virtual uint32_t getScrollbarWidth(void) const = 0;
 	virtual uint32_t getScrollbarHeight(void) const = 0;
+	virtual uint32_t getScrollbarButtonLeftWidth(void) const = 0;
+	virtual uint32_t getScrollbarButtonRightWidth(void) const = 0;
+	virtual uint32_t getScrollbarButtonUpHeight(void) const = 0;
+	virtual uint32_t getScrollbarButtonDownHeight(void) const = 0;
 
 private:
 

@@ -458,8 +458,9 @@ void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrol
 		uint32_t slider_leftend_width = tex_left->getWidth();
 		uint32_t slider_rightend_width = tex_right->getWidth();
 		uint32_t slider_area = scrollbar_width - scrollbar_button_left_width - scrollbar_button_right_width;
-		Real slider_size = slider_leftend_width + slider_rightend_width + (slider_area - slider_leftend_width - slider_rightend_width) * scrollbar->getSliderSize();
+		Real slider_size = slider_area * scrollbar->getSliderSize();
 		Real slider_pos = (slider_area - slider_size) * scrollbar->getValue();
+// TODO: What it slider is too small?
 		renderSprite(*tex_left, Vector2(scrollbar_button_left_width + slider_pos, 0));
 		renderSprite(*tex, Vector2(scrollbar_button_left_width + slider_pos + slider_leftend_width, 0), Vector2(slider_size - slider_leftend_width - slider_rightend_width, 0));
 		renderSprite(*tex_right, Vector2(scrollbar_button_left_width + slider_pos + slider_size - slider_rightend_width, 0));
@@ -499,8 +500,9 @@ void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrol
 		uint32_t slider_topend_height = tex_top->getHeight();
 		uint32_t slider_bottomend_height = tex_bottom->getHeight();
 		uint32_t slider_area = scrollbar_height - scrollbar_button_up_height - scrollbar_button_down_height;
-		Real slider_size = slider_topend_height + slider_bottomend_height + (slider_area - slider_topend_height - slider_bottomend_height) * scrollbar->getSliderSize();
+		Real slider_size = slider_area * scrollbar->getSliderSize();
 		Real slider_pos = (slider_area - slider_size) * scrollbar->getValue();
+// TODO: What it slider is too small?
 		renderSprite(*tex_top, Vector2(0, scrollbar_button_up_height + slider_pos));
 		renderSprite(*tex, Vector2(0, scrollbar_button_up_height + slider_pos + slider_topend_height), Vector2(0, slider_size - slider_topend_height - slider_bottomend_height));
 		renderSprite(*tex_bottom, Vector2(0, scrollbar_button_up_height + slider_pos + slider_size - slider_bottomend_height));
