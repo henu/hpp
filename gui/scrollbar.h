@@ -41,7 +41,7 @@ inline void Scrollbar::doRendering(int32_t x_origin, int32_t y_origin)
 {
 	Renderer* rend = getRenderer();
 	if (!rend) return;
-	rend->renderScrollbar(x_origin, y_origin, this, ori == HORIZONTAL);
+	rend->renderScrollbar(x_origin, y_origin, this, ori == HORIZONTAL, false, false);
 }
 
 }

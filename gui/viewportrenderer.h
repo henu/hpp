@@ -76,7 +76,7 @@ public:
 	inline void loadTextureScrollbarButtonPressedUp(Path const& path) { tex_scrollbar_button_pressed_up.loadFromFile(path, DEFAULT); }
 	inline void loadTextureScrollbarButtonPressedLeft(Path const& path) { tex_scrollbar_button_pressed_left.loadFromFile(path, DEFAULT); }
 	inline void loadTextureScrollbarButtonPressedRight(Path const& path) { tex_scrollbar_button_pressed_right.loadFromFile(path, DEFAULT); }
-	inline void loadTextureScrollbarButtonPressedDown(Path const& path) { tex_scrollbar_button_pressed_bottom.loadFromFile(path, DEFAULT); }
+	inline void loadTextureScrollbarButtonPressedDown(Path const& path) { tex_scrollbar_button_pressed_down.loadFromFile(path, DEFAULT); }
 	inline void loadTextureScrollbarBgHoriz(Path const& path) { tex_scrollbar_bg_horiz.loadFromFile(path, DEFAULT); }
 	inline void loadTextureScrollbarBgHorizLeft(Path const& path) { tex_scrollbar_bg_horiz_left.loadFromFile(path, DEFAULT); }
 	inline void loadTextureScrollbarBgHorizRight(Path const& path) { tex_scrollbar_bg_horiz_right.loadFromFile(path, DEFAULT); }
@@ -149,7 +149,7 @@ private:
 	Texture tex_scrollbar_button_pressed_up;
 	Texture tex_scrollbar_button_pressed_left;
 	Texture tex_scrollbar_button_pressed_right;
-	Texture tex_scrollbar_button_pressed_bottom;
+	Texture tex_scrollbar_button_pressed_down;
 	Texture tex_scrollbar_bg_horiz;
 	Texture tex_scrollbar_bg_horiz_left;
 	Texture tex_scrollbar_bg_horiz_right;
@@ -193,7 +193,7 @@ private:
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed);
 	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview);
 	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items);
-	virtual void renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal);
+	virtual void renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed);
 	virtual uint32_t getMenubarHeight(void) const;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuseparatorMinWidth(void) const;

@@ -415,7 +415,7 @@ void ViewportRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_orig
 	}
 }
 
-void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal)
+void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed)
 {
 	prepareSprites(x_origin, y_origin);
 
@@ -425,15 +425,39 @@ void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrol
 	if (horizontal) {
 		uint32_t scrollbar_leftend_width = tex_scrollbar_bg_horiz_left.getWidth();
 		uint32_t scrollbar_rightend_width = tex_scrollbar_bg_horiz_right.getWidth();
-		renderSprite(tex_scrollbar_bg_horiz_left, Vector2(0, 0));
-		renderSprite(tex_scrollbar_bg_horiz, Vector2(scrollbar_leftend_width, 0), Vector2(scrollbar_width - scrollbar_leftend_width - scrollbar_rightend_width, scrollbar_height));
-		renderSprite(tex_scrollbar_bg_horiz_right, Vector2(scrollbar_width - scrollbar_rightend_width, 0));
+		uint32_t scrollbar_button_left_width = tex_scrollbar_button_left.getWidth();
+		uint32_t scrollbar_button_right_width = tex_scrollbar_button_right.getWidth();
+		if (up_or_left_key_pressed) {
+			renderSprite(tex_scrollbar_button_pressed_left, Vector2(0, 0));
+		} else {
+			renderSprite(tex_scrollbar_button_left, Vector2(0, 0));
+		}
+		renderSprite(tex_scrollbar_bg_horiz_left, Vector2(scrollbar_button_left_width, 0));
+		renderSprite(tex_scrollbar_bg_horiz, Vector2(scrollbar_button_left_width + scrollbar_leftend_width, 0), Vector2(scrollbar_width - scrollbar_leftend_width - scrollbar_rightend_width - scrollbar_button_left_width - scrollbar_button_right_width, scrollbar_height));
+		renderSprite(tex_scrollbar_bg_horiz_right, Vector2(scrollbar_width - scrollbar_rightend_width - scrollbar_button_right_width, 0));
+		if (down_or_right_key_pressed) {
+			renderSprite(tex_scrollbar_button_pressed_right, Vector2(scrollbar_width - scrollbar_button_right_width, 0));
+		} else {
+			renderSprite(tex_scrollbar_button_right, Vector2(scrollbar_width - scrollbar_button_right_width, 0));
+		}
 	} else {
 		uint32_t scrollbar_topend_height = tex_scrollbar_bg_vert_top.getHeight();
 		uint32_t scrollbar_bottomend_height = tex_scrollbar_bg_vert_bottom.getHeight();
-		renderSprite(tex_scrollbar_bg_vert_top, Vector2(0, 0));
-		renderSprite(tex_scrollbar_bg_vert, Vector2(0, scrollbar_topend_height), Vector2(scrollbar_width, scrollbar_height - scrollbar_topend_height - scrollbar_bottomend_height));
-		renderSprite(tex_scrollbar_bg_vert_bottom, Vector2(0, scrollbar_height - scrollbar_bottomend_height));
+		uint32_t scrollbar_button_up_height = tex_scrollbar_button_up.getHeight();
+		uint32_t scrollbar_button_down_height = tex_scrollbar_button_down.getHeight();
+		if (up_or_left_key_pressed) {
+			renderSprite(tex_scrollbar_button_pressed_up, Vector2(0, 0));
+		} else {
+			renderSprite(tex_scrollbar_button_up, Vector2(0, 0));
+		}
+		renderSprite(tex_scrollbar_bg_vert_top, Vector2(0, scrollbar_button_up_height));
+		renderSprite(tex_scrollbar_bg_vert, Vector2(0, scrollbar_button_up_height + scrollbar_topend_height), Vector2(scrollbar_width, scrollbar_height - scrollbar_topend_height - scrollbar_bottomend_height - scrollbar_button_up_height - scrollbar_button_down_height));
+		renderSprite(tex_scrollbar_bg_vert_bottom, Vector2(0, scrollbar_height - scrollbar_bottomend_height - scrollbar_button_down_height));
+		if (down_or_right_key_pressed) {
+			renderSprite(tex_scrollbar_button_pressed_down, Vector2(0, scrollbar_height - scrollbar_button_down_height));
+		} else {
+			renderSprite(tex_scrollbar_button_down, Vector2(0, scrollbar_height - scrollbar_button_down_height));
+		}
 	}
 
 }
