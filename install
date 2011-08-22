@@ -5,15 +5,29 @@ PREFIX="/usr"
 DEPS=""
 
 HEADERS_MAIN=\
+"gui/button.h "\
 "gui/callback.h "\
+"gui/containerwidget.h "\
 "gui/engine.h "\
+"gui/filedialog.h "\
+"gui/folderviewcontents.h "\
+"gui/folderview.h "\
+"gui/label.h "\
 "gui/menu.h "\
 "gui/menubar.h "\
+"gui/menucontent.h "\
 "gui/menuitem.h "\
 "gui/menuitembase.h "\
 "gui/menuseparator.h "\
 "gui/renderer.h "\
+"gui/scrollbar.h "\
+"gui/scrollbox.h "\
+"gui/textinput.h "\
+"gui/vectorcontainer.h "\
 "gui/widget.h "\
+"gui/windowarea.h "\
+"gui/window.h "\
+"3dconversions.h "\
 "3dutils.h "\
 "angle.h "\
 "arguments.h "\
@@ -26,12 +40,16 @@ HEADERS_MAIN=\
 "collisions.h "\
 "color.h "\
 "commandexec.h "\
+"compressor.h "\
+"concurrencywatcher.h "\
 "condition.h "\
 "constants.h "\
 "cores.h "\
 "debug.h "\
+"decompressor.h "\
 "exception.h "\
 "lock.h "\
+"magic.h "\
 "matrix3.h "\
 "matrix4.h "\
 "memwatch.h "\
@@ -42,6 +60,7 @@ HEADERS_MAIN=\
 "pixelformat.h "\
 "profiler.h "\
 "profilermanager.h "\
+"quaternion.h "\
 "random.h "\
 "randomizer.h "\
 "rbuf.h "\
@@ -84,6 +103,7 @@ HEADERS_3D=\
 "lightsource.h "\
 "material.h "\
 "materialmanager.h "\
+"mesh.h "\
 "meshmanager.h "\
 "mousekey.h "\
 "movable.h "\
@@ -103,6 +123,7 @@ HEADERS_3D=\
 "statemanager.h "\
 "subentity.h "\
 "submesh.h "\
+"sun.h "\
 "test3d.h "\
 "texture.h "\
 "texturemanager.h "\
@@ -124,9 +145,11 @@ SOURCES_MAIN=\
 "gui/engine.cc "\
 "gui/menu.cc "\
 "gui/menubar.cc "\
+"gui/menucontent.cc "\
 "gui/menuitem.cc "\
 "gui/menuseparator.cc "\
 "gui/widget.cc "\
+"gui/windowarea.cc "\
 "assert.cc "\
 "3dconstants.cc "\
 "commandexec.cc "\
