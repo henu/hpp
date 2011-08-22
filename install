@@ -194,7 +194,7 @@ DEB_MAINTAINER_EMAIL="henu@henu.fi"
 
 # Debian dependencies
 #TODO: In future, make deps from other sections here too!
-DEB_DEPS="libc6-dev libfreetype6 libsdl1.2debian"
+DEB_DEPS="libc6-dev, libfreetype6, libsdl1.2debian"
 
 test()
 {
