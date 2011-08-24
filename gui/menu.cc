@@ -29,6 +29,10 @@ uint32_t Menu::getMinHeight(uint32_t width) const
 	return getRenderer()->getMenubarHeight();
 }
 
+void Menu::close(void)
+{
+	content.hide();
+}
 
 bool Menu::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key)
 {

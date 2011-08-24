@@ -1,5 +1,6 @@
 #include "menuitem.h"
 
+#include "menucontent.h"
 #include "renderer.h"
 
 namespace Hpp
@@ -51,6 +52,11 @@ void Menuitem::onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t mouse_
 			if (callback) {
 				callback(widget, callback_data);
 			}
+		}
+		// Ask container to close
+		Menucontent* menucontent = dynamic_cast< Menucontent* >(getParent());
+		if (menucontent) {
+			menucontent->close();
 		}
 	}
 }

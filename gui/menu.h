@@ -20,6 +20,8 @@ class Menuitembase;
 class Menu : public Widget
 {
 
+	friend class Menucontent;
+
 public:
 
 	Menu(void);
@@ -32,6 +34,11 @@ public:
 	// Virtual functions for Widget
 	virtual uint32_t getMaxWidth(void) const;
 	virtual uint32_t getMinHeight(uint32_t width) const;
+
+private:
+
+	// Called by friend class Menucontent
+	void close(void);
 
 private:
 

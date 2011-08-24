@@ -1,5 +1,7 @@
 #include "menucontent.h"
 
+#include "menu.h"
+
 namespace Hpp
 {
 
@@ -22,6 +24,12 @@ void Menucontent::hide(void)
 void Menucontent::reveal(void)
 {
 	setState(ENABLED);
+}
+
+void Menucontent::close(void)
+{
+	Menu* parent = dynamic_cast< Menu* >(getParent());
+	parent->close();
 }
 
 uint32_t Menucontent::getMaxWidth(void) const

@@ -77,40 +77,42 @@ bool Engine::mouseEvent(Event const& event)
 		widget_under_mouse = windowarea->mouseOverRecursive(0, 0, event.x, event.y);
 	}
 
-	// Check if some Widget is interested about these events
+	// Check if some Widget is interested about these events.
+	// Widgets needs to be looped in a special way, so they can
+	// alter these containers from these callback funtions
 	if (event.type == Event::MOUSE_KEY_DOWN) {
-		for (MouseEventListeners::iterator mouseclicklisteners_it = mouseclicklisteners.begin();
-		     mouseclicklisteners_it != mouseclicklisteners.end();
-		     mouseclicklisteners_it ++) {
+		Widget* listener = NULL;
+		MouseEventListeners::iterator mouseclicklisteners_it;
+		while ((mouseclicklisteners_it = mouseclicklisteners.upper_bound(listener)) != mouseclicklisteners.end()) {
+			listener = mouseclicklisteners_it->first;
 			Mousekey::KeycodeFlags flags = mouseclicklisteners_it->second;
 			if ((event.mousekey == Mousekey::LEFT && (flags & Mousekey::FLAG_LEFT)) ||
 			    (event.mousekey == Mousekey::MIDDLE && (flags & Mousekey::FLAG_MIDDLE)) ||
 			    (event.mousekey == Mousekey::RIGHT && (flags & Mousekey::FLAG_RIGHT)) ||
 			    (event.mousekey == Mousekey::WHEEL_UP && (flags & Mousekey::FLAG_WHEEL_UP)) ||
 			    (event.mousekey == Mousekey::WHEEL_DOWN && (flags & Mousekey::FLAG_WHEEL_DOWN))) {
-				Widget* listener = mouseclicklisteners_it->first;
 				listener->onMouseKeyDownOther(widget_under_mouse, event.x - listener->getAbsolutePositionX(), event.y - listener->getAbsolutePositionY(), event.mousekey);
 			}
 		}
 	} else if (event.type == Event::MOUSE_KEY_UP) {
-		for (MouseEventListeners::iterator mousereleaselisteners_it = mousereleaselisteners.begin();
-		     mousereleaselisteners_it != mousereleaselisteners.end();
-		     mousereleaselisteners_it ++) {
+		Widget* listener = NULL;
+		MouseEventListeners::iterator mousereleaselisteners_it;
+		while ((mousereleaselisteners_it = mousereleaselisteners.upper_bound(listener)) != mousereleaselisteners.end()) {
+			listener = mousereleaselisteners_it->first;
 			Mousekey::KeycodeFlags flags = mousereleaselisteners_it->second;
 			if ((event.mousekey == Mousekey::LEFT && (flags & Mousekey::FLAG_LEFT)) ||
 			    (event.mousekey == Mousekey::MIDDLE && (flags & Mousekey::FLAG_MIDDLE)) ||
 			    (event.mousekey == Mousekey::RIGHT && (flags & Mousekey::FLAG_RIGHT)) ||
 			    (event.mousekey == Mousekey::WHEEL_UP && (flags & Mousekey::FLAG_WHEEL_UP)) ||
 			    (event.mousekey == Mousekey::WHEEL_DOWN && (flags & Mousekey::FLAG_WHEEL_DOWN))) {
-				Widget* listener = mousereleaselisteners_it->first;
 				listener->onMouseKeyUpOther(widget_under_mouse, event.x - listener->getAbsolutePositionX(), event.y - listener->getAbsolutePositionY(), event.mousekey);
 			}
 		}
 	} else if (event.type == Event::MOUSE_MOVE) {
-		for (Widgets::iterator mousemovelisteners_it = mousemovelisteners.begin();
-		     mousemovelisteners_it != mousemovelisteners.end();
-		     mousemovelisteners_it ++) {
-			Widget* listener = *mousemovelisteners_it;
+		Widget* listener = NULL;
+		Widgets::iterator mousemovelisteners_it;
+		while ((mousemovelisteners_it = mousemovelisteners.upper_bound(listener)) != mousemovelisteners.end()) {
+			listener = *mousemovelisteners_it;
 			listener->onMouseMove(event.x - listener->getAbsolutePositionX(), event.y - listener->getAbsolutePositionY());
 		}
 	}
@@ -140,6 +142,7 @@ void Engine::unregisterWidget(Widget* widget)
 	// Check if this Widget is listening for mouse events
 	mouseclicklisteners.erase(widget);
 	mousereleaselisteners.erase(widget);
+	mousemovelisteners.erase(widget);
 	// Check if this Widget was under mouse
 	if (mouseover_widget == widget) {
 		mouseover_widget = NULL;

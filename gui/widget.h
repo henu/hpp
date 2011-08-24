@@ -79,6 +79,7 @@ protected:
 	inline void markSizeChanged(void);
 
 	inline Engine* getEngine(void) { return engine; }
+	inline Widget* getParent(void) { return parent; }
 
 	// Registers child
 	inline void addChild(Widget* child) { child->setEngine(engine); child->setParent(this); }

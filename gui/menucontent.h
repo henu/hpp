@@ -16,6 +16,7 @@ class Menucontent : public Widget
 {
 
 	friend class Menu;
+	friend class Menuitem;
 
 public:
 
@@ -30,6 +31,9 @@ private:
 
 	// Called by friend class Menu
 	inline void addItem(Menuitembase* item) { items.push_back(item); addChild(item); markSizeChanged(); }
+
+	// Called by friend class Menuitem
+	void close(void);
 
 private:
 
