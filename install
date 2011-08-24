@@ -23,6 +23,7 @@ HEADERS_MAIN=\
 "gui/scrollbar.h "\
 "gui/scrollbox.h "\
 "gui/textinput.h "\
+"gui/textinputcontents.h "\
 "gui/vectorcontainer.h "\
 "gui/widget.h "\
 "gui/windowarea.h "\

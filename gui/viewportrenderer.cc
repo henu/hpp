@@ -263,7 +263,7 @@ void ViewportRenderer::renderLabel(int32_t x_origin, int32_t y_origin, Label con
 	                  Vector2(x_origin + (width - label_width) / 2.0, viewport->getHeight() - y_origin - height + (height - font_label_size) / 2.0));
 }
 
-void ViewportRenderer::renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput, UnicodeString const& value)
+void ViewportRenderer::renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput)
 {
 	prepareSprites(x_origin, y_origin);
 	Real textinput_width = textinput->getWidth();
@@ -285,13 +285,10 @@ void ViewportRenderer::renderTextinput(int32_t x_origin, int32_t y_origin, Texti
 	renderSprite(tex_field_edge_topright,
 	             Vector2(textinput_width - edge_right_width, 0),
 	             Vector2(edge_right_width, edge_top_height));
-	// Middle edges and content
+	// Middle edges
 	renderSprite(tex_field_edge_left,
 	             Vector2(0, edge_top_height),
 	             Vector2(edge_left_width, content_height));
-	renderSprite(tex_field_bg,
-	             Vector2(edge_left_width, edge_top_height),
-	             Vector2(textinput_width - edge_left_width - edge_right_width, content_height));
 	renderSprite(tex_field_edge_right,
 	             Vector2(textinput_width - edge_right_width, edge_top_height),
 	             Vector2(edge_right_width, content_height));
@@ -305,14 +302,28 @@ void ViewportRenderer::renderTextinput(int32_t x_origin, int32_t y_origin, Texti
 	renderSprite(tex_field_edge_bottomright,
 	             Vector2(textinput_width - edge_right_width, edge_top_height + content_height),
 	             Vector2(edge_right_width, edge_bottom_height));
+}
+
+void ViewportRenderer::renderTextinputContents(int32_t x_origin, int32_t y_origin, TextinputContents const* textinputcontents)
+{
+	prepareSprites(x_origin, y_origin);
+
+	Real textinputcontents_width = textinputcontents->getWidth();
+
+	Real content_height = font_input_size;
+
+	// Background
+	renderSprite(tex_field_bg,
+	             Vector2(0, 0),
+	             Vector2(textinputcontents_width, content_height));
 
 	// Value
 	textSetColor(Color(0, 0, 0));
 	textSetHorizontalAlign(LEFT);
 	textSetVerticalAlign(CENTER);
-	renderString(value, font_input_size,
-	             Vector2(edge_left_width, edge_top_height),
-	             Vector2(textinput_width - edge_left_width - edge_right_width, content_height));
+	renderString(textinputcontents->getValue(), font_input_size,
+	             Vector2(0, 0),
+	             Vector2(textinputcontents_width, content_height));
 }
 
 void ViewportRenderer::renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed)
@@ -397,7 +408,6 @@ void ViewportRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_orig
 	Real folderviewcontents_width = folderviewcontents->getWidth();
 
 	Real pos_y = 0;
-	setFontSize(font_input_size);
 	textSetColor(Color(0, 0, 0));
 	textSetHorizontalAlign(LEFT);
 	textSetVerticalAlign(CENTER);
@@ -570,14 +580,12 @@ uint32_t ViewportRenderer::getLabelHeight(void) const
 	return font_label_size;
 }
 
-uint32_t ViewportRenderer::getMinimumTextinputWidth(void) const
+void ViewportRenderer::getTextinputEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const
 {
-	return tex_field_edge_left.getWidth() + tex_field_edge_right.getWidth() + textinput_min_size;
-}
-
-uint32_t ViewportRenderer::getTextinputHeight(void) const
-{
-	return tex_field_edge_top.getHeight() + tex_field_edge_bottom.getHeight() + font_input_size;
+	edge_top = tex_field_edge_top.getHeight();
+	edge_left = tex_field_edge_left.getWidth();
+	edge_right = tex_field_edge_right.getWidth();
+	edge_bottom = tex_field_edge_bottom.getHeight();
 }
 
 uint32_t ViewportRenderer::getButtonWidth(UnicodeString const& label) const

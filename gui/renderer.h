@@ -21,6 +21,7 @@ class Menu;
 class Window;
 class Label;
 class Textinput;
+class TextinputContents;
 class Button;
 class Folderview;
 class FolderviewContents;
@@ -49,7 +50,8 @@ public:
 	virtual void renderMenuitem(int32_t x_origin, int32_t y_origin, Menuitem const* menuitem, UnicodeString const& label, bool mouse_over) = 0;
 	virtual void renderWindow(int32_t x_origin, int32_t y_origin, Window const* window, UnicodeString const& title) = 0;
 	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str) = 0;
-	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput, UnicodeString const& value) = 0;
+	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput) = 0;
+	virtual void renderTextinputContents(int32_t x_origin, int32_t y_origin, TextinputContents const* textinputcontents) = 0;
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed) = 0;
 	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview) = 0;
 	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items) = 0;
@@ -69,6 +71,9 @@ public:
 	virtual uint32_t getLabelHeight(void) const = 0;
 	virtual uint32_t getMinimumTextinputWidth(void) const = 0;
 	virtual uint32_t getTextinputHeight(void) const = 0;
+	virtual uint32_t getMinimumTextinputContentsWidth(UnicodeString const& value) const = 0;
+	virtual uint32_t getTextinputContentsHeight(void) const = 0;
+	virtual void getTextinputEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const = 0;
 	virtual uint32_t getButtonWidth(UnicodeString const& label) const = 0;
 	virtual uint32_t getButtonHeight(void) const = 0;
 	virtual uint32_t getMinimumFolderviewWidth(void) const = 0;
