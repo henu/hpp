@@ -37,7 +37,6 @@ public:
 
 	// Size getters
 	inline virtual uint32_t getMinWidth(void) const { return 0; }
-	inline virtual uint32_t getMaxWidth(void) const { return 0; }
 	inline virtual uint32_t getMinHeight(uint32_t width) const { (void)width; return 0; }
 
 private:

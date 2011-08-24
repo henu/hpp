@@ -32,16 +32,16 @@ void Menucontent::close(void)
 	parent->close();
 }
 
-uint32_t Menucontent::getMaxWidth(void) const
+uint32_t Menucontent::getMinWidth(void) const
 {
-	uint32_t max_width = 0;
+	uint32_t min_width = 0;
 	for (Menuitems::const_iterator items_it = items.begin();
 	     items_it != items.end();
 	     items_it ++) {
 		Menuitembase const* item = *items_it;
-		max_width = std::max(max_width, item->getMaxWidth());
+		min_width = std::max(min_width, item->getMinWidth());
 	}
-	return max_width;
+	return min_width;
 }
 
 uint32_t Menucontent::getMinHeight(uint32_t width) const

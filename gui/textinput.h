@@ -23,7 +23,6 @@ public:
 	inline void setValue(UnicodeString const& value) { this->value = value; }
 
 	// Virtual functions for Widget
-	inline virtual uint32_t getMaxWidth(void) const;
 	inline virtual uint32_t getMinWidth(void) const;
 	inline virtual uint32_t getMinHeight(uint32_t width) const;
 
@@ -43,13 +42,6 @@ inline Textinput::Textinput(void)
 
 inline Textinput::~Textinput(void)
 {
-}
-
-inline uint32_t Textinput::getMaxWidth(void) const
-{
-	Renderer const* rend = getRenderer();
-	if (!rend) return 0;
-	return rend->getMinimumTextinputWidth();
 }
 
 inline uint32_t Textinput::getMinWidth(void) const

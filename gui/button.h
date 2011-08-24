@@ -23,7 +23,6 @@ public:
 	inline void setLabel(UnicodeString const& label) { this->label = label; markSizeChanged(); }
 
 	// Virtual functions for Widget
-	inline virtual uint32_t getMaxWidth(void) const;
 	inline virtual uint32_t getMinWidth(void) const;
 	inline virtual uint32_t getMinHeight(uint32_t width) const;
 
@@ -43,13 +42,6 @@ inline Button::Button(void)
 
 inline Button::~Button(void)
 {
-}
-
-inline uint32_t Button::getMaxWidth(void) const
-{
-	Renderer const* rend = getRenderer();
-	if (!rend) return 0;
-	return rend->getButtonWidth(label);
 }
 
 inline uint32_t Button::getMinWidth(void) const

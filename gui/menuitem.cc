@@ -18,7 +18,7 @@ Menuitem::~Menuitem(void)
 {
 }
 
-uint32_t Menuitem::getMaxWidth(void) const
+uint32_t Menuitem::getMinWidth(void) const
 {
 	return getRenderer()->getMenuitemWidth(label);
 }

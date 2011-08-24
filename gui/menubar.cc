@@ -40,7 +40,7 @@ void Menubar::updateSizeAndPositionOfMenus(void)
 	     menus_it ++) {
 		Menu* menu = *menus_it;
 		setChildPosition(menu, menu_x, 0);
-		uint32_t menu_width = menu->getMaxWidth();
+		uint32_t menu_width = menu->getMinWidth();
 		uint32_t menu_height = menu->getMinHeight(0);
 		setChildSize(menu, menu_width, menu_height);
 		menu_x += menu_width;

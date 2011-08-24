@@ -26,7 +26,6 @@ public:
 	inline void addWidget(Containerwidget* widget);
 
 	inline virtual uint32_t getMinWidth(void) const;
-	inline virtual uint32_t getMaxWidth(void) const;
 	inline virtual uint32_t getMinHeight(uint32_t width) const;
 
 private:
@@ -90,28 +89,6 @@ inline uint32_t Vectorcontainer::getMinWidth(void) const
 		}
 	}
 	return min_width;
-}
-
-inline uint32_t Vectorcontainer::getMaxWidth(void) const
-{
-	uint32_t max_width = 0;
-	if (dir == HORIZONTAL) {
-		for (Widgets::const_iterator widgets_it = widgets.begin();
-		     widgets_it != widgets.end();
-		     widgets_it ++) {
-			Containerwidget const* widget = *widgets_it;
-			max_width += widget->getMaxWidth();
-		}
-	} else {
-		for (Widgets::const_iterator widgets_it = widgets.begin();
-		     widgets_it != widgets.end();
-		     widgets_it ++) {
-			Containerwidget const* widget = *widgets_it;
-			max_width = std::min(max_width, widget->getMaxWidth());
-		}
-		max_width = std::max(getMinWidth(), max_width);
-	}
-	return max_width;
 }
 
 inline uint32_t Vectorcontainer::getMinHeight(uint32_t width) const

@@ -25,7 +25,7 @@ public:
 	inline void setCallbackFunc(CallbackFunc callback, void* data);
 
 	// Virtual functions for Widget
-	virtual uint32_t getMaxWidth(void) const;
+	virtual uint32_t getMinWidth(void) const;
 	virtual uint32_t getMinHeight(uint32_t width) const;
 
 private:
