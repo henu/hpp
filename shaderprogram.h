@@ -166,7 +166,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 			// Throw exception
 			std::string error_str(error_c_str, error_str_len);
 			delete[] error_c_str;
-			throw Exception(error_str);
+			throw Exception(std::string("Unable to compile GLSL shader! Reason: ") + error_str);
 		}
 		HppCheckGlErrors();
 	}
@@ -204,7 +204,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 		// Throw exception
 		std::string error_str(error_c_str, error_str_len);
 		delete[] error_c_str;
-		throw Exception(error_str);
+		throw Exception(std::string("Unable to link GLSL shader! Reason: ") + error_str);
 	}
 
 	lprogs[flags] = new_lprog;
