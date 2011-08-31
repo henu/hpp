@@ -279,7 +279,7 @@ inline void Widget::setState(State state)
 
 inline bool Widget::mouseOver(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const
 {
-	if (state == ENABLED &&
+	if (state != HIDDEN &&
 	    mouse_x >= x_origin + x && mouse_x < x_origin + x + (int32_t)width &&
 	    mouse_y >= y_origin + y && mouse_y < y_origin + y + (int32_t)height) {
 		return true;
@@ -289,6 +289,9 @@ inline bool Widget::mouseOver(int32_t x_origin, int y_origin, int32_t mouse_x, i
 
 inline Widget const* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const
 {
+	if (state == HIDDEN) {
+		return NULL;
+	}
 	for (Children::const_iterator children_it = children.begin();
 	     children_it != children.end();
 	     children_it ++) {
@@ -306,6 +309,9 @@ inline Widget const* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, 
 
 inline Widget* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y)
 {
+	if (state == HIDDEN) {
+		return NULL;
+	}
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
 	     children_it ++) {
