@@ -17,6 +17,7 @@ namespace Gui
 
 Engine::Engine(void) :
 rend(NULL),
+keyboardlistener(NULL),
 mouseover_widget(NULL),
 menubar(NULL)
 {
@@ -129,6 +130,17 @@ bool Engine::mouseEvent(Event const& event)
 	return false;
 }
 
+bool Engine::keyboardEvent(Event const& event)
+{
+	if (keyboardlistener) {
+		if (event.type == Event::KEY_DOWN) {
+			keyboardlistener->onKeyDown(event.key, event.unicode);
+		}
+		return true;
+	}
+	return false;
+}
+
 void Engine::registerWidget(Widget* widget)
 {
 	HppAssert(widgets.find(widget) == widgets.end(), "Widget is already registered to Engine!");
@@ -143,6 +155,9 @@ void Engine::unregisterWidget(Widget* widget)
 	mouseclicklisteners.erase(widget);
 	mousereleaselisteners.erase(widget);
 	mousemovelisteners.erase(widget);
+	if (keyboardlistener == widget) {
+		keyboardlistener = NULL;
+	}
 	// Check if this Widget was under mouse
 	if (mouseover_widget == widget) {
 		mouseover_widget = NULL;
@@ -188,6 +203,14 @@ void Engine::registerMouseMoveListener(Widget* widget, bool listen)
 	} else {
 		mousemovelisteners.erase(widget);
 	}
+}
+
+void Engine::registerKeyboardListener(Widget* widget)
+{
+	if (keyboardlistener && keyboardlistener != widget) {
+		keyboardlistener->onKeyboardListeningStop();
+	}
+	keyboardlistener = widget;
 }
 
 void Engine::pushRenderarealimit(int32_t x, int32_t y, uint32_t width, uint32_t height)

@@ -53,6 +53,11 @@ void Widget::listenMouseMoves(bool listen)
 	engine->registerMouseMoveListener(this, listen);
 }
 
+void Widget::listenKeyboard(void)
+{
+	engine->registerKeyboardListener(this);
+}
+
 void Widget::setEngine(Engine* engine)
 {
 	if (this->engine) {

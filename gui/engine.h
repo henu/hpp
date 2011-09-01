@@ -45,6 +45,7 @@ public:
 
 	// Returns true if event was consumed.
 	bool mouseEvent(Event const& event);
+	bool keyboardEvent(Event const& event);
 
 private:
 
@@ -61,6 +62,7 @@ private:
 	void registerMouseClickListener(Widget* widget, Mousekey::KeycodeFlags flags);
 	void registerMouseReleaseListener(Widget* widget, Mousekey::KeycodeFlags flags);
 	void registerMouseMoveListener(Widget* widget, bool listen);
+	void registerKeyboardListener(Widget* widget);
 
 	// Called by Renderer
 	inline void sizeOfRendererChanged(void) { updateSizes(); }
@@ -99,6 +101,7 @@ private:
 	MouseEventListeners mouseclicklisteners;
 	MouseEventListeners mousereleaselisteners;
 	Widgets mousemovelisteners;
+	Widget* keyboardlistener;
 
 	Widget* mouseover_widget;
 	int32_t mouse_lastpos_x, mouse_lastpos_y;
