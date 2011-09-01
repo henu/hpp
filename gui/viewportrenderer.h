@@ -190,7 +190,7 @@ private:
 	virtual void renderWindow(int32_t x_origin, int32_t y_origin, Window const* window, UnicodeString const& title);
 	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str);
 	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput);
-	virtual void renderTextinputContents(int32_t x_origin, int32_t y_origin, TextinputContents const* textinputcontents);
+	virtual void renderTextinputContents(int32_t x_origin, int32_t y_origin, TextinputContents const* textinputcontents, ssize_t cursor);
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed);
 	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview);
 	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items);
@@ -209,7 +209,7 @@ private:
 	virtual uint32_t getLabelHeight(void) const;
 	virtual uint32_t getMinimumTextinputWidth(void) const { return tex_field_edge_left.getWidth() + tex_field_edge_right.getWidth() + textinput_min_size; }
 	virtual uint32_t getTextinputHeight(void) const { return tex_field_edge_top.getHeight() + tex_field_edge_bottom.getHeight() + font_input_size; }
-	virtual uint32_t getMinimumTextinputContentsWidth(UnicodeString const& value) const { return font.getStringWidth(value, font_input_size); }
+	virtual uint32_t getMinimumTextinputContentsWidth(UnicodeString const& value) const { return font.getStringWidth(value, font_input_size) + font.getStringWidth("|", font_input_size); }
 	virtual uint32_t getTextinputContentsHeight(void) const { return font_input_size; }
 	virtual void getTextinputEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const;
 	virtual uint32_t getButtonWidth(UnicodeString const& label) const;

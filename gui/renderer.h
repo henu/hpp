@@ -51,7 +51,7 @@ public:
 	virtual void renderWindow(int32_t x_origin, int32_t y_origin, Window const* window, UnicodeString const& title) = 0;
 	virtual void renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str) = 0;
 	virtual void renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput) = 0;
-	virtual void renderTextinputContents(int32_t x_origin, int32_t y_origin, TextinputContents const* textinputcontents) = 0;
+	virtual void renderTextinputContents(int32_t x_origin, int32_t y_origin, TextinputContents const* textinputcontents, ssize_t cursor) = 0;
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed) = 0;
 	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview) = 0;
 	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items) = 0;

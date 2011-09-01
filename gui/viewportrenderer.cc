@@ -14,6 +14,7 @@
 
 #include "../display.h"
 #include "../viewport.h"
+#include "../time.h"
 #include "../assert.h"
 #include <cmath>
 
@@ -304,7 +305,7 @@ void ViewportRenderer::renderTextinput(int32_t x_origin, int32_t y_origin, Texti
 	             Vector2(edge_right_width, edge_bottom_height));
 }
 
-void ViewportRenderer::renderTextinputContents(int32_t x_origin, int32_t y_origin, TextinputContents const* textinputcontents)
+void ViewportRenderer::renderTextinputContents(int32_t x_origin, int32_t y_origin, TextinputContents const* textinputcontents, ssize_t cursor)
 {
 	prepareSprites(x_origin, y_origin);
 
@@ -324,6 +325,14 @@ void ViewportRenderer::renderTextinputContents(int32_t x_origin, int32_t y_origi
 	renderString(textinputcontents->getValue(), font_input_size,
 	             Vector2(0, 0),
 	             Vector2(textinputcontents_width, content_height));
+
+	// Cursor
+	if (cursor >= 0 && now().getNanoseconds() < 500000000) {
+		Real cursor_pos = font.getStringWidth(textinputcontents->getValue().substr(0, cursor), font_input_size);
+		renderString("|", font_input_size,
+			     Vector2(cursor_pos, 0),
+			     Vector2(textinputcontents_width - cursor_pos, content_height));
+	}
 }
 
 void ViewportRenderer::renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed)
