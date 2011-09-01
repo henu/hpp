@@ -103,6 +103,7 @@ protected:
 	void listenMouseReleases(Mousekey::KeycodeFlags flags);
 	void listenMouseMoves(bool listen = true);
 	void listenKeyboard(void);
+	void stopListeningKeyboard(void);
 
 private:
 

@@ -58,6 +58,11 @@ void Widget::listenKeyboard(void)
 	engine->registerKeyboardListener(this);
 }
 
+void Widget::stopListeningKeyboard(void)
+{
+	engine->registerKeyboardListener(NULL);
+}
+
 void Widget::setEngine(Engine* engine)
 {
 	if (this->engine) {
