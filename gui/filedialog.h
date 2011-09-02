@@ -7,6 +7,7 @@
 #include "label.h"
 #include "textinput.h"
 #include "folderview.h"
+#include "callback.h"
 
 #include <string>
 
@@ -23,6 +24,9 @@ public:
 
 	enum Type { SAVE, OPEN };
 
+	static uint32_t const SUBMIT = 0;
+	static uint32_t const CANCEL = 1;
+
 	inline Filedialog(void);
 	inline virtual ~Filedialog(void);
 
@@ -30,12 +34,19 @@ public:
 	inline void setFileextension(std::string const& fileext) { this->fileext = fileext; }
 	inline void setSelectMultiple(bool selectmultiple = true) { this->selectmultiple = selectmultiple; }
 
+	inline void setCallbackFunc(CallbackFuncWithType callback, void* data);
+
+	inline Path getPath(void) const;
+
 private:
 
 	// Options
 	Type type;
 	std::string fileext;
 	bool selectmultiple;
+
+	CallbackFuncWithType callback;
+	void* callback_data;
 
 	// Widgets
 	Vectorcontainer maincontainer;
@@ -57,7 +68,8 @@ private:
 
 inline Filedialog::Filedialog(void) :
 type(SAVE),
-selectmultiple(false)
+selectmultiple(false),
+callback(NULL)
 {
 	Path maps_path = Path::getConfig() / "hme_mapeditor" / "levels";
 	ensurePathExists(maps_path);
@@ -103,16 +115,33 @@ selectmultiple(false)
 
 	// Set callbacks
 	pathinput.setCallbackFunc(guiCallback, this);
+	filenameinput.setCallbackFunc(guiCallback, this);
 }
 
 inline Filedialog::~Filedialog(void)
 {
 }
 
+inline void Filedialog::setCallbackFunc(CallbackFuncWithType callback, void* data)
+{
+	this->callback = callback;
+	callback_data = data;
+}
+
+inline Path Filedialog::getPath(void) const
+{
+	return folderview.getFolder() / filenameinput.getValue().stl_string();
+}
+
 inline void Filedialog::guiCallback(Widget* widget, void* filedialog_raw)
 {
 	Filedialog* filedialog = reinterpret_cast< Filedialog* >(filedialog_raw);
-	if (widget == &filedialog->pathinput) {
+	if (widget == &filedialog->filenameinput) {
+		// Do callback if it has been set
+		if (filedialog->callback) {
+			filedialog->callback(filedialog, Filedialog::SUBMIT, filedialog->callback_data);
+		}
+	} else if (widget == &filedialog->pathinput) {
 		UnicodeString old_value = filedialog->folderview.getFolder().toString(true);
 		try {
 			Path new_path(filedialog->pathinput.getValue().stl_string());
