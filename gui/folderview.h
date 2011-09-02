@@ -24,6 +24,7 @@ public:
 	inline virtual ~Folderview(void);
 
 	inline void setFolder(Path const& path);
+	inline Path getFolder(void) const;
 
 	// Virtual functions for Widget
 	inline virtual uint32_t getMinWidth(void) const;
@@ -58,6 +59,11 @@ inline Folderview::~Folderview(void)
 inline void Folderview::setFolder(Path const& path)
 {
 	contents.setFolder(path);
+}
+
+inline Path Folderview::getFolder(void) const
+{
+	return contents.getFolder();
 }
 
 inline uint32_t Folderview::getMinWidth(void) const

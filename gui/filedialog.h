@@ -44,12 +44,14 @@ private:
 	Vectorcontainer buttonscontainer;
 	Label filenamelabel;
 	Textinput filenameinput;
-// TODO: Change to correct types!
 	Textinput pathinput;
 	Button newfolderbutton;
 	Folderview folderview;
 	Button cancelbutton;
 	Button savebutton;
+
+	// Callback function
+	inline static void guiCallback(Widget* widget, void* filedialog_raw);
 
 };
 
@@ -98,10 +100,28 @@ selectmultiple(false)
 	savebutton.setLabel("Save");
 	buttonscontainer.addWidget(&cancelbutton);
 	buttonscontainer.addWidget(&savebutton);
+
+	// Set callbacks
+	pathinput.setCallbackFunc(guiCallback, this);
 }
 
 inline Filedialog::~Filedialog(void)
 {
+}
+
+inline void Filedialog::guiCallback(Widget* widget, void* filedialog_raw)
+{
+	Filedialog* filedialog = reinterpret_cast< Filedialog* >(filedialog_raw);
+	if (widget == &filedialog->pathinput) {
+		UnicodeString old_value = filedialog->folderview.getFolder().toString(true);
+		try {
+			Path new_path(filedialog->pathinput.getValue().stl_string());
+			filedialog->folderview.setFolder(new_path);
+		}
+		catch ( ... ) {
+			filedialog->pathinput.setValue(old_value);
+		}
+	}
 }
 
 }

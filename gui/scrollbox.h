@@ -5,6 +5,8 @@
 #include "callback.h"
 #include "widget.h"
 
+#include "../vector2.h"
+
 namespace Hpp
 {
 
