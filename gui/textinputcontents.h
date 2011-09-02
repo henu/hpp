@@ -1,6 +1,7 @@
 #ifndef HPP_GUI_TEXTINPUTCONTENTS_H
 #define HPP_GUI_TEXTINPUTCONTENTS_H
 
+#include "renderer.h"
 #include "widget.h"
 
 #include "../unicodestring.h"
@@ -11,12 +12,14 @@ namespace Hpp
 namespace Gui
 {
 
+class Textinput;
+
 class TextinputContents : public Widget
 {
 
 public:
 
-	inline TextinputContents(void);
+	inline TextinputContents(Textinput* textinput);
 	inline virtual ~TextinputContents(void);
 
 	inline void setValue(UnicodeString const& value);
@@ -28,20 +31,25 @@ public:
 
 private:
 
+	Textinput* textinput;
+
 	UnicodeString value;
 	ssize_t cursor;
 
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
 	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
-	inline virtual void onKeyDown(Key::Keycode keycode, UChr uchr);
+	virtual void onKeyDown(Key::Keycode keycode, UChr uchr);
 	inline virtual void onKeyboardListeningStop(void);
 
 	inline void reloadFolderContents(void);
 
+	void updateScrolling(void);
+
 };
 
-inline TextinputContents::TextinputContents(void) :
+inline TextinputContents::TextinputContents(Textinput* textinput) :
+textinput(textinput),
 cursor(-1)
 {
 }
@@ -88,32 +96,6 @@ inline bool TextinputContents::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, 
 		return true;
 	}
 	return false;
-}
-
-inline void TextinputContents::onKeyDown(Key::Keycode keycode, UChr uchr)
-{
-	(void)keycode;
-	if (keycode == Key::LEFT) {
-		cursor --;
-		if (cursor < 0) cursor = 0;
-	} else if (keycode == Key::RIGHT) {
-		cursor ++;
-		if (cursor > (ssize_t)value.size()) cursor = value.size();
-	} else if (keycode == Key::HOME) {
-		cursor = 0;
-	} else if (keycode == Key::END) {
-		cursor = value.size();
-	} else if (keycode == Key::BACKSPACE) {
-		if (cursor > 0) {
-			value = value.substr(0, cursor - 1) + value.substr(cursor);
-			cursor --;
-		}
-	} else if (keycode == Key::DELETE) {
-		value = value.substr(0, cursor) + value.substr(cursor + 1);
-	} else if (uchr >= 32 && cursor >= 0) {
-		value = value.substr(0, cursor) + uchr + value.substr(cursor);
-		cursor ++;
-	}
 }
 
 inline void TextinputContents::onKeyboardListeningStop(void)

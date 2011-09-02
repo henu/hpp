@@ -5,6 +5,7 @@
 #include "scrollbox.h"
 #include "containerwidget.h"
 #include "renderer.h"
+#include "callback.h"
 
 namespace Hpp
 {
@@ -15,12 +16,17 @@ namespace Gui
 class Textinput : public Containerwidget
 {
 
+	friend class TextinputContents;
+
 public:
 
 	inline Textinput(void);
 	inline virtual ~Textinput(void);
 
 	inline void setValue(UnicodeString const& value);
+	inline UnicodeString getValue(void) const;
+
+	inline void setCallbackFunc(CallbackFunc callback, void* data);
 
 	// Virtual functions for Widget
 	inline virtual uint32_t getMinWidth(void) const;
@@ -28,8 +34,16 @@ public:
 
 private:
 
+	// Called by TextinputContents
+	inline void submitted(void);
+
+private:
+
 	Scrollbox scrollbox;
 	TextinputContents contents;
+
+	CallbackFunc callback;
+	void* callback_data;
 
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
@@ -40,7 +54,9 @@ private:
 
 };
 
-inline Textinput::Textinput(void)
+inline Textinput::Textinput(void) :
+contents(this),
+callback(NULL)
 {
 	addChild(&scrollbox);
 	scrollbox.setHorizontalScrollbar(Scrollbox::NEVER);
@@ -57,6 +73,17 @@ inline void Textinput::setValue(UnicodeString const& value)
 	contents.setValue(value);
 }
 
+inline UnicodeString Textinput::getValue(void) const
+{
+	return contents.getValue();
+}
+
+inline void Textinput::setCallbackFunc(CallbackFunc callback, void* data)
+{
+	this->callback = callback;
+	callback_data = data;
+}
+
 inline uint32_t Textinput::getMinWidth(void) const
 {
 	Renderer const* rend = getRenderer();
@@ -70,6 +97,14 @@ inline uint32_t Textinput::getMinHeight(uint32_t width) const
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
 	return rend->getTextinputHeight();
+}
+
+inline void Textinput::submitted(void)
+{
+	// Do callback if it has been set
+	if (callback) {
+		callback(this, callback_data);
+	}
 }
 
 inline void Textinput::doRendering(int32_t x_origin, int32_t y_origin)

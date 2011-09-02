@@ -149,6 +149,7 @@ SOURCES_MAIN=\
 "gui/menucontent.cc "\
 "gui/menuitem.cc "\
 "gui/menuseparator.cc "\
+"gui/textinputcontents.cc "\
 "gui/widget.cc "\
 "gui/windowarea.cc "\
 "assert.cc "\
