@@ -5,7 +5,7 @@
 #include "byteq.h"
 #include <zlib.h>
 
-namespace Elibcompress
+namespace Hpp
 {
 
 class Decompressor
