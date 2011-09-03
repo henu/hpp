@@ -116,6 +116,10 @@ callback(NULL)
 	// Set callbacks
 	pathinput.setCallbackFunc(guiCallback, this);
 	filenameinput.setCallbackFunc(guiCallback, this);
+	newfolderbutton.setCallbackFunc(guiCallback, this);
+	cancelbutton.setCallbackFunc(guiCallback, this);
+	savebutton.setCallbackFunc(guiCallback, this);
+
 }
 
 inline Filedialog::~Filedialog(void)
@@ -136,7 +140,12 @@ inline Path Filedialog::getPath(void) const
 inline void Filedialog::guiCallback(Widget* widget, void* filedialog_raw)
 {
 	Filedialog* filedialog = reinterpret_cast< Filedialog* >(filedialog_raw);
-	if (widget == &filedialog->filenameinput) {
+	if (widget == &filedialog->cancelbutton) {
+		// Do callback if it has been set
+		if (filedialog->callback) {
+			filedialog->callback(filedialog, Filedialog::CANCEL, filedialog->callback_data);
+		}
+	} else if (widget == &filedialog->filenameinput || widget == &filedialog->savebutton) {
 		// Do callback if it has been set
 		if (filedialog->callback) {
 			filedialog->callback(filedialog, Filedialog::SUBMIT, filedialog->callback_data);
