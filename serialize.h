@@ -17,9 +17,14 @@ namespace Hpp
 
 inline void serializeString(ByteV& result, std::string const& str, uint8_t bytes);
 
+inline int8_t deserializeInt8(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end);
+inline int16_t deserializeInt16(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end);
+inline int32_t deserializeInt32(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end);
+inline int32_t deserializeInt(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, uint8_t bytesize);
 inline uint8_t deserializeUInt8(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end);
 inline uint16_t deserializeUInt16(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end);
 inline uint32_t deserializeUInt32(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end);
+inline uint32_t deserializeUInt(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, uint8_t bytesize);
 inline float deserializeFloat(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end);
 inline std::string deserializeString(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, uint8_t bytes);
 inline Vector2 deserializeVector2(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end);
@@ -53,6 +58,46 @@ inline void serializeString(ByteV& result, std::string const& str, uint8_t bytes
 	result += str;
 }
 
+inline int8_t deserializeInt8(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end)
+{
+	if (data_end - data_it < 1) {
+		throw Exception("Unexpected end of data!");
+	}
+	int8_t result = (int8_t)*data_it;
+	data_it ++;
+	return result;
+}
+
+inline int16_t deserializeInt16(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end)
+{
+	if (data_end - data_it < 2) {
+		throw Exception("Unexpected end of data!");
+	}
+	int16_t result = cStrToInt16(&*data_it);
+	data_it += 2;
+	return result;
+}
+
+inline int32_t deserializeInt32(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end)
+{
+	if (data_end - data_it < 4) {
+		throw Exception("Unexpected end of data!");
+	}
+	int32_t result = cStrToInt32(&*data_it);
+	data_it += 4;
+	return result;
+}
+
+inline int32_t deserializeInt(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, uint8_t bytesize)
+{
+	if (data_end - data_it < bytesize) {
+		throw Exception("Unexpected end of data!");
+	}
+	int32_t result = cStrToInt(&*data_it, bytesize);
+	data_it += bytesize;
+	return result;
+}
+
 inline uint8_t deserializeUInt8(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end)
 {
 	if (data_end - data_it < 1) {
@@ -80,6 +125,16 @@ inline uint32_t deserializeUInt32(ByteV::const_iterator& data_it, ByteV::const_i
 	}
 	uint32_t result = cStrToUInt32(&*data_it);
 	data_it += 4;
+	return result;
+}
+
+inline uint32_t deserializeUInt(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, uint8_t bytesize)
+{
+	if (data_end - data_it < bytesize) {
+		throw Exception("Unexpected end of data!");
+	}
+	uint32_t result = cStrToUInt(&*data_it, bytesize);
+	data_it += bytesize;
 	return result;
 }
 
