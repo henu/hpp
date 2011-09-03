@@ -15,8 +15,10 @@ inline std::string	byteVToDStr(ByteV const& v);
 inline std::string	byteVToHexV(ByteV const& bytev);
 inline std::string	byteVToStr(ByteV const& v);
 inline float		cStrToFloat(uint8_t const* c_str);
+inline int32_t		cStrToInt(uint8_t const* c_str, uint8_t bytesize);
 inline int16_t		cStrToInt16(uint8_t const* c_str);
 inline int32_t		cStrToInt32(uint8_t const* c_str);
+inline uint32_t		cStrToUInt(uint8_t const* c_str, uint8_t bytesize);
 inline uint16_t		cStrToUInt16(uint8_t const* c_str);
 inline uint32_t		cStrToUInt32(uint8_t const* c_str);
 inline float		cStrToFloat(char const* c_str) { return cStrToFloat((uint8_t const*)c_str); }
@@ -128,6 +130,19 @@ inline float cStrToFloat(uint8_t const* c_str)
 	return f;
 }
 
+inline int32_t cStrToInt(uint8_t const* c_str, uint8_t bytesize)
+{
+	int32_t i = 0;
+	for (uint8_t byte = 0; byte < bytesize - 1; byte ++) {
+		i += c_str[byte] << (8 * byte);
+	}
+	i += (c_str[bytesize - 1] & 0x7F) << (8 * (bytesize - 1));
+	if (c_str[bytesize - 1] & 0x80) {
+		i = -i;
+	}
+	return i;
+}
+
 inline int16_t cStrToInt16(uint8_t const* c_str)
 {
 	int16_t i = 0;
@@ -148,6 +163,15 @@ inline int32_t cStrToInt32(uint8_t const* c_str)
 	i += (c_str[3] & 0x7F) << 24;
 	if (c_str[3] & 0x80) {
 		i = -i;
+	}
+	return i;
+}
+
+inline uint32_t cStrToUInt(uint8_t const* c_str, uint8_t bytesize)
+{
+	uint32_t i = 0;
+	for (uint8_t byte = 0; byte < bytesize; byte ++) {
+		i += c_str[byte] << (8 * byte);
 	}
 	return i;
 }
