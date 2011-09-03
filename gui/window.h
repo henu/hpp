@@ -69,6 +69,7 @@ private:
 
 inline Window::Window(void) :
 windowarea(NULL),
+content(NULL),
 x_rel(0), y_rel(0),
 movable(true),
 resizable(true),
