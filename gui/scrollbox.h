@@ -29,6 +29,10 @@ public:
 	inline void setVerticalScrollbarButtonmove(uint32_t amount);
 	inline void setContent(Widget* widget);
 
+	// Tries to scroll view so that given area becomes visible. If
+	// are does not fit to view, then it centers area to view.
+	inline void scrollTo(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+
 private:
 
 	uint32_t area_width, area_height;
@@ -111,6 +115,37 @@ inline void Scrollbox::setContent(Widget* widget)
 	content = widget;
 	addChild(widget);
 	updateContent();
+}
+
+inline void Scrollbox::scrollTo(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+{
+	// X
+	if (area_width < content_width) {
+		if (width > area_width) {
+			x += (area_width - width) / 2;
+			width = area_width;
+		}
+		if ((content_width - area_width) * content_scroll.x > x) {
+			content_scroll.x = x / (Real)(content_width - area_width);
+		}
+		if ((content_width - area_width) * content_scroll.x + area_width < x + width) {
+			content_scroll.x = (x + width - area_width) / (Real)(content_width - area_width);
+		}
+	}
+	// Y
+	if (area_height < content_height) {
+		if (height > area_height) {
+			y += (area_height - height) / 2;
+			height = area_height;
+		}
+		if ((content_height - area_height) * content_scroll.y > y) {
+			content_scroll.y = y / (Real)(content_height - area_height);
+		}
+		if ((content_height - area_height) * content_scroll.y + area_height < y + height) {
+			content_scroll.y = (y + height - area_height) / (Real)(content_height - area_height);
+		}
+	}
+	updateContentPosition();
 }
 
 inline void Scrollbox::onChildSizeChange(void)
