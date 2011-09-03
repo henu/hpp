@@ -42,6 +42,8 @@ inline ByteV		uInt16ToByteV(uint16_t i);
 inline void		uInt16ToCStr(uint16_t i, uint8_t* c_str);
 inline ByteV		uInt32ToByteV(uint32_t i);
 inline void		uInt32ToCStr(uint32_t i, uint8_t* c_str);
+inline ByteV		uIntToByteV(uint32_t i, uint8_t bytesize);
+inline void		uIntToCStr(uint32_t i, uint8_t* c_str, uint8_t bytesize);
 
 inline std::string byteVToDStr(ByteV const& v)
 {
@@ -404,6 +406,23 @@ inline void uInt32ToCStr(uint32_t i, uint8_t* c_str)
 	c_str[1] = static_cast< uint8_t >(i >> 8);
 	c_str[2] = static_cast< uint8_t >(i >> 16);
 	c_str[3] = static_cast< uint8_t >(i >> 24);
+}
+
+inline ByteV uIntToByteV(uint32_t i, uint8_t bytesize)
+{
+	ByteV result;
+	result.reserve(bytesize);
+	for (uint8_t byte = 0; byte < bytesize; byte ++) {
+		result.push_back(static_cast< uint8_t >(i >> (8 * byte)));
+	}
+	return result;
+}
+
+inline void uIntToCStr(uint32_t i, uint8_t* c_str, uint8_t bytesize)
+{
+	for (uint8_t byte = 0; byte < bytesize; byte ++) {
+		c_str[byte] = static_cast< uint8_t >(i >> (8 * byte));
+	}
 }
 
 }
