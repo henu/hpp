@@ -55,7 +55,9 @@ private:
 	void render(int32_t x_origin, int32_t y_origin);
 
 	// Called by Engine and other Widgets. Second function returns Widget
-	// that was under mouse or NULL if no Widget could be found.
+	// that was under mouse or NULL if no Widget could be found. Mouse
+	// coordinates are in absolute coordinate system, and origin tells the
+	// absolute coordinate of parent Widget.
 	inline bool mouseOver(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const;
 	inline Widget const* mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const;
 	inline Widget* mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y);
@@ -133,6 +135,8 @@ private:
 	// setChildRenderarealimit() and removeChildRenderarealimit().
 	inline void setRenderarealimit(int32_t x, int32_t y, uint32_t width, uint32_t height);
 	inline void removeRenderarealimit(void);
+
+	inline bool positionOutsideRenderarealimit(int32_t x_origin, int32_t y_origin, int32_t x_abs, int32_t y_abs) const;
 
 	// Real rendering function
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin) { (void)x_origin; (void)y_origin; }
@@ -287,6 +291,9 @@ inline bool Widget::mouseOver(int32_t x_origin, int y_origin, int32_t mouse_x, i
 	if (state != HIDDEN &&
 	    mouse_x >= x_origin + x && mouse_x < x_origin + x + (int32_t)width &&
 	    mouse_y >= y_origin + y && mouse_y < y_origin + y + (int32_t)height) {
+		if (positionOutsideRenderarealimit(x_origin, y_origin, mouse_x, mouse_y)) {
+			return false;
+		}
 		return true;
 	}
 	return false;
@@ -295,6 +302,9 @@ inline bool Widget::mouseOver(int32_t x_origin, int y_origin, int32_t mouse_x, i
 inline Widget const* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const
 {
 	if (state == HIDDEN) {
+		return NULL;
+	}
+	if (positionOutsideRenderarealimit(x_origin, y_origin, mouse_x, mouse_y)) {
 		return NULL;
 	}
 	for (Children::const_iterator children_it = children.begin();
@@ -315,6 +325,9 @@ inline Widget const* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, 
 inline Widget* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y)
 {
 	if (state == HIDDEN) {
+		return NULL;
+	}
+	if (positionOutsideRenderarealimit(x_origin, y_origin, mouse_x, mouse_y)) {
 		return NULL;
 	}
 	for (Children::iterator children_it = children.begin();
@@ -356,6 +369,22 @@ inline void Widget::setRenderarealimit(int32_t x, int32_t y, uint32_t width, uin
 inline void Widget::removeRenderarealimit(void)
 {
 	renderarealimit = false;
+}
+
+inline bool Widget::positionOutsideRenderarealimit(int32_t x_origin, int32_t y_origin, int32_t x_abs, int32_t y_abs) const
+{
+	if (!renderarealimit) {
+		return false;
+	}
+	int32_t x_rel = x_abs - x_origin;
+	int32_t y_rel = y_abs - y_origin;
+	if (x_rel < renderarealimit_x ||
+	    x_rel >= renderarealimit_x + (int32_t)renderarealimit_width ||
+	    y_rel < renderarealimit_y ||
+	    y_rel >= renderarealimit_y + (int32_t)renderarealimit_height) {
+		return true;
+	}
+	return false;
 }
 
 }
