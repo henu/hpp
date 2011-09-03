@@ -211,6 +211,7 @@ private:
 	virtual uint32_t getTextinputHeight(void) const { return tex_field_edge_top.getHeight() + tex_field_edge_bottom.getHeight() + font_input_size; }
 	virtual uint32_t getMinimumTextinputContentsWidth(UnicodeString const& value) const { return font.getStringWidth(value, font_input_size) + font.getStringWidth("|", font_input_size); }
 	virtual uint32_t getTextinputContentsHeight(void) const { return font_input_size; }
+	virtual void getTextinputContentsCursorProps(uint32_t& cursor_pos_x, uint32_t& cursor_pos_y, uint32_t& cursor_width, uint32_t& cursor_height, UnicodeString const& value, ssize_t cursor) const;
 	virtual void getTextinputEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const;
 	virtual uint32_t getButtonWidth(UnicodeString const& label) const;
 	virtual uint32_t getButtonHeight(void) const;

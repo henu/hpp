@@ -36,6 +36,7 @@ private:
 
 	// Called by TextinputContents
 	inline void submitted(void);
+	inline void scrollToCursor(uint32_t cursor_pos_x, uint32_t cursor_pos_y, uint32_t cursor_width, uint32_t cursor_height);
 
 private:
 
@@ -105,6 +106,11 @@ inline void Textinput::submitted(void)
 	if (callback) {
 		callback(this, callback_data);
 	}
+}
+
+inline void Textinput::scrollToCursor(uint32_t cursor_pos_x, uint32_t cursor_pos_y, uint32_t cursor_width, uint32_t cursor_height)
+{
+	scrollbox.scrollTo(cursor_pos_x, cursor_pos_y, cursor_width, cursor_height);
 }
 
 inline void Textinput::doRendering(int32_t x_origin, int32_t y_origin)

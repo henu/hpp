@@ -73,6 +73,7 @@ public:
 	virtual uint32_t getTextinputHeight(void) const = 0;
 	virtual uint32_t getMinimumTextinputContentsWidth(UnicodeString const& value) const = 0;
 	virtual uint32_t getTextinputContentsHeight(void) const = 0;
+	virtual void getTextinputContentsCursorProps(uint32_t& cursor_pos_x, uint32_t& cursor_pos_y, uint32_t& cursor_width, uint32_t& cursor_height, UnicodeString const& value, ssize_t cursor) const = 0;
 	virtual void getTextinputEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const = 0;
 	virtual uint32_t getButtonWidth(UnicodeString const& label) const = 0;
 	virtual uint32_t getButtonHeight(void) const = 0;

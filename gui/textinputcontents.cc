@@ -29,10 +29,12 @@ void TextinputContents::onKeyDown(Key::Keycode keycode, UChr uchr)
 		if (cursor > 0) {
 			value = value.substr(0, cursor - 1) + value.substr(cursor);
 			cursor --;
+			markSizeChanged();
 			updateScrolling();
 		}
 	} else if (keycode == Key::DELETE) {
 		value = value.substr(0, cursor) + value.substr(cursor + 1);
+		markSizeChanged();
 		updateScrolling();
 	} else if (keycode == Key::RETURN) {
 		cursor = -1;
@@ -41,13 +43,22 @@ void TextinputContents::onKeyDown(Key::Keycode keycode, UChr uchr)
 	} else if (uchr >= 32 && cursor >= 0) {
 		value = value.substr(0, cursor) + uchr + value.substr(cursor);
 		cursor ++;
+		markSizeChanged();
 		updateScrolling();
 	}
 }
 
 void TextinputContents::updateScrolling(void)
 {
-// TODO: Code this!
+	Renderer const* rend = getRenderer();
+	if (!rend || cursor < 0) {
+		return;
+	}
+	// Get cursor position and size
+	uint32_t cursor_pos_x, cursor_pos_y;
+	uint32_t cursor_width, cursor_height;
+	rend->getTextinputContentsCursorProps(cursor_pos_x, cursor_pos_y, cursor_width, cursor_height, value, cursor);
+	textinput->scrollToCursor(cursor_pos_x, cursor_pos_y, cursor_width, cursor_height);
 }
 
 }

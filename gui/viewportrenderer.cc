@@ -589,6 +589,14 @@ uint32_t ViewportRenderer::getLabelHeight(void) const
 	return font_label_size;
 }
 
+void ViewportRenderer::getTextinputContentsCursorProps(uint32_t& cursor_pos_x, uint32_t& cursor_pos_y, uint32_t& cursor_width, uint32_t& cursor_height, UnicodeString const& value, ssize_t cursor) const
+{
+	cursor_pos_x = font.getStringWidth(value.substr(0, cursor), font_input_size);
+	cursor_pos_y = 0;
+	cursor_width = font.getStringWidth("|", font_input_size);
+	cursor_height = font_input_size;
+}
+
 void ViewportRenderer::getTextinputEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const
 {
 	edge_top = tex_field_edge_top.getHeight();
