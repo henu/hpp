@@ -34,7 +34,8 @@ inline void getCameraDirections(Angle const& yaw, Angle const& pitch, Angle cons
                                 Vector3* down = NULL,
                                 Vector3* left = NULL);
 
-// Calculates FOV from aspect ratio and from another FOV
+// Calculates FOV from aspect ratio and from another
+// FOV. Aspecratio is calculated width / height.
 inline Angle calculateFovXFromAspectRatio(Angle const& fov_y, Real aspectratio);
 inline Angle calculateFovYFromAspectRatio(Angle const& fov_x, Real aspectratio);
 
