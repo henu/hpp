@@ -10,7 +10,7 @@
 #include "assert.h"
 #include "misc.h"
 
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include <string>
 
 namespace Hpp
