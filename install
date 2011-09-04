@@ -49,6 +49,7 @@ HEADERS_MAIN=\
 "debug.h "\
 "decompressor.h "\
 "exception.h "\
+"ivectors.h "\
 "lock.h "\
 "magic.h "\
 "matrix3.h "\
@@ -190,15 +191,15 @@ LIBNAME="hpp"
 FLAGS="-O3 `pkg-config --cflags sdl` -DNDEBUG -I/usr/include/freetype2"
 
 # Libs
-LIBS="-lpthread -lrt -lfreetype -lGL `pkg-config --libs sdl`"
+LIBS="-lpthread -lrt -lfreetype -lGL `pkg-config --libs sdl` -lSDL_image"
 
 # Combine headers
 #TODO: In future, make options here
-HEADERS=$HEADERS_MAIN
+HEADERS="$HEADERS_MAIN $HEADERS_IMAGE"
 
 # Combine sources
 #TODO: In future, make options here
-SOURCES=$SOURCES_MAIN
+SOURCES="$SOURCES_MAIN $SOURCES_IMAGE"
 
 # SVN Revision number
 REVISION=$(svn info 2> /dev/null|grep Revision|cut -d " " -f 2)
@@ -219,7 +220,7 @@ DEB_MAINTAINER_EMAIL="henu@henu.fi"
 
 # Debian dependencies
 #TODO: In future, make deps from other sections here too!
-DEB_DEPS="libc6-dev, libfreetype6, libsdl1.2debian"
+DEB_DEPS="libc6-dev, libfreetype6, libsdl1.2debian, libsdl-image1.2"
 
 test()
 {
