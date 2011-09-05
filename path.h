@@ -46,6 +46,9 @@ public:
 
 	inline void convertToAbsolute(void);
 
+	// Returns the parent of this file/dir
+	inline Path getParent(void) const;
+
 	inline size_t partsSize(void) const;
 
 	inline std::string operator[](int idx) const;
@@ -312,6 +315,21 @@ HppAssert(false, "Not implemented yet!");
 	     	}
 	}
 	parts.insert(parts.begin(), parts_begin_fixed.begin(), parts_begin_fixed.end());
+}
+
+inline Path Path::getParent(void) const
+{
+	Path result(*this);
+	// If there are no parts to reduce, then path needs to be
+	// converted to absolute and hope it brings some parts
+	if (!result.parts.empty()) {
+		result.convertToAbsolute();
+	}
+	if (result.parts.empty()) {
+		throw Hpp::Exception("Path has no parent!");
+	}
+	result.parts.pop_back();
+	return result;
 }
 
 inline size_t Path::partsSize(void) const
