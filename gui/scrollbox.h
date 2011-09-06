@@ -29,6 +29,10 @@ public:
 	inline void setVerticalScrollbarButtonmove(uint32_t amount);
 	inline void setContent(Widget* widget);
 
+	// Scrolls using
+	inline void scrollHorizontallyAsButtons(Real amount);
+	inline void scrollVerticallyAsButtons(Real amount);
+
 	// Tries to scroll view so that given area becomes visible. If
 	// are does not fit to view, then it centers area to view.
 	inline void scrollTo(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
@@ -115,6 +119,28 @@ inline void Scrollbox::setContent(Widget* widget)
 	content = widget;
 	addChild(widget);
 	updateContent();
+}
+
+inline void Scrollbox::scrollHorizontallyAsButtons(Real amount)
+{
+	content_scroll.x += (amount * scrollbar_horiz_buttonmove) / (content_width - area_width);
+	if (content_scroll.x < 0.0) content_scroll.x = 0.0;
+	if (content_scroll.x > 1.0) content_scroll.x = 1.0;
+	if (scrollbar_horiz) {
+		scrollbar_horiz->setValue(content_scroll.x);
+	}
+	updateContentPosition();
+}
+
+inline void Scrollbox::scrollVerticallyAsButtons(Real amount)
+{
+	content_scroll.y += (amount * scrollbar_vert_buttonmove) / (content_height - area_height);
+	if (content_scroll.y < 0.0) content_scroll.y = 0.0;
+	if (content_scroll.y > 1.0) content_scroll.y = 1.0;
+	if (scrollbar_vert) {
+		scrollbar_vert->setValue(content_scroll.y);
+	}
+	updateContentPosition();
 }
 
 inline void Scrollbox::scrollTo(uint32_t x, uint32_t y, uint32_t width, uint32_t height)

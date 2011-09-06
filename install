@@ -145,6 +145,7 @@ HEADERS_NCURSES=\
 
 SOURCES_MAIN=\
 "gui/engine.cc "\
+"gui/folderviewcontents.cc "\
 "gui/menu.cc "\
 "gui/menubar.cc "\
 "gui/menucontent.cc "\

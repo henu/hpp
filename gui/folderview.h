@@ -18,6 +18,8 @@ namespace Gui
 class Folderview : public Containerwidget
 {
 
+	friend class FolderviewContents;
+
 public:
 
 	inline Folderview(void);
@@ -29,6 +31,11 @@ public:
 	// Virtual functions for Widget
 	inline virtual uint32_t getMinWidth(void) const;
 	inline virtual uint32_t getMinHeight(uint32_t width) const;
+
+private:
+
+	// Called by friend class FolderviewContents
+	inline void scrollContents(Real amount);
 
 private:
 
@@ -44,7 +51,8 @@ private:
 
 };
 
-inline Folderview::Folderview(void)
+inline Folderview::Folderview(void) :
+contents(this)
 {
 	addChild(&scrollbox);
 	scrollbox.setHorizontalScrollbar(Scrollbox::ON_DEMAND);
@@ -79,6 +87,11 @@ inline uint32_t Folderview::getMinHeight(uint32_t width) const
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
 	return rend->getFolderviewHeight();
+}
+
+inline void Folderview::scrollContents(Real amount)
+{
+	scrollbox.scrollVerticallyAsButtons(amount);
 }
 
 inline void Folderview::doRendering(int32_t x_origin, int32_t y_origin)
