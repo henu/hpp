@@ -30,7 +30,7 @@ public:
 	inline Filedialog(void);
 	inline virtual ~Filedialog(void);
 
-	inline void setType(Type type) { this->type = type; }
+	inline void setType(Type type);
 	inline void setFileextension(std::string const& fileext) { this->fileext = fileext; }
 	inline void setSelectMultiple(bool selectmultiple = true) { this->selectmultiple = selectmultiple; }
 
@@ -59,7 +59,7 @@ private:
 	Button newfolderbutton;
 	Folderview folderview;
 	Button cancelbutton;
-	Button savebutton;
+	Button saveloadbutton;
 
 	// Callback function
 	inline static void guiCallback(Widget* widget, void* filedialog_raw);
@@ -109,21 +109,31 @@ callback(NULL)
 	maincontainer.addWidget(&buttonscontainer);
 	// Cancel and Save buttons
 	cancelbutton.setLabel("Cancel");
-	savebutton.setLabel("Save");
+	saveloadbutton.setLabel("Save");
 	buttonscontainer.addWidget(&cancelbutton);
-	buttonscontainer.addWidget(&savebutton);
+	buttonscontainer.addWidget(&saveloadbutton);
 
 	// Set callbacks
 	pathinput.setCallbackFunc(guiCallback, this);
 	filenameinput.setCallbackFunc(guiCallback, this);
 	newfolderbutton.setCallbackFunc(guiCallback, this);
 	cancelbutton.setCallbackFunc(guiCallback, this);
-	savebutton.setCallbackFunc(guiCallback, this);
+	saveloadbutton.setCallbackFunc(guiCallback, this);
 
 }
 
 inline Filedialog::~Filedialog(void)
 {
+}
+
+inline void Filedialog::setType(Type type)
+{
+	this->type = type;
+	if (type == Filedialog::SAVE) {
+		saveloadbutton.setLabel("Save");
+	} else {
+		saveloadbutton.setLabel("Open");
+	}
 }
 
 inline void Filedialog::setCallbackFunc(CallbackFuncWithType callback, void* data)
@@ -145,7 +155,7 @@ inline void Filedialog::guiCallback(Widget* widget, void* filedialog_raw)
 		if (filedialog->callback) {
 			filedialog->callback(filedialog, Filedialog::CANCEL, filedialog->callback_data);
 		}
-	} else if (widget == &filedialog->filenameinput || widget == &filedialog->savebutton) {
+	} else if (widget == &filedialog->filenameinput || widget == &filedialog->saveloadbutton) {
 		// Do callback if it has been set
 		if (filedialog->callback) {
 			filedialog->callback(filedialog, Filedialog::SUBMIT, filedialog->callback_data);
