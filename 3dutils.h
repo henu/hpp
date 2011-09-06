@@ -6,6 +6,7 @@
 #include "vector3.h"
 #include "trigon.h"
 #include "assert.h"
+#include "constants.h"
 
 namespace Hpp
 {
@@ -17,6 +18,11 @@ inline Real crossProduct(Vector2 const& v1, Vector2 const& v2);
 
 inline Angle angleBetweenVectors(Vector3 const& v1, Vector3 const& v2);
 inline Angle angleBetweenVectors(Vector2 const& v1, Vector2 const& v2);
+
+// Returns angle from compontents of Vector2. Positive Y
+// axis is 0°, negative X axis is 90° and so on. This means
+// right hand rotation. Result is between [-180° and 180°).
+inline Angle angleOfVector(Vector2 const& v);
 
 // Forces angle between vectors to be 90°.
 inline void forceVectorsPerpendicular(Vector3& v1, Vector3& v2);
@@ -169,6 +175,27 @@ inline Angle angleBetweenVectors(Vector2 const& v1, Vector2 const& v2)
 	}
 	return Angle::fromRadians(radians);
 
+}
+
+inline Angle angleOfVector(Vector2 const& v)
+{
+	Real rad;
+	if (v.y > 0) {
+		rad = ::atan(-v.x / v.y);
+	} else if (v.y < 0) {
+		if (v.x < 0) {
+			rad = HPP_PI - ::atan(v.x / v.y);
+		} else {
+			rad = -HPP_PI - ::atan(v.x / v.y);
+		}
+	} else {
+		if (v.x < 0) {
+			rad = HPP_PI / 2.0;
+		} else {
+			rad = -HPP_PI / 2.0;
+		}
+	}
+	return Angle::fromRadians(rad);
 }
 
 inline void forceVectorsPerpendicular(Vector3& v1, Vector3& v2)
