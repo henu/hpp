@@ -5,6 +5,7 @@ PREFIX="/usr"
 DEPS=""
 
 HEADERS_MAIN=\
+"gui/autogridcontainer.h "\
 "gui/button.h "\
 "gui/callback.h "\
 "gui/container.h "\
