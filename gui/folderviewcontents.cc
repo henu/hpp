@@ -13,6 +13,11 @@ void FolderviewContents::scrollContents(Real amount)
 	folderview->scrollContents(amount);
 }
 
+void FolderviewContents::selectionChanged(void)
+{
+	folderview->selectionChanged();
+}
+
 }
 
 }

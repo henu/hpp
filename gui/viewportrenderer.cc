@@ -416,6 +416,16 @@ void ViewportRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_orig
 
 	Real folderviewcontents_width = folderviewcontents->getWidth();
 
+	// Render selected items
+	FolderviewContents::SelectedItems items_sel = folderviewcontents->getSelectedItems();
+	for (FolderviewContents::SelectedItems::const_iterator items_sel_it = items_sel.begin();
+	     items_sel_it != items_sel.end();
+	     items_sel_it ++) {
+		size_t item_id = *items_sel_it;
+		renderSprite(tex_field_selection_bg, Vector2(0, item_id * tex_folder.getHeight()), Vector2(getWidth(), tex_folder.getHeight()));
+	}
+
+	// Render files
 	Real pos_y = 0;
 	textSetColor(Color(0, 0, 0));
 	textSetHorizontalAlign(LEFT);

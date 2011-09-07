@@ -32,7 +32,7 @@ public:
 
 	inline void setType(Type type);
 	inline void setFileextension(std::string const& fileext) { this->fileext = fileext; }
-	inline void setSelectMultiple(bool selectmultiple = true) { this->selectmultiple = selectmultiple; }
+	inline void setSelectMultiple(bool select_multiple = true) { folderview.setSelectMultiple(select_multiple); }
 
 	inline void setCallbackFunc(CallbackFuncWithType callback, void* data);
 
@@ -43,7 +43,6 @@ private:
 	// Options
 	Type type;
 	std::string fileext;
-	bool selectmultiple;
 
 	CallbackFuncWithType callback;
 	void* callback_data;
@@ -61,14 +60,14 @@ private:
 	Button cancelbutton;
 	Button saveloadbutton;
 
-	// Callback function
+	// Callback functions
 	inline static void guiCallback(Widget* widget, void* filedialog_raw);
+	inline static void guiCallbackWithType(Widget* widget, uint32_t type, void* filedialog_raw);
 
 };
 
 inline Filedialog::Filedialog(void) :
 type(SAVE),
-selectmultiple(false),
 callback(NULL)
 {
 	Path maps_path = Path::getConfig() / "hme_mapeditor" / "levels";
@@ -119,6 +118,7 @@ callback(NULL)
 	newfolderbutton.setCallbackFunc(guiCallback, this);
 	cancelbutton.setCallbackFunc(guiCallback, this);
 	saveloadbutton.setCallbackFunc(guiCallback, this);
+	folderview.setCallbackFunc(guiCallbackWithType, this);
 
 }
 
@@ -168,6 +168,25 @@ inline void Filedialog::guiCallback(Widget* widget, void* filedialog_raw)
 		}
 		catch ( ... ) {
 			filedialog->pathinput.setValue(old_value);
+		}
+	}
+}
+
+inline void Filedialog::guiCallbackWithType(Widget* widget, uint32_t type, void* filedialog_raw)
+{
+	Filedialog* filedialog = reinterpret_cast< Filedialog* >(filedialog_raw);
+	if (widget == &filedialog->folderview) {
+		if (type == Folderview::SELECTION_CHANGED) {
+			Folderview::SelectedItems items_sel = filedialog->folderview.getSelectedItems();
+			if (!items_sel.empty()) {
+				size_t item_id = *items_sel.begin();
+				FolderChild item = filedialog->folderview.getItem(item_id);
+				if (item.type == FolderChild::FILE) {
+					filedialog->filenameinput.setValue(item.name);
+				}
+			}
+		} else if (type == Folderview::DOUBLE_CLICKED) {
+HppAssert(false, "Not implemented yet!");
 		}
 	}
 }

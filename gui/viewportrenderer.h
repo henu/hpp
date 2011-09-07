@@ -49,6 +49,7 @@ public:
 	inline void loadTextureFieldEdgeBottom(Path const& path) { tex_field_edge_bottom.loadFromFile(path, DEFAULT); }
 	inline void loadTextureFieldEdgeBottomLeft(Path const& path) { tex_field_edge_bottomleft.loadFromFile(path, DEFAULT); }
 	inline void loadTextureFieldEdgeBottomRight(Path const& path) { tex_field_edge_bottomright.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldSelectionBg(Path const& path) { tex_field_selection_bg.loadFromFile(path, DEFAULT); }
 	inline void loadTextureButtonLeft(Path const& path) { tex_button_left.loadFromFile(path, DEFAULT); }
 	inline void loadTextureButton(Path const& path) { tex_button.loadFromFile(path, DEFAULT); }
 	inline void loadTextureButtonRight(Path const& path) { tex_button_right.loadFromFile(path, DEFAULT); }
@@ -122,6 +123,7 @@ private:
 	Texture tex_field_edge_bottom;
 	Texture tex_field_edge_bottomleft;
 	Texture tex_field_edge_bottomright;
+	Texture tex_field_selection_bg;
 	Texture tex_button_left;
 	Texture tex_button;
 	Texture tex_button_right;
