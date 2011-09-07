@@ -7,6 +7,7 @@ DEPS=""
 HEADERS_MAIN=\
 "gui/button.h "\
 "gui/callback.h "\
+"gui/container.h "\
 "gui/containerwidget.h "\
 "gui/engine.h "\
 "gui/filedialog.h "\
