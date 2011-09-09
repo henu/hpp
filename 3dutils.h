@@ -23,6 +23,7 @@ inline Angle angleBetweenVectors(Vector2 const& v1, Vector2 const& v2);
 // axis is 0°, negative X axis is 90° and so on. This means
 // right hand rotation. Result is between [-180° and 180°).
 inline Angle angleOfVector(Vector2 const& v);
+inline Vector2 vectorOfAngle(Angle const& a);
 
 // Forces angle between vectors to be 90°.
 inline void forceVectorsPerpendicular(Vector3& v1, Vector3& v2);
@@ -196,6 +197,14 @@ inline Angle angleOfVector(Vector2 const& v)
 		}
 	}
 	return Angle::fromRadians(rad);
+}
+
+inline Vector2 vectorOfAngle(Angle const& a)
+{
+	Vector2 result;
+	result.x = -a.sin();
+	result.y = a.cos();
+	return result;
 }
 
 inline void forceVectorsPerpendicular(Vector3& v1, Vector3& v2)
