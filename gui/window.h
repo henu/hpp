@@ -84,6 +84,9 @@ inline Window::~Window(void)
 
 inline void Window::setPosition(int32_t x, int32_t y)
 {
+	if (!windowarea) {
+		throw Exception("Unable to set position of Window, because windowarea is not given yet!");
+	}
 	x_rel = x;
 	y_rel = y;
 	windowarea->windowPositionChanged(this, x_rel, y_rel);
@@ -91,6 +94,9 @@ inline void Window::setPosition(int32_t x, int32_t y)
 
 inline void Window::setPositionCenter(void)
 {
+	if (!windowarea) {
+		throw Exception("Unable to position Window to center, because windowarea is not given yet!");
+	}
 	uint32_t windowarea_width;
 	uint32_t windowarea_height;
 	windowarea->getSize(windowarea_width, windowarea_height);
