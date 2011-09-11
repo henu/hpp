@@ -21,9 +21,9 @@ public:
 	// Setters
 	inline void setFovX(Angle const& fov_x) { this->fov_x = fov_x; }
 	inline void setFovY(Angle const& fov_y) { this->fov_y = fov_y; }
-	inline void setNear(Real near) { clip_near = near; }
-	inline void setFar(Real far) { clip_far = far; }
-	inline void setNearAndFar(Real near, Real far) { clip_near = near; clip_far = far; }
+	inline void setNear(Real clip_near) { this->clip_near = clip_near; }
+	inline void setFar(Real clip_far) { this->clip_far = clip_far; }
+	inline void setNearAndFar(Real clip_near, Real clip_far) { this->clip_near = clip_near; this->clip_far = clip_far; }
 	inline void setRotationFromUpRight(Vector3 const& up, Vector3 const& right);
 
 	// Getters

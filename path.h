@@ -206,9 +206,11 @@ inline std::string Path::toString(bool compact) const
 		}
 		result += '/';
 		#else
-		char path_cstr[MAX_PATH];
-		SHGetFolderPath(0, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
-		result = path_cstr + '/';
+		{
+			char path_cstr[MAX_PATH];
+			SHGetFolderPath(0, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			result = path_cstr + '/';
+		}
 		#endif
 		break;
 	case CONFIG:
@@ -220,9 +222,11 @@ inline std::string Path::toString(bool compact) const
 		}
 		result += "/.config/";
 		#else
-		char path_cstr[MAX_PATH];
-		SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
-		result = path_cstr + '/';
+		{
+			char path_cstr[MAX_PATH];
+			SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			result = path_cstr + '/';
+		}
 		#endif
 		break;
 	}
@@ -274,9 +278,11 @@ HppAssert(false, "Not implemented yet!");
 		#ifndef WIN32
 		parts_begin_str = getenv("HOME");
 		#else
-		char path_cstr[MAX_PATH];
-		SHGetFolderPath(0, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
-		parts_begin_str = path_cstr;
+		{
+			char path_cstr[MAX_PATH];
+			SHGetFolderPath(0, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			parts_begin_str = path_cstr;
+		}
 		#endif
 		break;
 	case CONFIG:
@@ -284,9 +290,11 @@ HppAssert(false, "Not implemented yet!");
 		parts_begin_str = getenv("HOME");
 		parts_begin_str += "/.config";
 		#else
-		char path_cstr[MAX_PATH];
-		SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
-		parts_begin_str = path_cstr;
+		{
+			char path_cstr[MAX_PATH];
+			SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			parts_begin_str = path_cstr;
+		}
 		#endif
 		break;
 	case UNKNOWN:
@@ -370,9 +378,11 @@ inline void Path::ensureAbsoluteOrRelative(void)
 		#ifndef WIN32
 		parts_begin_str = getenv("HOME");
 		#else
-		char path_cstr[MAX_PATH];
-		SHGetFolderPath(0, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
-		parts_begin_str = path_cstr;
+		{
+			char path_cstr[MAX_PATH];
+			SHGetFolderPath(0, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			parts_begin_str = path_cstr;
+		}
 		#endif
 		break;
 	case CONFIG:
@@ -380,9 +390,11 @@ inline void Path::ensureAbsoluteOrRelative(void)
 		parts_begin_str = getenv("HOME");
 		parts_begin_str += "/.config";
 		#else
-		char path_cstr[MAX_PATH];
-		SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
-		parts_begin_str = path_cstr;
+		{
+			char path_cstr[MAX_PATH];
+			SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			parts_begin_str = path_cstr;
+		}
 		#endif
 		break;
 	case UNKNOWN:
@@ -509,6 +521,7 @@ inline void listFolderChildren(FolderChildren& result, Path const& path)
 {
 	result.clear();
 
+	#ifndef WIN32
 	DIR* dir = opendir(path.toString().c_str());
 	if (dir == NULL) {
 		throw Exception("Unable to open folder \"" + path.toString() + "\"!");
@@ -536,6 +549,10 @@ inline void listFolderChildren(FolderChildren& result, Path const& path)
 	{
 		throw Exception("Unable to close folder \"" + path.toString() + "\"!");
 	}
+	#else
+// TODO: Code this!
+HppAssert(false, "Listing of folder children is not implemented on Windows yet!");
+	#endif
 
 	std::sort(result.begin(), result.end(), compareFolderChildren);
 

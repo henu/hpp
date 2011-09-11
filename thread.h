@@ -9,9 +9,10 @@
 #else
 #ifndef WIN32
 #include <pthread.h>
-#else
-#include <windows.h>
 #endif
+#endif
+#ifdef WIN32
+#include <windows.h>
 #endif
 #include <stdexcept>
 #include <stdint.h>
