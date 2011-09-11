@@ -41,8 +41,8 @@ public:
 	inline std::string toString(bool compact = false) const;
 
 	inline bool isUnknown(void) const { return type == UNKNOWN; }
-	inline bool isAbsolute(void) const { return type != UNKNOWN && type != RELATIVE; }
-	inline bool isRelative(void) const { return type == RELATIVE; }
+	inline bool isAbsolute(void) const { return type != UNKNOWN && type != REL; }
+	inline bool isRelative(void) const { return type == REL; }
 
 	inline void convertToAbsolute(void);
 
@@ -64,8 +64,8 @@ public:
 private:
 
 	enum Type { UNKNOWN,
-	            RELATIVE,
-	            ABSOLUTE,
+	            REL,
+	            ABS,
 	            HOME,
 	            CONFIG };
 
@@ -118,7 +118,7 @@ inline Path Path::getConfig(void)
 inline Path Path::getRoot(void)
 {
 	Path p;
-	p.type = ABSOLUTE;
+	p.type = ABS;
 	p.parts.clear();
 	return p;
 }
@@ -131,7 +131,7 @@ inline Path Path::getUnknown(void)
 }
 
 inline Path::Path(void) :
-type(RELATIVE)
+type(REL)
 {
 }
 
@@ -139,7 +139,7 @@ inline Path::Path(std::string const& p)
 {
 	std::string::const_iterator p_it;
 	if (p.empty()) {
-		type = RELATIVE;
+		type = REL;
 		return;
 	} else if (p.size() == 1 && p == "~") {
 		type = HOME;
@@ -148,12 +148,12 @@ inline Path::Path(std::string const& p)
 		type = HOME;
 		p_it = p.begin() + 2;
 	} else if (p[0] == '/') {
-		type = ABSOLUTE;
+		type = ABS;
 		p_it = p.begin() + 1;
 	} else if (p[0] == '~') {
 		throw Exception("Unknown path \"" + p + "\"");
 	} else {
-		type = RELATIVE;
+		type = REL;
 		p_it = p.begin();
 	}
 	std::string part;
@@ -192,9 +192,9 @@ inline std::string Path::toString(bool compact) const
 	case UNKNOWN:
 		throw Exception("Unable to convert path to string, because path is unknown");
 		break;
-	case RELATIVE:
+	case REL:
 		break;
-	case ABSOLUTE:
+	case ABS:
 		result = '/';
 		break;
 	case HOME:
@@ -260,7 +260,7 @@ HppAssert(false, "Not implemented yet!");
 	HppAssert(type != UNKNOWN, "Type cannot be unknown when ensuring absolute/relative.");
 	std::string parts_begin_str;
 	switch (type) {
-	case RELATIVE:
+	case REL:
 		{
 			char cwd[PATH_MAX];
 			if (getcwd(cwd, PATH_MAX) == NULL) {
@@ -268,7 +268,7 @@ HppAssert(false, "Not implemented yet!");
 			}
 			parts_begin_str = cwd;
 		}
-	case ABSOLUTE:
+	case ABS:
 		return;
 	case HOME:
 		#ifndef WIN32
@@ -304,7 +304,7 @@ HppAssert(false, "Not implemented yet!");
 	}
 	#endif
 
-	type = RELATIVE;
+	type = REL;
 	Parts parts_begin = explode(parts_begin_str, '/');
 	Parts parts_begin_fixed;
 	for (Parts::const_iterator parts_begin_it = parts_begin.begin();
@@ -363,8 +363,8 @@ inline void Path::ensureAbsoluteOrRelative(void)
 	HppAssert(type != UNKNOWN, "Type cannot be unknown when ensuring absolute/relative.");
 	std::string parts_begin_str;
 	switch (type) {
-	case RELATIVE:
-	case ABSOLUTE:
+	case REL:
+	case ABS:
 		return;
 	case HOME:
 		#ifndef WIN32
