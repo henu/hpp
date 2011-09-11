@@ -180,7 +180,7 @@ inline Delay Delay::operator-=(Delay const& d)
 
 inline Delay Delay::operator*(double d) const
 {
-	if (inf) {
+	if (inf_) {
 		return *this;
 	}
 	if (secs_ >= 0) {
