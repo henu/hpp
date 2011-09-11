@@ -9,6 +9,7 @@
 #include <cerrno>
 #include <ostream>
 #ifdef WIN32
+#include <windows.h>
 #include <sys/types.h>
 #include <sys/timeb.h>
 #endif
