@@ -4,9 +4,7 @@
 #include "assert.h"
 
 #include <string.h>
-#ifndef WIN32
-#include <glob.h>
-#endif
+#include <cstdlib>
 
 namespace Hpp
 {
