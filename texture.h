@@ -49,8 +49,8 @@ public:
 	inline bool loaded(void) const { return is_loaded || tempdata; }
 
 	// Functions to (re)load Texture
-	inline void loadFromFile(Path const& path, Pixelformat format, uint32_t flags = 0);
-	inline void loadFromData(ByteV const& data, Pixelformat format, uint32_t flags = 0);
+	inline void loadFromFile(Path const& path, Pixelformat format = DEFAULT, uint32_t flags = 0);
+	inline void loadFromData(ByteV const& data, Pixelformat format = DEFAULT, uint32_t flags = 0);
 
 	// Function to create a new empty Texture
 	inline void createNew(uint16_t width, uint16_t height, Pixelformat format, uint32_t flags = 0);
