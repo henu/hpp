@@ -62,6 +62,50 @@ void ViewportRenderer::loadFont(Path const& path)
 	font.loadMore(path);
 }
 
+void ViewportRenderer::renderSprite(Texture& tex, Vector2 const& pos, Vector2 const& size)
+{
+	Vector2 size2;
+	if (size.x == 0) {
+	 	size2.x = tex.getWidth();
+	} else {
+		size2.x = size.x;
+	}
+	if (size.y == 0) {
+	 	size2.y = tex.getHeight();
+	} else {
+		size2.y = size.y;
+	}
+	viewport->renderSprite(tex,
+	                       Vector2(spr_x_origin + pos.x, viewport->getHeight() - spr_y_origin - size2.y - pos.y),
+	                       size2,
+	                       Vector2(0.0, 0.0),
+	                       Vector2(size2.x / tex.getWidth(), size2.y / tex.getHeight()));
+}
+
+void ViewportRenderer::renderString(UnicodeString const& str, Real fontsize, Vector2 const& pos, Vector2 const& size)
+{
+	Real str_width = font.getStringWidth(str, fontsize);
+	Vector2 pos_rel;
+	if (text_align == CENTER) {
+		pos_rel.x = (size.x - str_width) / 2.0;
+	} else if (text_align == RIGHT) {
+		pos_rel.x = size.x - str_width;
+	} else {
+		pos_rel.x = 0;
+	}
+	if (text_valign == CENTER) {
+		pos_rel.y = (size.y - fontsize) / 2.0;
+	} else if (text_valign == BOTTOM) {
+		pos_rel.y = size.y - fontsize;
+	} else {
+		pos_rel.y = 0;
+	}
+
+	font.renderString(str, fontsize, text_color,
+	                  viewport,
+	                  Vector2(spr_x_origin + pos.x + pos_rel.x, viewport->getHeight() - spr_y_origin - fontsize - pos.y - pos_rel.y));
+}
+
 uint32_t ViewportRenderer::getWidth(void) const
 {
 	HppAssert(viewport, "Viewport not set!");
@@ -679,50 +723,6 @@ void ViewportRenderer::prepareSprites(Real x_origin, Real y_origin)
 {
 	spr_x_origin = x_origin;
 	spr_y_origin = y_origin;
-}
-
-void ViewportRenderer::renderSprite(Texture& tex, Vector2 const& pos, Vector2 const& size)
-{
-	Vector2 size2;
-	if (size.x == 0) {
-	 	size2.x = tex.getWidth();
-	} else {
-		size2.x = size.x;
-	}
-	if (size.y == 0) {
-	 	size2.y = tex.getHeight();
-	} else {
-		size2.y = size.y;
-	}
-	viewport->renderSprite(tex,
-	                       Vector2(spr_x_origin + pos.x, viewport->getHeight() - spr_y_origin - size2.y - pos.y),
-	                       size2,
-	                       Vector2(0.0, 0.0),
-	                       Vector2(size2.x / tex.getWidth(), size2.y / tex.getHeight()));
-}
-
-void ViewportRenderer::renderString(UnicodeString const& str, Real fontsize, Vector2 const& pos, Vector2 const& size)
-{
-	Real str_width = font.getStringWidth(str, fontsize);
-	Vector2 pos_rel;
-	if (text_align == CENTER) {
-		pos_rel.x = (size.x - str_width) / 2.0;
-	} else if (text_align == RIGHT) {
-		pos_rel.x = size.x - str_width;
-	} else {
-		pos_rel.x = 0;
-	}
-	if (text_valign == CENTER) {
-		pos_rel.y = (size.y - fontsize) / 2.0;
-	} else if (text_valign == BOTTOM) {
-		pos_rel.y = size.y - fontsize;
-	} else {
-		pos_rel.y = 0;
-	}
-
-	font.renderString(str, fontsize, text_color,
-	                  viewport,
-	                  Vector2(spr_x_origin + pos.x + pos_rel.x, viewport->getHeight() - spr_y_origin - fontsize - pos.y - pos_rel.y));
 }
 
 }

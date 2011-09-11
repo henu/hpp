@@ -19,6 +19,8 @@ class ViewportRenderer : public Renderer
 
 public:
 
+	enum Alignment { LEFT, RIGHT, TOP, BOTTOM, CENTER };
+
 	ViewportRenderer(Viewport const* viewport = NULL);
 	virtual ~ViewportRenderer(void);
 
@@ -93,9 +95,16 @@ public:
 
 	inline void setViewport(Viewport const* viewport) { this->viewport = viewport; sizeChanged(); }
 
-private:
+	// Fixed sprite rendering functions. These use coordinate
+	// system from topleft, rather than from bottomleft.
+	void prepareSprites(Real x_origin, Real y_origin);
+	inline void textSetColor(Color const& color) { text_color = color; }
+	inline void textSetHorizontalAlign(Alignment align) { text_align = align; }
+	inline void textSetVerticalAlign(Alignment align) { text_valign = align; }
+	void renderSprite(Texture& tex, Vector2 const& pos, Vector2 const& size = Vector2::ZERO);
+	void renderString(UnicodeString const& str, Real fontsize, Vector2 const& pos, Vector2 const& size);
 
-	enum Alignment { LEFT, RIGHT, TOP, BOTTOM, CENTER };
+private:
 
 	Viewport const* viewport;
 
@@ -230,15 +239,6 @@ private:
 	inline virtual uint32_t getScrollbarButtonDownHeight(void) const { return tex_scrollbar_button_down.getHeight(); };
 	virtual void setRenderareaLimit(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 	virtual void removeRenderareaLimit(void);
-
-	// Fixed sprite rendering functions. These use coordinate
-	// system from topleft, rather than from bottomleft.
-	void prepareSprites(Real x_origin, Real y_origin);
-	inline void textSetColor(Color const& color) { text_color = color; }
-	inline void textSetHorizontalAlign(Alignment align) { text_align = align; }
-	inline void textSetVerticalAlign(Alignment align) { text_valign = align; }
-	void renderSprite(Texture& tex, Vector2 const& pos, Vector2 const& size = Vector2::ZERO);
-	void renderString(UnicodeString const& str, Real fontsize, Vector2 const& pos, Vector2 const& size);
 
 };
 

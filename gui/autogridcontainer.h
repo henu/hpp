@@ -56,6 +56,7 @@ inline void Autogridcontainer::addWidget(Containerwidget* widget)
 	widgets.push_back(widget);
 	addChild(widget);
 	markSizeChanged();
+	updateWidgetSizesAndPositions();
 }
 
 inline uint32_t Autogridcontainer::getMinWidth(void) const
