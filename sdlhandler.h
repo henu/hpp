@@ -2,7 +2,7 @@
 #define HPP_SDLHANDLER_H
 
 #include <stdint.h>
-#include <SDL.h>
+#include <SDL/SDL.h>
 
 namespace Hpp
 {
