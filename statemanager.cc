@@ -7,7 +7,7 @@
 #include "exception.h"
 #include "display.h"
 
-#include "SDL.h"
+#include <SDL/SDL.h>
 #include <algorithm>
 
 namespace Hpp

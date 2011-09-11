@@ -9,7 +9,7 @@
 #include "thread.h"
 #include "real.h"
 
-#include "SDL.h"
+#include <SDL/SDL.h>
 #include <map>
 #include <set>
 #include <list>

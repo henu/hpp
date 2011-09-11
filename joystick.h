@@ -1,7 +1,7 @@
 #ifndef HPP_JOYSTICK_H
 #define HPP_JOYSTICK_H
 
-#include "SDL.h"
+#include <SDL/SDL.h>
 
 #include <vector>
 

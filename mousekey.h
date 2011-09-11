@@ -1,7 +1,7 @@
 #ifndef HPP_MOUSEKEY_H
 #define HPP_MOUSEKEY_H
 
-#include "SDL.h"
+#include <SDL/SDL.h>
 
 namespace Hpp
 {

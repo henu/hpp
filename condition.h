@@ -6,7 +6,7 @@
 #include "time.h"
 
 #ifdef HPP_USE_SDL_MUTEX
-#include "SDL_thread.h"
+#include <SDL/SDL_thread.h>
 #else
 #include <pthread.h>
 #include <sys/time.h>

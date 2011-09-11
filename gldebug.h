@@ -5,7 +5,7 @@
 #include "exception.h"
 #include "inc_gl.h"
 
-#include "SDL.h"
+#include <SDL/SDL.h>
 #include <iostream>
 #include <map>
 #include <string>

@@ -6,7 +6,7 @@
 #include "thread.h"
 #include "time.h"
 
-#include "SDL.h"
+#include <SDL/SDL.h>
 #include <list>
 #include <map>
 #include <set>

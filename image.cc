@@ -4,7 +4,7 @@
 #include "exception.h"
 #include "assert.h"
 
-#include "SDL_image.h"
+#include <SDL/SDL_image.h>
 
 namespace Hpp
 {

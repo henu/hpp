@@ -5,7 +5,7 @@
 
 #include "assert.h"
 #ifdef HPP_USE_SDL_MUTEX
-#include "SDL_thread.h"
+#include <SDL/SDL_thread.h>
 #else
 #ifndef WIN32
 #include <pthread.h>

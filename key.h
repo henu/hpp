@@ -1,7 +1,7 @@
 #ifndef HPP_KEY_H
 #define HPP_KEY_H
 
-#include "SDL.h"
+#include <SDL/SDL.h>
 
 namespace Hpp
 {

@@ -4,7 +4,7 @@
 #include "key.h"
 #include "mousekey.h"
 
-#include "SDL.h"
+#include <SDL/SDL.h>
 
 namespace Hpp
 {
