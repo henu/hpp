@@ -54,6 +54,7 @@ HEADERS_MAIN=\
 "ivectors.h "\
 "lock.h "\
 "magic.h "\
+"main.h "\
 "matrix3.h "\
 "matrix4.h "\
 "memwatch.h "\
