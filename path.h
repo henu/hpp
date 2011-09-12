@@ -200,20 +200,18 @@ inline std::string Path::toString(bool compact) const
 		#endif
 		break;
 	case HOME:
-		#ifndef WIN32
 		if (compact) {
 			result += "~";
 		} else {
+			#ifndef WIN32
 			result = getenv("HOME");
-		}
-		result += '/';
-		#else
-		{
+			#else
 			char path_cstr[MAX_PATH];
 			SHGetFolderPath(0, CSIDL_PERSONAL, 0, 0, path_cstr);
-			result = path_cstr + '/';
+			result = path_cstr;
+			#endif
 		}
-		#endif
+		result += '/';
 		break;
 	case CONFIG:
 		#ifndef WIN32
@@ -227,7 +225,8 @@ inline std::string Path::toString(bool compact) const
 		{
 			char path_cstr[MAX_PATH];
 			SHGetFolderPath(0, CSIDL_LOCAL_APPDATA, 0, 0, path_cstr);
-			result = path_cstr + '/';
+			result = path_cstr;
+			result += '/';
 		}
 		#endif
 		break;
