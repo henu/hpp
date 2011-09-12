@@ -163,7 +163,7 @@ static SDL_Surface* loadSDLSurface(std::string const& filename, uint8_t const* d
 	if (!filename.empty()) {
 		SDL_Surface* result = IMG_Load(filename.c_str());
 		if (!result) {
-			throw Exception(std::string("Unable to load image from file! Reason: ") + IMG_GetError());
+			throw Exception(std::string("Unable to load image \"" + filename + "\"! Reason: ") + IMG_GetError());
 		}
 		return result;
 	}

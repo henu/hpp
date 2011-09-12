@@ -179,7 +179,12 @@ inline UnicodeString::UnicodeString(std::string const& str)
 		std::string::const_iterator str_it = str.begin();
 		try {
 			for (size_t offset = 0; offset < len; offset ++) {
-				buf[offset] = extractUTF8(str_it, str.end());
+				try {
+					buf[offset] = extractUTF8(str_it, str.end());
+				}
+				catch (Hpp::Exception const& e) {
+					throw Hpp::Exception("Unable to construct UnicodeString from std::string \"" + str + "\"! Reason: " + e.what());
+				}
 			}
 		}
 		catch ( ... ) {
@@ -201,7 +206,12 @@ inline UnicodeString::UnicodeString(char const* c_str)
 		buf = new UChr[reserve];
 		std::string::const_iterator str_it;
 		for (size_t offset = 0; offset < len; offset ++) {
-			buf[offset] = extractUTF8(c_str, c_str_end);
+			try {
+				buf[offset] = extractUTF8(c_str, c_str_end);
+			}
+			catch (Hpp::Exception const& e) {
+				throw Hpp::Exception(std::string("Unable to construct UnicodeString from C string \"") + c_str + "\"! Reason: " + e.what());
+			}
 		}
 		HppAssert(c_str == c_str_end, "All UTF-8 characters not extracted!");
 	} else {
