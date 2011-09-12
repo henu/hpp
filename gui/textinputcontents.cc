@@ -32,7 +32,7 @@ void TextinputContents::onKeyDown(Key::Keycode keycode, UChr uchr)
 			markSizeChanged();
 			updateScrolling();
 		}
-	} else if (keycode == Key::DELETE) {
+	} else if (keycode == Key::DEL) {
 		value = value.substr(0, cursor) + value.substr(cursor + 1);
 		markSizeChanged();
 		updateScrolling();
