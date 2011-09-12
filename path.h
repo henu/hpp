@@ -195,7 +195,9 @@ inline std::string Path::toString(bool compact) const
 	case REL:
 		break;
 	case ABS:
+		#ifndef WIN32
 		result = '/';
+		#endif
 		break;
 	case HOME:
 		#ifndef WIN32
@@ -208,7 +210,7 @@ inline std::string Path::toString(bool compact) const
 		#else
 		{
 			char path_cstr[MAX_PATH];
-			SHGetFolderPath(0, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			SHGetFolderPath(0, CSIDL_PERSONAL, 0, 0, path_cstr);
 			result = path_cstr + '/';
 		}
 		#endif
@@ -224,7 +226,7 @@ inline std::string Path::toString(bool compact) const
 		#else
 		{
 			char path_cstr[MAX_PATH];
-			SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			SHGetFolderPath(0, CSIDL_LOCAL_APPDATA, 0, 0, path_cstr);
 			result = path_cstr + '/';
 		}
 		#endif
@@ -232,7 +234,7 @@ inline std::string Path::toString(bool compact) const
 	}
 
 	// Fix Bill's evil characters
-	#ifndef WIN32
+	#ifdef WIN32
 	for (std::string::iterator result_it = result.begin();
 	     result_it != result.end();
 	     result_it ++) {
@@ -257,14 +259,14 @@ inline std::string Path::toString(bool compact) const
 
 inline void Path::convertToAbsolute(void)
 {
-// TODO: Make to work on windows!
-#ifdef WIN32
-HppAssert(false, "Not implemented yet!");
-#endif
 	HppAssert(type != UNKNOWN, "Type cannot be unknown when ensuring absolute/relative.");
 	std::string parts_begin_str;
 	switch (type) {
 	case REL:
+// TODO: Make to work on windows!
+#ifdef WIN32
+HppAssert(false, "Not implemented yet!");
+#endif
 		{
 			char cwd[PATH_MAX];
 			if (getcwd(cwd, PATH_MAX) == NULL) {
@@ -280,7 +282,7 @@ HppAssert(false, "Not implemented yet!");
 		#else
 		{
 			char path_cstr[MAX_PATH];
-			SHGetFolderPath(0, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			SHGetFolderPath(0, CSIDL_PERSONAL, 0, 0, path_cstr);
 			parts_begin_str = path_cstr;
 		}
 		#endif
@@ -292,7 +294,7 @@ HppAssert(false, "Not implemented yet!");
 		#else
 		{
 			char path_cstr[MAX_PATH];
-			SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			SHGetFolderPath(0, CSIDL_LOCAL_APPDATA, 0, 0, path_cstr);
 			parts_begin_str = path_cstr;
 		}
 		#endif
@@ -302,7 +304,7 @@ HppAssert(false, "Not implemented yet!");
 	}
 
 	// Fix Bill's evil characters
-	#ifndef WIN32
+	#ifdef WIN32
 	for (std::string::iterator parts_begin_str_it = parts_begin_str.begin();
 	     parts_begin_str_it != parts_begin_str.end();
 	     parts_begin_str_it ++) {
@@ -312,7 +314,7 @@ HppAssert(false, "Not implemented yet!");
 	}
 	#endif
 
-	type = REL;
+	type = ABS;
 	Parts parts_begin = explode(parts_begin_str, '/');
 	Parts parts_begin_fixed;
 	for (Parts::const_iterator parts_begin_it = parts_begin.begin();
@@ -380,7 +382,7 @@ inline void Path::ensureAbsoluteOrRelative(void)
 		#else
 		{
 			char path_cstr[MAX_PATH];
-			SHGetFolderPath(0, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			SHGetFolderPath(0, CSIDL_PERSONAL, 0, 0, path_cstr);
 			parts_begin_str = path_cstr;
 		}
 		#endif
@@ -392,7 +394,7 @@ inline void Path::ensureAbsoluteOrRelative(void)
 		#else
 		{
 			char path_cstr[MAX_PATH];
-			SHGetFolderPath(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path_cstr);
+			SHGetFolderPath(0, CSIDL_LOCAL_APPDATA, 0, 0, path_cstr);
 			parts_begin_str = path_cstr;
 		}
 		#endif
@@ -402,7 +404,7 @@ inline void Path::ensureAbsoluteOrRelative(void)
 	}
 
 	// Fix Bill's evil characters
-	#ifndef WIN32
+	#ifdef WIN32
 	for (std::string::iterator parts_begin_str_it = parts_begin_str.begin();
 	     parts_begin_str_it != parts_begin_str.end();
 	     parts_begin_str_it ++) {
@@ -411,6 +413,8 @@ inline void Path::ensureAbsoluteOrRelative(void)
 		}
 	}
 	#endif
+// TODO: Finish this method!
+HppAssert(false, "Not implemented yet!");
 }
 
 inline Path Path::operator/(std::string const& subitem) const
@@ -475,11 +479,11 @@ inline void ensurePathExists(Path const& p)
 	Path p2(p);
 	p2.convertToAbsolute();
 
-// TODO: Make to work on windows!
-#ifdef WIN32
-HppAssert(false, "Not implemented yet!");
-#endif
+	#ifndef WIN32
 	std::string p_test("/");
+	#else
+	std::string p_test;
+	#endif
 	for (size_t part_id = 0; part_id < p2.partsSize(); part_id ++) {
 
 		std::string part = p2[part_id];
