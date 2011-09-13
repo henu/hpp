@@ -8,7 +8,6 @@ HEADERS_MAIN=\
 "gui/autogridcontainer.h "\
 "gui/button.h "\
 "gui/callback.h "\
-"gui/charset.h "\
 "gui/container.h "\
 "gui/containerwidget.h "\
 "gui/engine.h "\
@@ -41,6 +40,7 @@ HEADERS_MAIN=\
 "byteq.h "\
 "bytev.h "\
 "cast.h "\
+"charset.h "\
 "collisions.h "\
 "color.h "\
 "commandexec.h "\
