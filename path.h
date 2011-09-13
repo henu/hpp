@@ -1,6 +1,7 @@
 #ifndef HPP_PATH_H
 #define HPP_PATH_H
 
+#include "charset.h"
 #include "assert.h"
 #include "exception.h"
 #include "misc.h"
@@ -498,13 +499,13 @@ inline void ensurePathExists(Path const& p)
 
 		// Ensure current path part exists.
 		struct stat sttmp;
-		if (stat(p_test.c_str(), &sttmp) == -1) {
+		if (stat(convertFromUtf8ToSystemCharset(p_test).c_str(), &sttmp) == -1) {
 			#ifndef WIN32
-			if (mkdir(p_test.c_str(), 0700) == -1) {
+			if (mkdir(convertFromUtf8ToSystemCharset(p_test).c_str(), 0700) == -1) {
 				throw Exception("Unable to create directory \"" + p_test + "\"!");
 			}
 			#else
-			mkdir(p_test.c_str());
+			mkdir(convertFromUtf8ToSystemCharset(p_test).c_str());
 			#endif
 		} else if (!S_ISDIR(sttmp.st_mode)) {
 			throw Exception("\"" + p_test + "\" is not a directory!");
@@ -532,7 +533,7 @@ inline void listFolderChildren(FolderChildren& result, Path const& path)
 {
 	result.clear();
 
-	std::string path_str = path.toString();
+	std::string path_str = convertFromUtf8ToSystemCharset(path.toString());
 	DIR* dir = opendir(path_str.c_str());
 	if (dir == NULL) {
 		throw Exception("Unable to open folder \"" + path.toString() + "\"!");
@@ -547,6 +548,7 @@ inline void listFolderChildren(FolderChildren& result, Path const& path)
 		#else
 		new_child.name = std::string(dir_ent->d_name, dir_ent->d_namlen);
 		#endif
+		new_child.name = convertFromSystemCharsetToUtf8(new_child.name);
 		// Get type
 		#ifndef WIN32
 		switch (dir_ent->d_type) {
