@@ -3,6 +3,7 @@
 
 #include <iconv.h>
 #include <string>
+#include <errno.h>
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -31,7 +32,7 @@ inline std::string convertTo(std::string const& str, std::string const& from, st
 	}
 
 	std::string result;
-	size_t BUF_SIZE = 1024;
+	size_t const BUF_SIZE = 1024;
 	char buf[BUF_SIZE];
 
 	iconv_t cd = iconv_open(to.c_str(), from.c_str());
@@ -47,7 +48,7 @@ inline std::string convertTo(std::string const& str, std::string const& from, st
 	while (str_c_left > 0) {
 		char* subresult = buf;
 		size_t subresult_left = BUF_SIZE;
-		size_t chars_converted = iconv(cd, &str_c, &str_c_left, &subresult, &subresult_left);
+		size_t chars_converted = iconv(cd, (char**)&str_c, &str_c_left, &subresult, &subresult_left);
 		if (chars_converted == (size_t)(-1)) {
 			if (errno == E2BIG) {
 				// No more room in subresult. This is normal,
