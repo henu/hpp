@@ -48,7 +48,11 @@ inline std::string convertTo(std::string const& str, std::string const& from, st
 	while (str_c_left > 0) {
 		char* subresult = buf;
 		size_t subresult_left = BUF_SIZE;
+		#ifndef WIN32
 		size_t chars_converted = iconv(cd, (char**)&str_c, &str_c_left, &subresult, &subresult_left);
+		#else
+		size_t chars_converted = iconv(cd, &str_c, &str_c_left, &subresult, &subresult_left);
+		#endif
 		if (chars_converted == (size_t)(-1)) {
 			if (errno == E2BIG) {
 				// No more room in subresult. This is normal,
