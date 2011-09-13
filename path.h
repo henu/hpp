@@ -170,6 +170,14 @@ inline Path::Path(std::string const& p)
 	if (!part.empty()) {
 		parts.push_back(part);
 	}
+
+	// Absolute paths in windows are considered relative
+	// paths, so lets convert them to absolute.
+	#ifdef WIN32
+	if (!parts.empty() && parts[0].size() == 2 && parts[0][1] == ':') {
+		type = ABS;
+	}
+	#endif
 }
 
 inline Path::Path(Path const& p) :
@@ -524,8 +532,8 @@ inline void listFolderChildren(FolderChildren& result, Path const& path)
 {
 	result.clear();
 
-	#ifndef WIN32
-	DIR* dir = opendir(path.toString().c_str());
+	std::string path_str = path.toString();
+	DIR* dir = opendir(path_str.c_str());
 	if (dir == NULL) {
 		throw Exception("Unable to open folder \"" + path.toString() + "\"!");
 	}
@@ -533,7 +541,14 @@ inline void listFolderChildren(FolderChildren& result, Path const& path)
 	struct dirent* dir_ent;
 	while ((dir_ent = readdir(dir)) != NULL) {
 		FolderChild new_child;
+		// Get name
+		#ifndef WIN32
 		new_child.name = dir_ent->d_name;
+		#else
+		new_child.name = std::string(dir_ent->d_name, dir_ent->d_namlen);
+		#endif
+		// Get type
+		#ifndef WIN32
 		switch (dir_ent->d_type) {
 		case DT_DIR:
 			new_child.type = FolderChild::FOLDER;
@@ -545,6 +560,18 @@ inline void listFolderChildren(FolderChildren& result, Path const& path)
 			new_child.type = FolderChild::UNKNOWN;
 			break;
 		}
+		#else
+		struct stat sttmp;
+		if (stat((path_str + "/" + new_child.name).c_str(), &sttmp) == -1) {
+			// File/dir has disappeared!
+		} else if (S_ISREG(sttmp.st_mode)) {
+			new_child.type = FolderChild::FILE;
+		} else if (S_ISDIR(sttmp.st_mode)) {
+			new_child.type = FolderChild::FOLDER;
+		} else {
+			new_child.type = FolderChild::UNKNOWN;
+		}
+		#endif
 		result.push_back(new_child);
 	}
 
@@ -552,10 +579,6 @@ inline void listFolderChildren(FolderChildren& result, Path const& path)
 	{
 		throw Exception("Unable to close folder \"" + path.toString() + "\"!");
 	}
-	#else
-// TODO: Code this!
-HppAssert(false, "Listing of folder children is not implemented on Windows yet!");
-	#endif
 
 	std::sort(result.begin(), result.end(), compareFolderChildren);
 
