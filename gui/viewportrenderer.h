@@ -200,7 +200,6 @@ private:
 	// Padding and other sizes
 	Real padding_menu_h;
 	Real padding_menuitem_h, padding_menuitem_v;
-	Real textinput_min_size;
 	Real folderview_min_width;
 	uint32_t folderview_min_rows;
 
@@ -239,7 +238,7 @@ private:
 	virtual uint32_t getWindowEdgeBottomHeight(void) const;
 	virtual uint32_t getLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getLabelHeight(void) const;
-	virtual uint32_t getMinimumTextinputWidth(void) const { return tex_field_edge_left.getWidth() + tex_field_edge_right.getWidth() + textinput_min_size; }
+	virtual uint32_t getTextinputWidth(size_t cols) const { return tex_field_edge_left.getWidth() + tex_field_edge_right.getWidth() + font.getStringWidth("_", font_input_size) * cols; }
 	virtual uint32_t getTextinputHeight(void) const { return tex_field_edge_top.getHeight() + tex_field_edge_bottom.getHeight() + font_input_size; }
 	virtual uint32_t getMinimumTextinputContentsWidth(UnicodeString const& value) const { return font.getStringWidth(value, font_input_size) + font.getStringWidth("|", font_input_size); }
 	virtual uint32_t getTextinputContentsHeight(void) const { return font_input_size; }

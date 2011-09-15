@@ -26,6 +26,9 @@ public:
 	inline void setValue(UnicodeString const& value);
 	inline UnicodeString getValue(void) const;
 
+	inline void setCols(size_t cols);
+	inline size_t getCols(void) const { return cols; }
+
 	inline void setCallbackFunc(CallbackFunc callback, void* data);
 
 	// Virtual functions for Widget
@@ -43,6 +46,8 @@ private:
 	Scrollbox scrollbox;
 	TextinputContents contents;
 
+	size_t cols;
+
 	CallbackFunc callback;
 	void* callback_data;
 
@@ -57,6 +62,7 @@ private:
 
 inline Textinput::Textinput(void) :
 contents(this),
+cols(12),
 callback(NULL)
 {
 	addChild(&scrollbox);
@@ -79,6 +85,12 @@ inline UnicodeString Textinput::getValue(void) const
 	return contents.getValue();
 }
 
+inline void Textinput::setCols(size_t cols)
+{
+	this->cols = cols;
+	markSizeChanged();
+}
+
 inline void Textinput::setCallbackFunc(CallbackFunc callback, void* data)
 {
 	this->callback = callback;
@@ -89,7 +101,7 @@ inline uint32_t Textinput::getMinWidth(void) const
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
-	return rend->getMinimumTextinputWidth();
+	return rend->getTextinputWidth(cols);
 }
 
 inline uint32_t Textinput::getMinHeight(uint32_t width) const

@@ -53,7 +53,6 @@ void ViewportRenderer::setFontSize(uint32_t font_size)
 	padding_menuitem_h = font_menuitem_size * 0.5;
 	padding_menuitem_v = font_menuitem_size * 0.125;
 	// Tune other values
-	textinput_min_size = font_input_size * 5;
 	folderview_min_width = font_input_size * 20;
 	folderview_min_rows = 6;
 }
