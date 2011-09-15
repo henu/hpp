@@ -25,6 +25,9 @@ public:
 	inline Real getValue(void) const { return value; }
 	inline Real getButtonMove(void) const { return button_move; }
 
+	inline void setOrientation(Orientation ori);
+	inline Orientation getOrientation(void) const { return ori; }
+
 	inline void setCallbackFunc(CallbackFunc callback, void* data);
 
 	inline virtual uint32_t getMinWidth(void) const;
@@ -80,6 +83,12 @@ callback_data(NULL)
 
 inline Slider::~Slider(void)
 {
+}
+
+inline void Slider::setOrientation(Orientation ori)
+{
+	this->ori = ori;
+	markSizeChanged();
 }
 
 inline void Slider::setCallbackFunc(CallbackFunc callback, void* data)
