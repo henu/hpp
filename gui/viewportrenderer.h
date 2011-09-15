@@ -86,6 +86,16 @@ public:
 	inline void loadTextureScrollbarBgVert(Path const& path) { tex_scrollbar_bg_vert.loadFromFile(path, DEFAULT); }
 	inline void loadTextureScrollbarBgVertTop(Path const& path) { tex_scrollbar_bg_vert_top.loadFromFile(path, DEFAULT); }
 	inline void loadTextureScrollbarBgVertBottom(Path const& path) { tex_scrollbar_bg_vert_bottom.loadFromFile(path, DEFAULT); }
+	inline void loadTextureSliderHoriz(Path const& path) { tex_slider_horiz.loadFromFile(path, DEFAULT); }
+	inline void loadTextureSliderVert(Path const& path) { tex_slider_vert.loadFromFile(path, DEFAULT); }
+	inline void loadTextureSliderPressedHoriz(Path const& path) { tex_slider_pressed_horiz.loadFromFile(path, DEFAULT); }
+	inline void loadTextureSliderPressedVert(Path const& path) { tex_slider_pressed_vert.loadFromFile(path, DEFAULT); }
+	inline void loadTextureSliderBgHoriz(Path const& path) { tex_slider_bg_horiz.loadFromFile(path, DEFAULT); }
+	inline void loadTextureSliderBgHorizLeft(Path const& path) { tex_slider_bg_horiz_left.loadFromFile(path, DEFAULT); }
+	inline void loadTextureSliderBgHorizRight(Path const& path) { tex_slider_bg_horiz_right.loadFromFile(path, DEFAULT); }
+	inline void loadTextureSliderBgVert(Path const& path) { tex_slider_bg_vert.loadFromFile(path, DEFAULT); }
+	inline void loadTextureSliderBgVertTop(Path const& path) { tex_slider_bg_vert_top.loadFromFile(path, DEFAULT); }
+	inline void loadTextureSliderBgVertBottom(Path const& path) { tex_slider_bg_vert_bottom.loadFromFile(path, DEFAULT); }
 
 	// Font loading functions. Multiple fonts can be used. The firstly
 	// loaded font will always be preferred, but if some character is not
@@ -167,6 +177,16 @@ private:
 	Texture tex_scrollbar_bg_vert;
 	Texture tex_scrollbar_bg_vert_top;
 	Texture tex_scrollbar_bg_vert_bottom;
+	Texture tex_slider_horiz;
+	Texture tex_slider_vert;
+	Texture tex_slider_pressed_horiz;
+	Texture tex_slider_pressed_vert;
+	Texture tex_slider_bg_horiz;
+	Texture tex_slider_bg_horiz_left;
+	Texture tex_slider_bg_horiz_right;
+	Texture tex_slider_bg_vert;
+	Texture tex_slider_bg_vert_top;
+	Texture tex_slider_bg_vert_bottom;
 
 	// Font and its sizes
 	Font font;
@@ -206,6 +226,7 @@ private:
 	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview);
 	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items);
 	virtual void renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed, bool slider_pressed);
+	virtual void renderSlider(int32_t x_origin, int32_t y_origin, Slider const* slider, bool horizontal, bool slider_pressed);
 	virtual uint32_t getMenubarHeight(void) const;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuseparatorMinWidth(void) const;
@@ -237,6 +258,14 @@ private:
 	inline virtual uint32_t getScrollbarButtonRightWidth(void) const { return tex_scrollbar_button_right.getWidth(); };
 	inline virtual uint32_t getScrollbarButtonUpHeight(void) const { return tex_scrollbar_button_up.getHeight(); };
 	inline virtual uint32_t getScrollbarButtonDownHeight(void) const { return tex_scrollbar_button_down.getHeight(); };
+	inline virtual uint32_t getScrollboxMinWidth(void) const { return tex_scrollbar_bg_vert.getWidth() * 2; }
+	inline virtual uint32_t getScrollboxMinHeight(void) const { return tex_scrollbar_bg_horiz.getHeight() * 2; }
+	inline virtual uint32_t getHorizSliderWidth(void) const { return tex_slider_horiz.getWidth(); }
+	inline virtual uint32_t getVertSliderHeight(void) const { return tex_slider_vert.getHeight(); }
+	inline virtual uint32_t getHorizSliderMinWidth(void) const { return tex_slider_bg_horiz_left.getWidth() + tex_slider_bg_horiz_right.getWidth() + tex_slider_bg_horiz.getWidth() + tex_slider_horiz.getWidth(); }
+	inline virtual uint32_t getVertSliderMinHeight(void) const { return tex_slider_bg_vert_top.getHeight() + tex_slider_bg_vert_bottom.getHeight() + tex_slider_bg_vert.getHeight() + tex_slider_vert.getHeight(); }
+	inline virtual uint32_t getHorizSliderHeight(void) const { return std::max(tex_slider_horiz.getHeight(), tex_slider_bg_horiz.getHeight()); }
+	inline virtual uint32_t getVertSliderWidth(void) const { return std::max(tex_slider_vert.getWidth(), tex_slider_bg_vert.getWidth()); }
 	virtual void setRenderareaLimit(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 	virtual void removeRenderareaLimit(void);
 

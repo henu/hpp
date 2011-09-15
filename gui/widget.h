@@ -37,6 +37,7 @@ public:
 	inline uint32_t getHeight(void) const { return height; }
 
 	// Size getters
+// TODO: Move this to Containerwidget, and make it abstract!
 	inline virtual uint32_t getMinWidth(void) const { return 0; }
 	inline virtual uint32_t getMinHeight(uint32_t width) const { (void)width; return 0; }
 

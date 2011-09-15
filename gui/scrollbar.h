@@ -38,7 +38,6 @@ private:
 	Real value;
 	Real size;
 	Real button_move;
-	Real bg_move;
 
 	Dragtype drag;
 	Real drag_slider_pos;

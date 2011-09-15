@@ -11,6 +11,7 @@
 #include "folderview.h"
 #include "folderviewcontents.h"
 #include "scrollbar.h"
+#include "slider.h"
 
 #include "../display.h"
 #include "../viewport.h"
@@ -581,6 +582,51 @@ void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrol
 		renderSprite(*tex_bottom, Vector2(0, scrollbar_button_up_height + slider_pos + slider_size - slider_bottomend_height));
 	}
 
+}
+
+void ViewportRenderer::renderSlider(int32_t x_origin, int32_t y_origin, Slider const* slider, bool horizontal, bool slider_pressed)
+{
+	prepareSprites(x_origin, y_origin);
+
+	if (horizontal) {
+		uint32_t slider_width = slider->getWidth();
+		Real bg_extra = (getHorizSliderHeight() - tex_slider_bg_horiz.getHeight()) / 2.0;
+		Real slider_extra = (getHorizSliderHeight() - tex_slider_horiz.getHeight()) / 2.0;
+		// First end of background
+		renderSprite(tex_slider_bg_horiz_left, Vector2(0, bg_extra));
+		// Center of background
+		renderSprite(tex_slider_bg_horiz, Vector2(tex_slider_bg_horiz_left.getWidth(), bg_extra), Vector2(slider_width - tex_slider_bg_horiz_left.getWidth() - tex_slider_bg_horiz_right.getWidth(), 0));
+		// Second end of background
+		renderSprite(tex_slider_bg_horiz_right, Vector2(slider_width - tex_slider_bg_horiz_right.getWidth(), bg_extra));
+		// Slider
+		Real no_slider_size = slider_width - tex_slider_horiz.getWidth();
+		Texture* tex_slider;
+		if (!slider_pressed) {
+			tex_slider = &tex_slider_horiz;
+		} else {
+			tex_slider = &tex_slider_pressed_horiz;
+		}
+		renderSprite(*tex_slider, Vector2(no_slider_size * slider->getValue(), slider_extra));
+	} else {
+		uint32_t slider_height = slider->getHeight();
+		Real bg_extra = (getVertSliderWidth() - tex_slider_bg_vert.getWidth()) / 2.0;
+		Real slider_extra = (getVertSliderWidth() - tex_slider_vert.getWidth()) / 2.0;
+		// First end of background
+		renderSprite(tex_slider_bg_vert_top, Vector2(bg_extra, 0));
+		// Center of background
+		renderSprite(tex_slider_bg_vert, Vector2(bg_extra, tex_slider_bg_vert_top.getHeight()), Vector2(0, slider_height - tex_slider_bg_vert_top.getHeight() - tex_slider_bg_vert_bottom.getHeight()));
+		// Second end of background
+		renderSprite(tex_slider_bg_vert_bottom, Vector2(bg_extra, slider_height - tex_slider_bg_vert_top.getHeight()));
+		// Slider
+		Real no_slider_size = slider_height - tex_slider_vert.getHeight();
+		Texture* tex_slider;
+		if (!slider_pressed) {
+			tex_slider = &tex_slider_vert;
+		} else {
+			tex_slider = &tex_slider_pressed_vert;
+		}
+		renderSprite(*tex_slider, Vector2(slider_extra, no_slider_size * slider->getValue()));
+	}
 }
 
 uint32_t ViewportRenderer::getMenubarHeight(void) const

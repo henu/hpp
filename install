@@ -24,6 +24,7 @@ HEADERS_MAIN=\
 "gui/renderer.h "\
 "gui/scrollbar.h "\
 "gui/scrollbox.h "\
+"gui/slider.h "\
 "gui/textinput.h "\
 "gui/textinputcontents.h "\
 "gui/vectorcontainer.h "\

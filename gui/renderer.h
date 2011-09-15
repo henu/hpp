@@ -26,6 +26,7 @@ class Button;
 class Folderview;
 class FolderviewContents;
 class Scrollbar;
+class Slider;
 
 class Renderer
 {
@@ -56,6 +57,7 @@ public:
 	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview) = 0;
 	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items) = 0;
 	virtual void renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed, bool slider_pressed) = 0;
+	virtual void renderSlider(int32_t x_origin, int32_t y_origin, Slider const* slider, bool horizontal, bool slider_pressed) = 0;
 
 	virtual uint32_t getMenubarHeight(void) const = 0;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const = 0;
@@ -88,6 +90,14 @@ public:
 	virtual uint32_t getScrollbarButtonRightWidth(void) const = 0;
 	virtual uint32_t getScrollbarButtonUpHeight(void) const = 0;
 	virtual uint32_t getScrollbarButtonDownHeight(void) const = 0;
+	virtual uint32_t getScrollboxMinWidth(void) const = 0;
+	virtual uint32_t getScrollboxMinHeight(void) const = 0;
+	virtual uint32_t getHorizSliderWidth(void) const = 0;
+	virtual uint32_t getVertSliderHeight(void) const = 0;
+	virtual uint32_t getHorizSliderMinWidth(void) const = 0;
+	virtual uint32_t getVertSliderMinHeight(void) const = 0;
+	virtual uint32_t getHorizSliderHeight(void) const = 0;
+	virtual uint32_t getVertSliderWidth(void) const = 0;
 
 private:
 

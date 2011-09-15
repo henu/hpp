@@ -3,7 +3,7 @@
 
 #include "scrollbar.h"
 #include "callback.h"
-#include "widget.h"
+#include "containerwidget.h"
 
 #include "../vector2.h"
 
@@ -13,7 +13,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Scrollbox : public Widget
+class Scrollbox : public Containerwidget
 {
 
 public:
@@ -36,6 +36,9 @@ public:
 	// Tries to scroll view so that given area becomes visible. If
 	// are does not fit to view, then it centers area to view.
 	inline void scrollTo(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+
+	inline virtual uint32_t getMinWidth(void) const;
+	inline virtual uint32_t getMinHeight(uint32_t width) const;
 
 private:
 
@@ -173,6 +176,22 @@ inline void Scrollbox::scrollTo(uint32_t x, uint32_t y, uint32_t width, uint32_t
 	}
 	updateContentPosition();
 }
+
+inline uint32_t Scrollbox::getMinWidth(void) const
+{
+	Renderer const* rend = getRenderer();
+	if (!rend) return 0;
+	return rend->getScrollboxMinWidth();
+}
+
+inline uint32_t Scrollbox::getMinHeight(uint32_t width) const
+{
+	(void)width;
+	Renderer const* rend = getRenderer();
+	if (!rend) return 0;
+	return rend->getScrollboxMinHeight();
+}
+
 
 inline void Scrollbox::onChildSizeChange(void)
 {
