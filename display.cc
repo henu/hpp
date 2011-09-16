@@ -27,8 +27,10 @@ static bool videomodeComparer(Display::Mode const& mode1, Display::Mode const& m
 
 Display Display::instance;
 
-Display::Modes Display::getSupportedDisplaymodes(uint8_t bpp, uint8_t flags) const
+Display::Modes Display::getSupportedDisplaymodes(uint8_t bpp, uint8_t flags)
 {
+	instance.sdlhandler.init();
+
 	SDL_PixelFormat format;
 	format.palette = NULL;
 	format.BitsPerPixel = bpp;
@@ -39,6 +41,7 @@ Display::Modes Display::getSupportedDisplaymodes(uint8_t bpp, uint8_t flags) con
 
 	SDL_Rect** modes = SDL_ListModes(&format, fullscreen * SDL_FULLSCREEN | SDL_OPENGL);
 	if (!modes) {
+		instance.sdlhandler.deinit();
 		return Modes();
 	}
 
@@ -46,6 +49,7 @@ Display::Modes Display::getSupportedDisplaymodes(uint8_t bpp, uint8_t flags) con
 	if (modes == reinterpret_cast< SDL_Rect** >(-1)) {
 // TODO: What should we do here? I suggest we return a collection of basic displaymodes.
 HppAssert(false, "Not implemented yet!");
+		instance.sdlhandler.deinit();
 		return Modes();
 	}
 
@@ -76,6 +80,7 @@ HppAssert(false, "Not implemented yet!");
 	// Sort videomodes
 	std::sort(result.begin(), result.end(), videomodeComparer);
 
+	instance.sdlhandler.deinit();
 	return result;
 }
 

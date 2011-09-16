@@ -45,7 +45,7 @@ public:
 	static uint8_t const COMMON_MODES = 0x02;
 
 	// Gets list of available displaymodes while in fullscreen
-	Modes getSupportedDisplaymodes(uint8_t bpp, uint8_t flags = 0) const;
+	static Modes getSupportedDisplaymodes(uint8_t bpp, uint8_t flags = 0);
 
 	// Functions to open and close display
 	void static open(uint32_t width,
