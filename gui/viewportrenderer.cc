@@ -55,6 +55,7 @@ void ViewportRenderer::setFontSize(uint32_t font_size)
 	// Tune other values
 	folderview_min_width = font_input_size * 20;
 	folderview_min_rows = 6;
+	window_dragcorner_size = 16;
 }
 
 void ViewportRenderer::loadFont(Path const& path)
@@ -656,26 +657,6 @@ uint32_t ViewportRenderer::getMenuitemWidth(UnicodeString const& label) const
 uint32_t ViewportRenderer::getMenuitemHeight(void) const
 {
 	return round(font_menuitem_size + padding_menuitem_v * 2.0);
-}
-
-uint32_t ViewportRenderer::getWindowTitlebarHeight(void) const
-{
-	return tex_window_edge_top.getHeight();
-}
-
-uint32_t ViewportRenderer::getWindowEdgeLeftWidth(void) const
-{
-	return tex_window_edge_left.getWidth();
-}
-
-uint32_t ViewportRenderer::getWindowEdgeRightWidth(void) const
-{
-	return tex_window_edge_right.getWidth();
-}
-
-uint32_t ViewportRenderer::getWindowEdgeBottomHeight(void) const
-{
-	return tex_window_edge_bottom.getHeight();
 }
 
 uint32_t ViewportRenderer::getLabelWidth(UnicodeString const& label) const

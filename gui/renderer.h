@@ -66,9 +66,11 @@ public:
 	virtual uint32_t getMenuitemWidth(UnicodeString const& label) const = 0;
 	virtual uint32_t getMenuitemHeight(void) const = 0;
 	virtual uint32_t getWindowTitlebarHeight(void) const = 0;
+	virtual uint32_t getWindowEdgeTopHeight(void) const = 0;
 	virtual uint32_t getWindowEdgeLeftWidth(void) const = 0;
 	virtual uint32_t getWindowEdgeRightWidth(void) const = 0;
 	virtual uint32_t getWindowEdgeBottomHeight(void) const = 0;
+	virtual uint32_t getWindowDragcornerSize(void) const = 0;
 	virtual uint32_t getLabelWidth(UnicodeString const& label) const = 0;
 	virtual uint32_t getLabelHeight(void) const = 0;
 	virtual uint32_t getTextinputWidth(size_t cols) const = 0;

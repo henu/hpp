@@ -35,7 +35,8 @@ void Windowarea::addWindow(Window* window)
 
 void Windowarea::windowPositionChanged(Window* window, int32_t rel_x, int32_t rel_y)
 {
-	setChildPosition(window, getPositionX() + rel_x, getPositionY() + rel_y);
+//	setChildPosition(window, getPositionX() + rel_x, getPositionY() + rel_y);
+setChildPosition(window, rel_x, rel_y);
 }
 
 }

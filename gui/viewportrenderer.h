@@ -202,6 +202,7 @@ private:
 	Real padding_menuitem_h, padding_menuitem_v;
 	Real folderview_min_width;
 	uint32_t folderview_min_rows;
+	uint32_t window_dragcorner_size;
 
 	// Sprite rendering functions
 	Real spr_x_origin, spr_y_origin;
@@ -232,10 +233,12 @@ private:
 	virtual uint32_t getMenuseparatorHeight(void) const;
 	virtual uint32_t getMenuitemWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuitemHeight(void) const;
-	virtual uint32_t getWindowTitlebarHeight(void) const;
-	virtual uint32_t getWindowEdgeLeftWidth(void) const;
-	virtual uint32_t getWindowEdgeRightWidth(void) const;
-	virtual uint32_t getWindowEdgeBottomHeight(void) const;
+	virtual uint32_t getWindowTitlebarHeight(void) const { return tex_window_edge_top.getHeight(); }
+	virtual uint32_t getWindowEdgeTopHeight(void) const { return tex_window_edge_bottom.getHeight(); }
+	virtual uint32_t getWindowEdgeLeftWidth(void) const { return tex_window_edge_left.getWidth(); }
+	virtual uint32_t getWindowEdgeRightWidth(void) const { return tex_window_edge_right.getWidth(); }
+	virtual uint32_t getWindowEdgeBottomHeight(void) const { return tex_window_edge_bottom.getHeight(); }
+	virtual uint32_t getWindowDragcornerSize(void) const { return window_dragcorner_size; }
 	virtual uint32_t getLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getLabelHeight(void) const;
 	virtual uint32_t getTextinputWidth(size_t cols) const { return tex_field_edge_left.getWidth() + tex_field_edge_right.getWidth() + font.getStringWidth("_", font_input_size) * cols; }
