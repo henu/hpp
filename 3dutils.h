@@ -52,6 +52,7 @@ inline Angle calculateFovYFromAspectRatio(Angle const& fov_x, Real aspectratio);
 // normalize plane_normal!
 // TODO: Put point parameter first!
 inline Real distanceToPlane(Vector3 const& plane_pos, Vector3 const& plane_normal, Vector3 const& point);
+inline Real distanceToPlane(Vector2 const& plane_pos, Vector2 const& plane_normal, Vector2 const& point);
 
 // Distance is negative if point is at the "left side" of ray. Sides of ray are
 // measured in space where X is right and Y is up and front of ray points to
@@ -101,6 +102,13 @@ inline bool triangleHitsRay(Vector3 const& begin,
                             Vector3 const& v2,
                             Vector3* hit_pos = NULL,
                             Vector3 const* normal = NULL);
+
+// Length of collision will be 1.
+// TODO: Make it possible to not want collision information!
+inline bool triangleHitsSphere(Vector3 const& pos, Real radius,
+                               Vector3 const& tp0, Vector3 const& tp1, Vector3 const& tp2,
+                               Vector3& coll_pos, Vector3& coll_nrm, Real& coll_depth,
+                               Vector3 const& tri_bs_pos = Vector3::ZERO, Real tri_bs_r = -1.0);
 
 
 
@@ -306,6 +314,12 @@ inline Angle calculateFovYFromAspectRatio(Angle const& fov_x, Real aspectratio)
 }
 
 inline Real distanceToPlane(Vector3 const& plane_pos, Vector3 const& plane_normal, Vector3 const& point)
+{
+	Real dp_nn = dotProduct(plane_normal, plane_normal);
+	return (dotProduct(plane_normal, point) - dotProduct(plane_normal, plane_pos)) / dp_nn;
+}
+
+inline Real distanceToPlane(Vector2 const& plane_pos, Vector2 const& plane_normal, Vector2 const& point)
 {
 	Real dp_nn = dotProduct(plane_normal, plane_normal);
 	return (dotProduct(plane_normal, point) - dotProduct(plane_normal, plane_pos)) / dp_nn;
@@ -543,6 +557,201 @@ inline bool triangleHitsRay(Vector3 const& begin,
 	}
 
 	return true;
+}
+
+inline bool triangleHitsSphere(Vector3 const& pos, Real radius,
+                               Vector3 const& tp0, Vector3 const& tp1, Vector3 const& tp2,
+                               Vector3& coll_pos, Vector3& coll_nrm, Real& coll_depth,
+                               Vector3 const& tri_bs_pos, Real tri_bs_r)
+{
+	Vector3 edge0(tp1 - tp0);
+	Vector3 edge1(tp2 - tp1);
+	// Before collision check, do bounding sphere check.
+	if (tri_bs_r >= 0.0) {
+		if ((pos - tri_bs_pos).length() > radius + tri_bs_r) {
+			return false;
+		}
+	} else {
+		Vector3 const& tri_bs_pos2 = tp1;
+		Real dst0 = edge0.length();
+		Real dst1 = edge1.length();
+		Real tri_bs_r2 = (dst0 > dst1) ? dst0 : dst1;
+		if ((pos - tri_bs_pos2).length() > radius + tri_bs_r2) {
+			return false;
+		}
+	}
+	// Do the collision check.
+	Vector3 edge2(tp0 - tp2);
+	// Form normal of plane. If result is zero, then do not test against
+	// plane. Only do edge and corner tests then.
+	Vector3 plane_nrm = crossProduct(tp1 - tp0, tp2 - tp0);
+	Real plane_nrm_length = plane_nrm.length();
+	if (plane_nrm_length > 0.0) {
+		// Check if center of sphere is above/below triangle
+		HppAssert(plane_nrm.length() > 0.0, "Plane normal must not be zero!");
+		Vector3 pos_at_plane = posToPlane(pos, tp0, plane_nrm);
+
+		// We can calculate collision normal and depth here.
+		coll_nrm = pos_at_plane - pos;
+		coll_depth = radius - coll_nrm.length();
+
+		// Do not check any other stuff if sphere is too far away from
+		// triangle plane.
+		if (coll_depth > 0) {
+
+			// Check if the position is inside the area of triangle
+			Vector2 pos_at_tri = transformPointToTrianglespace(pos_at_plane - tp0, edge0, -edge2);
+			if (pos_at_tri.x >= 0.0 && pos_at_tri.y >= 0.0 && pos_at_tri.x + pos_at_tri.y <= 1.0) {
+				coll_pos = pos_at_plane;
+				Real coll_nrm_length = coll_nrm.length();
+				if (coll_nrm_length != 0) {
+					coll_nrm = -coll_nrm / coll_nrm_length;
+				} else {
+					coll_nrm = plane_nrm / plane_nrm_length;
+				}
+				HppAssert(coll_nrm.length() != 0.0, "Fail!");
+				return true;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	Real deepest_neg_depth;
+	bool coll_found;
+	#ifndef NDEBUG
+	deepest_neg_depth = 0;
+	#endif
+
+	// Check if edges collide
+	Real dp0 = dotProduct(tp0, tp0);
+	Real dp1 = dotProduct(tp1, tp1);
+	Real dp2 = dotProduct(tp2, tp2);
+	Real dp01 = dotProduct(tp0, tp1);
+	Real dp12 = dotProduct(tp1, tp2);
+	Real dp20 = dotProduct(tp2, tp0);
+	Real val0 = dotProduct(tp0, pos);
+	Real val1 = dotProduct(tp1, pos);
+	Real val2 = dotProduct(tp2, pos);
+	Real divider = 2*dp01-dp0-dp1;
+	if (divider != 0) {
+		Vector3 edge0_np = tp0 + edge0 * ((dp01-val1+val0-dp0) / divider);
+		Real edge0_len = edge0.length();
+		Real edge0_dst = (edge0_np - pos).length();
+		if (edge0_dst <= radius &&
+		    (tp0 - edge0_np).length() <= edge0_len &&
+		    (tp1 - edge0_np).length() <= edge0_len) {
+			coll_pos = edge0_np;
+			coll_nrm = edge0_np - pos;
+			deepest_neg_depth = coll_nrm.length();
+			coll_found = true;
+		} else coll_found = false;
+	} else coll_found = false;
+	divider = 2*dp12-dp1-dp2;
+	if (divider != 0) {
+		Vector3 edge1_np = tp1 + edge1 * ((dp12-val2+val1-dp1) / divider);
+		Real edge1_len = edge1.length();
+		Real edge1_dst = (edge1_np - pos).length();
+		if (edge1_dst <= radius &&
+		    (tp1 - edge1_np).length() <= edge1_len &&
+		    (tp2 - edge1_np).length() <= edge1_len) {
+			if (!coll_found) {
+				coll_pos = edge1_np;
+				coll_nrm = edge1_np - pos;
+				deepest_neg_depth = coll_nrm.length();
+				coll_found = true;
+			} else {
+				Vector3 test_nrm = edge1_np - pos;
+				Real test_neg_depth = test_nrm.length();
+				if (test_neg_depth < deepest_neg_depth) {
+					coll_pos = edge1_np;
+					coll_nrm = test_nrm;
+					deepest_neg_depth = test_neg_depth;
+				}
+			}
+		}
+	}
+	divider = 2*dp20-dp2-dp0;
+	if (divider != 0) {
+		Vector3 edge2_np = tp2 + edge2 * ((dp20-val0+val2-dp2) / divider);
+		Real edge2_len = edge2.length();
+		Real edge2_dst = (edge2_np - pos).length();
+		if (edge2_dst <= radius &&
+		    (tp2 - edge2_np).length() <= edge2_len &&
+		    (tp0 - edge2_np).length() <= edge2_len) {
+			if (!coll_found) {
+				coll_pos = edge2_np;
+				coll_nrm = edge2_np - pos;
+				deepest_neg_depth = coll_nrm.length();
+				coll_found = true;
+			} else {
+				Vector3 test_nrm = edge2_np - pos;
+				Real test_neg_depth = test_nrm.length();
+				if (test_neg_depth < deepest_neg_depth) {
+					coll_pos = edge2_np;
+					coll_nrm = test_nrm;
+					deepest_neg_depth = test_neg_depth;
+				}
+			}
+		}
+	}
+
+	// Check if corners hit sphere
+	if ((tp0 - pos).length() <= radius) {
+		if (!coll_found) {
+			coll_pos = tp0;
+			coll_nrm = tp0 - pos;
+			deepest_neg_depth = coll_nrm.length();
+			coll_found = true;
+		} else {
+			Vector3 test_nrm = tp0 - pos;
+			Real test_neg_depth = test_nrm.length();
+			if (test_neg_depth < deepest_neg_depth) {
+				coll_pos = tp0;
+				coll_nrm = test_nrm;
+				deepest_neg_depth = test_neg_depth;
+			}
+		}
+	}
+	if ((tp1 - pos).length() <= radius) {
+		if (!coll_found) {
+			coll_pos = tp1;
+			coll_nrm = tp1 - pos;
+			deepest_neg_depth = coll_nrm.length();
+			coll_found = true;
+		} else {
+			Vector3 test_nrm = tp1 - pos;
+			Real test_neg_depth = test_nrm.length();
+			if (test_neg_depth < deepest_neg_depth) {
+				coll_pos = tp1;
+				coll_nrm = test_nrm;
+				deepest_neg_depth = test_neg_depth;
+			}
+		}
+	}
+	if ((tp2 - pos).length() <= radius) {
+		if (!coll_found) {
+			coll_pos = tp2;
+			coll_nrm = tp2 - pos;
+			deepest_neg_depth = coll_nrm.length();
+			coll_found = true;
+		} else {
+			Vector3 test_nrm = tp2 - pos;
+			Real test_neg_depth = test_nrm.length();
+			if (test_neg_depth < deepest_neg_depth) {
+				coll_pos = tp2;
+				coll_nrm = test_nrm;
+				deepest_neg_depth = test_neg_depth;
+			}
+		}
+	}
+	if (coll_found) {
+		coll_depth = radius - deepest_neg_depth;
+		HppAssert(deepest_neg_depth != 0.0, "Division by zero!");
+		coll_nrm /= -deepest_neg_depth;
+		return true;
+	}
+	return false;
 }
 
 }
