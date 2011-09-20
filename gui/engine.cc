@@ -47,11 +47,11 @@ void Engine::render(void)
 {
 	rend->initRendering();
 
+	windowarea->render(0, 0);
+
 	if (menubar) {
 		menubar->render(0, 0);
 	}
-
-	windowarea->render(0, 0);
 
 	rend->deinitRendering();
 }

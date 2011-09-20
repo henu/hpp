@@ -6,8 +6,9 @@
 #include "../assert.h"
 #include "../exception.h"
 
-#include <set>
+#include <vector>
 #include <cstdlib>
+#include <algorithm>
 #include <stdint.h>
 
 namespace Hpp
@@ -110,7 +111,7 @@ protected:
 
 private:
 
-	typedef std::set< Widget* > Children;
+	typedef std::vector< Widget* > Children;
 
 	Engine* engine;
 	Widget* parent;
@@ -238,32 +239,32 @@ inline void Widget::markSizeChanged(void)
 
 inline void Widget::setChildPosition(Widget* child, int32_t x, int32_t y)
 {
-	HppAssert(children.find(child) != children.end(), "Unable to change child position, because it is really not our child!");
+	HppAssert(std::find(children.begin(), children.end(), child)  != children.end(), "Unable to change child position, because it is really not our child!");
 	child->x = x;
 	child->y = y;
 }
 
 inline void Widget::setChildSize(Widget* child, uint32_t width, uint32_t height)
 {
-	HppAssert(children.find(child) != children.end(), "Unable to change child size, because it is really not our child!");
+	HppAssert(std::find(children.begin(), children.end(), child)  != children.end(), "Unable to change child size, because it is really not our child!");
 	child->setSize(width, height);
 }
 
 inline void Widget::setChildRenderarealimit(Widget* child, int32_t x, int32_t y, uint32_t width, uint32_t height)
 {
-	HppAssert(children.find(child) != children.end(), "Unable to limit child renderarea, because it is really not our child!");
+	HppAssert(std::find(children.begin(), children.end(), child)  != children.end(), "Unable to limit child renderarea, because it is really not our child!");
 	child->setRenderarealimit(x, y, width, height);
 }
 
 inline void Widget::removeChildRenderarealimit(Widget* child)
 {
-	HppAssert(children.find(child) != children.end(), "Unable to limit child renderarea, because it is really not our child!");
+	HppAssert(std::find(children.begin(), children.end(), child)  != children.end(), "Unable to limit child renderarea, because it is really not our child!");
 	child->removeRenderarealimit();
 }
 
 inline bool Widget::isMyChild(Widget const* widget) const
 {
-	if (children.find((Widget*)widget) != children.end()) {
+	if (std::find(children.begin(), children.end(), (Widget*)widget) != children.end()) {
 		return true;
 	}
 	for (Children::const_iterator children_it = children.begin();
@@ -308,10 +309,10 @@ inline Widget const* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, 
 	if (positionOutsideRenderarealimit(x_origin, y_origin, mouse_x, mouse_y)) {
 		return NULL;
 	}
-	for (Children::const_iterator children_it = children.begin();
-	     children_it != children.end();
-	     children_it ++) {
-		Widget const* child = *children_it;
+	for (Children::const_reverse_iterator children_rit = children.rbegin();
+	     children_rit != children.rend();
+	     children_rit ++) {
+		Widget const* child = *children_rit;
 		Widget const* widget_under_mouse = child->mouseOverRecursive(x_origin + x, y_origin + y, mouse_x, mouse_y);
 		if (widget_under_mouse) {
 			return widget_under_mouse;
@@ -331,10 +332,10 @@ inline Widget* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, int32_
 	if (positionOutsideRenderarealimit(x_origin, y_origin, mouse_x, mouse_y)) {
 		return NULL;
 	}
-	for (Children::iterator children_it = children.begin();
-	     children_it != children.end();
-	     children_it ++) {
-		Widget* child = *children_it;
+	for (Children::reverse_iterator children_rit = children.rbegin();
+	     children_rit != children.rend();
+	     children_rit ++) {
+		Widget* child = *children_rit;
 		Widget* widget_under_mouse = child->mouseOverRecursive(x_origin + x, y_origin + y, mouse_x, mouse_y);
 		if (widget_under_mouse) {
 			return widget_under_mouse;
@@ -348,14 +349,15 @@ inline Widget* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, int32_
 
 inline void Widget::registerChild(Widget* child)
 {
-	HppAssert(children.find(child) == children.end(), "Child of Widget already registered!");
-	children.insert(child);
+	HppAssert(std::find(children.begin(), children.end(), child) == children.end(), "Child of Widget already registered!");
+	children.push_back(child);
 }
 
 inline void Widget::unregisterChild(Widget* child)
 {
-	HppAssert(children.find(child) != children.end(), "Child of Widget not found!");
-	children.erase(child);
+	Children::iterator children_find = std::find(children.begin(), children.end(), child);
+	HppAssert(children_find != children.end(), "Child of Widget not found!");
+	children.erase(children_find);
 }
 
 inline void Widget::setRenderarealimit(int32_t x, int32_t y, uint32_t width, uint32_t height)
