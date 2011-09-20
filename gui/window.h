@@ -152,24 +152,26 @@ inline bool Window::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::K
 	int32_t mouse_parent_y = mouse_y + getPositionY();
 	if (mouse_key == Hpp::Mousekey::LEFT) {
 		Part part = getPartUnder(mouse_x, mouse_y);
-		if (part == TITLEBAR ||
-		    part == TOP_EDGE ||
-		    part == TOPLEFT_CORNER ||
-		    part == TOPRIGHT_CORNER ||
-		    part == LEFT_EDGE ||
-		    part == RIGHT_EDGE ||
-		    part == BOTTOMLEFT_CORNER ||
-		    part == BOTTOMRIGHT_CORNER ||
-		    part == BOTTOM_EDGE) {
-			drag = part;
-			drag_start_mouse_x = mouse_parent_x;
-			drag_start_mouse_y = mouse_parent_y;
-			drag_start_pos_x = x_rel;
-			drag_start_pos_y = y_rel;
-			drag_start_width = getWidth();
-			drag_start_height = getHeight();
-			listenMouseMoves();
-			listenMouseReleases(Mousekey::FLAG_LEFT);
+		if (movable) {
+			if (part == TITLEBAR ||
+			    (resizable && (part == TOP_EDGE ||
+			                   part == TOPLEFT_CORNER ||
+			                   part == TOPRIGHT_CORNER ||
+			                   part == LEFT_EDGE ||
+			                   part == RIGHT_EDGE ||
+			                   part == BOTTOMLEFT_CORNER ||
+			                   part == BOTTOMRIGHT_CORNER ||
+			                   part == BOTTOM_EDGE))) {
+				drag = part;
+				drag_start_mouse_x = mouse_parent_x;
+				drag_start_mouse_y = mouse_parent_y;
+				drag_start_pos_x = x_rel;
+				drag_start_pos_y = y_rel;
+				drag_start_width = getWidth();
+				drag_start_height = getHeight();
+				listenMouseMoves();
+				listenMouseReleases(Mousekey::FLAG_LEFT);
+			}
 		}
 	}
 	return true;
