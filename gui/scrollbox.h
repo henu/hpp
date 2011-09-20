@@ -246,6 +246,8 @@ inline void Scrollbox::updateContent(void)
 
 	} while (vertical_scrollbar_added);
 
+	content_height = std::max(content_height, area_height);
+
 	// Check if there are two scrollbars. They
 	// require little box to bottomleft.
 	bool two_scrollbars = (scrollbar_horiz_needed && scrollbar_vert_needed);

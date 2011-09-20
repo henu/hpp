@@ -66,7 +66,7 @@ inline uint32_t Autogridcontainer::getMinWidth(void) const
 	     widgets_it != widgets.end();
 	     widgets_it ++) {
 		Containerwidget const* widget = *widgets_it;
-		min_width = std::min(min_width, widget->getMinWidth());
+		min_width = std::max(min_width, widget->getMinWidth());
 	}
 	return min_width;
 }
@@ -110,6 +110,31 @@ inline void Autogridcontainer::updateWidgetSizesAndPositions(void)
 	// Calculate widths of columns
 	Sizes widths = calculateWidthsOfColumns(getWidth());
 	Sizes heights = calculateHeightsOfRows(widths);
+
+	// Calculate minimum width and height with these
+	// options, and then calculate remainings
+	size_t min_width = std::accumulate(widths.begin(), widths.end(), 0);
+	size_t min_height = std::accumulate(heights.begin(), heights.end(), 0);
+	size_t remaining_width = getWidth() - min_width;
+	size_t remaining_height = getHeight() - min_height;
+
+	// Share remainings among sizes
+	size_t extra_width_per_column = remaining_width / widths.size();
+	size_t extra_height_per_row = remaining_height / heights.size();
+	for (size_t width_id = 0; width_id < widths.size(); width_id ++) {
+		if (width_id < widths.size() - 1) {
+			widths[width_id] += extra_width_per_column;
+		} else {
+			widths[width_id] += remaining_width - extra_width_per_column * (widths.size() - 1);
+		}
+	}
+	for (size_t height_id = 0; height_id < heights.size(); height_id ++) {
+		if (height_id < heights.size() - 1) {
+			heights[height_id] += extra_height_per_row;
+		} else {
+			heights[height_id] += remaining_height - extra_height_per_row * (heights.size() - 1);
+		}
+	}
 
 	// Go widgets through
 	size_t column_id = 0;
