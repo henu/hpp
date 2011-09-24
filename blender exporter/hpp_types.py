@@ -1899,22 +1899,22 @@ class Material:
 		self.name = mat.name
 
 		# Color
-		color_raw = mat.getRGBCol()
-		self.color = mathutils.Vector([color_raw[0], color_raw[1], color_raw[2]])
+		color_raw = mat.diffuse_color
+		self.color = mathutils.Vector([color_raw.r, color_raw.g, color_raw.b])
 
 		# Specular color and shininess
-		color_raw = mat.getSpecCol()
-		self.specular = mathutils.Vector([color_raw[0], color_raw[1], color_raw[2]]) * mat.getSpec()
-		self.shininess = mat.getHardness()
+		color_raw = mat.specular_color
+		self.specular = mathutils.Vector([color_raw.r, color_raw.g, color_raw.b]) * mat.specular_intensity
+		self.shininess = mat.specular_hardness
 
 		# Ambient light multiplier
-		self.ambient = mat.getAmb()
+		self.ambient = mat.ambient
 
 		# Emitting multiplier
-		self.emit = mat.getEmit()
+		self.emit = mat.emit
 
 		# Alpha multiplier
-		self.alpha = mat.getAlpha()
+		self.alpha = mat.alpha
 
 	def serialize(self):
 		result = bytes()
