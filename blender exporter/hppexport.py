@@ -121,9 +121,9 @@ class MeshExporter:
 		self.used_mats = set()
 
 		if export_armature:
-			armature_obj = object.getParent()
+			armature_obj = object.parent
 			assert armature_obj
-			assert armature_obj.getType() == 'Armature'
+			assert armature_obj.type == 'ARMATURE'
 			self.armature = armature_obj.data
 		else:
 			self.armature = None
@@ -153,7 +153,7 @@ class MeshExporter:
 		# Armature
 		if self.armature:
 			efile.write(bytes([1]))
-			myarmature = Armature(self.armature)
+			myarmature = hpp_types.Armature(self.armature)
 			efile.write(myarmature.serialize())
 		else:
 			efile.write(bytes([0]))
@@ -213,12 +213,12 @@ class SceneExporter:
 				portal = Portal(obj)
 				self.portals.append(portal)
 			# Decoration objects
-			elif obj.getType() == 'Mesh':
+			elif obj.type == 'MESH':
 				dobj = Object(obj)
 				self.dobjs[obj_name] = dobj
 				self.used_meshes.add(obj.getData(mesh = True))
 			else:
-				raise Exception('Object \"' + obj.getName() + '\" has unsupported type \"' + obj.getType() + '\"!')
+				raise Exception('Object \"' + obj.getName() + '\" has unsupported type \"' + obj.type + '\"!')
 
 		# Ensure all portals have valid room names
 		for portal in self.portals:

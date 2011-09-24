@@ -235,7 +235,7 @@ class Mesh:
 			return
 
 		if object.type != 'MESH':
-			raise Exception('Mesh was tried to construct with object that is not a mesh!')
+			raise Exception('Mesh was tried to construct with object that is not a mesh! It is \"' + object.type + '\"!')
 
 		# Get mesh and vertex groups from object
 		mesh = object.data
@@ -1937,8 +1937,8 @@ class Material:
 class Object:
 	def __init__(self, obj):
 
-		if obj.getType() != 'Mesh':
-			raise Exception('Unable to create Object from other types than Meshes!')
+		if obj.type != 'MESH':
+			raise Exception('Invalid type \"' + obj.type + '\" of Object! It should be MESH!')
 
 		self.transf = obj.getMatrix()
 		self.mesh = obj.data.name
@@ -1957,8 +1957,8 @@ class Object:
 class Room:
 	def __init__(self, obj):
 
-		if obj.getType() != 'Mesh':
-			raise Exception('Unable to create Room because it is not Mesh!')
+		if obj.type != 'MESH':
+			raise Exception('Invalid type \"' + obj.type + '\" of Room! It should be MESH!')
 
 		self.transf = obj.getMatrix()
 		self.mesh = obj.data.name
@@ -1981,8 +1981,8 @@ class Portal:
 
 		obj_name = obj.getName()
 
-		if obj.getType() != 'Mesh':
-			raise Exception('Portal \"' + obj_name + '\" has invalid type! It should be Mesh!')
+		if obj.type != 'MESH':
+			raise Exception('Invalid type \"' + obj.type + '\" of Portal! It should be MESH!')
 
 		# Names of rooms
 		# Remove possible .XXX from end, where XXX is number
