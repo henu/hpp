@@ -1,8 +1,15 @@
-#!BPY
 # coding=UTF-8
-import Blender
-from Blender import Mathutils
+import mathutils
 import struct
+import bpy
+
+# Returns selected objects from scene
+def getObjects(only_selected = False):
+	result = []
+	for obj in bpy.data.objects:
+		if not only_selected or obj.select:
+			result.append(obj)
+	return result
 
 # Functor (class that can be used as function) for comparing distances of
 # vectors to some specific vector. It is also possible to give index/tuple
@@ -25,9 +32,9 @@ class DistComparer:
 # Returns Vector(len=3) that is perpendicular to given one
 def perpVec(v):
 	if abs(v.x) < abs(v.y):
-		return Mathutils.Vector(0, v.z, -v.y)
+		return mathutils.Vector([0, v.z, -v.y])
 	else:
-		return Mathutils.Vector(-v.z, 0, v.x)
+		return mathutils.Vector([-v.z, 0, v.x])
 
 # Checks if two line segments at the same plane cross each others. If line
 # segments are not at the same plane, then result is not reliable.
@@ -54,13 +61,13 @@ def linesegmentsIntersectAtPlane(ls0_begin, ls0_end, ls1_begin, ls1_end):
 def transformPointToTrianglespace(pos, x_axis, y_axis):
 	# Calculate helper vector that is in 90 degree against y_axis.
 	helper = (x_axis.cross(y_axis)).cross(y_axis)
-	result = Mathutils.Vector(0, 0)
+	result = mathutils.Vector([0, 0])
 
 	dp_xh = x_axis.dot(helper)
 	assert dp_xh != 0.0, 'transformPointToTrianglespace(): Division by zero!'
 	result.x = pos.dot(helper) / dp_xh
 
-	y_axis_abs = Mathutils.Vector(abs(y_axis.x), abs(y_axis.y), abs(y_axis.z))
+	y_axis_abs = mathutils.Vector([abs(y_axis.x), abs(y_axis.y), abs(y_axis.z)])
 	if y_axis_abs.x > y_axis_abs.y and y_axis_abs.x > y_axis_abs.z:
 		assert y_axis.x != 0.0, 'transformPointToTrianglespace(): Division by zero!'
 		result.y = (pos.x + -result.x * x_axis.x) / y_axis.x
@@ -107,12 +114,12 @@ def rayHitsTriangle(ray_begin, ray_dir, v0, v1, v2, error_tolerance = 0.0):
 	# triangle.
 	dp_e_n = ray_dir.dot(hit_normal)
 	if dp_e_n == 0:
-		return False, Mathutils.Vector(0, 0, 0), Mathutils.Vector(0, 0, 0)
+		return False, mathutils.Vector([0, 0, 0]), mathutils.Vector([0, 0, 0])
 	m = (v0.dot(hit_normal) - ray_begin.dot(hit_normal)) / dp_e_n
 
 	# If collision point is behind ray, then collision is not possible.
 	if m < 0.0:
-		return False, Mathutils.Vector(0, 0, 0), Mathutils.Vector(0, 0, 0)
+		return False, mathutils.Vector([0, 0, 0]), mathutils.Vector([0, 0, 0])
 
 	hit_point = ray_begin + ray_dir * m
 
@@ -120,7 +127,7 @@ def rayHitsTriangle(ray_begin, ray_dir, v0, v1, v2, error_tolerance = 0.0):
 	pos_at_plane = transformPointToTrianglespace(hit_point - v0, tedge0, tedge1)
 
 	if pos_at_plane.x < -error_tolerance or pos_at_plane.y < -error_tolerance or pos_at_plane.x + pos_at_plane.y > 1 + error_tolerance:
-		return False, Mathutils.Vector(0, 0, 0), Mathutils.Vector(0, 0, 0)
+		return False, mathutils.Vector([0, 0, 0]), mathutils.Vector([0, 0, 0])
 
 	return True, hit_point, hit_normal
 
@@ -330,23 +337,26 @@ def floatToBytes(f):
 	return struct.pack('>f', f)
 
 def uInt8ToBytes(i):
-	result = ''
-	result += chr(i & 0xFF)
+	result = bytes()
+	result += bytes([i & 0xFF])
 	return result
 
 def uInt32ToBytes(i):
-	result = ''
-	result += chr((i >> 0) & 0xFF)
-	result += chr((i >> 8) & 0xFF)
-	result += chr((i >> 16) & 0xFF)
-	result += chr((i >> 24) & 0xFF)
+	result = bytes()
+	result += bytes([(i >> 0) & 0xFF])
+	result += bytes([(i >> 8) & 0xFF])
+	result += bytes([(i >> 16) & 0xFF])
+	result += bytes([(i >> 24) & 0xFF])
 	return result
 
 def stringToBytes(s):
-	return uInt32ToBytes(len(s)) + s
+	result = uInt32ToBytes(len(s))
+	for c in s:
+		result += bytes([ord(c)])
+	return result
 
 def vectorToBytes(v):
-	result = ''
+	result = bytes()
 	result += floatToBytes(v.x)
 	result += floatToBytes(v.y)
 	if (len(v) >= 3):
@@ -356,7 +366,7 @@ def vectorToBytes(v):
 	return result
 
 def matrixToBytes(m):
-	result = ''
+	result = bytes()
 	m_len = len(m)
 	for row in range(0, m_len):
 		for col in range(0, m_len):
@@ -383,14 +393,14 @@ def readVector(ifile, components):
 	x = readFloat(ifile)
 	y = readFloat(ifile)
 	if components == 2:
-		return Mathutils.Vector(x, y)
+		return mathutils.Vector([x, y])
 	elif components == 3:
 		z = readFloat(ifile)
-		return Mathutils.Vector(x, y, z)
+		return mathutils.Vector([x, y, z])
 	elif components == 4:
 		z = readFloat(ifile)
 		w = readFloat(ifile)
-		return Mathutils.Vector(x, y, z, w)
+		return mathutils.Vector([x, y, z, w])
 	else:
 		assert False, 'Components must be 2, 3 or 4!'
 

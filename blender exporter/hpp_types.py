@@ -1,23 +1,21 @@
-#!BPY
 # coding=UTF-8
 import hpp_misc
-import Blender
-from Blender import Mathutils
+import mathutils
 import copy
 
 class MeshVertex:
 	def __init__(self):
-		self.pos = Mathutils.Vector(0, 0, 0)
+		self.pos = mathutils.Vector([0, 0, 0])
 		self.vgroups = {}
 
 	def __deepcopy__(self, memo):
 		newvrt = MeshVertex()
-		newvrt.pos = Mathutils.Vector(self.pos)
+		newvrt.pos = mathutils.Vector(self.pos)
 		newvrt.vgroups = copy.deepcopy(self.vgroups, memo)
 		return newvrt
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 		result += hpp_misc.vectorToBytes(self.pos)
 		result += hpp_misc.uInt32ToBytes(len(self.vgroups))
 		for vgroup_id, weight in self.vgroups.items():
@@ -26,7 +24,7 @@ class MeshVertex:
 		return result
 
 	def read(self, ifile):
-		self.pos = Mathutils.Vector(0, 0, 0)
+		self.pos = mathutils.Vector([0, 0, 0])
 		self.vgroups = {}
 
 		self.pos = hpp_misc.readVector(ifile, 3)
@@ -57,7 +55,7 @@ class MeshFace:
 		for uvlayer in self.uvs:
 			newface_uvlayer = []
 			for uv in uvlayer:
-				newface_uvlayer.append(Mathutils.Vector(uv))
+				newface_uvlayer.append(mathutils.Vector(uv))
 			newface.uvs.append(newface_uvlayer)
 		newface.smooth = self.smooth
 		return newface;
@@ -71,7 +69,7 @@ class MeshFace:
 		return result
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 
 		# Vertices. Count is not needed, because this is called for
 		# triangles and quads.
@@ -87,7 +85,7 @@ class MeshFace:
 				result += hpp_misc.vectorToBytes(self.uvs[vrt_id][layer_id])
 
 		# Smooth
-		result += chr(self.smooth)
+		result += bytes([self.smooth])
 
 		return result
 
@@ -167,7 +165,7 @@ class MeshSubmesh:
 		self.mat = ''
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 
 		# Component counts of UV layers
 		result += hpp_misc.uInt32ToBytes(len(self.uvlayers_compcounts))
@@ -188,8 +186,7 @@ class MeshSubmesh:
 		if not self.mat:
 			result += hpp_misc.uInt32ToBytes(0)
 		else:
-			result += hpp_misc.uInt32ToBytes(len(self.mat))
-			result += self.mat
+			result += hpp_misc.stringToBytes(self.mat)
 
 		return result
 
@@ -231,14 +228,20 @@ class MeshCutError(Exception):
 
 class Mesh:
 
-	def __init__(self, mesh = None, custom_name = ''):
+	def __init__(self, object = None, custom_name = ''):
 
-		# If mesh is not given, then construct dummy Mesh
-		if not mesh:
+		# If object is not given, then construct dummy Mesh
+		if not object:
 			return
-			
-		# Temporary container of vertexgroups
-		tmp_vgroups = {}
+
+		if object.type != 'MESH':
+			raise Exception('Mesh was tried to construct with object that is not a mesh!')
+
+		# Get mesh and vertex groups from object
+		mesh = object.data
+		self.vgroups = []
+		for vertex_group in object.vertex_groups:
+			self.vgroups.append(vertex_group.name)
 
 		# Read name
 		if custom_name == '':
@@ -248,30 +251,16 @@ class Mesh:
 
 		# Read vertices
 		self.vrts = []
-		for vert in mesh.verts:
+		for vert in mesh.vertices:
 			new_vert = MeshVertex()
-			new_vert.pos = Mathutils.Vector(vert.co)
-			vgroups = mesh.getVertexInfluences(vert.index)
+			new_vert.pos = mathutils.Vector(vert.co)
+			vgroups = vert.groups
 			for vgroup in vgroups:
-				vgroup_name = vgroup[0]
-				weight = vgroup[1]
-				if vgroup_name not in tmp_vgroups:
-					tmp_vgroups[vgroup_name] = len(tmp_vgroups)
-				vgroup_id = tmp_vgroups[vgroup_name]
+				vgroup_id = vgroup.group
+				weight = vgroup.weight
 				assert vgroup_id not in new_vert.vgroups, 'Vertex group ID already found!'
 				new_vert.vgroups[vgroup_id] = weight
 			self.vrts.append(new_vert)
-
-		# Convert temporary vertexgroups to final ones
-		self.vgroups = []
-		tmp_vgroups2 = []
-		# Dictionary is not in proper order, so it needs to be copied
-		# to list that can be sorted.
-		for name_and_index in tmp_vgroups.items():
-			tmp_vgroups2.append(name_and_index)
-		tmp_vgroups2.sort(key = lambda vgroup: vgroup[1])
-		for name_and_index in tmp_vgroups2:
-			self.vgroups.append(name_and_index[0])
 
 		# Read materials
 		self.submeshes = []
@@ -288,31 +277,38 @@ class Mesh:
 			new_submesh.uvlayers_compcounts = None
 			self.submeshes.append(new_submesh)
 
-		# Read faces		
+		# Get UVs from mesh
+		# TODO: Here we get all UV layers, but is this done correctly?
+		mesh_uv_layers = []
+		for uv in mesh.uv_textures:
+			mesh_uv_layers.append(uv.data)
+
+		# Read faces
+		face_id = 0
 		for face in mesh.faces:
-			new_face = MeshFace(len(face.verts))
+			face_verts_len = len(face.vertices)
+			new_face = MeshFace(face_verts_len)
 			# Vertices
-			for vert in face.verts:
-				new_face.vrts.append(vert.index)
+			for vert in face.vertices:
+				new_face.vrts.append(vert)
 			# UVs
-			try:
+			for mesh_uv_layer in mesh_uv_layers:
+				face_uv_layer = mesh_uv_layer[face_id]
 				vrt_id = 0
-				for uv in face.uv:
-					new_face.uvs[vrt_id].append(uv)
+				for uv in face_uv_layer.uv:
+					new_face.uvs[vrt_id].append(mathutils.Vector(uv))
 					vrt_id += 1
-			except ValueError:
-				pass
 			# Smooth
-			new_face.smooth = bool(face.smooth)
+			new_face.smooth = bool(face.use_smooth)
 
 			# Store face to submesh
-			submesh = self.submeshes[face.mat]
-			if len(face.verts) == 3:
+			submesh = self.submeshes[face.material_index]
+			if face_verts_len == 3:
 				submesh.tris.append(new_face)
-			elif len(face.verts) == 4:
+			elif face_verts_len == 4:
 				submesh.quads.append(new_face)
 			else:
-				raise Exception('Mesh \"' + mesh.name + '\" has face with invalid number(' + str(len(face.verts)) + ') of vertices!')
+				raise Exception('Mesh \"' + mesh.name + '\" has face with invalid number(' + str(face_verts_len) + ') of vertices!')
 
 			# Check if uv layer count has been set for this submesh
 			if submesh.uvlayers_compcounts == None:
@@ -320,6 +316,7 @@ class Mesh:
 			else:
 				if submesh.uvlayers_compcounts != new_face.getUVComponentCounts():
 					raise Exception('Mesh \"' + mesh.name + '\" has submesh with faces using different amount of uv components!')
+			face_id += 1
 
 	def __deepcopy__(self, memo):
 		newmesh = Mesh()
@@ -473,7 +470,7 @@ class Mesh:
 									if n1_id not in face.vrts:
 										n1_possible = False
 								else:
-									n1_possible = Mathutils.AngleBetweenVecs(face_nrm, face_nrm_check) < MAX_NORMAL_CHANGE
+									n1_possible = mathutils.AngleBetweenVecs(face_nrm, face_nrm_check) < MAX_NORMAL_CHANGE
 							if n2_possible:
 								face_vposs[vrt_corner] = n2_pos
 								face_nrm_check = (face_vposs[1] - face_vposs[0]).cross(face_vposs[2] - face_vposs[0])
@@ -484,7 +481,7 @@ class Mesh:
 									if n2_id not in face.vrts:
 										n2_possible = False
 								else:
-									n2_possible = Mathutils.AngleBetweenVecs(face_nrm, face_nrm_check) < MAX_NORMAL_CHANGE
+									n2_possible = mathutils.AngleBetweenVecs(face_nrm, face_nrm_check) < MAX_NORMAL_CHANGE
 							# TODO: What if face becomes zero area'd?!
 							# If merging to both ends have become
 							# impossible, then give up.
@@ -602,7 +599,7 @@ class Mesh:
 								if len(vrt_uvs) <= side:
 									new_uvs = []
 									for uv in uvs:
-										new_uvs.append(Mathutils.Vector(uv))
+										new_uvs.append(mathutils.Vector(uv))
 									vrt_uvs.append(new_uvs)
 								else:
 									assert len(uvs) == len(vrt_uvs[side]), 'Found faces in same submesh, that have different number of layers in UVs!'
@@ -887,7 +884,7 @@ class Mesh:
 
 		MIN_CUT_DEPTH = 0.0001
 
-		plane_normal_normalized = Mathutils.Vector(plane_normal)
+		plane_normal_normalized = mathutils.Vector(plane_normal)
 		plane_normal_normalized.length = 1.0
 
 		# TODO: Remove this when quads are supported!
@@ -1205,7 +1202,7 @@ class Mesh:
 				to_prev = newvrts[prev_id].pos - newvrts[this_id].pos
 				to_next = newvrts[next_id].pos - newvrts[this_id].pos
 				assert to_prev.length > 0.0 and to_next.length > 0, 'Zero length vectors not accepted here!'
-				diffangle = 180.0 - Mathutils.AngleBetweenVecs(to_prev, to_next)
+				diffangle = 180.0 - mathutils.AngleBetweenVecs(to_prev, to_next)
 				if plane_normal.dot(to_next.cross(to_prev)) > 0:
 					turn += diffangle
 				else:
@@ -1476,7 +1473,7 @@ class Mesh:
 					center = (pos1 + pos2) / 2.0
 					self.mergeVertices(vrt1, vrt2, center)
 					return self.isClosed()
-				print 'Edge', self.vrts[edge[0][0]].pos, ' ---', self.vrts[edge[0][1]].pos, ' is open or has invalid number of faces connected to it!'
+				print('Edge ' + str(self.vrts[edge[0][0]].pos) + ' --- ' + str(self.vrts[edge[0][1]].pos) + ' is open or has invalid number of faces connected to it!')
 				return False
 			del edges[counter_edge]
 		return True
@@ -1509,14 +1506,15 @@ class Mesh:
 
 	def spawn(self):
 		# Mesh
+		# TODO: Fix to work in new Blender!
 		bmesh = Blender.Mesh.New(self.name)
 
 		# Vertices
 		vrt_map = {}
 		for vrt_id in range(0, len(self.vrts)):
 			vrt = self.vrts[vrt_id]
-			bmesh.verts.extend(vrt.pos)
-			bvrt_id = len(bmesh.verts) - 1
+			bmesh.vertices.extend(vrt.pos)
+			bvrt_id = len(bmesh.vertices) - 1
 			vrt_map[vrt_id] = bvrt_id
 			# TODO: Add vertexgroup weights too!
 
@@ -1529,16 +1527,17 @@ class Mesh:
 				bmesh.faces.extend(vrts)
 
 		# Object
+		# TODO: Fix to work in new Blender!
 		bobj = Blender.Object.New('Mesh', self.name)
 		bobj.link(bmesh)
+		# TODO: Fix to work in new Blender!
 		Blender.Scene.GetCurrent().link(bobj)
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 
 		# Name
-		result += hpp_misc.uInt32ToBytes(len(self.name))
-		result += self.name
+		result += hpp_misc.stringToBytes(self.name)
 
 		# Vertices
 		result += hpp_misc.uInt32ToBytes(len(self.vrts))
@@ -1548,8 +1547,7 @@ class Mesh:
 		# Vertexgroups
 		result += hpp_misc.uInt32ToBytes(len(self.vgroups))
 		for vgroup in self.vgroups:
-			result += hpp_misc.uInt32ToBytes(len(vgroup))
-			result += vgroup
+			result += hpp_misc.stringToBytes(vgroup)
 
 		# Submeshes
 		result += hpp_misc.uInt32ToBytes(len(self.submeshes))
@@ -1685,7 +1683,7 @@ class Mesh:
 	def angleAtPlane(self, v1, v2, plane_normal):
 		assert v1.length > 0.0, 'angleAtPlane(): Vector #1 has zero length!'
 		assert v2.length > 0.0, 'angleAtPlane(): Vector #2 has zero length!'
-		raw_angle = Mathutils.AngleBetweenVecs(v1, v2);
+		raw_angle = mathutils.AngleBetweenVecs(v1, v2);
 		if plane_normal.dot(v1.cross(v2)) < 0:
 			return 360.0 - raw_angle
 		else:
@@ -1783,7 +1781,7 @@ class ArmatureBone:
 			self.parent = ''
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 		result += hpp_misc.vectorToBytes(self.pos)
 		result += hpp_misc.matrixToBytes(self.rotmatrix)
 		result += hpp_misc.stringToBytes(self.parent)
@@ -1798,7 +1796,7 @@ class ArmatureIpoPoint:
 		self.weight = 1.0
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 		result += hpp_misc.floatToBytes(self.time)
 		result += hpp_misc.floatToBytes(self.value)
 		result += hpp_misc.floatToBytes(self.weight)
@@ -1816,14 +1814,14 @@ class ArmatureIpo:
 
 	def serializeChannel(self, channel_name):
 		channel = self.channels[channel_name]
-		result = ''
+		result = bytes()
 		result += hpp_misc.uInt32ToBytes(len(channel))
 		for point in channel:
 			result += point.serialize()
 		return result
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 		result += self.serializeChannel('LocX')
 		result += self.serializeChannel('LocY')
 		result += self.serializeChannel('LocZ')
@@ -1841,7 +1839,7 @@ class ArmatureAction:
 		self.ipos = ipos
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 		result += hpp_misc.uInt32ToBytes(len(self.ipos))
 		for bone_name, ipo in self.ipos.items():
 			result += hpp_misc.stringToBytes(bone_name)
@@ -1858,6 +1856,7 @@ class Armature:
 
 		# Actions
 		self.actions = {}
+		# TODO: Fix to work in new Blender!
 		all_acts = Blender.Armature.NLA.GetActions()
 		for act_name, act in all_acts.items():
 
@@ -1879,7 +1878,7 @@ class Armature:
 				self.actions[act_name] = ArmatureAction(new_ipos)
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 
 		result += hpp_misc.uInt32ToBytes(len(self.bones))
 		for bone_name, bone in self.bones.items():
@@ -1897,15 +1896,15 @@ class Material:
 	def __init__(self, mat):
 
 		# Name
-		self.name = mat.getName()
+		self.name = mat.name
 
 		# Color
 		color_raw = mat.getRGBCol()
-		self.color = Mathutils.Vector(color_raw[0], color_raw[1], color_raw[2])
+		self.color = mathutils.Vector([color_raw[0], color_raw[1], color_raw[2]])
 
 		# Specular color and shininess
 		color_raw = mat.getSpecCol()
-		self.specular = Mathutils.Vector(color_raw[0], color_raw[1], color_raw[2]) * mat.getSpec()
+		self.specular = mathutils.Vector([color_raw[0], color_raw[1], color_raw[2]]) * mat.getSpec()
 		self.shininess = mat.getHardness()
 
 		# Ambient light multiplier
@@ -1918,7 +1917,7 @@ class Material:
 		self.alpha = mat.getAlpha()
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 
 		result += hpp_misc.stringToBytes(self.name)
 
@@ -1942,17 +1941,16 @@ class Object:
 			raise Exception('Unable to create Object from other types than Meshes!')
 
 		self.transf = obj.getMatrix()
-		self.mesh = obj.getData(mesh = True).name
+		self.mesh = obj.data.name
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 
 		# Transformation
 		result += hpp_misc.matrixToBytes(self.transf)
 
 		# Mesh
-		result += hpp_misc.uInt32ToBytes(len(self.mesh))
-		result += self.mesh
+		result += hpp_misc.stringToBytes(self.mesh)
 
 		return result
 
@@ -1963,17 +1961,16 @@ class Room:
 			raise Exception('Unable to create Room because it is not Mesh!')
 
 		self.transf = obj.getMatrix()
-		self.mesh = obj.getData(mesh = True).name
+		self.mesh = obj.data.name
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 
 		# Transformation
 		result += hpp_misc.matrixToBytes(self.transf)
 
 		# Mesh
-		result += hpp_misc.uInt32ToBytes(len(self.mesh))
-		result += self.mesh
+		result += hpp_misc.stringToBytes(self.mesh)
 
 		return result
 
@@ -2005,36 +2002,36 @@ class Portal:
 		# Vertices
 		# Get position of portal
 		obj_m = obj.getMatrix()
-		mesh = obj.getData(mesh = True)
-		self.pos = Mathutils.Vector(0, 0, 0)
-		if len(mesh.verts) == 0:
+		mesh = obj.data
+		self.pos = mathutils.Vector([0, 0, 0])
+		if len(mesh.vertices) == 0:
 			raise Exception('Portal \"' + obj_name + '\" has no vertices!')
-		for vert in mesh.verts:
+		for vert in mesh.vertices:
 			pos_abs = vert.co * obj_m
 			self.pos += pos_abs
-		self.pos /= len(mesh.verts)
+		self.pos /= len(mesh.vertices)
 		# Get normal of portal and ensure rest of faces have same normal
 		if len(mesh.faces) == 0:
 			raise Exception('Portal \"' + obj_name + '\" has no faces! At least one is needed to define the front side of portal!')
 		self.normal = mesh.faces[0].no * obj_m.rotationPart()
 		for face in mesh.faces:
 			normal = face.no * obj_m.rotationPart()
-			angle = Mathutils.AngleBetweenVecs(self.normal, normal)
+			angle = mathutils.AngleBetweenVecs(self.normal, normal)
 			if angle > MAX_NORMAL_DIFF:
 				raise Exception('Portal \"' + obj_name + '\" has faces with different normal! Maximum difference between normals is ' + str(MAX_NORMAL_DIFF) + ' degrees!')
 		
 		# Gather vertices to tuple list, and then sort them based on
 		# their angle to pivot vertex. The first vertex is selected as
 		# the pivot one.
-		pivot = mesh.verts[0].co * obj_m - self.pos
+		pivot = mesh.vertices[0].co * obj_m - self.pos
 		vrts = []
-		for vert in mesh.verts:
+		for vert in mesh.vertices:
 			pos_abs = vert.co * obj_m
 			v = pos_abs - self.pos
-			angle = Mathutils.AngleBetweenVecs(v, pivot)
+			angle = mathutils.AngleBetweenVecs(v, pivot)
 			# Check which side of pivot this vector is
-			cv = Mathutils.CrossVecs(pivot, v)
-			if Mathutils.DotVecs(cv, self.normal) < 0:
+			cv = mathutils.CrossVecs(pivot, v)
+			if mathutils.DotVecs(cv, self.normal) < 0:
 				angle = -angle
 			vrt = pos_abs, angle
 			vrts.append(vrt)
@@ -2051,18 +2048,16 @@ class Portal:
 			v = self.vrts[vrts_id]
 			v_next = self.vrts[(vrts_id + 1) % len(self.vrts)]
 			v_prev = self.vrts[(vrts_id - 1) % len(self.vrts)]
-			normal = Mathutils.CrossVecs(v_next - v, v_prev - v)
-			if Mathutils.DotVecs(normal, self.normal) < 0:
+			normal = mathutils.CrossVecs(v_next - v, v_prev - v)
+			if mathutils.DotVecs(normal, self.normal) < 0:
 				raise Exception('Portal \"' + obj_name + '\" is not concave!')
 
 	def serialize(self):
-		result = ''
+		result = bytes()
 
 		# Rooms
-		result += hpp_misc.uInt32ToBytes(len(self.frontroom_name))
-		result += hpp_misc.uInt32ToBytes(len(self.backroom_name))
-		result += self.frontroom_name
-		result += self.backroom_name
+		result += hpp_misc.stringToBytes(self.frontroom_name)
+		result += hpp_misc.stringToBytes(self.backroom_name)
 
 		# Position and normal
 		result += hpp_misc.vectorToBytes(self.pos)
