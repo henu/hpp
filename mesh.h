@@ -5,8 +5,9 @@
 #include "renderable.h"
 #include "rawmesh.h"
 #include "submesh.h"
-#include "3dutils.h"
+#include "boundingsphere.h"
 #include "real.h"
+#include "3dutils.h"
 
 #include <vector>
 
@@ -26,6 +27,10 @@ public:
 	inline size_t getSubmeshesSize(void) const { return submeshes.size(); }
 	inline Submesh const* getSubmesh(size_t submesh_id) const { HppAssert(submesh_id < submeshes.size(), "Submesh ID out of range!"); return submeshes[submesh_id]; }
 	inline std::string getDefaultMaterial(size_t submesh_id) const { HppAssert(submesh_id < submeshes.size(), "Submesh ID out of range!"); return submeshes[submesh_id]->getDefaultMaterial(); }
+
+	// Returns boundingsphere, that is not
+	// distorted for example by skeleton.
+	inline Boundingsphere getDefaultBoundingsphere(void) const;
 
 private:
 
@@ -112,6 +117,28 @@ inline Mesh::~Mesh(void)
 	     submeshes_it ++) {
 		delete *submeshes_it;
 	}
+}
+
+inline Boundingsphere Mesh::getDefaultBoundingsphere(void) const
+{
+	Boundingsphere result;
+	Vector3 vrts_min(99999.9, 99999.9, 99999.9);
+	Vector3 vrts_max(-99999.9, -99999.9, -99999.9);;
+	for (Submeshes::const_iterator submeshes_it = submeshes.begin();
+	     submeshes_it != submeshes.end();
+	     submeshes_it ++) {
+		Submesh const* submesh = *submeshes_it;
+		submesh->getVertexBoundings(vrts_min, vrts_max);
+	}
+	Vector3 bsphere_pos = (vrts_min + vrts_max) / 2;
+	Real bsphere_radius_to_2 = 0.0;
+	for (Submeshes::const_iterator submeshes_it = submeshes.begin();
+	     submeshes_it != submeshes.end();
+	     submeshes_it ++) {
+		Submesh const* submesh = *submeshes_it;
+		submesh->getMaxVertexDistance(bsphere_radius_to_2, bsphere_pos);
+	}
+	return Boundingsphere(bsphere_pos, sqrt(bsphere_radius_to_2));
 }
 
 inline void Mesh::findSharedNormals(Submesh::VrtsSNormals& result,

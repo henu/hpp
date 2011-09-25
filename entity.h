@@ -87,6 +87,9 @@ skel_uptodate(false)
 	}
 	// Allocate memory for bonetransformations
 	btransfs.assign(mesh->getNumOfVGroups(), Matrix4::IDENTITY);
+
+	// By default, use boundingsphere of undistorted mesh
+	setBoundingsphere(mesh->getDefaultBoundingsphere());
 }
 
 inline Entity::~Entity(void)

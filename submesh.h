@@ -17,7 +17,7 @@
 namespace Hpp
 {
 
-class Submesh : public Hpp::NonCopyable
+class Submesh : public NonCopyable
 {
 
 	friend class Subentity;
@@ -69,6 +69,11 @@ public:
 	                                         Vector3& binormal,
 	                                         Vector3 const* poss,
 	                                         Vector2 const* uvs);
+
+	// Functions to get some statistics of the volume that vertices use.
+	// This is mainly used for calculation of default boundingsphere.
+	inline void getVertexBoundings(Vector3& vrts_min, Vector3& vrts_max) const;
+	inline void getMaxVertexDistance(Real& result_to_2, Vector3 const& pos) const;
 
 private:
 
@@ -193,6 +198,28 @@ inline void Submesh::calculateTangentspace(Vector3& tangent,
 	tangent.normalize();
 	binormal.normalize();
 
+}
+
+inline void Submesh::getVertexBoundings(Vector3& vrts_min, Vector3& vrts_max) const
+{
+	for (size_t poss_ofs = 0; poss_ofs < poss.size(); poss_ofs += 3) {
+		Vector3 vrt_pos(poss[poss_ofs + 0], poss[poss_ofs + 1], poss[poss_ofs + 2]);
+		vrts_min.x = std::min(vrts_min.x, vrt_pos.x);
+		vrts_min.y = std::min(vrts_min.y, vrt_pos.y);
+		vrts_min.z = std::min(vrts_min.z, vrt_pos.z);
+		vrts_max.x = std::max(vrts_max.x, vrt_pos.x);
+		vrts_max.y = std::max(vrts_max.y, vrt_pos.y);
+		vrts_max.z = std::max(vrts_max.z, vrt_pos.z);
+	}
+}
+
+inline void Submesh::getMaxVertexDistance(Real& result_to_2, Vector3 const& pos) const
+{
+	for (size_t poss_ofs = 0; poss_ofs < poss.size(); poss_ofs += 3) {
+		Vector3 vrt_pos(poss[poss_ofs + 0], poss[poss_ofs + 1], poss[poss_ofs + 2]);
+		Real dst_to_2 = (vrt_pos - pos).lengthTo2();
+		result_to_2 = std::max(result_to_2, dst_to_2);
+	}
 }
 
 inline Renderable* Submesh::createRenderable(void) const
@@ -335,23 +362,23 @@ inline void Submesh::addFaceToStaticparts(size_t submesh_id,
 		HppAssert(nrms.size() % 3 == 0, "Not multiple of nine!");
 		uint32_t vrts_size = poss.size() / 3;
 		int32_t matching_vrt_id = -1;
-		Hpp::Real const DIFF_THRESHOLD = 0.001 * 0.001;
-		Hpp::Real const DIFF_THRESHOLD_TO_2 = DIFF_THRESHOLD * DIFF_THRESHOLD;
+		Real const DIFF_THRESHOLD = 0.001 * 0.001;
+		Real const DIFF_THRESHOLD_TO_2 = DIFF_THRESHOLD * DIFF_THRESHOLD;
 		for (uint32_t vrt_id = 0; vrt_id < vrts_size; vrt_id ++) {
 			uint32_t offset4 = vrt_id * 4;
 			uint32_t offset3 = vrt_id * 3;
 			uint32_t offset2 = vrt_id * 2;
 			// Skip those vertices that have different position or
 			// normal.
-			if ((Hpp::Vector3(poss[offset3 + 0], poss[offset3 + 1], poss[offset3 + 2]) - vrt_pos).lengthTo2() > DIFF_THRESHOLD_TO_2 ||
-			    (Hpp::Vector3(nrms[offset3 + 0], nrms[offset3 + 1], nrms[offset3 + 2]) - vrt_nrm).lengthTo2() > DIFF_THRESHOLD_TO_2) {
+			if ((Vector3(poss[offset3 + 0], poss[offset3 + 1], poss[offset3 + 2]) - vrt_pos).lengthTo2() > DIFF_THRESHOLD_TO_2 ||
+			    (Vector3(nrms[offset3 + 0], nrms[offset3 + 1], nrms[offset3 + 2]) - vrt_nrm).lengthTo2() > DIFF_THRESHOLD_TO_2) {
 			    	continue;
 			}
 			// Also skip those with different UV coordinates.
 			if (uvs_exist &&
-			    ((Hpp::Vector2((*uvs[0])[offset2 + 0], (*uvs[0])[offset2 + 1]) - vrt_uv).lengthTo2() > DIFF_THRESHOLD_TO_2 ||
-			     (Hpp::Vector3((*uvs[1])[offset3 + 0], (*uvs[1])[offset3 + 1], (*uvs[1])[offset3 + 2]) - vrt_tangent).lengthTo2() > DIFF_THRESHOLD_TO_2 ||
-			     (Hpp::Vector3((*uvs[2])[offset3 + 0], (*uvs[2])[offset3 + 1], (*uvs[2])[offset3 + 2]) - vrt_binormal).lengthTo2() > DIFF_THRESHOLD_TO_2)) {
+			    ((Vector2((*uvs[0])[offset2 + 0], (*uvs[0])[offset2 + 1]) - vrt_uv).lengthTo2() > DIFF_THRESHOLD_TO_2 ||
+			     (Vector3((*uvs[1])[offset3 + 0], (*uvs[1])[offset3 + 1], (*uvs[1])[offset3 + 2]) - vrt_tangent).lengthTo2() > DIFF_THRESHOLD_TO_2 ||
+			     (Vector3((*uvs[2])[offset3 + 0], (*uvs[2])[offset3 + 1], (*uvs[2])[offset3 + 2]) - vrt_binormal).lengthTo2() > DIFF_THRESHOLD_TO_2)) {
 				continue;
 			}
 			// And finally check vertexgroup influences
