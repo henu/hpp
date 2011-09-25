@@ -1,6 +1,7 @@
 #ifndef HPP_SUBMESH_H
 #define HPP_SUBMESH_H
 
+#include "noncopyable.h"
 #include "renderable.h"
 #include "vertexgroupinfluences.h"
 #include "real.h"
@@ -16,7 +17,7 @@
 namespace Hpp
 {
 
-class Submesh
+class Submesh : public Hpp::NonCopyable
 {
 
 	friend class Subentity;
@@ -118,7 +119,7 @@ private:
 	inline static TangentsAndBinormals::const_iterator findBestTangentAndBinormal(TangentsAndBinormals const& ts_n_bs, UvAndSubmeshId const& uv_n_si);
 
 };
-typedef std::vector< Submesh > Submeshes;
+typedef std::vector< Submesh* > Submeshes;
 
 inline Submesh::Submesh(size_t submesh_id,
                         Rawmesh::Submesh const& rawsubmesh,
@@ -144,7 +145,7 @@ default_mat(rawsubmesh.mat)
 		uvs[0]->convertToVBO(RendbufEnums::ARRAY);
 		uvs[1]->convertToVBO(RendbufEnums::ARRAY);
 		uvs[2]->convertToVBO(RendbufEnums::ARRAY);
-// TODO: Current solution produces too many vertices! Code system that makes verices one, even if their tangent space values differ little bit...
+// TODO: Current solution produces too many vertices! Code system that makes vertices one, even if their tangent space values differ little bit...
 	}
 	clrs.convertToVBO(RendbufEnums::ARRAY);
 	tris.convertToVBO(RendbufEnums::ELEMENTS);
@@ -220,6 +221,7 @@ inline void Submesh::addFaceToStaticparts(size_t submesh_id,
 	if (uvs_exist && uvs.empty()) {
 		uvs.reserve(3);
 		for (uint8_t i = 0; i < 3; i ++) {
+// TODO: Should these rendbufs be autoreleasing ones?
 			uvs.push_back(new Rendbuf< Real >());
 		}
 	}

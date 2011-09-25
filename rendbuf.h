@@ -190,7 +190,7 @@ public:
 		HppAssert(!source_releases_automatically, "Unable to reserve data for Rendbuft that has its sourece set to release it!");
 		#endif
 		if (this->res < res) {
-			if (items > 0) {
+			if (this->res > 0) {
 				Type* new_buf = new Type[res];
 				memcpy(new_buf, buf, items * sizeof(Type));
 				HppStopWatchingMem(buf);

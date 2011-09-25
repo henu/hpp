@@ -24,8 +24,8 @@ public:
 	inline ~Mesh(void);
 
 	inline size_t getSubmeshesSize(void) const { return submeshes.size(); }
-	inline Submesh const* getSubmesh(size_t submesh_id) const { HppAssert(submesh_id < submeshes.size(), "Submesh ID out of range!"); return &submeshes[submesh_id]; }
-	inline std::string getDefaultMaterial(size_t submesh_id) const { HppAssert(submesh_id < submeshes.size(), "Submesh ID out of range!"); return submeshes[submesh_id].getDefaultMaterial(); }
+	inline Submesh const* getSubmesh(size_t submesh_id) const { HppAssert(submesh_id < submeshes.size(), "Submesh ID out of range!"); return submeshes[submesh_id]; }
+	inline std::string getDefaultMaterial(size_t submesh_id) const { HppAssert(submesh_id < submeshes.size(), "Submesh ID out of range!"); return submeshes[submesh_id]->getDefaultMaterial(); }
 
 private:
 
@@ -83,7 +83,7 @@ inline Mesh::Mesh(Rawmesh const& rawmesh, Rawmesh::Halvingstyle hstyle)
 	for (size_t submesh_id = 0;
 	     submesh_id < rawmesh.submeshes.size();
 	     submesh_id ++) {
-		submeshes.push_back(Submesh(submesh_id, rawmesh.submeshes[submesh_id], tris_n_quads[submesh_id], rawmesh.vrts, vrts_snormal));
+		submeshes.push_back(new Submesh(submesh_id, rawmesh.submeshes[submesh_id], tris_n_quads[submesh_id], rawmesh.vrts, vrts_snormal));
 	}
 
 	// Copy possible skeleton
@@ -107,6 +107,11 @@ inline Mesh::Mesh(Rawmesh const& rawmesh, Rawmesh::Halvingstyle hstyle)
 inline Mesh::~Mesh(void)
 {
 	delete skel;
+	for (Submeshes::iterator submeshes_it = submeshes.begin();
+	     submeshes_it != submeshes.end();
+	     submeshes_it ++) {
+		delete *submeshes_it;
+	}
 }
 
 inline void Mesh::findSharedNormals(Submesh::VrtsSNormals& result,
