@@ -3,6 +3,7 @@
 
 #include "serialize.h"
 #include "color.h"
+#include "texture.h"
 
 #include <vector>
 #include <string>
@@ -27,11 +28,16 @@ public:
 	float shininess;
 	float ambient_multiplier;
 	float emittance;
+	float normalmap_weight;
 
-	// Textures
+	// Textures. If pointers to real textures
+	// are given, then they omit strings.
 	std::string colormap;
 	std::string normalmap;
 	std::string specularmap;
+	Hpp::Texture* colormap_tex;
+	Hpp::Texture* normalmap_tex;
+	Hpp::Texture* specularmap_tex;
 
 };
 typedef std::vector< Rawmaterial > Rawmaterials;
@@ -41,7 +47,11 @@ color(1, 1, 1),
 specular(0, 0, 0),
 shininess(0),
 ambient_multiplier(1),
-emittance(0)
+emittance(0),
+normalmap_weight(1),
+colormap_tex(NULL),
+normalmap_tex(NULL),
+specularmap_tex(NULL)
 {
 }
 

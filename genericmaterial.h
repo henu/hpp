@@ -54,6 +54,7 @@ private:
 	bool is_translucent;
 	bool needs_uvs;
 	bool no_repeat;
+	float normalmap_weight;
 
 	// Class-wide shaders
 	static Shader* shader_vrt;
@@ -79,7 +80,8 @@ shininess(rawmat.shininess),
 ambient_multiplier(rawmat.ambient_multiplier),
 emittance(rawmat.emittance),
 twosided(twosided),
-no_repeat(false)
+no_repeat(false),
+normalmap_weight(rawmat.normalmap_weight)
 {
 	// Some options
 	Real const MIN_TO_NEED_LIGHT = 0.001;
@@ -103,19 +105,28 @@ no_repeat(false)
 	}
 
 	needs_uvs = false;
-	if (!rawmat.colormap.empty()) {
+	if (rawmat.colormap_tex) {
+		colormap = rawmat.colormap_tex;
+		needs_uvs = true;
+	} else if (!rawmat.colormap.empty()) {
 		colormap = Texturemanager::getTexture(rawmat.colormap);
 		needs_uvs = true;
 	} else {
 		colormap = NULL;
 	}
-	if (!rawmat.normalmap.empty()) {
+	if (rawmat.normalmap_tex) {
+		normalmap = rawmat.normalmap_tex;
+		needs_uvs = true;
+	} else if (!rawmat.normalmap.empty()) {
 		normalmap = Texturemanager::getTexture(rawmat.normalmap);
 		needs_uvs = true;
 	} else {
 		normalmap = NULL;
 	}
-	if (!rawmat.specularmap.empty()) {
+	if (rawmat.specularmap_tex) {
+		specularmap = rawmat.specularmap_tex;
+		needs_uvs = true;
+	} else if (!rawmat.specularmap.empty()) {
 		specularmap = Texturemanager::getTexture(rawmat.specularmap);
 		needs_uvs = true;
 	} else {
@@ -137,6 +148,8 @@ inline void GenericMaterial::initRendering(size_t num_of_lights, Flags flags) co
 {
 HppAssert(!(flags & Material::ADDITIVE_RENDERING), "Additive rendering not implemented yet!");
 // TODO: Implement additive rendering!
+
+// TODO: Implement using of normalmap_weight!
 
 	HppAssert(num_of_lights <= 1, "Terrainmaterial: Only one or less lights supported!");
 
