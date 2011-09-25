@@ -1,6 +1,8 @@
 #ifndef HPP_LOCALE_H
 #define HPP_LOCALE_H
 
+#include "exception.h"
+
 #include <iconv.h>
 #include <string>
 #include <errno.h>
