@@ -146,11 +146,13 @@ inline bool GenericMaterial::needsLight(Renderable const* renderable) const
 
 inline void GenericMaterial::initRendering(size_t num_of_lights, Flags flags) const
 {
-HppAssert(!(flags & Material::ADDITIVE_RENDERING), "Additive rendering not implemented yet!");
-// TODO: Implement additive rendering!
+	bool additive_rendering = flags & Material::ADDITIVE_RENDERING;
+	bool ambient_light = flags & Material::AMBIENT_ENABLED;
 
 // TODO: Implement using of normalmap_weight!
 
+HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
+// TODO: Implement additive rendering!
 	HppAssert(num_of_lights <= 1, "Terrainmaterial: Only one or less lights supported!");
 
 	HppCheckGlErrors();
@@ -232,6 +234,7 @@ HppAssert(!(flags & Material::ADDITIVE_RENDERING), "Additive rendering not imple
 		}
 		sflags.insert("SMAP");
 	}
+	if (ambient_light) sflags.insert("AMBIENT_LIGHT");
 	GlSystem::ActiveTexture(GL_TEXTURE0);
 	GlSystem::ClientActiveTexture(GL_TEXTURE0);
 
