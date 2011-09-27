@@ -51,6 +51,10 @@ public:
 	inline void loadTextureFieldEdgeBottom(Path const& path) { tex_field_edge_bottom.loadFromFile(path, DEFAULT); }
 	inline void loadTextureFieldEdgeBottomLeft(Path const& path) { tex_field_edge_bottomleft.loadFromFile(path, DEFAULT); }
 	inline void loadTextureFieldEdgeBottomRight(Path const& path) { tex_field_edge_bottomright.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeTopLeftConcave(Path const& path) { tex_field_edge_topleft_concave.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeTopRightConcave(Path const& path) { tex_field_edge_topright_concave.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeBottomLeftConcave(Path const& path) { tex_field_edge_bottomleft_concave.loadFromFile(path, DEFAULT); }
+	inline void loadTextureFieldEdgeBottomRightConcave(Path const& path) { tex_field_edge_bottomright_concave.loadFromFile(path, DEFAULT); }
 	inline void loadTextureFieldSelectionBg(Path const& path) { tex_field_selection_bg.loadFromFile(path, DEFAULT); }
 	inline void loadTextureButtonLeft(Path const& path) { tex_button_left.loadFromFile(path, DEFAULT); }
 	inline void loadTextureButton(Path const& path) { tex_button.loadFromFile(path, DEFAULT); }
@@ -96,6 +100,9 @@ public:
 	inline void loadTextureSliderBgVert(Path const& path) { tex_slider_bg_vert.loadFromFile(path, DEFAULT); }
 	inline void loadTextureSliderBgVertTop(Path const& path) { tex_slider_bg_vert_top.loadFromFile(path, DEFAULT); }
 	inline void loadTextureSliderBgVertBottom(Path const& path) { tex_slider_bg_vert_bottom.loadFromFile(path, DEFAULT); }
+	inline void loadTextureTab(Path const& path) { tex_tab.loadFromFile(path, DEFAULT); }
+	inline void loadTextureTabLeft(Path const& path) { tex_tab_left.loadFromFile(path, DEFAULT); }
+	inline void loadTextureTabRight(Path const& path) { tex_tab_right.loadFromFile(path, DEFAULT); }
 
 	// Font loading functions. Multiple fonts can be used. The firstly
 	// loaded font will always be preferred, but if some character is not
@@ -142,6 +149,10 @@ private:
 	Texture tex_field_edge_bottom;
 	Texture tex_field_edge_bottomleft;
 	Texture tex_field_edge_bottomright;
+	Texture tex_field_edge_topleft_concave;
+	Texture tex_field_edge_topright_concave;
+	Texture tex_field_edge_bottomleft_concave;
+	Texture tex_field_edge_bottomright_concave;
 	Texture tex_field_selection_bg;
 	Texture tex_button_left;
 	Texture tex_button;
@@ -187,6 +198,9 @@ private:
 	Texture tex_slider_bg_vert;
 	Texture tex_slider_bg_vert_top;
 	Texture tex_slider_bg_vert_bottom;
+	Texture tex_tab;
+	Texture tex_tab_left;
+	Texture tex_tab_right;
 
 	// Font and its sizes
 	Font font;
