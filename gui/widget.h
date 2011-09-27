@@ -240,32 +240,32 @@ inline void Widget::markSizeChanged(void)
 
 inline void Widget::setChildPosition(Widget* child, int32_t x, int32_t y)
 {
-	HppAssert(std::find(children.begin(), children.end(), child)  != children.end(), "Unable to change child position, because it is really not our child!");
+	HppAssert(std::find(children.begin(), children.end(), child) != children.end(), "Unable to change child position, because it is really not our child!");
 	child->x = x;
 	child->y = y;
 }
 
 inline void Widget::setChildSize(Widget* child, uint32_t width, uint32_t height)
 {
-	HppAssert(std::find(children.begin(), children.end(), child)  != children.end(), "Unable to change child size, because it is really not our child!");
+	HppAssert(std::find(children.begin(), children.end(), child) != children.end(), "Unable to change child size, because it is really not our child!");
 	child->setSize(width, height);
 }
 
 inline void Widget::setChildState(Widget* child, State state)
 {
-	HppAssert(std::find(children.begin(), children.end(), child)  != children.end(), "Unable to set child state, because it is really not our child!");
+	HppAssert(std::find(children.begin(), children.end(), child) != children.end(), "Unable to set child state, because it is really not our child!");
 	child->setState(state);
 }
 
 inline void Widget::setChildRenderarealimit(Widget* child, int32_t x, int32_t y, uint32_t width, uint32_t height)
 {
-	HppAssert(std::find(children.begin(), children.end(), child)  != children.end(), "Unable to limit child renderarea, because it is really not our child!");
+	HppAssert(std::find(children.begin(), children.end(), child) != children.end(), "Unable to limit child renderarea, because it is really not our child!");
 	child->setRenderarealimit(x, y, width, height);
 }
 
 inline void Widget::removeChildRenderarealimit(Widget* child)
 {
-	HppAssert(std::find(children.begin(), children.end(), child)  != children.end(), "Unable to limit child renderarea, because it is really not our child!");
+	HppAssert(std::find(children.begin(), children.end(), child) != children.end(), "Unable to limit child renderarea, because it is really not our child!");
 	child->removeRenderarealimit();
 }
 
@@ -287,12 +287,13 @@ inline bool Widget::isMyChild(Widget const* widget) const
 
 inline void Widget::setState(State state)
 {
+	State old_state = this->state;
+	this->state = state;
 	// If visibility will change, then inform parent about it
-	if ((this->state != HIDDEN && state == HIDDEN) ||
-	    (this->state == HIDDEN && state != HIDDEN)) {
+	if ((old_state != HIDDEN && state == HIDDEN) ||
+	    (old_state == HIDDEN && state != HIDDEN)) {
 		markSizeChanged();
 	}
-	this->state = state;
 }
 
 inline bool Widget::mouseOver(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const
