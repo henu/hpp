@@ -90,6 +90,7 @@ protected:
 
 	inline void setChildPosition(Widget* child, int32_t x, int32_t y);
 	inline void setChildSize(Widget* child, uint32_t width, uint32_t height);
+	inline void setChildState(Widget* child, State state);
 	inline void setChildRenderarealimit(Widget* child, int32_t x, int32_t y, uint32_t width, uint32_t height);
 	inline void removeChildRenderarealimit(Widget* child);
 
@@ -248,6 +249,12 @@ inline void Widget::setChildSize(Widget* child, uint32_t width, uint32_t height)
 {
 	HppAssert(std::find(children.begin(), children.end(), child)  != children.end(), "Unable to change child size, because it is really not our child!");
 	child->setSize(width, height);
+}
+
+inline void Widget::setChildState(Widget* child, State state)
+{
+	HppAssert(std::find(children.begin(), children.end(), child)  != children.end(), "Unable to set child state, because it is really not our child!");
+	child->setState(state);
 }
 
 inline void Widget::setChildRenderarealimit(Widget* child, int32_t x, int32_t y, uint32_t width, uint32_t height)

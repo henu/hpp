@@ -12,6 +12,7 @@
 #include "folderviewcontents.h"
 #include "scrollbar.h"
 #include "slider.h"
+#include "tabs.h"
 
 #include "../display.h"
 #include "../viewport.h"
@@ -48,6 +49,7 @@ void ViewportRenderer::setFontSize(uint32_t font_size)
 	font_label_size = font_size * 0.86;
 	font_input_size = font_size;
 	font_button_size = font_size;
+	font_tablabel_size = font_size;
 	// Tune some padding values
 	padding_menu_h = font_menu_size * 0.5;
 	padding_menuitem_h = font_menuitem_size * 0.5;
@@ -627,6 +629,63 @@ void ViewportRenderer::renderSlider(int32_t x_origin, int32_t y_origin, Slider c
 		}
 		renderSprite(*tex_slider, Vector2(slider_extra, no_slider_size * slider->getValue()));
 	}
+}
+
+void ViewportRenderer::renderTabs(int32_t x_origin, int32_t y_origin, Tabs const* tabs)
+{
+	prepareSprites(x_origin, y_origin);
+
+	uint32_t width = tabs->getWidth();
+	uint32_t height = tabs->getHeight();
+	size_t selected = tabs->getSelected();
+	size_t num_of_tabs = tabs->getNumOfTabs();
+
+	// Render tab bar
+	uint32_t selected_tab_begin = 0;
+	uint32_t selected_tab_end = 0;
+	uint32_t x_offset = getTabsLeftEdgeWidth();
+	for (size_t tab_id = 0; tab_id < num_of_tabs; tab_id ++) {
+		if (tab_id == selected) {
+			selected_tab_begin = x_offset;
+		}
+		UnicodeString label = tabs->getTabLabel(tab_id);
+		uint32_t label_width = font.getStringWidth(label, font_tablabel_size);
+
+		renderSprite(tex_tab_left, Vector2(x_offset, 0));
+		x_offset += tex_tab_left.getWidth();
+		size_t label_pos_x = x_offset;
+		renderSprite(tex_tab, Vector2(x_offset, 0), Vector2(label_width, 0));
+		x_offset += label_width;
+		renderSprite(tex_tab_right, Vector2(x_offset, 0));
+		x_offset += tex_tab_right.getWidth();
+
+		textSetHorizontalAlign(CENTER);
+		textSetVerticalAlign(CENTER);
+		renderString(label, font_tablabel_size, Vector2(label_pos_x, 0), Vector2(label_width, tex_tab.getHeight()));
+
+		if (tab_id == selected) {
+			selected_tab_end = x_offset;
+		}
+	}
+
+	uint32_t tabbar_height = tex_tab.getHeight() - tex_field_edge_top.getHeight();
+
+	// Render top edge
+	renderSprite(tex_field_edge_bottomright_concave, Vector2(0, tabbar_height));
+	if (selected_tab_begin > tex_field_edge_right.getWidth()) {
+		renderSprite(tex_field_edge_bottom, Vector2(tex_field_edge_right.getWidth(), tabbar_height), Vector2(selected_tab_begin - tex_field_edge_right.getWidth(), 0));
+	}
+	renderSprite(tex_field_edge_bottom, Vector2(selected_tab_end, tabbar_height), Vector2(width - selected_tab_end - tex_field_edge_left.getWidth(), 0));
+	renderSprite(tex_field_edge_bottomleft_concave, Vector2(width - tex_field_edge_left.getWidth(), tabbar_height));
+
+	// Render side edges
+	renderSprite(tex_field_edge_right, Vector2(0, tex_tab.getHeight()), Vector2(0, height - tex_tab.getHeight() - tex_field_edge_top.getHeight()));
+	renderSprite(tex_field_edge_left, Vector2(width - tex_field_edge_left.getWidth(), tex_tab.getHeight()), Vector2(0, height - tex_tab.getHeight() - tex_field_edge_top.getHeight()));
+
+	// Render bottom edge
+	renderSprite(tex_field_edge_topright_concave, Vector2(0, height - tex_field_edge_top.getHeight()));
+	renderSprite(tex_field_edge_top, Vector2(tex_field_edge_right.getWidth(), height - tex_field_edge_top.getHeight()), Vector2(width - tex_field_edge_right.getWidth() - tex_field_edge_left.getWidth(), 0));
+	renderSprite(tex_field_edge_topleft_concave, Vector2(width - tex_field_edge_left.getWidth(), height - tex_field_edge_top.getHeight()));
 }
 
 uint32_t ViewportRenderer::getMenubarHeight(void) const

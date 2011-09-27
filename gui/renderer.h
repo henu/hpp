@@ -27,6 +27,7 @@ class Folderview;
 class FolderviewContents;
 class Scrollbar;
 class Slider;
+class Tabs;
 
 class Renderer
 {
@@ -58,6 +59,7 @@ public:
 	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items) = 0;
 	virtual void renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed, bool slider_pressed) = 0;
 	virtual void renderSlider(int32_t x_origin, int32_t y_origin, Slider const* slider, bool horizontal, bool slider_pressed) = 0;
+	virtual void renderTabs(int32_t x_origin, int32_t y_origin, Tabs const* tabs) = 0;
 
 	virtual uint32_t getMenubarHeight(void) const = 0;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const = 0;
@@ -100,6 +102,10 @@ public:
 	virtual uint32_t getVertSliderMinHeight(void) const = 0;
 	virtual uint32_t getHorizSliderHeight(void) const = 0;
 	virtual uint32_t getVertSliderWidth(void) const = 0;
+	virtual uint32_t getTabbarHeight(void) const = 0;
+	virtual uint32_t getTabsLeftEdgeWidth(void) const = 0;
+	virtual uint32_t getTabsRightEdgeWidth(void) const = 0;
+	virtual uint32_t getTabsBottomEdgeHeight(void) const = 0;
 
 private:
 

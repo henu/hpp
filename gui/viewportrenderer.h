@@ -210,6 +210,7 @@ private:
 	uint32_t font_label_size;
 	uint32_t font_input_size;
 	uint32_t font_button_size;
+	uint32_t font_tablabel_size;
 
 	// Padding and other sizes
 	Real padding_menu_h;
@@ -241,6 +242,7 @@ private:
 	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items);
 	virtual void renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed, bool slider_pressed);
 	virtual void renderSlider(int32_t x_origin, int32_t y_origin, Slider const* slider, bool horizontal, bool slider_pressed);
+	virtual void renderTabs(int32_t x_origin, int32_t y_origin, Tabs const* tabs);
 	virtual uint32_t getMenubarHeight(void) const;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuseparatorMinWidth(void) const;
@@ -282,6 +284,10 @@ private:
 	inline virtual uint32_t getVertSliderMinHeight(void) const { return tex_slider_bg_vert_top.getHeight() + tex_slider_bg_vert_bottom.getHeight() + tex_slider_bg_vert.getHeight() + tex_slider_vert.getHeight(); }
 	inline virtual uint32_t getHorizSliderHeight(void) const { return std::max(tex_slider_horiz.getHeight(), tex_slider_bg_horiz.getHeight()); }
 	inline virtual uint32_t getVertSliderWidth(void) const { return std::max(tex_slider_vert.getWidth(), tex_slider_bg_vert.getWidth()); }
+	inline virtual uint32_t getTabbarHeight(void) const { return tex_tab.getHeight(); }
+	inline virtual uint32_t getTabsLeftEdgeWidth(void) const { return tex_field_edge_right.getWidth(); }
+	inline virtual uint32_t getTabsRightEdgeWidth(void) const { return tex_field_edge_left.getWidth(); }
+	inline virtual uint32_t getTabsBottomEdgeHeight(void) const { return tex_field_edge_top.getHeight(); }
 	virtual void setRenderareaLimit(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 	virtual void removeRenderareaLimit(void);
 

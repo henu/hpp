@@ -21,7 +21,7 @@ protected:
 
 	// Takes care of alignments, and positions widget to given area.
 	// Also expands to full size, if expanding is wanted.
-	inline void positionWidget(Containerwidget* widget, int32_t pos_x, int32_t pos_y, uint32_t width, uint32_t height);
+	inline void positionWidget(Containerwidget* widget, int32_t pos_x, int32_t pos_y, uint32_t width, uint32_t height, bool force_expanding = false);
 
 private:
 
@@ -35,13 +35,13 @@ inline Container::~Container(void)
 {
 }
 
-inline void Container::positionWidget(Containerwidget* widget, int32_t pos_x, int32_t pos_y, uint32_t width, uint32_t height)
+inline void Container::positionWidget(Containerwidget* widget, int32_t pos_x, int32_t pos_y, uint32_t width, uint32_t height, bool force_expanding)
 {
 	// Calculate size
 	uint32_t widget_width = widget->getMinWidth();
-	if (widget->getHorizontalExpanding() > 0) widget_width = width;
+	if (force_expanding || widget->getHorizontalExpanding() > 0) widget_width = width;
 	uint32_t widget_height = widget->getMinHeight(widget_width);
-	if (widget->getVerticalExpanding() > 0) widget_height = height;
+	if (force_expanding || widget->getVerticalExpanding() > 0) widget_height = height;
 
 	// Calculate position
 	int32_t pos_x_rel;
