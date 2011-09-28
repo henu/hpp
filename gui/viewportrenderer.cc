@@ -675,7 +675,9 @@ void ViewportRenderer::renderTabs(int32_t x_origin, int32_t y_origin, Tabs const
 	if (selected_tab_begin > tex_field_edge_right.getWidth()) {
 		renderSprite(tex_field_edge_bottom, Vector2(tex_field_edge_right.getWidth(), tabbar_height), Vector2(selected_tab_begin - tex_field_edge_right.getWidth(), 0));
 	}
-	renderSprite(tex_field_edge_bottom, Vector2(selected_tab_end, tabbar_height), Vector2(width - selected_tab_end - tex_field_edge_left.getWidth(), 0));
+	if (width > selected_tab_end + tex_field_edge_left.getWidth()) {
+		renderSprite(tex_field_edge_bottom, Vector2(selected_tab_end, tabbar_height), Vector2(width - selected_tab_end - tex_field_edge_left.getWidth(), 0));
+	}
 	renderSprite(tex_field_edge_bottomleft_concave, Vector2(width - tex_field_edge_left.getWidth(), tabbar_height));
 
 	// Render side edges

@@ -106,6 +106,7 @@ public:
 	virtual uint32_t getTabsLeftEdgeWidth(void) const = 0;
 	virtual uint32_t getTabsRightEdgeWidth(void) const = 0;
 	virtual uint32_t getTabsBottomEdgeHeight(void) const = 0;
+	virtual uint32_t getTablabelWidth(UnicodeString const& label) const = 0;
 
 private:
 

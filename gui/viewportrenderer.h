@@ -288,6 +288,7 @@ private:
 	inline virtual uint32_t getTabsLeftEdgeWidth(void) const { return tex_field_edge_right.getWidth(); }
 	inline virtual uint32_t getTabsRightEdgeWidth(void) const { return tex_field_edge_left.getWidth(); }
 	inline virtual uint32_t getTabsBottomEdgeHeight(void) const { return tex_field_edge_top.getHeight(); }
+	inline virtual uint32_t getTablabelWidth(UnicodeString const& label) const { return font.getStringWidth(label, font_tablabel_size) + tex_tab_left.getWidth() + tex_tab_right.getWidth(); }
 	virtual void setRenderareaLimit(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 	virtual void removeRenderareaLimit(void);
 

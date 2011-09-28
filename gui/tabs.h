@@ -45,6 +45,7 @@ private:
 
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
+	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	inline virtual void onSizeChange(void);
 	inline virtual void onChildSizeChange(void);
 
@@ -83,6 +84,13 @@ inline uint32_t Tabs::getMinWidth(void) const
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
 	uint32_t min_width = 0;
+// TODO: Support scrollable tab bar!
+	for (TabV::const_iterator tabs_it = tabs.begin();
+	     tabs_it != tabs.end();
+	     tabs_it ++) {
+		Tab const& tab = *tabs_it;
+		min_width += rend->getTablabelWidth(tab.label);
+	}
 	for (TabV::const_iterator tabs_it = tabs.begin();
 	     tabs_it != tabs.end();
 	     tabs_it ++) {
@@ -112,6 +120,30 @@ inline void Tabs::doRendering(int32_t x_origin, int32_t y_origin)
 	Renderer* rend = getRenderer();
 	if (!rend) return;
 	rend->renderTabs(x_origin, y_origin, this);
+}
+
+inline bool Tabs::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key)
+{
+	Renderer* rend = getRenderer();
+	if (!rend) return false;
+
+	if (mouse_key == Mousekey::LEFT) {
+		if (mouse_y >= 0 && mouse_y < (int32_t)rend->getTabbarHeight()) {
+			mouse_x -= rend->getTabsLeftEdgeWidth();
+			for (size_t tab_id = 0; tab_id < tabs.size(); tab_id ++) {
+				if (mouse_x >= 0) {
+					uint32_t label_width = rend->getTablabelWidth(tabs[tab_id].label);
+					if (mouse_x < (int32_t)label_width) {
+						selected = tab_id;
+						updateWidgetSizesAndPositions();
+						break;
+					}
+					mouse_x -= label_width;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 inline void Tabs::onSizeChange(void)
