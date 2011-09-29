@@ -408,9 +408,9 @@ inline Vector3 rayPlaneIntersection(Vector3 const& ray_begin,
                                     Vector3 const& plane_pos,
                                     Vector3 const& plane_nrm)
 {
-	HppAssert(ray_dir.length() > 0.0, "Segment cannot be zero sized!");
+	HppAssert(ray_dir.lengthTo2() > 0.0, "Segment cannot be zero sized!");
 	HppAssert(dotProduct(ray_dir, plane_nrm) != 0.0, "This ray will never hit plane!");
-	HppAssert(plane_nrm.length() > 0.0, "Plane normal cannot have zero length!");
+	HppAssert(plane_nrm.lengthTo2() > 0.0, "Plane normal cannot have zero length!");
 	Real m = (dotProduct(plane_pos, plane_nrm) - dotProduct(ray_begin, plane_nrm)) / dotProduct(ray_dir, plane_nrm);
 	return ray_begin + ray_dir * m;
 }
@@ -515,7 +515,7 @@ inline bool triangleHitsRay(Vector3 const& begin,
                             Vector3* hit_pos,
                             Vector3 const* normal)
 {
-	HppAssert(dir.length() > 0.0, "Dir can not be zero!");
+	HppAssert(dir.lengthTo2() > 0.0, "Dir can not be zero!");
 
 	Vector3 tedge0 = v1 - v0;
 	Vector3 tedge1 = v2 - v0;
@@ -588,7 +588,7 @@ inline bool triangleHitsSphere(Vector3 const& pos, Real radius,
 	Real plane_nrm_length = plane_nrm.length();
 	if (plane_nrm_length > 0.0) {
 		// Check if center of sphere is above/below triangle
-		HppAssert(plane_nrm.length() > 0.0, "Plane normal must not be zero!");
+		HppAssert(plane_nrm.lengthTo2() > 0.0, "Plane normal must not be zero!");
 		Vector3 pos_at_plane = posToPlane(pos, tp0, plane_nrm);
 
 		// We can calculate collision normal and depth here.
@@ -609,7 +609,7 @@ inline bool triangleHitsSphere(Vector3 const& pos, Real radius,
 				} else {
 					coll_nrm = plane_nrm / plane_nrm_length;
 				}
-				HppAssert(coll_nrm.length() != 0.0, "Fail!");
+				HppAssert(coll_nrm.lengthTo2() != 0.0, "Fail!");
 				return true;
 			}
 		} else {

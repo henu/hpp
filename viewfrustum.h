@@ -136,9 +136,9 @@ inline Viewfrustum::VFResult Viewfrustum::testBoundingsphere(Boundingsphere cons
 		return PARTIALLY_INSIDE;
 	}
 
-	HppAssert(dir.length() > 0.999 && dir.length() < 1.001, "Not normalized!");
-	HppAssert(up.length() > 0.999 && up.length() < 1.001, "Not normalized!");
-	HppAssert(right.length() > 0.999 && right.length() < 1.001, "Not normalized!");
+	HppAssert(dir.lengthTo2() > 0.999 && dir.lengthTo2() < 1.001, "Not normalized!");
+	HppAssert(up.lengthTo2() > 0.999 && up.lengthTo2() < 1.001, "Not normalized!");
+	HppAssert(right.lengthTo2() > 0.999 && right.lengthTo2() < 1.001, "Not normalized!");
 
 	bool fully_inside = true;
 
@@ -184,7 +184,7 @@ inline Viewfrustum::VFResult Viewfrustum::testBoundingsphere(Boundingsphere cons
 
 inline Viewfrustum Viewfrustum::doIntersection(Viewfrustum const& vfrust) const
 {
-	HppAssert((pos - vfrust.pos).length() < 0.001, "Unable to merge two viewfrustrums because they don\'t have the same position!");
+	HppAssert((pos - vfrust.pos).lengthTo2() < 0.000001, "Unable to merge two viewfrustrums because they don\'t have the same position!");
 	if (type == EMPTY || vfrust.type == EMPTY) {
 		return Viewfrustum(EMPTY, pos);
 	}
@@ -243,7 +243,7 @@ return Viewfrustum(EMPTY, pos);
 inline Viewfrustum::VFResult Viewfrustum::bsInFront(Boundingsphere const& bs, Vector3 const& pos, Vector3 const& nrm)
 {
 	HppAssert(!bs.isInfinite(), "Cannot be infinite!");
-	HppAssert(nrm.length() > 0.999 && nrm.length() < 1.001, "Not normalized!");
+	HppAssert(nrm.lengthTo2() > 0.999 && nrm.lengthTo2() < 1.001, "Not normalized!");
 	Real dst = distanceToPlane(pos, nrm, bs.getPosition()) + bs.getRadius();
 	if (dst < 0) {
 		return OUTSIDE;

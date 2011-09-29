@@ -188,8 +188,8 @@ inline void Submesh::calculateTangentspace(Vector3& tangent,
 	binormal = one_by_d * (c2c0.x * v1v0 - c1c0.x * v2v0);
 
 // TODO: If these fail, then replace assert with if!
-	HppAssert(tangent.length() > 0.0, "Divizion by zero!");
-	HppAssert(binormal.length() > 0.0, "Divizion by zero!");
+	HppAssert(tangent.lengthTo2() > 0.0, "Divizion by zero!");
+	HppAssert(binormal.lengthTo2() > 0.0, "Divizion by zero!");
 
 	// Force angle between vectors to be 90°
 	forceVectorsPerpendicular(tangent, binormal);
@@ -293,7 +293,7 @@ inline void Submesh::addFaceToStaticparts(size_t submesh_id,
 		if (tri.smooth) {
 			VrtsSNormals::const_iterator vrts_snormal_find = vrts_snormal.find(vrt_id);
 			HppAssert(vrts_snormal_find != vrts_snormal.end(), "Static normal was not found!");
-			HppAssert(vrts_snormal_find->second.nrm.length() > 0.999 && vrts_snormal_find->second.nrm.length() < 1.001, "Normal is not normalized!");
+			HppAssert(vrts_snormal_find->second.nrm.lengthTo2() > 0.999 && vrts_snormal_find->second.nrm.lengthTo2() < 1.001, "Normal is not normalized!");
 			vrts_nrm[face_vrt_id] = vrts_snormal_find->second.nrm;
 			if (uvs_exist) {
 				HppAssert(!tri.layers.empty(), "No layers!");

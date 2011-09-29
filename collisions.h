@@ -75,7 +75,7 @@ inline Vector3 moveOut(Collisions& colls)
 	     colls_id < colls.size();
 	     colls_id ++) {
 		Collision& coll = colls[colls_id];
-		HppAssert(::fabs(coll.normal.length() - 1) < 0.001, "Normal is not normalized!");
+		HppAssert(coll.normal.lengthTo2() > 0.999 && coll.normal.lengthTo2() < 1.001, "Normal is not normalized!");
 		if (coll.depth > deepest_depth) {
 			deepest_depth = coll.depth;
 			deepest = colls_id;
@@ -170,7 +170,7 @@ inline Vector3 moveOut(Collisions& colls)
 	// collisions are already fixed, all other movings must be done at the
 	// planes of these collisions! This means one line in space.
 	Vector3 const move_v = crossProduct(coll_d.normal, coll_d2.normal);
-	HppAssert(move_v.length() != 0.0, "Too small cross product!");
+	HppAssert(move_v.lengthTo2() != 0.0, "Too small cross product!");
 	Real deepest3_depth = -99999;
 	Real deepest3_move;
 	#ifndef NDEBUG
@@ -242,7 +242,7 @@ inline Vector2 moveOut(Collisions2D& colls)
 	     colls_id < colls.size();
 	     colls_id ++) {
 		Collision2D& coll = colls[colls_id];
-		HppAssert(::fabs(coll.normal.length() - 1) < 0.001, "Normal is not normalized!");
+		HppAssert(coll.normal.lengthTo2() > 0.999 && coll.normal.lengthTo2() < 1.001, "Normal is not normalized!");
 		if (coll.depth > deepest_depth) {
 			deepest_depth = coll.depth;
 			deepest = colls_id;
