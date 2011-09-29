@@ -2,8 +2,10 @@
 #define HPP_CAST_H
 
 #include "assert.h"
-#include "bytev.h"
 #include "exception.h"
+#include "bytev.h"
+#include "vector2.h"
+#include "vector3.h"
 
 #include <sstream>
 #include <cstdlib>
@@ -37,7 +39,9 @@ inline ByteV		int32ToByteV(int32_t i);
 inline void		int32ToCStr(int32_t i, uint8_t* c_str);
 inline std::string 	sizeToStr(size_t i);
 inline std::string	ssizeToStr(ssize_t i);
-inline float		strToFloat(std::string str);
+inline float		strToFloat(std::string const& str);
+inline Vector2		strToVector2(std::string const& str);
+inline Vector3		strToVector3(std::string const& str);
 inline size_t		strToSize(std::string const& str);
 inline ssize_t		strToSSize(std::string const& str);
 inline ByteV		uInt16ToByteV(uint16_t i);
@@ -383,9 +387,60 @@ inline std::string ssizeToStr(ssize_t i)
 	return std::string(i_strm.str());
 }
 
-inline float strToFloat(std::string str)
+inline float strToFloat(std::string const& str)
 {
 	return static_cast< float >(atof(str.c_str()));
+}
+
+inline Vector2 strToVector2(std::string const& str)
+{
+	// Strip possible parenthesis around numeric values
+	std::string::size_type v_begin = str.find_first_not_of("([{ \t\n");
+	if (v_begin == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector2 because it does not contain any numerals!");
+	}
+	std::string::size_type v_end = str.find_last_not_of(")]} \t\n");
+	if (v_end == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector2 because it does not contain any numerals!");
+	}
+	v_end ++;
+	// Find commas and do conversion
+	std::string::size_type comma = str.find(',', v_begin);
+	if (comma == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector2 because comma is not found!");
+	}
+	Vector2 result;
+	result.x = strToFloat(str.substr(v_begin, comma));
+	result.y = strToFloat(str.substr(comma+1, v_end-comma-1));
+	return result;
+}
+
+inline Vector3 strToVector3(std::string const& str)
+{
+	// Strip possible parenthesis around numeric values
+	std::string::size_type v_begin = str.find_first_not_of("([{ \t\n");
+	if (v_begin == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector3 because it does not contain any numerals!");
+	}
+	std::string::size_type v_end = str.find_last_not_of(")]} \t\n");
+	if (v_end == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector3 because it does not contain any numerals!");
+	}
+	v_end ++;
+	// Find commas and do conversion
+	std::string::size_type first_comma = str.find(',', v_begin);
+	if (first_comma == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector3 because first comma is not found!");
+	}
+	std::string::size_type second_comma = str.find(',', first_comma + 1);
+	if (second_comma == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector3 because second comma is not found!");
+	}
+	Vector3 result;
+	result.x = strToFloat(str.substr(v_begin, first_comma));
+	result.y = strToFloat(str.substr(first_comma+1, second_comma-first_comma-1));
+	result.z = strToFloat(str.substr(second_comma+1, v_end-second_comma-1));
+	return result;
 }
 
 inline size_t strToSize(std::string const& str)

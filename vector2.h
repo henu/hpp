@@ -2,7 +2,6 @@
 #define HPP_VECTOR2_H
 
 #include "real.h"
-#include "cast.h"
 #include "assert.h"
 
 #include <cmath>
@@ -23,7 +22,6 @@ public:
 
 	inline Vector2(void);
 	inline Vector2(Real x, Real y);
-	inline Vector2(std::string const& str);
 
 	// Miscellaneous functions
 	inline Real length(void) const;
@@ -74,16 +72,6 @@ inline Vector2::Vector2(void)
 inline Vector2::Vector2(Real x, Real y) :
 x(x), y(y)
 {
-}
-
-inline Vector2::Vector2(std::string const& str)
-{
-	std::string::size_type comma = str.find(',');
-	if (comma == std::string::npos) {
-		throw Exception("Comma not found!");
-	}
-	x = strToFloat(str.substr(0, comma));
-	y = strToFloat(str.substr(comma+1));
 }
 
 inline Real Vector2::length(void) const

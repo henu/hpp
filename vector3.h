@@ -2,7 +2,6 @@
 #define HPP_VECTOR3_H
 
 #include "real.h"
-#include "cast.h"
 #include "assert.h"
 
 #include <cmath>
@@ -24,7 +23,6 @@ public:
 
 	inline Vector3(void);
 	inline Vector3(Real x, Real y, Real z);
-	inline Vector3(std::string const& str);
 
 	// Miscellaneous functions
 	inline Real length(void) const;
@@ -75,21 +73,6 @@ inline Vector3::Vector3(void)
 inline Vector3::Vector3(Real x, Real y, Real z) :
 x(x), y(y), z(z)
 {
-}
-
-inline Vector3::Vector3(std::string const& str)
-{
-	std::string::size_type first_comma = str.find(',');
-	if (first_comma == std::string::npos) {
-		throw Exception("Comma not found!");
-	}
-	std::string::size_type second_comma = str.find(',', first_comma + 1);
-	if (second_comma == std::string::npos) {
-		throw Exception("Comma not found!");
-	}
-	x = strToFloat(str.substr(0, first_comma));
-	y = strToFloat(str.substr(first_comma+1, second_comma-first_comma-1));
-	z = strToFloat(str.substr(second_comma+1));
 }
 
 inline Real Vector3::length(void) const
