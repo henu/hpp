@@ -2,7 +2,7 @@
 #define HPP_IMAGE_DRAW_H
 
 #include "color.h"
-#include "vectors.h"
+#include "vector2.h"
 #include "image.h"
 
 namespace Hpp
