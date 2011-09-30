@@ -11,7 +11,9 @@
 namespace Hpp
 {
 
+// Returns a value in range [min, max)
 inline Real random(Real min, Real max);
+
 inline Vector2 randomVector2(Real max_radius);
 inline Vector3 randomVector3(Real max_radius);
 
