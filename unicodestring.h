@@ -210,6 +210,7 @@ inline UnicodeString::UnicodeString(char const* c_str)
 				buf[offset] = extractUTF8(c_str, c_str_end);
 			}
 			catch (Hpp::Exception const& e) {
+				delete[] buf;
 				throw Hpp::Exception(std::string("Unable to construct UnicodeString from C string \"") + c_str + "\"! Reason: " + e.what());
 			}
 		}
@@ -260,7 +261,7 @@ inline UnicodeString::UnicodeString(UChr const* ustr, size_t len)
 
 inline UnicodeString::~UnicodeString(void)
 {
-	delete buf;
+	delete[] buf;
 }
 
 inline UnicodeString UnicodeString::operator=(UnicodeString const& ustr)
