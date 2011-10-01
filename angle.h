@@ -2,7 +2,6 @@
 #define HPP_ANGLE_H
 
 #include "constants.h"
-#include "cast.h"
 #include "assert.h"
 #include "real.h"
 
@@ -24,8 +23,8 @@ public:
 	inline float getDegrees(void) const;
 
 	// Conversion functions
-	inline std::string toRadiansStr(void) const;
-	inline std::string toDegreesStr(void) const;
+	std::string toRadiansStr(void) const;
+	std::string toDegreesStr(void) const;
 
 	// Constructing functions
 	inline static Angle fromDegrees(float degrees);
@@ -92,16 +91,6 @@ inline float Angle::getDegrees(void) const
 inline Angle::Angle(Angle const& a) :
 rad(a.rad)
 {
-}
-
-inline std::string Angle::toRadiansStr(void) const
-{
-	return floatToStr(rad);
-}
-
-inline std::string Angle::toDegreesStr(void) const
-{
-	return floatToStr(rad / HPP_PI * 180) + "°";
 }
 
 inline Angle Angle::operator=(Angle const& a)

@@ -7,6 +7,8 @@
 #include "real.h"
 #include "axis.h"
 
+#include <stdint.h>
+
 namespace Hpp
 {
 

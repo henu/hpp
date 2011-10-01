@@ -7,6 +7,7 @@
 #include "color.h"
 #include "path.h"
 #include "vector2.h"
+#include "cast.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

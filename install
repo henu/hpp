@@ -160,6 +160,7 @@ SOURCES_MAIN=\
 "gui/textinputcontents.cc "\
 "gui/widget.cc "\
 "gui/windowarea.cc "\
+"angle.cc "\
 "assert.cc "\
 "3dconstants.cc "\
 "commandexec.cc "\

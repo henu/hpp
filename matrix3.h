@@ -5,6 +5,8 @@
 #include "vector2.h"
 #include "real.h"
 
+#include <stdint.h>
+
 namespace Hpp
 {
 

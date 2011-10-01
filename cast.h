@@ -6,6 +6,8 @@
 #include "bytev.h"
 #include "vector2.h"
 #include "vector3.h"
+#include "matrix3.h"
+#include "matrix4.h"
 
 #include <sstream>
 #include <cstdlib>
@@ -37,6 +39,8 @@ inline ByteV		int16ToByteV(int16_t i);
 inline void		int16ToCStr(int16_t i, uint8_t* c_str);
 inline ByteV		int32ToByteV(int32_t i);
 inline void		int32ToCStr(int32_t i, uint8_t* c_str);
+inline ByteV		matrix3ToBytes(Matrix3 const& m);
+inline ByteV		matrix4ToBytes(Matrix4 const& m);
 inline std::string 	sizeToStr(size_t i);
 inline std::string	ssizeToStr(ssize_t i);
 inline float		strToFloat(std::string const& str);
@@ -371,6 +375,26 @@ inline void int32ToCStr(int32_t i, uint8_t* c_str)
 	c_str[1] = static_cast< uint8_t >(ui >> 8);
 	c_str[2] = static_cast< uint8_t >(ui >> 16);
 	c_str[3] = static_cast< uint8_t >(((ui >> 24) & 0x7F) + (negative << 7));
+}
+
+inline ByteV matrix3ToBytes(Matrix3 const& m)
+{
+	ByteV result;
+	result.reserve(4*9);
+	for (uint8_t cell_id = 0; cell_id < 9; cell_id ++) {
+		result += floatToByteV(m.cell(cell_id));
+	}
+	return result;
+}
+
+inline ByteV matrix4ToBytes(Matrix4 const& m)
+{
+	ByteV result;
+	result.reserve(4*16);
+	for (uint8_t cell_id = 0; cell_id < 16; cell_id ++) {
+		result += floatToByteV(m.cell(cell_id));
+	}
+	return result;
 }
 
 inline std::string sizeToStr(size_t i)
