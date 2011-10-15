@@ -71,6 +71,9 @@ inline void nearestPointToRay(Vector3 const& point,
                               Vector3 const& ray_begin, Vector3 const& ray_dir,
                               Vector3* nearest_point, Real* m, Real* dst_to_point);
 
+inline Real distanceBetweenLines(Vector3 const& begin1, Vector3 const& dir1,
+                                 Vector3 const& begin2, Vector3 const& dir2);
+
 // Transforms a 3D or 2D point at the plane of triangle to the space of it so
 // that the point can be defined using axes of triangle. This can be used to
 // check if point is inside triangle or not. Note, that position is measured so
@@ -358,6 +361,20 @@ inline void nearestPointToRay(Vector3 const& point,
 	} else if (dst_to_point) {
 		*dst_to_point = ((ray_begin + ray_dir * m2) - point).length();
 	}
+}
+
+inline Real distanceBetweenLines(Vector3 const& begin1, Vector3 const& dir1,
+                                 Vector3 const& begin2, Vector3 const& dir2)
+{
+	Vector3 cp_d1_d2 = crossProduct(dir1, dir2);
+	Real cp_d1_d2_len_to_2 = cp_d1_d2.lengthTo2();
+	if (cp_d1_d2_len_to_2 < 0.000001) {
+		Vector3 helper = posToPlane(begin2, begin1, dir1);
+		return (begin1 - helper).length();
+	}
+	Real cp_d1_d2_len = ::sqrt(cp_d1_d2_len_to_2);
+	Vector3 n = cp_d1_d2 / cp_d1_d2_len;
+	return ::fabs(dotProduct(n, begin1 - begin2));
 }
 
 inline Vector2 transformPointToTrianglespace(Vector3 const& pos, Vector3 const& x_axis, Vector3 const& y_axis)
