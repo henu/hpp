@@ -203,11 +203,11 @@ LIBS="-lpthread -lrt -lfreetype -lGL `pkg-config --libs sdl` -lSDL_image"
 
 # Combine headers
 #TODO: In future, make options here
-HEADERS="$HEADERS_MAIN $HEADERS_IMAGE"
+HEADERS="$HEADERS_MAIN $HEADERS_IMAGE $HEADERS_3D"
 
 # Combine sources
 #TODO: In future, make options here
-SOURCES="$SOURCES_MAIN $SOURCES_IMAGE"
+SOURCES="$SOURCES_MAIN $SOURCES_IMAGE $SOURCES_3D"
 
 # SVN Revision number
 REVISION=$(svn info 2> /dev/null|grep Revision|cut -d " " -f 2)
