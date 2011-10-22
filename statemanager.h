@@ -102,9 +102,7 @@ private:
 
 	// The thread that statemanager is ran. This is for debugging purposes
 	// only.
-	#ifndef NDEBUG
 	Thread::Id thread_id;
-	#endif
 
 	// The only instance of this class
 	static Statemanager instance;

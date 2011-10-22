@@ -518,10 +518,8 @@ private:
 	mutable GLuint vbo_id;
 
 	// This boolean is used to check if current data is from Rendbuf that
-	// autoreleases it's data.
-	#ifndef NDEBUG
+	// autoreleases it's data. This is only used when debugging.
 	bool source_releases_automatically;
-	#endif
 
 	// ----------------------------------------
 	// Private functions
