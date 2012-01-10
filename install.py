@@ -7,6 +7,7 @@ import shlex
 import subprocess
 import shutil
 import tempfile
+import re
 
 def main(pname, args):
 
@@ -149,7 +150,7 @@ def main(pname, args):
 		# Make package
 		os.chdir(temp)
 		deb_file = 'lib' + libname + '-dev_' + version + '_' + arch + '.deb'
-		runCommand('ar r ' + os.path.join(wd, deb_file) + ' debian-binary control.tar.gz data.tar.gz 2> /dev/null')
+		runCommand('ar r ' + addSlashes(os.path.join(wd, deb_file)) + ' debian-binary control.tar.gz data.tar.gz 2> /dev/null')
 
 		# Return to original working directory
 		os.chdir(wd)
@@ -168,11 +169,11 @@ def build(sources, cflags, libs, libname):
 	for source in sources:
 		source_prefix = source.split('.')[0]
 		obj = source_prefix + '.o'
-		objs_str += obj + ' '
+		objs_str += addSlashes(obj) + ' '
 		objs.append(obj)
-		runCommand('g++ -fPIC -w -c ' + cflags + ' ' + source + ' -o ' + obj)
+		runCommand('g++ -fPIC -w -c ' + cflags + ' ' + addSlashes(source) + ' -o ' + obj)
 	# Link
-	runCommand('g++ -w -shared ' + cflags + ' -o lib' + libname + '.so ' + objs_str)
+	runCommand('g++ -w -shared ' + cflags + ' -o lib' + addSlashes(libname) + '.so ' + objs_str)
 
 def clean(sources, libname):
 	# Clean object files
@@ -278,6 +279,12 @@ def removeAsMuchAsPossible(path):
 			os.removedirs(path)
 		except:
 			pass
+
+def addSlashes(s):
+	s = s.replace(' ', '\\ ')
+	s = s.replace('\"', '\\\"')
+	s = s.replace('\'', '\\\'')
+	return s
 
 if __name__ == '__main__':
 	try:
