@@ -110,8 +110,11 @@ def main(pname, args):
 					deb_deps_set.add(dep)
 		deb_deps_list = list(deb_deps_set)
 		deb_deps = ''
-		for deb_dep in deb_deps_list:
-			deb_deps += deb_dep + ' '
+		for deb_dep_id in range(len(deb_deps_list)):
+			deb_dep = deb_deps_list[deb_dep_id]
+			deb_deps += deb_dep
+			if deb_dep_id < len(deb_deps_list) - 1:
+				deb_deps += ', '
 
 		# Build and install to temporary
 		build(sources, cflags, libs, libname)
