@@ -32,7 +32,7 @@ public:
 
 	// Type for thread ID
 	#ifndef WIN32
-	typedef uint32_t Id;
+	typedef pthread_t Id;
 	#else
 	typedef DWORD Id;
 	#endif

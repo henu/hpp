@@ -51,7 +51,11 @@ inline std::string convertTo(std::string const& str, std::string const& from, st
 		char* subresult = buf;
 		size_t subresult_left = BUF_SIZE;
 		#ifndef WIN32
+		#ifndef FREEBSD
 		size_t chars_converted = iconv(cd, (char**)&str_c, &str_c_left, &subresult, &subresult_left);
+		#else
+		size_t chars_converted = iconv(cd, &str_c, &str_c_left, &subresult, &subresult_left);
+		#endif
 		#else
 		size_t chars_converted = iconv(cd, &str_c, &str_c_left, &subresult, &subresult_left);
 		#endif

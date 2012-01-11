@@ -152,9 +152,13 @@ int CommandExec::wait(void)
 void CommandExec::kill(void)
 {
 	HppAssert(!child_quit, "Command has already ended!");
+	#ifdef FREEBSD
+	throw Exception("Not supported on FreeBSD!");
+	#else
 	if (::kill(child_pid, SIGKILL) != 0) {
 		throw Exception("Unable to kill command!");
 	}
+	#endif
 	wait();
 }
 

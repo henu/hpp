@@ -4,8 +4,6 @@
 #include "menubar.h"
 #include "windowarea.h"
 
-#include "../viewport.h"
-
 #include <algorithm>
 #include <cstdlib>
 

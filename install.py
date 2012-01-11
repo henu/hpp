@@ -160,6 +160,11 @@ def main(pname, args):
 
 		# Clean
 		clean(sources, libname)
+	elif user_command == 'freebsd':
+		cflags += ' -I/usr/local/include/ -DFREEBSD'
+		if '3d' not in parts and 'image' not in parts:
+			cflags += ' -DHPP_NO_SDL'
+		build(sources, cflags, libs, libname)
 	else:
 		raise Exception('Invalid command \"' + user_command + '\"!')
 
