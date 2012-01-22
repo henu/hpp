@@ -152,9 +152,6 @@ void Movable::setParent(Movable* parent)
 {
 	if (this->parent) {
 		this->parent->unregisterChild(this);
-		if (!this->parent->transf_abs_uptodate == NO_FOR_CHILDREN) {
-			this->parent->checkIfAllChildrenHasAbsoluteTransformsUpToDate();
-		}
 	}
 	this->parent = parent;
 	if (this->parent) {
@@ -174,7 +171,7 @@ inline Transform Movable::getAbsoluteTransform(void) const
 
 inline void Movable::updateAbsoluteTransform(void)
 {
-	HppAssert(!parent || parent->transf_abs_uptodate != NO, "Parent transform must be up-to-date!");
+	HppAssert(!parent, "This method may only be called for root nodes!");
 
 	// Check if this call is useless
 	if (transf_abs_uptodate == YES) {
@@ -245,9 +242,7 @@ inline void Movable::transformChanged(void)
 	     children_it != children.end();
 	     children_it ++) {
 	     	Movable* child = *children_it;
-	     	if (child->visible && child->transf_abs_uptodate != NO) {
-	     		child->transformChangedRecursive();
-	     	}
+     		child->transformChangedRecursive();
 	}
 
 	transf_abs_uptodate = NO;
@@ -279,10 +274,10 @@ inline void Movable::registerChild(Movable* child)
 	// Ensure this will not make loop of parents
 	#ifndef NDEBUG
 	Movable* check_parent = this;
-	while (check_parent) {
+	do {
 		HppAssert(child != check_parent, "Some Movables form parent loop!");
 		check_parent = check_parent->parent;
-	}
+	} while (check_parent);
 	#endif
 	children.insert(child);
 	// If hidden, then do nothing more
@@ -300,6 +295,10 @@ inline void Movable::unregisterChild(Movable* child)
 	// If hidden, then do nothing more
 	if (!visible) {
 		return;
+	}
+	// Check if transform has become fully YES again.
+	if (transf_abs_uptodate == NO_FOR_CHILDREN) {
+		checkIfAllChildrenHasAbsoluteTransformsUpToDate();
 	}
 	markTotalBoundingsphereToNeedRecalculation();
 }
@@ -465,15 +464,14 @@ inline void Movable::updateAbsoluteTransform(Transform const& parent_transf_abs)
 
 inline void Movable::transformChangedRecursive(void)
 {
-	HppAssert(transf_abs_uptodate != NO, "Must not be NO!");
-	HppAssert(visible, "Movable must be visible!");
+	if (!visible) return;
+	if (transf_abs_uptodate == NO) return;
+
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
 	     children_it ++) {
-	     	Movable* child = *children_it;
-	     	if (child->transf_abs_uptodate != NO) {
-	     		child->transformChangedRecursive();
-	     	}
+		Movable* child = *children_it;
+		child->transformChangedRecursive();
 	}
 	transf_abs_uptodate = NO;
 }
