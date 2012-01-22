@@ -1,4 +1,5 @@
 #include "test3d.h"
+#include "testmisc.h"
 #include "exception.h"
 
 #include <cstdlib>
@@ -10,6 +11,7 @@ int main(int argc, char** argv)
 	(void)argv;
 	try {
 		Hpp::Tests::test3D();
+		Hpp::Tests::testMisc();
 	}
 	catch (Hpp::Exception const& e)	{
 		std::cerr << "ERROR: " << e.what() << std::endl;

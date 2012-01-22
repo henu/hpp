@@ -41,6 +41,14 @@ inline std::string trim(std::string const& str, std::string ws = " \t\n");
 // Power function for integers
 inline ssize_t ipow(ssize_t a, size_t n);
 
+// Division functions for integers that always round to down/up
+inline ssize_t iDivFloor(ssize_t dividend, ssize_t divisor);
+inline ssize_t iDivCeil(ssize_t dividend, ssize_t divisor);
+
+// Modulo function that does not produce negative results. Always returns value
+// that is in range [0 - divisor). Note, that divisor must be positive!
+inline size_t iMod(ssize_t dividend, size_t divisor);
+
 // Converts camera fov angles between X and Y.
 inline Angle fovYToFovX(Angle const& fov_y, Real display_w, Real display_h);
 inline Angle fovXToFovY(Angle const& fov_x, Real display_w, Real display_h);
@@ -127,6 +135,43 @@ inline ssize_t ipow(ssize_t a, size_t n)
 		}
 	}
 	return result;
+}
+
+inline ssize_t iDivFloor(ssize_t dividend, ssize_t divisor)
+{
+	HppAssert(divisor != 0, "Division by zero!");
+	if (dividend >= 0 && divisor > 0) {
+		return dividend / divisor;
+	}
+	if (dividend < 0 && divisor < 0) {
+		return dividend / divisor;
+	}
+	if (dividend < 0) {
+		HppAssert(divisor > 0, "Fail!");
+		return (dividend - (divisor - 1)) / divisor;
+	}
+	return (dividend - (divisor + 1)) / divisor;
+}
+
+inline ssize_t iDivCeil(ssize_t dividend, ssize_t divisor)
+{
+	HppAssert(divisor != 0, "Division by zero!");
+	if (dividend >= 0 && divisor > 0) {
+		return (dividend + (divisor - 1)) / divisor;
+	}
+	if (dividend < 0 && divisor < 0) {
+		return (dividend + (divisor + 1)) / divisor;
+	}
+	return dividend / divisor;
+}
+
+inline size_t iMod(ssize_t dividend, size_t divisor)
+{
+	HppAssert(divisor != 0, "Division by zero!");
+	if (dividend >= 0) {
+		return dividend % divisor;
+	}
+	return (dividend % (ssize_t)divisor) + divisor;
 }
 
 inline Angle fovYToFovX(Angle const& fov_y, Real display_w, Real display_h)
