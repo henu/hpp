@@ -116,7 +116,7 @@
 		},
 
 		"3d": {
-			"libs": "-lfreetype -lGL `pkg-config --libs sdl`",
+			"libs": "-lfreetype -lGL -lSDL",
 			"cflags": "`pkg-config --cflags sdl` -I/usr/include/freetype2",
 			"deb_deps": [ "libfreetype6", "libsdl1.2debian" ],
 			"headers": [

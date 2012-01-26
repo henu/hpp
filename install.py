@@ -118,7 +118,7 @@ def main(pname, args):
 
 		# Build and install to temporary
 		build(sources, cflags, libs, libname)
-		install(temp_install, headers, libname, libs, version, desc)
+		install(temp_install, headers, libname, libs, version, desc, real_path = '/usr')
 
 		# Pack and calculate data
 		os.chdir(os.path.join(temp, 'data'))
@@ -197,10 +197,13 @@ def test():
 	runCommand('/tmp/libhpp_tester')
 	os.remove('/tmp/libhpp_tester')
 
-def install(path, headers, libname, libs, version, desc):
+def install(path, headers, libname, libs, version, desc, real_path = None):
 
 	# TODO: Get these from somewhere else!
 	deps = ''
+
+	if real_path == None:
+		real_path = path
 
 	# Dirs
 	headers_dir = os.path.join(path, 'include', 'hpp')
@@ -220,16 +223,16 @@ def install(path, headers, libname, libs, version, desc):
 	# Write .pc file
 	ensureDirExists(pc_dir)
 	pc_file = open(os.path.join(pc_dir, libname + '.pc'), 'w')
-	pc_file.write('prefix=' + path + '\n')
-	pc_file.write('exec_prefix=\${prefix}\n')
-	pc_file.write('libdir=\${exec_prefix}/lib\n')
-	pc_file.write('includedir=\${prefix}/include/hpp\n')
+	pc_file.write('prefix=' + real_path + '\n')
+	pc_file.write('exec_prefix=${prefix}\n')
+	pc_file.write('libdir=${exec_prefix}/lib\n')
+	pc_file.write('includedir=${prefix}/include/hpp\n')
 	pc_file.write('\n')
 	pc_file.write('Name: ' + libname + '\n')
 	pc_file.write('Description: ' + desc + '\n')
 	pc_file.write('Version: ' + version + '\n')
 	pc_file.write('Requires: ' + deps + '\n')
-	pc_file.write('Libs: -L\${libdir} -lhpp ' + libs + '\n')
+	pc_file.write('Libs: -L${libdir} -lhpp ' + libs + '\n')
 	pc_file.write('Cflags: \n')
 	pc_file.close()
 
