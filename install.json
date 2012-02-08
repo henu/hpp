@@ -210,9 +210,11 @@
 			"libs": "-lncursesw",
 			"deb_deps": [ "libncursesw5" ],
 			"headers": [
+				"gui/viewportrenderer.h",
 				"ncios.h"
 			],
 			"sources": [
+				"gui/viewportrenderer.cc",
 				"ncios.cc"
 			],
 			"deps": [ "main" ]
