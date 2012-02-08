@@ -1,8 +1,7 @@
 #include "engine.h"
 
 #include "renderer.h"
-#include "menubar.h"
-#include "windowarea.h"
+#include "widget.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -17,16 +16,12 @@ Engine::Engine(void) :
 rend(NULL),
 keyboardlistener(NULL),
 mouseover_widget(NULL),
-menubar(NULL)
+content(NULL)
 {
-	windowarea = new Windowarea();
-	windowarea->setEngine(this);
-	windowarea->setParent(NULL);
 }
 
 Engine::~Engine(void)
 {
-	delete windowarea;
 }
 
 void Engine::setRenderer(Renderer* rend)
@@ -45,20 +40,20 @@ void Engine::render(void)
 {
 	rend->initRendering();
 
-	windowarea->render(0, 0);
-
-	if (menubar) {
-		menubar->render(0, 0);
-	}
+	content->render(0, 0);
 
 	rend->deinitRendering();
 }
 
-void Engine::setMenubar(Menubar* menubar)
+void Engine::setContent(Widget* widget)
 {
-	this->menubar = menubar;
-	menubar->setEngine(this);
-	menubar->setParent(NULL);
+	if (content) {
+		content->setEngine(NULL);
+		content->setParent(NULL);
+	}
+	content = widget;
+	content->setEngine(this);
+	content->setParent(NULL);
 	updateSizes();
 }
 
@@ -69,11 +64,8 @@ bool Engine::mouseEvent(Event const& event)
 
 	// Try to get widget over mouse
 	Widget* widget_under_mouse = NULL;
-	if (menubar) {
-		widget_under_mouse = menubar->mouseOverRecursive(0, 0, event.x, event.y);
-	}
-	if (!widget_under_mouse) {
-		widget_under_mouse = windowarea->mouseOverRecursive(0, 0, event.x, event.y);
+	if (content) {
+		widget_under_mouse = content->mouseOverRecursive(0, 0, event.x, event.y);
 	}
 
 	// Check if some Widget is interested about these events.
@@ -161,11 +153,6 @@ void Engine::unregisterWidget(Widget* widget)
 		mouseover_widget = NULL;
 		checkForNewMouseOver();
 	}
-}
-
-void Engine::addWindow(Window* window)
-{
-	windowarea->addWindow(window);
 }
 
 void Engine::setMouseOver(Widget* widget)
@@ -263,11 +250,8 @@ void Engine::popRenderarealimit(void)
 void Engine::checkForNewMouseOver(void)
 {
 	Widget* widget_under_mouse = NULL;
-	if (menubar) {
-		widget_under_mouse = menubar->mouseOverRecursive(0, 0, mouse_lastpos_x, mouse_lastpos_y);
-	}
-	if (widget_under_mouse) {
-		widget_under_mouse->setMouseOver(mouse_lastpos_x, mouse_lastpos_y);
+	if (content) {
+		widget_under_mouse = content->mouseOverRecursive(0, 0, mouse_lastpos_x, mouse_lastpos_y);
 	}
 }
 
@@ -278,15 +262,11 @@ void Engine::updateSizes(void)
 		return;
 	}
 
-	uint32_t windowarea_y = 0;
-	if (menubar) {
-		menubar->setSize(rend->getWidth(), rend->getMenubarHeight());
-		menubar->setPosition(0, 0);
-		menubar->updateEnvironment();
+	if (content) {
+		content->setSize(rend->getWidth(), rend->getHeight());
+		content->setPosition(0, 0);
+		content->updateEnvironment();
 	}
-	windowarea->setPosition(0, windowarea_y);
-	windowarea->setSize(rend->getWidth(), rend->getHeight() - windowarea_y);
-	windowarea->updateEnvironment();
 }
 
 void Engine::updateTotalRenderarelimit(void)

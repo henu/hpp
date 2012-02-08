@@ -18,7 +18,7 @@ namespace Gui
 
 class Widget;
 class Renderer;
-class Menubar;
+class AreaWithMenubar;
 class Window;
 class Windowarea;
 
@@ -39,9 +39,7 @@ public:
 
 	void render(void);
 
-	void addWindow(Window* window);
-
-	void setMenubar(Menubar* menubar);
+	void setContent(Widget* widget);
 
 	// Returns true if event was consumed.
 	bool mouseEvent(Event const& event);
@@ -108,8 +106,7 @@ private:
 
 	Renderarealimits renderarealimits;
 
-	Windowarea* windowarea;
-	Menubar* menubar;
+	Widget* content;
 
 
 	// ----------------------------------------

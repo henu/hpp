@@ -16,7 +16,7 @@ namespace Gui
 
 class Menuitem;
 class Menuseparator;
-class Menubar;
+class AreaWithMenubar;
 class Menu;
 class Window;
 class Label;
@@ -46,7 +46,7 @@ public:
 	virtual void deinitRendering(void) = 0;
 
 	// Virtual rendering functions
-	virtual void renderMenubarBackground(int32_t x_origin, int32_t y_origin, Menubar const* menubar) = 0;
+	virtual void renderMenubarBackground(int32_t x_origin, int32_t y_origin, uint32_t width, AreaWithMenubar const* areawithmenubar) = 0;
 	virtual void renderMenuseparator(int32_t x_origin, int32_t y_origin, Menuseparator const* menusep) = 0;
 	virtual void renderMenuLabel(int32_t x_origin, int32_t y_origin, Menu const* menu, UnicodeString const& label, bool mouse_over) = 0;
 	virtual void renderMenuitem(int32_t x_origin, int32_t y_origin, Menuitem const* menuitem, UnicodeString const& label, bool mouse_over) = 0;
