@@ -3,6 +3,8 @@
 
 #include "callback.h"
 #include "widget.h"
+#include "renderer.h"
+#include "../real.h"
 
 namespace Hpp
 {

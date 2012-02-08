@@ -38,6 +38,7 @@ void AreaWithMenubar::setContent(Containerwidget* widget)
 		moveWidgetBack(content);
 	}
 	markSizeChanged();
+	updateWidgetSizesAndPositions();
 }
 
 uint32_t AreaWithMenubar::getMinWidth(void) const
