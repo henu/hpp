@@ -1,7 +1,7 @@
 #ifndef HPP_GUI_WINDOWAREA_H
 #define HPP_GUI_WINDOWAREA_H
 
-#include "widget.h"
+#include "containerwidget.h"
 
 #include <vector>
 
@@ -13,7 +13,7 @@ namespace Gui
 
 class Window;
 
-class Windowarea : public Widget
+class Windowarea : public Containerwidget
 {
 
 	friend class Window;

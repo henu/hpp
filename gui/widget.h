@@ -7,6 +7,7 @@
 #include "../exception.h"
 
 #include <vector>
+#include <algorithm>
 #include <cstdlib>
 #include <algorithm>
 #include <stdint.h>
@@ -85,8 +86,13 @@ protected:
 	inline Engine* getEngine(void) { return engine; }
 	inline Widget* getParent(void) { return parent; }
 
-	// Registers child
+	// Adds/removes child
 	inline void addChild(Widget* child) { child->setEngine(engine); child->setParent(this); }
+	inline void removeChild(Widget* child) { child->setEngine(NULL); child->setParent(NULL); }
+
+	// Functions to handle order of children in child stack
+	inline void moveWidgetBack(Widget* child);
+	inline void moveWidgetFront(Widget* child);
 
 	inline void setChildPosition(Widget* child, int32_t x, int32_t y);
 	inline void setChildSize(Widget* child, uint32_t width, uint32_t height);
@@ -236,6 +242,36 @@ inline void Widget::markSizeChanged(void)
 	if (parent) {
 		parent->onChildSizeChange();
 	}
+}
+
+inline void Widget::moveWidgetBack(Widget* child)
+{
+	Children::reverse_iterator children_rfind = std::find(children.rbegin(), children.rend(), child);
+	if (children_rfind == children.rend()) {
+		throw Exception("Unable to move widget back, because it is not my child!");
+	}
+	for (Children::reverse_iterator children_rit = children_rfind;
+	     children_rit != children.rend() - 1;
+	     children_rit ++) {
+		Widget* prev_child = *(children_rit + 1);
+		*children_rit = prev_child;
+	}
+	children.front() = child;
+}
+
+inline void Widget::moveWidgetFront(Widget* child)
+{
+	Children::iterator children_find = std::find(children.begin(), children.end(), child);
+	if (children_find == children.end()) {
+		throw Exception("Unable to move widget front, because it is not my child!");
+	}
+	for (Children::iterator children_it = children_find;
+	     children_it != children.end() - 1;
+	     children_it ++) {
+		Widget* next_child = *(children_it + 1);
+		*children_it = next_child;
+	}
+	children.back() = child;
 }
 
 inline void Widget::setChildPosition(Widget* child, int32_t x, int32_t y)

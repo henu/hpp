@@ -18,7 +18,6 @@ content(NULL)
 
 AreaWithMenubar::~AreaWithMenubar(void)
 {
-	HppAssert(false, "Removing of child Widgets not implemented yet!");
 }
 
 void AreaWithMenubar::addMenu(Menu* menu)
@@ -31,11 +30,12 @@ void AreaWithMenubar::addMenu(Menu* menu)
 void AreaWithMenubar::setContent(Containerwidget* widget)
 {
 	if (content) {
-		HppAssert(false, "Removing of child Widgets not implemented yet!");
+		removeChild(content);
 	}
 	content = widget;
 	if (content) {
 		addChild(content);
+		moveWidgetBack(content);
 	}
 	markSizeChanged();
 }
@@ -84,7 +84,7 @@ void AreaWithMenubar::updateWidgetSizesAndPositions(void)
 	Renderer const* rend = getRenderer();
 	if (content && rend) {
 		uint32_t menu_height = rend->getMenubarHeight();
-		positionWidget(content, 0, menu_height, getWidth(), getHeight() - menu_height);
+		positionWidget(content, 0, menu_height, getWidth(), getHeight() - menu_height, true);
 	}
 }
 

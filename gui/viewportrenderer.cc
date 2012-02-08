@@ -3,7 +3,7 @@
 #include "menuitem.h"
 #include "menuseparator.h"
 #include "menu.h"
-#include "menubar.h"
+#include "areawithmenubar.h"
 #include "window.h"
 #include "label.h"
 #include "textinput.h"
@@ -131,9 +131,9 @@ void ViewportRenderer::deinitRendering(void)
 	viewport->deinit2DRendering();
 }
 
-void ViewportRenderer::renderMenubarBackground(int32_t x_origin, int32_t y_origin, Menubar const* menubar)
+void ViewportRenderer::renderMenubarBackground(int32_t x_origin, int32_t y_origin, uint32_t width, AreaWithMenubar const* areawithmenubar)
 {
-	uint32_t width = menubar->getWidth();
+	(void)areawithmenubar;
 
 	uint32_t tex_menubar_width = tex_menubar_bg.getWidth();
 	uint32_t tex_menubar_height = tex_menubar_bg.getHeight();

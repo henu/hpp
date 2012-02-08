@@ -229,7 +229,7 @@ private:
 	virtual uint32_t getHeight(void) const;
 	virtual void initRendering(void);
 	virtual void deinitRendering(void);
-	virtual void renderMenubarBackground(int32_t x_origin, int32_t y_origin, Menubar const* menubar);
+	virtual void renderMenubarBackground(int32_t x_origin, int32_t y_origin, uint32_t width, AreaWithMenubar const* areawithmenubar);
 	virtual void renderMenuLabel(int32_t x_origin, int32_t y_origin, Menu const* menu, UnicodeString const& label, bool mouse_over);
 	virtual void renderMenuseparator(int32_t x_origin, int32_t y_origin, Menuseparator const* menusep);
 	virtual void renderMenuitem(int32_t x_origin, int32_t y_origin, Menuitem const* menuitem, UnicodeString const& label, bool mouse_over);
