@@ -217,12 +217,12 @@ void NCursesRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scroll
 		printChar('^');
 
 		setColors(NC::BLACK, NC::BLACK);
-		for (uint32_t row = 1; row < getHeight() - 1; row ++) {
+		for (uint32_t row = 1; row < scrollbar->getHeight() - 1; row ++) {
 			setCursor(x_origin, y_origin + row);
 			printChar('|');
 		}
 
-		setCursor(x_origin, y_origin + getHeight() - 1);
+		setCursor(x_origin, y_origin + scrollbar->getHeight() - 1);
 		setColors(NC::BLACK, NC::GRAY);
 		printChar('v');
 	}
