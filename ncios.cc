@@ -152,6 +152,15 @@ void NCursesOut::setColors(NC::Color text, NC::Color bg)
 	attron(COLOR_PAIR(color_in_use));
 }
 
+void NCursesOut::setCursorVisible(bool visible)
+{
+	if (visible) {
+		curs_set(1);
+	} else {
+		curs_set(0);
+	}
+}
+
 void NCursesOut::refresh(void)
 {
 	::refresh();

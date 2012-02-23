@@ -85,6 +85,9 @@ public:
 	// Sets colors. You need to ensure that colors are supported
 	void setColors(NC::Color text, NC::Color bg);
 
+	// Sets cursor visibility
+	void setCursorVisible(bool visible);
+
 	// Refreshes screen
 	void refresh(void);
 
