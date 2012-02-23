@@ -123,6 +123,7 @@ bool Engine::mouseEvent(Event const& event)
 bool Engine::keyboardEvent(Event const& event)
 {
 	if (keyboardlistener) {
+		// TODO: Also check if there are global listeners, like CTRL+S, CTRL+X, etc.!
 		if (event.type == Event::KEY_DOWN) {
 			keyboardlistener->onKeyDown(event.key, event.unicode);
 		}
@@ -196,6 +197,11 @@ void Engine::registerKeyboardListener(Widget* widget)
 		keyboardlistener->onKeyboardListeningStop();
 	}
 	keyboardlistener = widget;
+}
+
+bool Engine::amIListeningKeyboard(Widget const* widget) const
+{
+	return keyboardlistener == widget;
 }
 
 void Engine::pushRenderarealimit(int32_t x, int32_t y, uint32_t width, uint32_t height)

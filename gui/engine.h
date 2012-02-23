@@ -61,6 +61,7 @@ private:
 	void registerMouseReleaseListener(Widget* widget, Mousekey::KeycodeFlags flags);
 	void registerMouseMoveListener(Widget* widget, bool listen);
 	void registerKeyboardListener(Widget* widget);
+	bool amIListeningKeyboard(Widget const* widget) const;
 
 	// Called by Renderer
 	inline void sizeOfRendererChanged(void) { updateSizes(); }

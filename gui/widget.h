@@ -116,6 +116,9 @@ protected:
 	void listenKeyboard(void);
 	void stopListeningKeyboard(void);
 
+	// Query functions for listenings
+	bool isListeningKeyboard(void) const;
+
 private:
 
 	typedef std::vector< Widget* > Children;
