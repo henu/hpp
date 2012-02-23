@@ -25,9 +25,11 @@ public:
 	void printString(Hpp::UnicodeString const& str);
 	inline void printString(std::string const& str) { printString(Hpp::UnicodeString(str)); }
 
+	virtual void renderTextCursor(int32_t x_origin, int32_t y_origin);
+
 private:
 
-	// Cursor position
+	// Position of drawing cursor
 	int32_t cursor_col, cursor_row;
 
 	// Renderarea limit
@@ -35,12 +37,22 @@ private:
 	uint32_t limit_x, limit_y;
 	uint32_t limit_w, limit_h;
 
+	bool textcursor_visible;
+	int32_t textcursor_col;
+	int32_t textcursor_row;
+
 	void positionCursorIfAtRenderarea(void);
 
 	void advanceCursor(size_t amount);
 
 	size_t getVisibleLeft(void) const;
 	size_t getHiddenLeft(void) const;
+
+	bool isAtRenderarea(int32_t col, int32_t row) const;
+
+	// Tries to hide textcursor by printing specific amount
+	// of characters from current print cursor.
+	void hideTextCursor(size_t chars);
 
 	// Virtual functions required by superclass Renderer
 	virtual uint32_t getWidth(void) const;

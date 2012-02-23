@@ -36,6 +36,7 @@ void NCursesRenderer::printChar(char c)
 {
 	size_t visible_left = getVisibleLeft();
 	if (visible_left > 0) {
+		hideTextCursor(1);
 		ncout << c << std::flush;
 	}
 	advanceCursor(1);
@@ -48,6 +49,7 @@ void NCursesRenderer::printString(Hpp::UnicodeString const& str)
 		size_t visible_left = getVisibleLeft();
 		if (visible_left > 0) {
 			size_t print_amount = std::min(visible_left, str.size() - ofs);
+			hideTextCursor(print_amount);
 			ncout << str.substr(ofs, print_amount) << std::flush;
 			ofs += print_amount;
 			advanceCursor(print_amount);
@@ -62,13 +64,7 @@ void NCursesRenderer::printString(Hpp::UnicodeString const& str)
 
 void NCursesRenderer::positionCursorIfAtRenderarea(void)
 {
-	if (limit &&
-	    (cursor_col < (int32_t)limit_x || cursor_col >= (int32_t)(limit_x + limit_w) ||
-	     cursor_row < (int32_t)limit_y || cursor_row >= (int32_t)(limit_y + limit_h))) {
-		return;
-	}
-	if (cursor_col < 0 || cursor_col >= (int32_t)ncout.getScreenWidth() ||
-	    cursor_row < 0 || cursor_row >= (int32_t)ncout.getScreenHeight()) {
+	if (!isAtRenderarea(cursor_col, cursor_row)) {
 		return;
 	}
 	ncout.setLoc(cursor_col, cursor_row);
@@ -119,6 +115,29 @@ size_t NCursesRenderer::getHiddenLeft(void) const
 	return (size_t)-1;
 }
 
+bool NCursesRenderer::isAtRenderarea(int32_t col, int32_t row) const
+{
+	if (limit &&
+	    (col < (int32_t)limit_x || col >= (int32_t)(limit_x + limit_w) ||
+	     row < (int32_t)limit_y || row >= (int32_t)(limit_y + limit_h))) {
+		return false;
+	}
+	if (col < 0 || col >= (int32_t)ncout.getScreenWidth() ||
+	    row < 0 || row >= (int32_t)ncout.getScreenHeight()) {
+		return false;
+	}
+	return true;
+}
+
+void NCursesRenderer::hideTextCursor(size_t chars)
+{
+	if (!textcursor_visible) return;
+	if (cursor_row != textcursor_row) return;
+	if (cursor_col > textcursor_col) return;
+	if ((ssize_t)cursor_col + chars <= (ssize_t)textcursor_col) return;
+	textcursor_visible = false;
+}
+
 uint32_t NCursesRenderer::getWidth(void) const
 {
 	return ncout.getScreenWidth();
@@ -131,10 +150,19 @@ uint32_t NCursesRenderer::getHeight(void) const
 
 void NCursesRenderer::initRendering(void)
 {
+	textcursor_visible = false;
 }
 
 void NCursesRenderer::deinitRendering(void)
 {
+	// If textcursor was left visible, then position it
+	if (textcursor_visible) {
+		ncout.setCursorVisible(true);
+		ncout.setLoc(textcursor_col, textcursor_row);
+	} else {
+		ncout.setCursorVisible(false);
+	}
+
 	ncout.refresh();
 }
 
@@ -236,6 +264,15 @@ HppAssert(false, "Not implemented yet!");
 void NCursesRenderer::renderTabs(int32_t x_origin, int32_t y_origin, Tabs const* tabs)
 {
 HppAssert(false, "Not implemented yet!");
+}
+
+void NCursesRenderer::renderTextCursor(int32_t x_origin, int32_t y_origin)
+{
+	if (isAtRenderarea(x_origin, y_origin)) {
+		textcursor_visible = true;
+		textcursor_col = x_origin;
+		textcursor_row = y_origin;
+	}
 }
 
 void NCursesRenderer::setRenderareaLimit(uint32_t x, uint32_t y, uint32_t width, uint32_t height)

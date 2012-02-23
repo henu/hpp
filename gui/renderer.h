@@ -34,6 +34,8 @@ class Renderer
 
 	friend class Engine;
 
+	virtual void renderTextCursor(int32_t x_origin, int32_t y_origin) = 0;
+
 public:
 
 	inline Renderer(void);
@@ -120,6 +122,8 @@ private:
 protected:
 
 	inline void sizeChanged(void);
+
+	inline Engine* getEngine(void) { return engine; }
 
 private:
 
