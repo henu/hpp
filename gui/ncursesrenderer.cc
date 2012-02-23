@@ -229,25 +229,48 @@ HppAssert(false, "Not implemented yet!");
 
 void NCursesRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed, bool slider_pressed)
 {
+	Real slider_size_rel = scrollbar->getSliderSize();
+	Real value = scrollbar->getValue();
+
 	if (horizontal) {
+		// Calculate absolute position and size of slider
+		uint32_t slider_size = (getWidth() - 2) * slider_size_rel + 0.5;
+		uint32_t slider_pos = (getWidth() - 2 - slider_size) * value + 0.5;
+
+		// Render
 		setCursor(x_origin, y_origin);
 		setColors(NC::BLACK, NC::GRAY);
 		printChar('<');
 
-		setColors(NC::BLACK, NC::BLACK);
-		printString(std::string(scrollbar->getWidth() - 2, '-'));
+		setColors(NC::DARK_GRAY, NC::BLACK);
+		printString(std::string(slider_pos, '-'));
+		setColors(NC::BLACK, NC::GRAY);
+		printString(std::string(slider_size, ' '));
+		setColors(NC::DARK_GRAY, NC::BLACK);
+		HppAssert(scrollbar->getWidth() >= 2 + slider_pos + slider_size, "Fail!");
+		printString(std::string(scrollbar->getWidth() - 2 - slider_pos - slider_size, '-'));
 
 		setColors(NC::BLACK, NC::GRAY);
 		printChar('>');
 	} else {
+		// Calculate absolute position and size of slider
+		uint32_t slider_size = (getHeight() - 2) * slider_size_rel + 0.5;
+		uint32_t slider_pos = (getHeight() - 2 - slider_size) * value + 0.5;
+
+		// Render
 		setCursor(x_origin, y_origin);
 		setColors(NC::BLACK, NC::GRAY);
 		printChar('^');
 
-		setColors(NC::BLACK, NC::BLACK);
 		for (uint32_t row = 1; row < scrollbar->getHeight() - 1; row ++) {
 			setCursor(x_origin, y_origin + row);
-			printChar('|');
+			if (row - 1 >= slider_pos && row - 1 < slider_pos + slider_size) {
+				setColors(NC::BLACK, NC::GRAY);
+				printChar(' ');
+			} else {
+				setColors(NC::DARK_GRAY, NC::BLACK);
+				printChar('|');
+			}
 		}
 
 		setCursor(x_origin, y_origin + scrollbar->getHeight() - 1);
