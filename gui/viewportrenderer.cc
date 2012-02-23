@@ -109,6 +109,12 @@ void ViewportRenderer::renderString(UnicodeString const& str, Real fontsize, Vec
 	                  Vector2(spr_x_origin + pos.x + pos_rel.x, viewport->getHeight() - spr_y_origin - fontsize - pos.y - pos_rel.y));
 }
 
+void ViewportRenderer::renderTextCursor(int32_t x_origin, int32_t y_origin)
+{
+	(void)x_origin;
+	(void)y_origin;
+}
+
 uint32_t ViewportRenderer::getWidth(void) const
 {
 	HppAssert(viewport, "Viewport not set!");

@@ -121,6 +121,8 @@ public:
 	void renderSprite(Texture& tex, Vector2 const& pos, Vector2 const& size = Vector2::ZERO);
 	void renderString(UnicodeString const& str, Real fontsize, Vector2 const& pos, Vector2 const& size);
 
+	virtual void renderTextCursor(int32_t x_origin, int32_t y_origin);
+
 private:
 
 	Viewport const* viewport;
