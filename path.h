@@ -323,7 +323,7 @@ HppAssert(false, "Not implemented yet!");
 	#endif
 
 	type = ABS;
-	Parts parts_begin = explode(parts_begin_str, '/');
+	Parts parts_begin = splitString(parts_begin_str, '/');
 	Parts parts_begin_fixed;
 	for (Parts::const_iterator parts_begin_it = parts_begin.begin();
 	     parts_begin_it != parts_begin.end();

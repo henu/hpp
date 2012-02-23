@@ -21,6 +21,7 @@ public:
 	typedef std::string::size_type size_type;
 	static const size_type npos = std::string::npos;
 
+	class const_iterator;
 	class iterator
 	{
 		friend class UnicodeString;
@@ -41,7 +42,8 @@ public:
 		inline iterator operator+=(ssize_t amount);
 		inline iterator operator-=(ssize_t amount);
 		// Arithmetic operations
-		inline size_t operator-(iterator const it);
+		inline size_t operator-(iterator const it) const;
+		inline size_t operator-(const_iterator const it) const;
 		// Dereferencing operators
 		inline UChr& operator*(void) const;
 	private:
@@ -69,7 +71,8 @@ public:
 		inline const_iterator operator+=(ssize_t amount);
 		inline const_iterator operator-=(ssize_t amount);
 		// Arithmetic operations
-		inline size_t operator-(const_iterator const it);
+		inline size_t operator-(const_iterator const it) const;
+		inline size_t operator-(iterator const it) const;
 		// Dereferencing operators
 		inline UChr operator*(void) const;
 	private:
@@ -718,7 +721,12 @@ inline UnicodeString::iterator UnicodeString::iterator::operator-=(ssize_t amoun
 	return *this;
 }
 
-inline size_t UnicodeString::iterator::operator-(UnicodeString::iterator const it)
+inline size_t UnicodeString::iterator::operator-(UnicodeString::iterator const it) const
+{
+	return loc - it.loc;
+}
+
+inline size_t UnicodeString::iterator::operator-(UnicodeString::const_iterator const it) const
 {
 	return loc - it.loc;
 }
@@ -816,7 +824,12 @@ inline UnicodeString::const_iterator UnicodeString::const_iterator::operator-=(s
 	return *this;
 }
 
-inline size_t UnicodeString::const_iterator::operator-(UnicodeString::const_iterator const it)
+inline size_t UnicodeString::const_iterator::operator-(UnicodeString::const_iterator const it) const
+{
+	return loc - it.loc;
+}
+
+inline size_t UnicodeString::const_iterator::operator-(UnicodeString::iterator const it) const
 {
 	return loc - it.loc;
 }

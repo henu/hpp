@@ -31,9 +31,12 @@ inline void toZero(Type* buf, size_t size)
 template< typename Type >
 inline Type clamp(Type min, Type max, Type val);
 
-// Divides ByteV/string to parts using separator character
-inline std::vector< ByteV > explode(ByteV const& v, char separator);
-inline std::vector< std::string > explode(std::string const& str, char separator);
+// Divides ByteV/string to parts using separator character. Last functions do
+// this in parts to save memory. They return true whenever subsearch was found.
+inline std::vector< ByteV > splitString(ByteV const& v, char separator);
+inline std::vector< std::string > splitString(std::string const& str, char separator);
+template < class Type, class IterIt, class IterEnd, class Char >
+inline bool splitStringInParts(Type& result, IterIt& it, IterEnd const& end, Char separator);
 
 // Removes whitespace from beginning and end of string
 inline std::string trim(std::string const& str, std::string ws = " \t\n");
@@ -65,7 +68,7 @@ inline Type clamp(Type min, Type max, Type val)
 	return val;
 }
 
-inline std::vector< ByteV > explode(ByteV const& v, char separator)
+inline std::vector< ByteV > splitString(ByteV const& v, char separator)
 {
 	std::vector< ByteV > result;
 	ByteV::const_iterator part_begin = v.begin();
@@ -86,7 +89,7 @@ inline std::vector< ByteV > explode(ByteV const& v, char separator)
 	return result;
 }
 
-inline std::vector< std::string > explode(std::string const& str, char separator)
+inline std::vector< std::string > splitString(std::string const& str, char separator)
 {
 	std::vector< std::string > result;
 	std::string::const_iterator part_begin = str.begin();
@@ -105,6 +108,30 @@ inline std::vector< std::string > explode(std::string const& str, char separator
 		result.push_back(std::string(part_begin, str.end()));
 	}
 	return result;
+}
+
+template < class Type, class IterIt, class IterEnd, class Char >
+inline bool splitStringInParts(Type& result, IterIt& it, IterEnd const& end, Char separator)
+{
+	result.clear();
+
+	if (it == end) {
+		return false;
+	}
+
+	do {
+		Char c = *it;
+		it ++;
+
+		if (c == separator) {
+			break;
+		}
+
+		result += c;
+
+	} while (it != end);
+
+	return true;
 }
 
 inline std::string trim(std::string const& str, std::string ws)
