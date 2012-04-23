@@ -41,10 +41,13 @@ inline void getCameraDirections(Angle const& yaw, Angle const& pitch, Angle cons
                                 Vector3* down = NULL,
                                 Vector3* left = NULL);
 
-// Calculates FOV from aspect ratio and from another
-// FOV. Aspecratio is calculated width / height.
+// Calculates FOV from aspect ratio/screen size and from
+// another FOV. FOV means angle between opposite viewfrustum
+// planes. Aspectratio is calculated width / height.
 inline Angle calculateFovXFromAspectRatio(Angle const& fov_y, Real aspectratio);
 inline Angle calculateFovYFromAspectRatio(Angle const& fov_x, Real aspectratio);
+inline Angle calculateFovXFromWidthHeight(Angle const& fov_y, Real width, Real height);
+inline Angle calculateFovYFromWidthHeight(Angle const& fov_x, Real width, Real height);
 
 // Returns distance to plane. If point is at the back side of plane, then
 // distance is negative. Note, that distance is measured in length of
@@ -314,6 +317,18 @@ inline Angle calculateFovXFromAspectRatio(Angle const& fov_y, Real aspectratio)
 inline Angle calculateFovYFromAspectRatio(Angle const& fov_x, Real aspectratio)
 {
 	return atan(((fov_x / 2.0).tan() / aspectratio)) * 2.0;
+}
+
+inline Angle calculateFovXFromWidthHeight(Angle const& fov_y, Real width, Real height)
+{
+	HppAssert(height != 0, "Division by zero!");
+	return calculateFovXFromAspectRatio(fov_y, width / height);
+}
+
+inline Angle calculateFovYFromWidthHeight(Angle const& fov_x, Real width, Real height)
+{
+	HppAssert(height != 0, "Division by zero!");
+	return calculateFovYFromAspectRatio(fov_x, width / height);
 }
 
 inline Real distanceToPlane(Vector3 const& plane_pos, Vector3 const& plane_normal, Vector3 const& point)
