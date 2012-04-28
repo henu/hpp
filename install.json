@@ -218,6 +218,18 @@
 				"ncios.cc"
 			],
 			"deps": [ "main" ]
+		},
+
+		"crypto": {
+			"libs": "-lcrypto",
+			"deb_deps": [ "libssl" ],
+			"headers": [
+				"hasher.h",
+				"opensslhasher.h",
+				"sha256hasher.h"
+			],
+			"sources": [ ],
+			"deps": [ "main" ]
 		}
 
 	}

@@ -193,7 +193,7 @@ def clean(sources, libname):
 	os.remove('lib' + libname + '.so')
 
 def test():
-	runCommand('g++ -o /tmp/libhpp_tester test.cc 3dconstants.cc assert.cc')
+	runCommand('g++ -o /tmp/libhpp_tester test.cc 3dconstants.cc assert.cc -lcrypto')
 	runCommand('/tmp/libhpp_tester')
 	os.remove('/tmp/libhpp_tester')
 
