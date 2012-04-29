@@ -62,6 +62,14 @@ public:
 	inline Path operator+(std::string const& add) const;
 	inline Path operator+=(std::string const& add);
 
+	// Comparison operator for sorting. Sorted order is somewhat
+	// arbitrary, at least among unknown, relative and absolute
+	// paths, but its still good for keys to sets and maps.
+	inline bool operator<(Path const& path) const;
+
+	inline bool operator==(Path const& path) const;
+	inline bool operator!=(Path const& path) const;
+
 private:
 
 	enum Type { UNKNOWN,
@@ -199,8 +207,7 @@ inline std::string Path::toString(bool compact) const
 	std::string result;
 	switch (type) {
 	case UNKNOWN:
-		throw Exception("Unable to convert path to string, because path is unknown");
-		break;
+		return "*** unknown ***";
 	case REL:
 		break;
 	case ABS:
@@ -477,6 +484,72 @@ inline Path Path::operator+=(std::string const& add)
 	}
 	parts.back() += add;
 	return *this;
+}
+
+inline bool Path::operator<(Path const& path) const
+{
+	// Unknowns paths are always in front in order
+	if (isUnknown()) return !path.isUnknown();
+	if (path.isUnknown()) return false;
+
+	// Ensure there are only relative or absolute paths left
+	HppAssert((isRelative() || isAbsolute()) && !(isRelative() && isAbsolute()), "Path must be either relative or absolute in this point!");
+	HppAssert((path.isRelative() || path.isAbsolute()) && !(path.isRelative() && path.isAbsolute()), "Path must be either relative or absolute in this point!");
+
+	// Relative paths are always before absolute ones.
+	if (isRelative() && path.isAbsolute()) return true;
+	if (isAbsolute() && path.isRelative()) return false;
+
+	HppAssert(isRelative() == path.isRelative(), "Both paths must be same type!");
+
+	// In case absolute paths are not really absolute, they need
+	// to be converted into absolutes. However, since only one
+	// comparison part is wanted, we have to do some preparations.
+	Path const* cmp1;
+	Path const* cmp2;
+	Path temp1;
+	Path temp2;
+	if (isRelative()) {
+		cmp1 = this;
+		cmp2 = &path;
+	} else {
+		if (type == ABS) {
+			cmp1 = this;
+		} else {
+			temp1 = *this;
+			temp1.convertToAbsolute();
+			cmp1 = &temp1;
+		}
+		if (path.type == ABS) {
+			cmp2 = &path;
+		} else {
+			temp2 = path;
+			temp2.convertToAbsolute();
+			cmp2 = &temp2;
+		}
+	}
+
+	size_t cmp1_parts = cmp1->parts.size();
+	size_t cmp2_parts = cmp2->parts.size();
+	size_t min_parts = std::min(cmp1_parts, cmp2_parts);
+	for (size_t part_id = 0; part_id < min_parts; ++ part_id) {
+		std::string const& cmp1_part = cmp1->parts[part_id];
+		std::string const& cmp2_part = cmp2->parts[part_id];
+		if (cmp1_part < cmp2_part) return true;
+		if (cmp1_part > cmp2_part) return false;
+	}
+	return cmp1_parts < cmp2_parts;
+}
+
+inline bool Path::operator==(Path const& path) const
+{
+// TODO/Optimize: Make real implementation!
+	return !(*this < path) && !(path < *this);
+}
+
+inline bool Path::operator!=(Path const& path) const
+{
+	return !(*this == path);
 }
 
 inline void ensurePathExists(Path const& p)

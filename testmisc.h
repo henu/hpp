@@ -5,6 +5,7 @@
 #include "misc.h"
 #include "assert.h"
 #include "cast.h"
+#include "path.h"
 
 namespace Hpp
 {
@@ -54,6 +55,34 @@ inline void testMisc(void)
 		HppAssert(byteVToHexV(hasher_result1) == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "SHA-256 hasher has failed!");
 		HppAssert(byteVToHexV(hasher_result2) == "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592", "SHA-256 hasher has failed!");
 		HppAssert(byteVToHexV(hasher_result3) == "ef537f25c895bfa782526529a9b63d97aa631564d5d789c2b765448c8635fb6c", "SHA-256 hasher has failed!");
+	}
+
+	// Test path sorting
+	{
+		std::vector< Path > paths;
+		paths.push_back(Path::getUnknown());
+		paths.push_back(Path::getUnknown());
+		paths.push_back(Path::getHome() / "test" / "foobar");
+		paths.push_back(Path::getHome() / "omg");
+		paths.push_back(Path::getConfig() / "123" / "abc");
+		paths.push_back(Path::getConfig() / "zomg");
+		paths.push_back(Path("/abs/test"));
+		paths.push_back(Path("/zzz/xxx/yyy"));
+		paths.push_back(Path("/abs/abs"));
+		paths.push_back(Path("/zzz/xxx/yyy/aaa"));
+		paths.push_back(Path("rel/test"));
+		paths.push_back(Path("zzz/xxx/yyy"));
+		paths.push_back(Path("rel/test5"));
+		paths.push_back(Path("zzz/xxx/123"));
+
+		std::vector< Path > paths_sorted = paths;
+		std::sort(paths_sorted.begin(), paths_sorted.end());
+
+		for (size_t test = 0; test < 100; ++ test) {
+			std::random_shuffle(paths.begin(), paths.end());
+			std::sort(paths.begin(), paths.end());
+			HppAssert(paths == paths_sorted, "Unable to sort paths!");
+		}
 	}
 
 }
