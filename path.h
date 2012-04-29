@@ -100,7 +100,9 @@ struct FolderChild
 };
 typedef std::vector< FolderChild > FolderChildren;
 
+// Lists folder contents. Does not return entries "." and "..".
 inline void listFolderChildren(FolderChildren& result, Path const& path);
+
 inline bool compareFolderChildren(FolderChild const& child1, FolderChild const& child2);
 
 
@@ -622,6 +624,10 @@ inline void listFolderChildren(FolderChildren& result, Path const& path)
 		new_child.name = std::string(dir_ent->d_name, dir_ent->d_namlen);
 		#endif
 		new_child.name = convertFromSystemCharsetToUtf8(new_child.name);
+		// Discard . and .. entries
+		if (new_child.name == "." || new_child.name == "..") {
+			continue;
+		}
 		// Get type
 		#ifndef WIN32
 		switch (dir_ent->d_type) {
