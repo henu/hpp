@@ -222,7 +222,7 @@
 
 		"crypto": {
 			"libs": "-lcrypto",
-			"deb_deps": [ "libssl" ],
+			"deb_deps": [ "libssl0.9.8" ],
 			"headers": [
 				"hasher.h",
 				"opensslhasher.h",
