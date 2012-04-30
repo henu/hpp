@@ -3,9 +3,7 @@
 
 #include "exception.h"
 #include "assert.h"
-#ifndef NDEBUG
 #include "thread.h"
-#endif
 
 #ifdef HPP_USE_SDL_MUTEX
 #include <SDL/SDL_thread.h>
@@ -83,10 +81,8 @@ private:
 	#endif
 
 	// Debug stuff
-	#ifndef NDEBUG
 	size_t locked;
 	Thread::Id locked_thread;
-	#endif
 
 };
 
