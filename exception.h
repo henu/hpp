@@ -24,6 +24,18 @@ private:
 
 };
 
+class HostUnavailable : public Exception
+{
+
+public:
+
+	inline HostUnavailable(std::string const& error) : Exception(error) { }
+	inline virtual ~HostUnavailable(void) throw () { }
+
+private:
+
+};
+
 
 inline Exception::Exception(void)
 {
