@@ -234,7 +234,7 @@
 
 		"network": {
 			"libs": "",
-			"deb_deps": [ "" ],
+			"deb_deps": [ ],
 			"headers": [
 				"connectionmanager.h",
 				"tcpconnection.h",
