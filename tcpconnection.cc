@@ -103,6 +103,8 @@ void TCPConnection::setDataReceiver(DataReceiver receiver, void* data)
 	Lock receiver_lock(receiver_mutex);
 	this->receiver = receiver;
 	receiver_data = data;
+	receiver_lock.unlock();
+	reader_cond.broadcast();
 }
 
 uint16_t TCPConnection::getPort(void) const
@@ -399,8 +401,8 @@ void TCPConnection::notifierThread(void* conn_raw)
 	Mutex& inbuffer_rcv_mutex = conn.inbuffer_rcv_mutex;
 	bool& connected = conn.connected;
 	Mutex& connected_mutex = conn.connected_mutex;
-	DataReceiver receiver = conn.receiver;
-	void* receiver_data = conn.receiver_data;
+	DataReceiver& receiver = conn.receiver;
+	void*& receiver_data = conn.receiver_data;
 	Mutex& receiver_mutex = conn.receiver_mutex;
 
 	// Run thread
@@ -436,6 +438,16 @@ void TCPConnection::notifierThread(void* conn_raw)
 		Lock receiver_lock(receiver_mutex);
 		if (receiver) {
 			receiver(&conn, receiver_data);
+		}
+		// If there was no receiver set, then wait for it to appear set
+		else {
+			reader_cond.wait(receiver_mutex);
+			// Check if connection was closed
+			connected_lock.relock();
+			if (!connected) {
+				return;
+			}
+			connected_lock.unlock();
 		}
 
 	} while (true);
