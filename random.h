@@ -1,5 +1,5 @@
-#ifndef RAND_H
-#define RAND_H
+#ifndef RANDOM_H
+#define RANDOM_H
 
 #include "assert.h"
 #include "vector2.h"
@@ -14,6 +14,9 @@ namespace Hpp
 // Returns a value in range [min, max)
 inline Real random(Real min, Real max);
 
+// Returns a value in range [min, max]
+inline ssize_t randomInt(ssize_t min, ssize_t max);
+
 inline Vector2 randomVector2(Real max_radius);
 inline Vector3 randomVector3(Real max_radius);
 
@@ -21,6 +24,12 @@ inline Real random(Real min, Real max)
 {
 	HppAssert(max >= min, "Maximum cannot be smaller than minimum");
 	return min + ((max - min) * (Real)rand() / (Real)RAND_MAX);
+}
+
+inline ssize_t randomInt(ssize_t min, ssize_t max)
+{
+	ssize_t range = max - min + 1;
+	return min + (rand() % range);
 }
 
 inline Vector2 randomVector2(Real max_radius)

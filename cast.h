@@ -18,29 +18,30 @@ namespace Hpp
 inline std::string	byteVToDStr(ByteV const& v);
 inline std::string	byteVToHexV(ByteV const& bytev);
 inline std::string	byteVToStr(ByteV const& v);
-inline float		cStrToFloat(uint8_t const* c_str);
-inline int32_t		cStrToInt(uint8_t const* c_str, uint8_t bytesize);
-inline int16_t		cStrToInt16(uint8_t const* c_str);
-inline int32_t		cStrToInt32(uint8_t const* c_str);
-inline uint32_t		cStrToUInt(uint8_t const* c_str, uint8_t bytesize);
-inline uint16_t		cStrToUInt16(uint8_t const* c_str);
-inline uint32_t		cStrToUInt32(uint8_t const* c_str);
-inline float		cStrToFloat(char const* c_str) { return cStrToFloat((uint8_t const*)c_str); }
-inline int16_t		cStrToInt16(char const* c_str) { return cStrToInt16((uint8_t const*)c_str); }
-inline int32_t		cStrToInt32(char const* c_str) { return cStrToInt32((uint8_t const*)c_str); }
-inline uint16_t		cStrToUInt16(char const* c_str) { return cStrToUInt16((uint8_t const*)c_str); }
-inline uint32_t		cStrToUInt32(char const* c_str) { return cStrToUInt32((uint8_t const*)c_str); }
+inline float		cStrToFloat(uint8_t const* c_str, bool bigendian = true);
+inline ssize_t		cStrToInt(uint8_t const* c_str, uint8_t bytesize, bool bigendian = true);
+inline int16_t		cStrToInt16(uint8_t const* c_str, bool bigendian = true);
+inline int32_t		cStrToInt32(uint8_t const* c_str, bool bigendian = true);
+inline size_t		cStrToUInt(uint8_t const* c_str, uint8_t bytesize, bool bigendian = true);
+inline uint16_t		cStrToUInt16(uint8_t const* c_str, bool bigendian = true);
+inline uint32_t		cStrToUInt32(uint8_t const* c_str, bool bigendian = true);
+inline float		cStrToFloat(char const* c_str, bool bigendian = true) { return cStrToFloat((uint8_t const*)c_str, bigendian); }
+inline int16_t		cStrToInt16(char const* c_str, bool bigendian = true) { return cStrToInt16((uint8_t const*)c_str, bigendian); }
+inline int32_t		cStrToInt32(char const* c_str, bool bigendian = true) { return cStrToInt32((uint8_t const*)c_str, bigendian); }
+inline uint16_t		cStrToUInt16(char const* c_str, bool bigendian = true) { return cStrToUInt16((uint8_t const*)c_str, bigendian); }
+inline uint32_t		cStrToUInt32(char const* c_str, bool bigendian = true) { return cStrToUInt32((uint8_t const*)c_str, bigendian); }
 inline ByteV		dStrToByteV(std::string const& dstr);
-inline ByteV		floatToByteV(float f);
-inline void		floatToCStr(float f, uint8_t* c_str);
+inline ByteV		floatToByteV(float f, bool bigendian = true);
+inline void		floatToCStr(float f, uint8_t* c_str, bool bigendian = true);
 inline std::string	floatToStr(float f);
 inline ByteV		hexVToByteV(std::string const& hexv);
-inline ByteV		int16ToByteV(int16_t i);
-inline void		int16ToCStr(int16_t i, uint8_t* c_str);
-inline ByteV		int32ToByteV(int32_t i);
-inline void		int32ToCStr(int32_t i, uint8_t* c_str);
-inline ByteV		matrix3ToBytes(Matrix3 const& m);
-inline ByteV		matrix4ToBytes(Matrix4 const& m);
+inline ByteV		intToByteV(ssize_t i, uint8_t bytesize, bool bigendian = true);
+inline ByteV		int16ToByteV(int16_t i, bool bigendian = true);
+inline void		int16ToCStr(int16_t i, uint8_t* c_str, bool bigendian = true);
+inline ByteV		int32ToByteV(int32_t i, bool bigendian = true);
+inline void		int32ToCStr(int32_t i, uint8_t* c_str, bool bigendian = true);
+inline ByteV		matrix3ToBytes(Matrix3 const& m, bool bigendian = true);
+inline ByteV		matrix4ToBytes(Matrix4 const& m, bool bigendian = true);
 inline std::string 	sizeToStr(size_t i);
 inline std::string	ssizeToStr(ssize_t i);
 inline float		strToFloat(std::string const& str);
@@ -48,12 +49,12 @@ inline Vector2		strToVector2(std::string const& str);
 inline Vector3		strToVector3(std::string const& str);
 inline size_t		strToSize(std::string const& str);
 inline ssize_t		strToSSize(std::string const& str);
-inline ByteV		uInt16ToByteV(uint16_t i);
-inline void		uInt16ToCStr(uint16_t i, uint8_t* c_str);
-inline ByteV		uInt32ToByteV(uint32_t i);
-inline void		uInt32ToCStr(uint32_t i, uint8_t* c_str);
-inline ByteV		uIntToByteV(uint32_t i, uint8_t bytesize);
-inline void		uIntToCStr(uint32_t i, uint8_t* c_str, uint8_t bytesize);
+inline ByteV		uInt16ToByteV(uint16_t i, bool bigendian = true);
+inline void		uInt16ToCStr(uint16_t i, uint8_t* c_str, bool bigendian = true);
+inline ByteV		uInt32ToByteV(uint32_t i, bool bigendian = true);
+inline void		uInt32ToCStr(uint32_t i, uint8_t* c_str, bool bigendian = true);
+inline ByteV		uIntToByteV(size_t i, uint8_t bytesize, bool bigendian = true);
+inline void		uIntToCStr(size_t i, uint8_t* c_str, uint8_t bytesize, bool bigendian = true);
 
 inline std::string byteVToDStr(ByteV const& v)
 {
@@ -125,80 +126,88 @@ inline std::string byteVToStr(ByteV const& v)
 	return std::string(v.begin(), v.end());
 }
 
-inline float cStrToFloat(uint8_t const* c_str)
+inline float cStrToFloat(uint8_t const* c_str, bool bigendian)
 {
 // TODO: Fix this! Now this works only system that has 32bit floats and versions between different architectures may not be compatible even if they both have 32bit floats
 // TODO: The next thing may put debuggers crazy, as the f might be consider uninitialized
 	float f;
 	uint8_t* f_cp = (uint8_t*)(&f);
-	f_cp[0] = c_str[3];
-	f_cp[1] = c_str[2];
-	f_cp[2] = c_str[1];
-	f_cp[3] = c_str[0];
+	if (bigendian) {
+		f_cp[0] = c_str[3];
+		f_cp[1] = c_str[2];
+		f_cp[2] = c_str[1];
+		f_cp[3] = c_str[0];
+	} else {
+		f_cp[0] = c_str[0];
+		f_cp[1] = c_str[1];
+		f_cp[2] = c_str[2];
+		f_cp[3] = c_str[3];
+	}
 	return f;
 }
 
-inline int32_t cStrToInt(uint8_t const* c_str, uint8_t bytesize)
+inline ssize_t cStrToInt(uint8_t const* c_str, uint8_t bytesize, bool bigendian)
 {
-	int32_t i = 0;
-	for (uint8_t byte = 0; byte < bytesize - 1; byte ++) {
-		i += c_str[byte] << (8 * byte);
+	ssize_t i_max_plus_1 = (size_t)1 << (bytesize*8-1);
+	ssize_t i_u = cStrToUInt(c_str, bytesize, bigendian);
+	if (i_u >= i_max_plus_1) {
+		i_u -= i_max_plus_1 * 2;
 	}
-	i += (c_str[bytesize - 1] & 0x7F) << (8 * (bytesize - 1));
-	if (c_str[bytesize - 1] & 0x80) {
-		i = -i;
-	}
-	return i;
+	return i_u;
 }
 
-inline int16_t cStrToInt16(uint8_t const* c_str)
+inline int16_t cStrToInt16(uint8_t const* c_str, bool bigendian)
 {
-	int16_t i = 0;
-	i += c_str[0] << 0;
-	i += (c_str[1] & 0x7F) << 8;
-	if (c_str[1] & 0x80) {
-		i = -i;
-	}
-	return i;
+	return (int16_t)cStrToUInt16(c_str, bigendian);
 }
 
-inline int32_t cStrToInt32(uint8_t const* c_str)
+inline int32_t cStrToInt32(uint8_t const* c_str, bool bigendian)
 {
-	int32_t i = 0;
-	i += c_str[0] << 0;
-	i += c_str[1] << 8;
-	i += c_str[2] << 16;
-	i += (c_str[3] & 0x7F) << 24;
-	if (c_str[3] & 0x80) {
-		i = -i;
-	}
-	return i;
+	return (int32_t)cStrToUInt32(c_str, bigendian);
 }
 
-inline uint32_t cStrToUInt(uint8_t const* c_str, uint8_t bytesize)
+inline size_t cStrToUInt(uint8_t const* c_str, uint8_t bytesize, bool bigendian)
 {
 	uint32_t i = 0;
-	for (uint8_t byte = 0; byte < bytesize; byte ++) {
-		i += c_str[byte] << (8 * byte);
+	if (bigendian) {
+		for (uint8_t byte = 0; byte < bytesize; byte ++) {
+			i += (size_t)c_str[bytesize - 1 -byte] << (8 * byte);
+		}
+	} else {
+		for (uint8_t byte = 0; byte < bytesize; byte ++) {
+			i += (size_t)c_str[byte] << (8 * byte);
+		}
 	}
 	return i;
 }
 
-inline uint16_t cStrToUInt16(uint8_t const* c_str)
+inline uint16_t cStrToUInt16(uint8_t const* c_str, bool bigendian)
 {
 	uint16_t i = 0;
-	i += c_str[0] << 0;
-	i += c_str[1] << 8;
+	if (bigendian) {
+		i += c_str[1] << 0;
+		i += c_str[0] << 8;
+	} else {
+		i += c_str[0] << 0;
+		i += c_str[1] << 8;
+	}
 	return i;
 }
 
-inline uint32_t cStrToUInt32(uint8_t const* c_str)
+inline uint32_t cStrToUInt32(uint8_t const* c_str, bool bigendian)
 {
 	uint32_t i = 0;
-	i += c_str[0] << 0;
-	i += c_str[1] << 8;
-	i += c_str[2] << 16;
-	i += c_str[3] << 24;
+	if (bigendian) {
+		i += c_str[3] << 0;
+		i += c_str[2] << 8;
+		i += c_str[1] << 16;
+		i += c_str[0] << 24;
+	} else {
+		i += c_str[0] << 0;
+		i += c_str[1] << 8;
+		i += c_str[2] << 16;
+		i += c_str[3] << 24;
+	}
 	return i;
 }
 
@@ -243,27 +252,41 @@ inline ByteV dStrToByteV(std::string const& dstr)
 	return result;
 }
 
-inline ByteV floatToByteV(float f)
+inline ByteV floatToByteV(float f, bool bigendian)
 {
 // TODO: Fix this! Now this works only system that has 32bit floats and versions between different architectures may not be compatible even if they both have 32bit floats
 	uint8_t* f_cp = (uint8_t*)(&f);
 	ByteV result;
 	result.reserve(4);
-	result.push_back(f_cp[3]);
-	result.push_back(f_cp[2]);
-	result.push_back(f_cp[1]);
-	result.push_back(f_cp[0]);
+	if (bigendian) {
+		result.push_back(f_cp[3]);
+		result.push_back(f_cp[2]);
+		result.push_back(f_cp[1]);
+		result.push_back(f_cp[0]);
+	} else {
+		result.push_back(f_cp[0]);
+		result.push_back(f_cp[1]);
+		result.push_back(f_cp[2]);
+		result.push_back(f_cp[3]);
+	}
 	return result;
 }
 
-inline void floatToCStr(float f, uint8_t* c_str)
+inline void floatToCStr(float f, uint8_t* c_str, bool bigendian)
 {
 // TODO: Fix this! Now this works only system that has 32bit floats and versions between different architectures may not be compatible even if they both have 32bit floats
 	uint8_t* f_cp = (uint8_t*)(&f);
-	c_str[0] = f_cp[3];
-	c_str[1] = f_cp[2];
-	c_str[2] = f_cp[1];
-	c_str[3] = f_cp[0];
+	if (bigendian) {
+		c_str[0] = f_cp[3];
+		c_str[1] = f_cp[2];
+		c_str[2] = f_cp[1];
+		c_str[3] = f_cp[0];
+	} else {
+		c_str[0] = f_cp[0];
+		c_str[1] = f_cp[1];
+		c_str[2] = f_cp[2];
+		c_str[3] = f_cp[3];
+	}
 }
 
 inline std::string floatToStr(float f)
@@ -315,84 +338,52 @@ inline ByteV hexVToByteV(std::string const& hexv)
 	return result;
 }
 
-inline ByteV int16ToByteV(int16_t i)
+inline ByteV intToByteV(ssize_t i, uint8_t bytesize, bool bigendian)
 {
-	uint16_t ui;
-	bool negative = i < 0;
-	if (negative) {
-		ui = -i;
+	ssize_t i_max_plus_1 = (ssize_t)1 << (bytesize*8-1);
+	if (i < i_max_plus_1) {
+		return uIntToByteV(i, bytesize, bigendian);
 	} else {
-		ui = i;
+		return uIntToByteV(i_max_plus_1 + i_max_plus_1 - i, bytesize, bigendian);
 	}
-	ByteV result;
-	result.reserve(2);
-	result.push_back(static_cast< uint8_t >(ui >> 0));
-	result.push_back(static_cast< uint8_t >(((ui >> 8) & 0x7F) + (negative << 7)));
-	return result;
 }
 
-inline void int16ToCStr(int16_t i, uint8_t* c_str)
+inline ByteV int16ToByteV(int16_t i, bool bigendian)
 {
-	uint16_t ui;
-	bool negative = i < 0;
-	if (negative) {
-		ui = -i;
-	} else {
-		ui = i;
-	}
-	c_str[0] = static_cast< uint8_t >(ui >> 0);
-	c_str[1] = static_cast< uint8_t >(((ui >> 8) & 0x7F) + (negative << 7));
+	return uInt16ToByteV((uint16_t)i, bigendian);
 }
 
-inline ByteV int32ToByteV(int32_t i)
+inline void int16ToCStr(int16_t i, uint8_t* c_str, bool bigendian)
 {
-	uint32_t ui;
-	bool negative = i < 0;
-	if (negative) {
-		ui = -i;
-	} else {
-		ui = i;
-	}
-	ByteV result;
-	result.reserve(4);
-	result.push_back(static_cast< uint8_t >(ui >> 0));
-	result.push_back(static_cast< uint8_t >(ui >> 8));
-	result.push_back(static_cast< uint8_t >(ui >> 16));
-	result.push_back(static_cast< uint8_t >(((ui >> 24) & 0x7F) + (negative << 7)));
-	return result;
+	uInt16ToCStr((uint16_t)i, c_str, bigendian);
 }
 
-inline void int32ToCStr(int32_t i, uint8_t* c_str)
+inline ByteV int32ToByteV(int32_t i, bool bigendian)
 {
-	uint32_t ui;
-	bool negative = i < 0;
-	if (negative) {
-		ui = -i;
-	} else {
-		ui = i;
-	}
-	c_str[0] = static_cast< uint8_t >(ui >> 0);
-	c_str[1] = static_cast< uint8_t >(ui >> 8);
-	c_str[2] = static_cast< uint8_t >(ui >> 16);
-	c_str[3] = static_cast< uint8_t >(((ui >> 24) & 0x7F) + (negative << 7));
+	return uInt32ToByteV((uint32_t)i, bigendian);
 }
 
-inline ByteV matrix3ToBytes(Matrix3 const& m)
+inline void int32ToCStr(int32_t i, uint8_t* c_str, bool bigendian)
+{
+	uInt32ToCStr((uint32_t)i, c_str, bigendian);
+}
+
+inline ByteV matrix3ToBytes(Matrix3 const& m, bool bigendian)
 {
 	ByteV result;
 	result.reserve(4*9);
 	for (uint8_t cell_id = 0; cell_id < 9; cell_id ++) {
-		result += floatToByteV(m.cell(cell_id));
+		result += floatToByteV(m.cell(cell_id), bigendian);
 	}
 	return result;
 }
 
-inline ByteV matrix4ToBytes(Matrix4 const& m)
+inline ByteV matrix4ToBytes(Matrix4 const& m, bool bigendian)
 {
 	ByteV result;
 	result.reserve(4*16);
 	for (uint8_t cell_id = 0; cell_id < 16; cell_id ++) {
-		result += floatToByteV(m.cell(cell_id));
+		result += floatToByteV(m.cell(cell_id), bigendian);
 	}
 	return result;
 }
@@ -477,54 +468,90 @@ inline ssize_t strToSSize(std::string const& str)
 	return atoll(str.c_str());
 }
 
-inline ByteV uInt16ToByteV(uint16_t i)
+inline ByteV uInt16ToByteV(uint16_t i, bool bigendian)
 {
 	ByteV result;
 	result.reserve(2);
-	result.push_back(static_cast< uint8_t >(i >> 0));
-	result.push_back(static_cast< uint8_t >(i >> 8));
-	return result;
-}
-
-inline void uInt16ToCStr(uint16_t i, uint8_t* c_str)
-{
-	c_str[0] = static_cast< uint8_t >(i >> 0);
-	c_str[1] = static_cast< uint8_t >(i >> 8);
-}
-
-inline ByteV uInt32ToByteV(uint32_t i)
-{
-	ByteV result;
-	result.reserve(4);
-	result.push_back(static_cast< uint8_t >(i >> 0));
-	result.push_back(static_cast< uint8_t >(i >> 8));
-	result.push_back(static_cast< uint8_t >(i >> 16));
-	result.push_back(static_cast< uint8_t >(i >> 24));
-	return result;
-}
-
-inline void uInt32ToCStr(uint32_t i, uint8_t* c_str)
-{
-	c_str[0] = static_cast< uint8_t >(i >> 0);
-	c_str[1] = static_cast< uint8_t >(i >> 8);
-	c_str[2] = static_cast< uint8_t >(i >> 16);
-	c_str[3] = static_cast< uint8_t >(i >> 24);
-}
-
-inline ByteV uIntToByteV(uint32_t i, uint8_t bytesize)
-{
-	ByteV result;
-	result.reserve(bytesize);
-	for (uint8_t byte = 0; byte < bytesize; byte ++) {
-		result.push_back(static_cast< uint8_t >(i >> (8 * byte)));
+	if (bigendian) {
+		result.push_back(static_cast< uint8_t >(i >> 8));
+		result.push_back(static_cast< uint8_t >(i >> 0));
+	} else {
+		result.push_back(static_cast< uint8_t >(i >> 0));
+		result.push_back(static_cast< uint8_t >(i >> 8));
 	}
 	return result;
 }
 
-inline void uIntToCStr(uint32_t i, uint8_t* c_str, uint8_t bytesize)
+inline void uInt16ToCStr(uint16_t i, uint8_t* c_str, bool bigendian)
 {
-	for (uint8_t byte = 0; byte < bytesize; byte ++) {
-		c_str[byte] = static_cast< uint8_t >(i >> (8 * byte));
+	if (bigendian) {
+		c_str[1] = static_cast< uint8_t >(i >> 0);
+		c_str[0] = static_cast< uint8_t >(i >> 8);
+	} else {
+		c_str[0] = static_cast< uint8_t >(i >> 0);
+		c_str[1] = static_cast< uint8_t >(i >> 8);
+	}
+}
+
+inline ByteV uInt32ToByteV(uint32_t i, bool bigendian)
+{
+	ByteV result;
+	result.reserve(4);
+	if (bigendian) {
+		result.push_back(static_cast< uint8_t >(i >> 24));
+		result.push_back(static_cast< uint8_t >(i >> 16));
+		result.push_back(static_cast< uint8_t >(i >> 8));
+		result.push_back(static_cast< uint8_t >(i >> 0));
+	} else {
+		result.push_back(static_cast< uint8_t >(i >> 0));
+		result.push_back(static_cast< uint8_t >(i >> 8));
+		result.push_back(static_cast< uint8_t >(i >> 16));
+		result.push_back(static_cast< uint8_t >(i >> 24));
+	}
+	return result;
+}
+
+inline void uInt32ToCStr(uint32_t i, uint8_t* c_str, bool bigendian)
+{
+	if (bigendian) {
+		c_str[3] = static_cast< uint8_t >(i >> 0);
+		c_str[2] = static_cast< uint8_t >(i >> 8);
+		c_str[1] = static_cast< uint8_t >(i >> 16);
+		c_str[0] = static_cast< uint8_t >(i >> 24);
+	} else {
+		c_str[0] = static_cast< uint8_t >(i >> 0);
+		c_str[1] = static_cast< uint8_t >(i >> 8);
+		c_str[2] = static_cast< uint8_t >(i >> 16);
+		c_str[3] = static_cast< uint8_t >(i >> 24);
+	}
+}
+
+inline ByteV uIntToByteV(size_t i, uint8_t bytesize, bool bigendian)
+{
+	ByteV result;
+	result.reserve(bytesize);
+	if (bigendian) {
+		for (uint8_t byte = 0; byte < bytesize; byte ++) {
+			result.push_back(static_cast< uint8_t >(i >> (8 * (bytesize - 1 - byte))));
+		}
+	} else {
+		for (uint8_t byte = 0; byte < bytesize; byte ++) {
+			result.push_back(static_cast< uint8_t >(i >> (8 * byte)));
+		}
+	}
+	return result;
+}
+
+inline void uIntToCStr(size_t i, uint8_t* c_str, uint8_t bytesize, bool bigendian)
+{
+	if (bigendian) {
+		for (uint8_t byte = 0; byte < bytesize; byte ++) {
+			c_str[byte] = static_cast< uint8_t >(i >> (8 * (bytesize - 1 - byte)));
+		}
+	} else {
+		for (uint8_t byte = 0; byte < bytesize; byte ++) {
+			c_str[byte] = static_cast< uint8_t >(i >> (8 * byte));
+		}
 	}
 }
 
