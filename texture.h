@@ -352,38 +352,31 @@ HppAssert(!tempdata, "Adding pixeldata with tempdata not implemented yet!");
 	HppAssert(y_offset + height <= tex_height, "Overflow over image borders is not allowed (for now)!");
 
 	// Get BPP and format
-	GLint internalformat;
 	GLenum gl_format;
 	uint8_t bytes_per_pixel;
 	#ifndef NDEBUG
-	internalformat = 0;
 	gl_format = 0;
 	bytes_per_pixel = 0;
 	#endif
 	switch (format) {
 	case RGB:
 		bytes_per_pixel = 3;
-		internalformat = GL_RGB;
 		gl_format = GL_RGB;
 		break;
 	case RGBA:
 		bytes_per_pixel = 4;
-		internalformat = GL_RGBA;
 		gl_format = GL_RGBA;
 		break;
 	case GRAYSCALE:
 		bytes_per_pixel = 1;
-		internalformat = GL_LUMINANCE;
 		gl_format = GL_LUMINANCE;
 		break;
 	case GRAYSCALE_ALPHA:
 		bytes_per_pixel = 2;
-		internalformat = GL_LUMINANCE_ALPHA;
 		gl_format = GL_LUMINANCE_ALPHA;
 		break;
 	case ALPHA:
 		bytes_per_pixel = 1;
-		internalformat = GL_ALPHA;
 		gl_format = GL_ALPHA;
 		break;
 	default:
@@ -483,32 +476,6 @@ inline void Texture::resizePixeldata(Pixeldata& pdata, size_t new_width, size_t 
 
 inline Texture::Pixeldata Texture::load(Path const& path, ByteV const& data, bool load_from_data, Pixelformat format, uint32_t flags)
 {
-	// Read flags
-	bool force_no_alpha = flags & REMOVE_ALPHA;
-	bool force_alpha = flags & FORCE_ALPHA;
-	bool force_grayscale = flags & FORCE_GRAYSCALE;
-	switch (format) {
-	case RGB:
-		force_no_alpha = true;
-		break;
-	case RGBA:
-		force_alpha = true;
-		break;
-	case GRAYSCALE:
-		force_grayscale = true;
-		break;
-	case GRAYSCALE_ALPHA:
-		force_grayscale = true;
-		force_alpha = true;
-		break;
-	case ALPHA:
-		force_grayscale = false;
-		force_alpha = false;
-		force_no_alpha = false;
-		break;
-	case DEFAULT:
-		break;
-	}
 	GLint min_filter = GL_LINEAR_MIPMAP_LINEAR;
 	if (flags & NEAREST) {
 		min_filter = GL_NEAREST;

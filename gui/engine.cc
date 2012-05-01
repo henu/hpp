@@ -255,9 +255,8 @@ void Engine::popRenderarealimit(void)
 
 void Engine::checkForNewMouseOver(void)
 {
-	Widget* widget_under_mouse = NULL;
 	if (content) {
-		widget_under_mouse = content->mouseOverRecursive(0, 0, mouse_lastpos_x, mouse_lastpos_y);
+		mouseover_widget = content->mouseOverRecursive(0, 0, mouse_lastpos_x, mouse_lastpos_y);
 	}
 }
 

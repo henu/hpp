@@ -99,7 +99,6 @@ void VboManager::unregisterVBONeeder(void const* buf, GLuint* vbo_id)
 	Lock vbos_lock(instance.vbos_mutex);
 	VBOs::iterator vbos_find = instance.vbos.find(buf);
 	HppAssert(vbos_find != instance.vbos.end(), "Buffer does not exist!");
-	VBONeeders::iterator needers_find = vbos_find->second.needers.find(vbo_id);
 // TODO: Is it good idea to let needer not exist?
 	vbos_find->second.needers.erase(vbo_id);
 }
