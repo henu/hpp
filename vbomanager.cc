@@ -10,25 +10,23 @@
 namespace Hpp
 {
 
-VboManager VboManager::instance;
-
 void VboManager::addVBOJob(GLenum target, void const* buf, size_t buf_len)
 {
-	Lock vbos_lock(instance.vbos_mutex);
-	HppAssert(instance.vbos.find(buf) == instance.vbos.end(), "That VBO already exists!");
+	Lock vbos_lock(vbos_mutex);
+	HppAssert(vbos.find(buf) == vbos.end(), "That VBO already exists!");
 	VBO new_vbo;
 	new_vbo.buf_len = buf_len;
 	new_vbo.target = target;
 	new_vbo.id = 0;
-	instance.vbos[buf] = new_vbo;
+	vbos[buf] = new_vbo;
 }
 
 GLsizei VboManager::getVBO(void const* buf, GLuint* caller_vbo_id)
 {
 	HppAssert(Display::isThisRenderingThread(), "VboManager::getVBO may be only called from OpenGL thread!");
-	Lock vbos_lock(instance.vbos_mutex);
-	VBOs::iterator vbos_find = instance.vbos.find(buf);
-	HppAssert(vbos_find != instance.vbos.end(), "VBO not found!");
+	Lock vbos_lock(vbos_mutex);
+	VBOs::iterator vbos_find = vbos.find(buf);
+	HppAssert(vbos_find != vbos.end(), "VBO not found!");
 	VBO& vbo = vbos_find->second;
 	if (vbo.id == 0) {
 		GlSystem::GenBuffers(1, &vbo.id);
@@ -63,26 +61,26 @@ GLsizei VboManager::getVBO(void const* buf, GLuint* caller_vbo_id)
 
 void VboManager::releaseVBO(void const* buf, GLuint id)
 {
-	Lock vbos_lock(instance.vbos_mutex);
+	Lock vbos_lock(vbos_mutex);
 	// First check if this class knows about this buffer
-	VBOs::iterator vbos_find = instance.vbos.find(buf);
-	if (vbos_find != instance.vbos.end()) {
+	VBOs::iterator vbos_find = vbos.find(buf);
+	if (vbos_find != vbos.end()) {
 		// If it's zero, set it anyway. It means that VBO is not allocated yet!
 		id = vbos_find->second.id;
 		HppAssert(vbos_find->second.needers.empty(), "There are still needers of VBO that is being released!");
-		instance.vbos.erase(vbos_find);
+		vbos.erase(vbos_find);
 	}
 	if (id != 0) {
-		HppAssert(std::find(instance.vbos_release.begin(), instance.vbos_release.end(), id) == instance.vbos_release.end(), "This VBO is already being marked as released!");
-		instance.vbos_release.push_back(id);
+		HppAssert(std::find(vbos_release.begin(), vbos_release.end(), id) == vbos_release.end(), "This VBO is already being marked as released!");
+		vbos_release.push_back(id);
 	}
 }
 
 void VboManager::registerVBONeeder(void const* buf, GLuint* vbo_id, RendbufEnums::VBOState* vbo_state)
 {
-	Lock vbos_lock(instance.vbos_mutex);
-	VBOs::iterator vbos_find = instance.vbos.find(buf);
-	HppAssert(vbos_find != instance.vbos.end(), "Try to register buffer that does not exist!");
+	Lock vbos_lock(vbos_mutex);
+	VBOs::iterator vbos_find = vbos.find(buf);
+	HppAssert(vbos_find != vbos.end(), "Try to register buffer that does not exist!");
 	// First check if this VBO is already got
 	if (vbos_find->second.id != 0) {
 		*vbo_id = vbos_find->second.id;
@@ -96,9 +94,9 @@ void VboManager::registerVBONeeder(void const* buf, GLuint* vbo_id, RendbufEnums
 
 void VboManager::unregisterVBONeeder(void const* buf, GLuint* vbo_id)
 {
-	Lock vbos_lock(instance.vbos_mutex);
-	VBOs::iterator vbos_find = instance.vbos.find(buf);
-	HppAssert(vbos_find != instance.vbos.end(), "Buffer does not exist!");
+	Lock vbos_lock(vbos_mutex);
+	VBOs::iterator vbos_find = vbos.find(buf);
+	HppAssert(vbos_find != vbos.end(), "Buffer does not exist!");
 // TODO: Is it good idea to let needer not exist?
 	vbos_find->second.needers.erase(vbo_id);
 }
@@ -109,16 +107,16 @@ VboManager::VboManager(void)
 
 VboManager::~VboManager(void)
 {
-	Lock vbos_lock(instance.vbos_mutex);
-	HppAssert(instance.vbos_release.empty(), "There are unreleased VBOs!");
+	Lock vbos_lock(vbos_mutex);
+	HppAssert(vbos_release.empty(), "There are unreleased VBOs!");
 }
 
 void VboManager::cleanReleasableVbos(void)
 {
-	Lock vbos_lock(instance.vbos_mutex);
-	if (!instance.vbos_release.empty()) {
-		GlSystem::DeleteBuffers(instance.vbos_release.size(), &instance.vbos_release[0]);
-		instance.vbos_release.clear();
+	Lock vbos_lock(vbos_mutex);
+	if (!vbos_release.empty()) {
+		GlSystem::DeleteBuffers(vbos_release.size(), &vbos_release[0]);
+		vbos_release.clear();
 	}
 }
 

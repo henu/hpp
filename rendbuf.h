@@ -53,7 +53,7 @@ public:
 		#endif
 		// If vbo is not yet got, then ask it now
 		if (vbo == RendbufEnums::VBO_NOT_READY) {
-			VboManager::registerVBONeeder(buf, &vbo_id, &vbo);
+			Display::getVboManager()->registerVBONeeder(buf, &vbo_id, &vbo);
 		}
 	}
 	inline ~Rendbuf(void) {
@@ -65,7 +65,7 @@ public:
 				// got, then we need to unregister ourself from
 				// there.
 				if (vbo == RendbufEnums::VBO_NOT_READY) {
-					VboManager::unregisterVBONeeder(buf, &vbo_id);
+					Display::getVboManager()->unregisterVBONeeder(buf, &vbo_id);
 				}
 				// Ask display to release VBO. If it knows
 				// about this VBO, it can find it by using
@@ -74,12 +74,12 @@ public:
 				// case may happen if Rendbuf is converted to
 				// VBO in OpenGL thread, but is released in
 				// another thread.
-				VboManager::releaseVBO(buf, vbo_id);
+				Display::getVboManager()->releaseVBO(buf, vbo_id);
 			} else {
 				GlSystem::DeleteBuffers(1, &vbo_id);
 			}
 		} else if (vbo == RendbufEnums::VBO_NOT_READY) {
-			VboManager::unregisterVBONeeder(buf, &vbo_id);
+			Display::getVboManager()->unregisterVBONeeder(buf, &vbo_id);
 		}
 		if (autorelease && res > 0) {
 			HppStopWatchingMem(buf);
@@ -99,7 +99,7 @@ public:
 				// got, then we need to unregister ourself from
 				// there.
 				if (vbo == RendbufEnums::VBO_NOT_READY) {
-					VboManager::unregisterVBONeeder(buf, &vbo_id);
+					Display::getVboManager()->unregisterVBONeeder(buf, &vbo_id);
 				}
 				// Ask display to release VBO. If it knows
 				// about this VBO, it can find it by using
@@ -108,12 +108,12 @@ public:
 				// case may happen if Rendbuf is converted to
 				// VBO in OpenGL thread, but is released in
 				// another thread.
-				VboManager::releaseVBO(buf, vbo_id);
+				Display::getVboManager()->releaseVBO(buf, vbo_id);
 			} else {
 				GlSystem::DeleteBuffers(1, &vbo_id);
 			}
 		} else if (vbo == RendbufEnums::VBO_NOT_READY) {
-			VboManager::unregisterVBONeeder(buf, &vbo_id);
+			Display::getVboManager()->unregisterVBONeeder(buf, &vbo_id);
 		}
 		if (autorelease && res > 0) {
 			HppStopWatchingMem(buf);
@@ -134,7 +134,7 @@ public:
 		vbo_id = autob.vbo_id;
 		// If vbo is not yet got, then ask it now
 		if (vbo == RendbufEnums::VBO_NOT_READY) {
-			VboManager::registerVBONeeder(buf, &vbo_id, &vbo);
+			Display::getVboManager()->registerVBONeeder(buf, &vbo_id, &vbo);
 		}
 		return *this;
 	}
@@ -158,7 +158,7 @@ public:
 			    vbo == RendbufEnums::VBO_NOT_READY ||
 			    vbo == RendbufEnums::VBO_READY_FROM_MANAGER) {
 				if (vbo == RendbufEnums::VBO_NOT_READY) {
-					VboManager::unregisterVBONeeder(buf, &vbo_id);
+					Display::getVboManager()->unregisterVBONeeder(buf, &vbo_id);
 				}
 				// Ask display to release VBO. If it knows
 				// about this VBO, it can find it by using
@@ -167,7 +167,7 @@ public:
 				// case may happen if Rendbuf is converted to
 				// VBO in OpenGL thread, but is released in
 				// another thread.
-				VboManager::releaseVBO(buf, vbo_id);
+				Display::getVboManager()->releaseVBO(buf, vbo_id);
 			} else {
 				GlSystem::DeleteBuffers(1, &vbo_id);
 			}
@@ -351,12 +351,12 @@ public:
 				// Because we are in wrong thread, we need to
 				// ask for a manager class to do the loading
 				// job for us.
-				VboManager::addVBOJob(type, buf, sizeof(Type) * items);
+				Display::getVboManager()->addVBOJob(type, buf, sizeof(Type) * items);
 				vbo = RendbufEnums::VBO_NOT_READY;
 				// We also need to register this class as a
 				// needer of vbo_id
 				vbo_id = 0;
-				VboManager::registerVBONeeder(buf, &vbo_id, &vbo);
+				Display::getVboManager()->registerVBONeeder(buf, &vbo_id, &vbo);
 			}
 		}
 	}
@@ -415,7 +415,7 @@ public:
 		} else {
 			#ifndef ELIBGL_NOGRAPHICS
 			if (vbo == RendbufEnums::VBO_NOT_READY) {
-				vbo_id = VboManager::getVBO(buf, &vbo_id);
+				vbo_id = Display::getVboManager()->getVBO(buf, &vbo_id);
 				vbo = RendbufEnums::VBO_READY_FROM_MANAGER;
 			}
 			GlSystem::BindBuffer(GL_ARRAY_BUFFER_ARB, vbo_id);
@@ -484,7 +484,7 @@ public:
 		} else {
 			#ifndef ELIBGL_NOGRAPHICS
 			if (vbo == RendbufEnums::VBO_NOT_READY) {
-				vbo_id = VboManager::getVBO(buf, &vbo_id);
+				vbo_id = Display::getVboManager()->getVBO(buf, &vbo_id);
 				vbo = RendbufEnums::VBO_READY_FROM_MANAGER;
 			}
 			GlSystem::BindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, vbo_id);

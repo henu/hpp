@@ -1,6 +1,7 @@
 #ifndef HPP_DISPLAY_H
 #define HPP_DISPLAY_H
 
+#include "vbomanager.h"
 #include "inc_gl.h"
 #include "image.h"
 #include "sdlhandler.h"
@@ -80,6 +81,9 @@ public:
 
 	static Videorecorder* startRecordingVideo(Real fps, Recordingmethod rmethod);
 
+	// This should be called only by Rendbuf
+	inline static VboManager* getVboManager(void) { return &(instance.vbomanager); }
+
 private:
 
 	// ----------------------------------------
@@ -119,6 +123,9 @@ private:
 
 	// The only instance of this class
 	static Display instance;
+
+	// The only instance of VBOManager
+	VboManager vbomanager;
 
 	// State of display
 	bool opened;

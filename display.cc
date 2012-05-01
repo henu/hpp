@@ -158,7 +158,7 @@ void Display::close(void)
 
 	GenericMaterial::deinitShaders();
 
-	VboManager::cleanReleasableVbos();
+	instance.vbomanager.cleanReleasableVbos();
 
 	SDL_FreeSurface(instance.display);
 	instance.display = NULL;
@@ -176,7 +176,7 @@ void Display::endRendering(void)
 {
 	HppCheckForCorrectThread();
 	SDL_GL_SwapBuffers();
-	VboManager::cleanReleasableVbos();
+	instance.vbomanager.cleanReleasableVbos();
 	Texturemanager::cleanReleasableTextures();
 	// Get screenshot and inform all recorders about it
 	if (!instance.recorders.empty()) {

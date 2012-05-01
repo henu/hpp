@@ -27,12 +27,12 @@ public:
 	// immediately.
 	//     The third function is to release VBO if caller is not in the
 	// correct thread or if VBO was creted by this handler class.
-	static void addVBOJob(GLenum target, void const* buf, size_t buf_len);
-	static GLsizei getVBO(void const* buf, GLuint* caller_vbo_id);
-	static void releaseVBO(void const* buf, GLuint id);
+	void addVBOJob(GLenum target, void const* buf, size_t buf_len);
+	GLsizei getVBO(void const* buf, GLuint* caller_vbo_id);
+	void releaseVBO(void const* buf, GLuint id);
 	// Functions to handle needing of VBO id
-	static void registerVBONeeder(void const* buf, GLuint* vbo_id, RendbufEnums::VBOState* vbo_state);
-	static void unregisterVBONeeder(void const* buf, GLuint* vbo_id);
+	void registerVBONeeder(void const* buf, GLuint* vbo_id, RendbufEnums::VBOState* vbo_state);
+	void unregisterVBONeeder(void const* buf, GLuint* vbo_id);
 
 private:
 
@@ -47,9 +47,6 @@ private:
 	typedef std::map< void const*, VBO > VBOs;
 	typedef std::vector< GLuint > ReleasableVBOs;
 
-	// The only instance of this class
-	static VboManager instance;
-
 	// Data
 	Mutex vbos_mutex;
 	VBOs vbos;
@@ -62,7 +59,7 @@ private:
 
 	// Tries to release VBOs that were unable to release later because the
 	// execution was in wrong thread.
-	static void cleanReleasableVbos(void);
+	void cleanReleasableVbos(void);
 
 };
 
