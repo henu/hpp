@@ -27,9 +27,9 @@ class Importer:
 		# Read header
 		header = ifile.read(32)
 		try:
-			if header == 'HPP_MESH_1.00                   ':
+			if header == 'HPP_MESH_1.01                   ':
 				self.readMesh100(ifile)
-			elif header == 'HPP_SCENE_1.00                  ':
+			elif header == 'HPP_SCENE_1.01                  ':
 				self.readScene100(ifile)
 			else:
 				raise Exception('Invalid header \"' + header + '\"!')
@@ -38,7 +38,7 @@ class Importer:
 			raise
 		ifile.close()
 
-	def readMesh100(self, ifile):
+	def readMesh101(self, ifile):
 		self.meshes = []
 
 		mesh = hpp_types.Mesh()

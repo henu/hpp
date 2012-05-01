@@ -343,10 +343,10 @@ def uInt8ToBytes(i):
 
 def uInt32ToBytes(i):
 	result = bytes()
-	result += bytes([(i >> 0) & 0xFF])
-	result += bytes([(i >> 8) & 0xFF])
-	result += bytes([(i >> 16) & 0xFF])
 	result += bytes([(i >> 24) & 0xFF])
+	result += bytes([(i >> 16) & 0xFF])
+	result += bytes([(i >> 8) & 0xFF])
+	result += bytes([(i >> 0) & 0xFF])
 	return result
 
 def stringToBytes(s):
@@ -383,10 +383,10 @@ def readUInt8(ifile):
 def readUInt32(ifile):
 	buf = ifile.read(4)
 	result = 0
-	result += ord(buf[0]) << 0
-	result += ord(buf[1]) << 8
-	result += ord(buf[2]) << 16
-	result += ord(buf[3]) << 24
+	result += ord(buf[0]) << 24
+	result += ord(buf[1]) << 16
+	result += ord(buf[2]) << 8
+	result += ord(buf[3]) << 0
 	return result
 
 def readVector(ifile, components):

@@ -3,7 +3,7 @@
 bl_info = {
 	'name' : 'LibHPP mesh and scene exporter',
 	'author' : 'Henrik Heino <henu@henu.fi>',
-	'version' : (1, 0, 0),
+	'version' : (1, 0, 1),
 	'blender' : (2, 5, 8),
 	'api' : 37702,
 	'location' : 'File > Export > LibHPP',
@@ -145,7 +145,7 @@ class MeshExporter:
 
 		# Open file and write header
 		efile = open(filename, 'wb')
-		efile.write(bytes('HPP_MESH_1.00                   ', 'ASCII'))
+		efile.write(bytes('HPP_MESH_1.01                   ', 'ASCII'))
 
 		# Mesh
 		efile.write(self.mesh.serialize())
@@ -239,7 +239,7 @@ class SceneExporter:
 
 		# Open file and write header
 		efile = open(filename, 'wb')
-		efile.write(bytes('HPP_SCENE_1.00                  ', 'ASCII'))
+		efile.write(bytes('HPP_SCENE_1.01                  ', 'ASCII'))
 
 		# Portals
 		efile.write(hpp_misc.uInt32ToBytes(len(self.portals)))
