@@ -70,7 +70,7 @@ public:
 	inline int16_t readInt16(void);
 	inline int32_t readInt32(void);
 	inline float readFloat(void);
-	inline ByteV readVector(size_t size);
+	inline ByteV readByteV(size_t size);
 	inline std::string readString(size_t size);
 
 	// Send specific types of data. These can be called from any thread.
@@ -83,7 +83,7 @@ public:
 	inline void writeInt16(int16_t i);
 	inline void writeInt32(int32_t i);
 	inline void writeFloat(float f);
-	inline void writeVector(ByteV const& v);
+	inline void writeByteV(ByteV const& v);
 	inline void writeString(std::string const& s);
 
 	// Waits until all bytes are sent. This is usefull for example when
@@ -295,7 +295,7 @@ inline float TCPConnection::readFloat(void)
 	return cStrToFloat(result_bytes);
 }
 
-inline ByteV TCPConnection::readVector(size_t size)
+inline ByteV TCPConnection::readByteV(size_t size)
 {
 	HppAssert(inbuffer_rcv.size() >= size, "Not enough data in input buffer!");
 	ByteV result;
@@ -376,7 +376,7 @@ inline void TCPConnection::writeFloat(float f)
 	outbuffer_pending.push_back(buf[3]);
 }
 
-inline void TCPConnection::writeVector(ByteV const& v)
+inline void TCPConnection::writeByteV(ByteV const& v)
 {
 	outbuffer_pending.insert(outbuffer_pending.end(), v.begin(), v.end());
 }
