@@ -174,7 +174,7 @@ inline void Mutex::lock(void)
 inline void Mutex::unlock(void)
 {
 	#ifndef NDEBUG
-	HppAssert(locked > 0, "Not locked when trying to unlock!");
+	HppAssertCC(locked > 0, "Not locked when trying to unlock!");
 	locked --;
 	#endif
 	#ifdef HPP_USE_SDL_MUTEX
