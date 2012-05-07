@@ -310,6 +310,9 @@ inline Path Path::linkTarget(void) const
 
 inline Path::Type Path::getType(void) const
 {
+	if (roottype == UNK) {
+		throw Exception("Unable to get type of unknown path!");
+	}
 	struct stat st;
 	#ifndef WIN32
 	if (lstat(toString().c_str(), &st)) {
@@ -328,11 +331,14 @@ inline Path::Type Path::getType(void) const
 
 inline bool Path::exists(void) const
 {
+	if (roottype == UNK) {
+		throw Exception("Unable to chcek if unknown path exists!");
+	}
 	struct stat st;
 	#ifndef WIN32
-	if (lstat(toString().c_str(), &st)) {
+	if (!lstat(toString().c_str(), &st)) {
 	#else
-	if (stat(toString().c_str(), &st)) {
+	if (!stat(toString().c_str(), &st)) {
 	#endif
 		return true;
 	}
