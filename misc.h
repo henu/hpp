@@ -56,6 +56,10 @@ inline size_t iMod(ssize_t dividend, size_t divisor);
 inline Angle fovYToFovX(Angle const& fov_y, Real display_w, Real display_h);
 inline Angle fovXToFovY(Angle const& fov_x, Real display_w, Real display_h);
 
+// Converts tab, enter, \ and given characters to slashes
+inline std::string slashEncode(std::string str, std::string const& chars = "\"\'");
+
+
 // ----------------------------------------
 // Implementation of functions
 // ----------------------------------------
@@ -217,6 +221,30 @@ inline Angle fovXToFovY(Angle const& fov_x, Real display_w, Real display_h)
 	HppAssert(display_w > 0.0, "Display width must be greater than zero!");
 	HppAssert(display_h > 0.0, "Display height must be greater than zero!");
 	return fovYToFovX(fov_x, display_h, display_w);
+}
+
+inline std::string slashEncode(std::string str, std::string const& chars)
+{
+	std::string result;
+	result.reserve(str.size());
+	for (std::string::const_iterator it = str.begin();
+	     it != str.end();
+	     ++ it) {
+		char c = *it;
+		if (c == '\t') {
+			result += "\\t";
+		} else if (c == '\n') {
+			result += "\\n";
+		} else if (c == '\\') {
+			result += "\\\\";
+		} else if (chars.find(c) != std::string::npos) {
+			result += "\\";
+			result += c;
+		} else {
+			result += c;
+		}
+	}
+	return result;
 }
 
 // Goes through a range of elements and checks which of them should be moved to
