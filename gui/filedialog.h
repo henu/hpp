@@ -180,8 +180,8 @@ inline void Filedialog::guiCallbackWithType(Widget* widget, uint32_t type, void*
 			Folderview::SelectedItems items_sel = filedialog->folderview.getSelectedItems();
 			if (!items_sel.empty()) {
 				size_t item_id = *items_sel.begin();
-				FolderChild item = filedialog->folderview.getItem(item_id);
-				if (item.type == FolderChild::FILE) {
+				Path::DirChild item = filedialog->folderview.getItem(item_id);
+				if (item.type == Path::FILE) {
 					filedialog->filenameinput.setValue(item.name);
 				}
 			}
