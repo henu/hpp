@@ -61,6 +61,7 @@
 				"event.h",
 				"exception.h",
 				"ivectors.h",
+				"json.h",
 				"key.h",
 				"lock.h",
 				"magic.h",
