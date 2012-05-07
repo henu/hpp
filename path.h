@@ -64,6 +64,11 @@ public:
 	inline bool isLink(void) const { return getType() == SYMLINK; }
 
 	inline bool exists(void) const;
+	
+	// Renames file/dir that this Path points to. Note, that
+	// pointing of this Path will be modified. Also, if this
+	// cannot be done atomically, then Exception is thrown.
+	inline void rename(Path const& new_path) const;
 
 	// Lists directory contents. If you want "." and
 	// ".." entries, set show_dotdots to true.
@@ -75,6 +80,9 @@ public:
 	// is not file, then exception is thrown.
 	inline void readBytes(ByteV& result) const;
 	inline void readString(std::string& result) const;
+
+	inline void writeBytes(ByteV const& bytes) const;
+	inline void writeString(std::string const& str) const;
 
 	// Returns the parent of this file/dir
 	inline Path getParent(void) const;
@@ -345,6 +353,16 @@ inline bool Path::exists(void) const
 	return errno != ENOENT;
 }
 
+inline void Path::rename(Path const& new_path) const
+{
+	if (::rename(toString().c_str(), new_path.toString().c_str())) {
+		if (errno == EXDEV) {
+			throw Exception("Unable to rename atomically!");
+		}
+		throw Exception("Unable to rename!");
+	}
+}
+
 inline void Path::listDir(DirChildren& result, bool show_dotdots) const
 {
 	result.clear();
@@ -482,13 +500,13 @@ HppAssert(false, "Not implemented yet!");
 inline void Path::readBytes(ByteV& result) const
 {
 	if (isUnknown()) {
-		throw Exception("Unable to get bytes of unknown path!");
+		throw Exception("Unable to read from unknown path!");
 	}
 	if (!isFile()) {
-		throw Exception("Unable to get bytes! Reason: \"" + toString() + "\" is not file!");
+		throw Exception("Unable to read! Reason: \"" + toString() + "\" is not file!");
 	}
 	if (!exists()) {
-		throw Exception("Unable to get bytes! Reason: \"" + toString() + "\" does not exist!");
+		throw Exception("Unable to read! Reason: \"" + toString() + "\" does not exist!");
 	}
 	// Open file
 	std::ifstream file(toString().c_str(), std::ios::binary);
@@ -517,13 +535,13 @@ inline void Path::readBytes(ByteV& result) const
 inline void Path::readString(std::string& result) const
 {
 	if (isUnknown()) {
-		throw Exception("Unable to get bytes of unknown path!");
+		throw Exception("Unable to read from unknown path!");
 	}
 	if (!isFile()) {
-		throw Exception("Unable to get bytes! Reason: \"" + toString() + "\" is not file!");
+		throw Exception("Unable to read! Reason: \"" + toString() + "\" is not file!");
 	}
 	if (!exists()) {
-		throw Exception("Unable to get bytes! Reason: \"" + toString() + "\" does not exist!");
+		throw Exception("Unable to read! Reason: \"" + toString() + "\" does not exist!");
 	}
 	// Open file
 	std::ifstream file(toString().c_str(), std::ios::binary);
@@ -547,6 +565,34 @@ inline void Path::readString(std::string& result) const
 	delete[] readbuf;
 	file.close();
 	HppAssert(result.size() == file_size, "Not all bytes could be read!");
+}
+
+inline void Path::writeBytes(ByteV const& bytes) const
+{
+	if (isUnknown()) {
+		throw Exception("Unable to write to unknown path!");
+	}
+	// Open file
+	std::ofstream file(toString().c_str(), std::ios::binary);
+	if (!file.is_open()) {
+		throw Exception("Unable to open file \"" + toString() + "\" for writing!");
+	}
+	file.write((char const*)&bytes[0], bytes.size());
+	file.close();
+}
+
+inline void Path::writeString(std::string const& str) const
+{
+	if (isUnknown()) {
+		throw Exception("Unable to write to unknown path!");
+	}
+	// Open file
+	std::ofstream file(toString().c_str(), std::ios::binary);
+	if (!file.is_open()) {
+		throw Exception("Unable to open file \"" + toString() + "\" for writing!");
+	}
+	file.write(&str[0], str.size());
+	file.close();
 }
 
 inline Path Path::getParent(void) const
