@@ -4,6 +4,7 @@
 #include "bytev.h"
 #include "exception.h"
 #include "cast.h"
+#include "misc.h"
 
 #include <map>
 #include <vector>
@@ -25,9 +26,22 @@ public:
 	inline Json(void);
 	inline Json(std::string const& json);
 
-	inline void load(std::string const& json);
+	inline void decode(std::string const& json);
+	inline std::string encode(void) const;
 
 	inline Type getType(void) const;
+
+	// Constructors for new JSON variables
+	inline static Json newObject(Object const& obj = Object());
+	inline static Json newArray(Array const& arr = Array());
+	inline static Json newString(std::string const& str = "");
+	inline static Json newNumber(double num = 0);
+	inline static Json newBoolean(bool value = false);
+	inline static Json newNull(void);
+
+	// Setters
+	inline void setMember(std::string const& key, Json const& var);
+	inline void addItem(Json const& var);
 
 	// Getters
 	inline double getNumber(void) const;
@@ -66,10 +80,10 @@ type(NUL)
 inline Json::Json(std::string const& json) :
 type(NUL)
 {
-	load(json);
+	decode(json);
 }
 
-inline void Json::load(std::string const& json)
+inline void Json::decode(std::string const& json)
 {
 	std::string::const_iterator json_it = json.begin();
 	loadRecursively(json_it, json.end());
@@ -80,9 +94,123 @@ inline void Json::load(std::string const& json)
 	}
 }
 
+inline std::string Json::encode(void) const
+{
+	switch (type)
+	{
+	case NUMBER:
+		return floatToStr(num);
+	case STRING:
+		return "\"" + slashEncode(str, "\"") + "\"";
+	case BOOLEAN:
+		if (num > 0) return "true";
+		else return "false";
+	case OBJECT:
+		{
+			std::string result;
+			result += "{";
+			for (Object::const_iterator obj_it = obj.begin();
+			     obj_it != obj.end();
+			     ++ obj_it) {
+				result += "\"" + slashEncode(obj_it->first, "\"") + "\":" + obj_it->second.encode() + ",";
+			}
+			if (obj.empty()) {
+				result += "}";
+			} else {
+				result[result.size()-1] = '}';
+			}
+			return result;
+		}
+	case ARRAY:
+		{
+			std::string result;
+			result += "[";
+			for (Array::const_iterator arr_it = arr.begin();
+			     arr_it != arr.end();
+			     ++ arr_it) {
+				result += arr_it->encode() + ",";
+			}
+			if (arr.empty()) {
+				result += "]";
+			} else {
+				result[result.size()-1] = ']';
+			}
+			return result;
+		}
+	case NUL:
+		return "null";
+	default:
+		break;
+	}
+	HppAssert(false, "Invalid JSON type!");
+}
+
 inline Json::Type Json::getType(void) const
 {
 	return type;
+}
+
+inline Json Json::newObject(Object const& obj)
+{
+	Json result;
+	result.type = OBJECT;
+	result.obj = obj;
+	return result;
+}
+
+inline Json Json::newArray(Array const& arr)
+{
+	Json result;
+	result.type = ARRAY;
+	result.arr = arr;
+	return result;
+}
+
+inline Json Json::newString(std::string const& str)
+{
+	Json result;
+	result.type = STRING;
+	result.str = str;
+	return result;
+}
+
+inline Json Json::newNumber(double num)
+{
+	Json result;
+	result.type = NUMBER;
+	result.num = num;
+	return result;
+}
+
+inline Json Json::newBoolean(bool value)
+{
+	Json result;
+	result.type = BOOLEAN;
+	if (value) result.num = 1;
+	else result.num = -1;
+	return result;
+}
+
+inline Json Json::newNull(void)
+{
+	Json result;
+	return result;
+}
+
+inline void Json::setMember(std::string const& key, Json const& var)
+{
+	if (type != OBJECT) {
+		throw Exception("Unable to set member, because this JSON is not an object!");
+	}
+	obj[key] = var;
+}
+
+inline void Json::addItem(Json const& var)
+{
+	if (type != ARRAY) {
+		throw Exception("Unable to add item, because this JSON is not an array!");
+	}
+	arr.push_back(var);
 }
 
 inline double Json::getNumber(void) const
