@@ -222,7 +222,7 @@ void NCursesRenderer::renderFolderview(int32_t x_origin, int32_t y_origin, Folde
 HppAssert(false, "Not implemented yet!");
 }
 
-void NCursesRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items)
+void NCursesRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, Path::DirChildren const& items)
 {
 HppAssert(false, "Not implemented yet!");
 }

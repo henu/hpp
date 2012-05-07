@@ -65,8 +65,9 @@ public:
 
 	inline bool exists(void) const;
 
-	// Lists directory contents. Does not return entries "." and "..".
-	inline void listDir(DirChildren& result) const;
+	// Lists directory contents. If you want "." and
+	// ".." entries, set show_dotdots to true.
+	inline void listDir(DirChildren& result, bool show_dotdots = false) const;
 
 	inline void convertToAbsolute(void);
 
@@ -324,7 +325,7 @@ inline bool Path::exists(void) const
 	return errno != ENOENT;
 }
 
-inline void Path::listDir(DirChildren& result) const
+inline void Path::listDir(DirChildren& result, bool show_dotdots) const
 {
 	result.clear();
 
@@ -345,7 +346,7 @@ inline void Path::listDir(DirChildren& result) const
 		#endif
 		new_child.name = convertFromSystemCharsetToUtf8(new_child.name);
 		// Discard . and .. entries
-		if (new_child.name == "." || new_child.name == "..") {
+		if (!show_dotdots && (new_child.name == "." || new_child.name == "..")) {
 			continue;
 		}
 		// Get type

@@ -38,7 +38,7 @@ public:
 	inline Path getFolder(void) const;
 
 	inline SelectedItems getSelectedItems(void) const { return contents.getSelectedItems(); }
-	inline FolderChild getItem(size_t item_id) const { return contents.getItem(item_id); }
+	inline Path::DirChild getItem(size_t item_id) const { return contents.getItem(item_id); }
 
 	inline void setCallbackFunc(CallbackFuncWithType callback, void* data);
 

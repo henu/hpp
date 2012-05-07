@@ -58,7 +58,7 @@ public:
 	virtual void renderTextinputContents(int32_t x_origin, int32_t y_origin, TextinputContents const* textinputcontents, ssize_t cursor) = 0;
 	virtual void renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed) = 0;
 	virtual void renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview) = 0;
-	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items) = 0;
+	virtual void renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, Path::DirChildren const& items) = 0;
 	virtual void renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed, bool slider_pressed) = 0;
 	virtual void renderSlider(int32_t x_origin, int32_t y_origin, Slider const* slider, bool horizontal, bool slider_pressed) = 0;
 	virtual void renderTabs(int32_t x_origin, int32_t y_origin, Tabs const* tabs) = 0;

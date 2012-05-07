@@ -463,7 +463,7 @@ void ViewportRenderer::renderFolderview(int32_t x_origin, int32_t y_origin, Fold
 
 }
 
-void ViewportRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, FolderChildren const& items)
+void ViewportRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, Path::DirChildren const& items)
 {
 	prepareSprites(x_origin, y_origin);
 
@@ -483,11 +483,11 @@ void ViewportRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_orig
 	textSetColor(Color(0, 0, 0));
 	textSetHorizontalAlign(LEFT);
 	textSetVerticalAlign(CENTER);
-	for (FolderChildren::const_iterator items_it = items.begin();
+	for (Path::DirChildren::const_iterator items_it = items.begin();
 	     items_it != items.end();
 	     items_it ++) {
-		FolderChild const& item = *items_it;
-		if (item.type == FolderChild::FOLDER) {
+		Path::DirChild const& item = *items_it;
+		if (item.type == Path::DIRECTORY) {
 			renderSprite(tex_folder, Vector2(0, pos_y));
 		} else {
 			renderSprite(tex_file, Vector2(0, pos_y));

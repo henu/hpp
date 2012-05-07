@@ -32,7 +32,7 @@ public:
 	inline Path getFolder(void) const;
 
 	inline SelectedItems getSelectedItems(void) const { return items_sel; }
-	inline FolderChild getItem(size_t item_id) const;
+	inline Path::DirChild getItem(size_t item_id) const;
 
 	// Virtual functions for Widget
 	inline virtual uint32_t getMinWidth(void) const;
@@ -45,7 +45,7 @@ private:
 	bool select_multiple;
 
 	Path path;
-	FolderChildren items;
+	Path::DirChildren items;
 
 	SelectedItems items_sel;
 
@@ -87,7 +87,7 @@ inline Path FolderviewContents::getFolder(void) const
 	return path;
 }
 
-inline FolderChild FolderviewContents::getItem(size_t item_id) const
+inline Path::DirChild FolderviewContents::getItem(size_t item_id) const
 {
 	if (item_id >= items.size()) {
 		throw Hpp::Exception("Unable to get item because item ID is too big!");
@@ -102,10 +102,10 @@ inline uint32_t FolderviewContents::getMinWidth(void) const
 		return 0;
 	}
 	uint32_t min_width = 0;
-	for (FolderChildren::const_iterator items_it = items.begin();
+	for (Path::DirChildren::const_iterator items_it = items.begin();
 	     items_it != items.end();
 	     items_it ++) {
-		FolderChild const& item = *items_it;
+		Path::DirChild const& item = *items_it;
 		UnicodeString item_name = item.name;
 		min_width = std::max(min_width, rend->getMinimumFolderviewContentsWidth(item_name));
 	}
@@ -170,8 +170,8 @@ HppAssert(false, "Not implemented yet!");
 
 inline void FolderviewContents::reloadFolderContents(void)
 {
-	FolderChildren new_items;
-	listFolderChildren(new_items, path);
+	Path::DirChildren new_items;
+	path.listDir(new_items, true);
 	items.swap(new_items);
 	markSizeChanged();
 }

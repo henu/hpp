@@ -73,6 +73,11 @@ inline void Json::load(std::string const& json)
 {
 	std::string::const_iterator json_it = json.begin();
 	loadRecursively(json_it, json.end());
+	if (type != OBJECT && type != ARRAY) {
+		clear();
+		type = NUL;
+		throw Exception("JSON must be either object or array!");
+	}
 }
 
 inline Json::Type Json::getType(void) const
