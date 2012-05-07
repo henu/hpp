@@ -292,6 +292,7 @@ inline std::string Path::toString(bool compact) const
 
 inline Path Path::linkTarget(void) const
 {
+	#ifndef WIN32
 	size_t TARGET_BUF_SIZE = 10 * 1024;
 	char* target_buf = new char[TARGET_BUF_SIZE];
 	ssize_t target_size = readlink(toString().c_str(), target_buf, TARGET_BUF_SIZE);
@@ -302,24 +303,37 @@ inline Path Path::linkTarget(void) const
 	Path result(std::string(target_buf, target_size));
 	delete[] target_buf;
 	return result;
+	#else
+	throw Exception("Symlinks are not supported on Windows!");
+	#endif
 }
 
 inline Path::Type Path::getType(void) const
 {
 	struct stat st;
+	#ifndef WIN32
 	if (lstat(toString().c_str(), &st)) {
+	#else
+	if (stat(toString().c_str(), &st)) {
+	#endif
 		throw Exception("Unable to get type of \"" + toString() + "\"!");
 	}
 	if (S_ISREG(st.st_mode)) return FILE;
 	if (S_ISDIR(st.st_mode)) return DIRECTORY;
+	#ifndef WIN32
 	if (S_ISLNK(st.st_mode)) return SYMLINK;
+	#endif
 	return UNKNOWN;
 }
 
 inline bool Path::exists(void) const
 {
 	struct stat st;
+	#ifndef WIN32
 	if (lstat(toString().c_str(), &st)) {
+	#else
+	if (stat(toString().c_str(), &st)) {
+	#endif
 		return true;
 	}
 	return errno != ENOENT;
