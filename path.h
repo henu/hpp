@@ -28,6 +28,16 @@ class Path
 
 public:
 
+	enum Type { FILE, DIRECTORY, SYMLINK, UNKNOWN };
+
+	struct DirChild
+	{
+		std::string name;
+		Path::Type type;
+	};
+	typedef std::vector< DirChild > DirChildren;
+
+
 	inline static Path getHome(void);
 	inline static Path getConfig(void);
 	inline static Path getRoot(void);
@@ -41,11 +51,29 @@ public:
 
 	inline std::string toString(bool compact = false) const;
 
-	inline bool isUnknown(void) const { return type == UNKNOWN; }
-	inline bool isAbsolute(void) const { return type != UNKNOWN && type != REL; }
-	inline bool isRelative(void) const { return type == REL; }
+	inline bool isUnknown(void) const { return roottype == UNKN; }
+	inline bool isAbsolute(void) const { return roottype != UNKN && roottype != REL; }
+	inline bool isRelative(void) const { return roottype == REL; }
+
+	// Get target of symbolic link
+	inline Path linkTarget(void) const;
+
+	inline Type getType(void) const;
+	inline bool isFile(void) const { return getType() == FILE || (getType() == SYMLINK && linkTarget().isFile()); }
+	inline bool isDir(void) const { return getType() == DIRECTORY || (getType() == SYMLINK && linkTarget().isDir()); }
+	inline bool isLink(void) const { return getType() == SYMLINK; }
+
+	inline bool exists(void) const;
+
+	// Lists directory contents. Does not return entries "." and "..".
+	inline void listDir(DirChildren& result) const;
 
 	inline void convertToAbsolute(void);
+
+	// Reads pointed file as bytes/string. If target
+	// is not file, then exception is thrown.
+	inline void readBytes(ByteV& result) const;
+	inline void readString(std::string& result) const;
 
 	// Returns the parent of this file/dir
 	inline Path getParent(void) const;
@@ -72,38 +100,25 @@ public:
 
 private:
 
-	enum Type { UNKNOWN,
-	            REL,
-	            ABS,
-	            HOME,
-	            CONFIG };
+	enum RootType { UNKN,
+	                REL,
+	                ABS,
+	                HOME,
+	                CONFIG };
 
 	typedef std::vector< std::string > Parts;
 
-	Type type;
+	RootType roottype;
 	Parts parts;
 
 	// Ensures that path is either absolute or relative.
 	inline void ensureAbsoluteOrRelative(void);
 
+	inline static bool compareDirChildren(DirChild const& child1, DirChild const& child2);
+
 };
 
 inline void ensurePathExists(Path const& p);
-
-inline bool fileExists(Path const& p);
-
-struct FolderChild
-{
-	enum Type { FILE, FOLDER, UNKNOWN };
-	std::string name;
-	Type type;
-};
-typedef std::vector< FolderChild > FolderChildren;
-
-// Lists folder contents. Does not return entries "." and "..".
-inline void listFolderChildren(FolderChildren& result, Path const& path);
-
-inline bool compareFolderChildren(FolderChild const& child1, FolderChild const& child2);
 
 
 // ----------------------------------------
@@ -113,7 +128,7 @@ inline bool compareFolderChildren(FolderChild const& child1, FolderChild const& 
 inline Path Path::getHome(void)
 {
 	Path p;
-	p.type = HOME;
+	p.roottype = HOME;
 	p.parts.clear();
 	return p;
 }
@@ -121,7 +136,7 @@ inline Path Path::getHome(void)
 inline Path Path::getConfig(void)
 {
 	Path p;
-	p.type = CONFIG;
+	p.roottype = CONFIG;
 	p.parts.clear();
 	return p;
 }
@@ -129,7 +144,7 @@ inline Path Path::getConfig(void)
 inline Path Path::getRoot(void)
 {
 	Path p;
-	p.type = ABS;
+	p.roottype = ABS;
 	p.parts.clear();
 	return p;
 }
@@ -137,12 +152,12 @@ inline Path Path::getRoot(void)
 inline Path Path::getUnknown(void)
 {
 	Path p;
-	p.type = UNKNOWN;
+	p.roottype = UNKN;
 	return p;
 }
 
 inline Path::Path(void) :
-type(REL)
+roottype(REL)
 {
 }
 
@@ -150,21 +165,21 @@ inline Path::Path(std::string const& p)
 {
 	std::string::const_iterator p_it;
 	if (p.empty()) {
-		type = REL;
+		roottype = REL;
 		return;
 	} else if (p.size() == 1 && p == "~") {
-		type = HOME;
+		roottype = HOME;
 		return;
 	} else if (p.size() >= 2 && p.substr(0, 2) == "~/") {
-		type = HOME;
+		roottype = HOME;
 		p_it = p.begin() + 2;
 	} else if (p[0] == '/') {
-		type = ABS;
+		roottype = ABS;
 		p_it = p.begin() + 1;
 	} else if (p[0] == '~') {
 		throw Exception("Unknown path \"" + p + "\"");
 	} else {
-		type = REL;
+		roottype = REL;
 		p_it = p.begin();
 	}
 	std::string part;
@@ -186,20 +201,20 @@ inline Path::Path(std::string const& p)
 	// paths, so lets convert them to absolute.
 	#ifdef WIN32
 	if (!parts.empty() && parts[0].size() == 2 && parts[0][1] == ':') {
-		type = ABS;
+		roottype = ABS;
 	}
 	#endif
 }
 
 inline Path::Path(Path const& p) :
-type(p.type),
+roottype(p.roottype),
 parts(p.parts)
 {
 }
 
 inline Path Path::operator=(Path const& p)
 {
-	type = p.type;
+	roottype = p.roottype;
 	parts = p.parts;
 	return *this;
 }
@@ -207,8 +222,8 @@ inline Path Path::operator=(Path const& p)
 inline std::string Path::toString(bool compact) const
 {
 	std::string result;
-	switch (type) {
-	case UNKNOWN:
+	switch (roottype) {
+	case UNKN:
 		return "*** unknown ***";
 	case REL:
 		break;
@@ -274,11 +289,110 @@ inline std::string Path::toString(bool compact) const
 	return result;
 }
 
+inline Path Path::linkTarget(void) const
+{
+	size_t TARGET_BUF_SIZE = 10 * 1024;
+	char* target_buf = new char[TARGET_BUF_SIZE];
+	ssize_t target_size = readlink(toString().c_str(), target_buf, TARGET_BUF_SIZE);
+	if (target_size < 0) {
+		delete[] target_buf;
+		throw Exception("Unable to get target of symlink \"" + toString() + "\"!");
+	}
+	Path result(std::string(target_buf, target_size));
+	delete[] target_buf;
+	return result;
+}
+
+inline Path::Type Path::getType(void) const
+{
+	struct stat st;
+	if (lstat(toString().c_str(), &st)) {
+		throw Exception("Unable to get type of \"" + toString() + "\"!");
+	}
+	if (S_ISREG(st.st_mode)) return FILE;
+	if (S_ISDIR(st.st_mode)) return DIRECTORY;
+	if (S_ISLNK(st.st_mode)) return SYMLINK;
+	return UNKNOWN;
+}
+
+inline bool Path::exists(void) const
+{
+	struct stat st;
+	if (lstat(toString().c_str(), &st)) {
+		return true;
+	}
+	return errno != ENOENT;
+}
+
+inline void Path::listDir(DirChildren& result) const
+{
+	result.clear();
+
+	std::string path_str = convertFromUtf8ToSystemCharset(toString());
+	DIR* dir = opendir(path_str.c_str());
+	if (dir == NULL) {
+		throw Exception("Unable to open folder \"" + toString() + "\"!");
+	}
+
+	struct dirent* dir_ent;
+	while ((dir_ent = readdir(dir)) != NULL) {
+		DirChild new_child;
+		// Get name
+		#ifndef WIN32
+		new_child.name = dir_ent->d_name;
+		#else
+		new_child.name = std::string(dir_ent->d_name, dir_ent->d_namlen);
+		#endif
+		new_child.name = convertFromSystemCharsetToUtf8(new_child.name);
+		// Discard . and .. entries
+		if (new_child.name == "." || new_child.name == "..") {
+			continue;
+		}
+		// Get type
+		#ifndef WIN32
+		switch (dir_ent->d_type) {
+		case DT_DIR:
+			new_child.type = DIRECTORY;
+			break;
+		case DT_REG:
+			new_child.type = FILE;
+			break;
+		case DT_LNK:
+			new_child.type = SYMLINK;
+			break;
+		default:
+			new_child.type = UNKNOWN;
+			break;
+		}
+		#else
+		struct stat sttmp;
+		if (stat((path_str + "/" + new_child.name).c_str(), &sttmp) == -1) {
+			// File/dir has disappeared!
+		} else if (S_ISREG(sttmp.st_mode)) {
+			new_child.type = FILE;
+		} else if (S_ISDIR(sttmp.st_mode)) {
+			new_child.type = DIRECTORY;
+		} else {
+			new_child.type = UNKNOWN;
+		}
+		#endif
+		result.push_back(new_child);
+	}
+
+	if (closedir(dir) != 0)
+	{
+		throw Exception("Unable to close folder \"" + toString() + "\"!");
+	}
+
+	std::sort(result.begin(), result.end(), compareDirChildren);
+
+}
+
 inline void Path::convertToAbsolute(void)
 {
-	HppAssert(type != UNKNOWN, "Type cannot be unknown when ensuring absolute/relative.");
+	HppAssert(roottype != UNKN, "Type cannot be unknown when ensuring absolute/relative.");
 	std::string parts_begin_str;
-	switch (type) {
+	switch (roottype) {
 	case REL:
 // TODO: Make to work on windows!
 #ifdef WIN32
@@ -316,7 +430,7 @@ HppAssert(false, "Not implemented yet!");
 		}
 		#endif
 		break;
-	case UNKNOWN:
+	case UNKN:
 		HppAssert(false, "");
 	}
 
@@ -331,7 +445,7 @@ HppAssert(false, "Not implemented yet!");
 	}
 	#endif
 
-	type = ABS;
+	roottype = ABS;
 	Parts parts_begin = splitString(parts_begin_str, '/');
 	Parts parts_begin_fixed;
 	for (Parts::const_iterator parts_begin_it = parts_begin.begin();
@@ -342,6 +456,76 @@ HppAssert(false, "Not implemented yet!");
 	     	}
 	}
 	parts.insert(parts.begin(), parts_begin_fixed.begin(), parts_begin_fixed.end());
+}
+
+inline void Path::readBytes(ByteV& result) const
+{
+	if (isUnknown()) {
+		throw Exception("Unable to get bytes of unknown path!");
+	}
+	if (!isFile()) {
+		throw Exception("Unable to get bytes! Reason: \"" + toString() + "\" is not file!");
+	}
+	if (!exists()) {
+		throw Exception("Unable to get bytes! Reason: \"" + toString() + "\" does not exist!");
+	}
+	// Open file
+	std::ifstream file(toString().c_str(), std::ios::binary);
+	if (!file.is_open()) {
+		throw Exception("Unable to open file \"" + toString() + "\" for reading!");
+	}
+	// Get file size
+	file.seekg(0, std::ios::end);
+	size_t file_size = file.tellg();
+	file.seekg(0, std::ios::beg);
+	// Read data
+	result.clear();
+	result.reserve(file_size);
+	size_t const READBUF_SIZE = 256 * 1024;
+	uint8_t* readbuf = new uint8_t[READBUF_SIZE];
+	for (size_t offset = 0; offset < file_size; offset += READBUF_SIZE) {
+		size_t read_amount = std::min(file_size - offset, READBUF_SIZE);
+		file.read((char*)readbuf, read_amount);
+		result.insert(result.end(), readbuf, readbuf + read_amount);
+	}
+	delete[] readbuf;
+	file.close();
+	HppAssert(result.size() == file_size, "Not all bytes could be read!");
+}
+
+inline void Path::readString(std::string& result) const
+{
+	if (isUnknown()) {
+		throw Exception("Unable to get bytes of unknown path!");
+	}
+	if (!isFile()) {
+		throw Exception("Unable to get bytes! Reason: \"" + toString() + "\" is not file!");
+	}
+	if (!exists()) {
+		throw Exception("Unable to get bytes! Reason: \"" + toString() + "\" does not exist!");
+	}
+	// Open file
+	std::ifstream file(toString().c_str(), std::ios::binary);
+	if (!file.is_open()) {
+		throw Exception("Unable to open file \"" + toString() + "\" for reading!");
+	}
+	// Get file size
+	file.seekg(0, std::ios::end);
+	size_t file_size = file.tellg();
+	file.seekg(0, std::ios::beg);
+	// Read data
+	result.clear();
+	result.reserve(file_size);
+	size_t const READBUF_SIZE = 256 * 1024;
+	uint8_t* readbuf = new uint8_t[READBUF_SIZE];
+	for (size_t offset = 0; offset < file_size; offset += READBUF_SIZE) {
+		size_t read_amount = std::min(file_size - offset, READBUF_SIZE);
+		file.read((char*)readbuf, read_amount);
+		result.insert(result.end(), readbuf, readbuf + read_amount);
+	}
+	delete[] readbuf;
+	file.close();
+	HppAssert(result.size() == file_size, "Not all bytes could be read!");
 }
 
 inline Path Path::getParent(void) const
@@ -387,9 +571,9 @@ inline std::string Path::operator[](int idx) const
 
 inline void Path::ensureAbsoluteOrRelative(void)
 {
-	HppAssert(type != UNKNOWN, "Type cannot be unknown when ensuring absolute/relative.");
+	HppAssert(roottype != UNKN, "Type cannot be unknown when ensuring absolute/relative.");
 	std::string parts_begin_str;
-	switch (type) {
+	switch (roottype) {
 	case REL:
 	case ABS:
 		return;
@@ -416,7 +600,7 @@ inline void Path::ensureAbsoluteOrRelative(void)
 		}
 		#endif
 		break;
-	case UNKNOWN:
+	case UNKN:
 		HppAssert(false, "");
 	}
 
@@ -515,14 +699,14 @@ inline bool Path::operator<(Path const& path) const
 		cmp1 = this;
 		cmp2 = &path;
 	} else {
-		if (type == ABS) {
+		if (roottype == ABS) {
 			cmp1 = this;
 		} else {
 			temp1 = *this;
 			temp1.convertToAbsolute();
 			cmp1 = &temp1;
 		}
-		if (path.type == ABS) {
+		if (path.roottype == ABS) {
 			cmp2 = &path;
 		} else {
 			temp2 = path;
@@ -589,87 +773,11 @@ inline void ensurePathExists(Path const& p)
 	}
 }
 
-inline bool fileExists(Path const& p)
+inline bool Path::compareDirChildren(DirChild const& child1, DirChild const& child2)
 {
-	if (p.isUnknown()) {
-		throw Exception("Unable to check if file exists, because path is unknown!");
-	}
-	std::string p_str = p.toString();
-	std::ifstream file(p_str.c_str());
-	if (file.is_open()) {
-		file.close();
+	if (child1.type == DIRECTORY && child2.type != DIRECTORY) {
 		return true;
-	}
-	file.close();
-	return false;
-}
-
-inline void listFolderChildren(FolderChildren& result, Path const& path)
-{
-	result.clear();
-
-	std::string path_str = convertFromUtf8ToSystemCharset(path.toString());
-	DIR* dir = opendir(path_str.c_str());
-	if (dir == NULL) {
-		throw Exception("Unable to open folder \"" + path.toString() + "\"!");
-	}
-
-	struct dirent* dir_ent;
-	while ((dir_ent = readdir(dir)) != NULL) {
-		FolderChild new_child;
-		// Get name
-		#ifndef WIN32
-		new_child.name = dir_ent->d_name;
-		#else
-		new_child.name = std::string(dir_ent->d_name, dir_ent->d_namlen);
-		#endif
-		new_child.name = convertFromSystemCharsetToUtf8(new_child.name);
-		// Discard . and .. entries
-		if (new_child.name == "." || new_child.name == "..") {
-			continue;
-		}
-		// Get type
-		#ifndef WIN32
-		switch (dir_ent->d_type) {
-		case DT_DIR:
-			new_child.type = FolderChild::FOLDER;
-			break;
-		case DT_REG:
-			new_child.type = FolderChild::FILE;
-			break;
-		default:
-			new_child.type = FolderChild::UNKNOWN;
-			break;
-		}
-		#else
-		struct stat sttmp;
-		if (stat((path_str + "/" + new_child.name).c_str(), &sttmp) == -1) {
-			// File/dir has disappeared!
-		} else if (S_ISREG(sttmp.st_mode)) {
-			new_child.type = FolderChild::FILE;
-		} else if (S_ISDIR(sttmp.st_mode)) {
-			new_child.type = FolderChild::FOLDER;
-		} else {
-			new_child.type = FolderChild::UNKNOWN;
-		}
-		#endif
-		result.push_back(new_child);
-	}
-
-	if (closedir(dir) != 0)
-	{
-		throw Exception("Unable to close folder \"" + path.toString() + "\"!");
-	}
-
-	std::sort(result.begin(), result.end(), compareFolderChildren);
-
-}
-
-inline bool compareFolderChildren(FolderChild const& child1, FolderChild const& child2)
-{
-	if (child1.type == FolderChild::FOLDER && child2.type != FolderChild::FOLDER) {
-		return true;
-	} else if (child1.type != FolderChild::FOLDER && child2.type == FolderChild::FOLDER) {
+	} else if (child1.type != DIRECTORY && child2.type == DIRECTORY) {
 		return false;
 	}
 	return child1.name < child2.name;
