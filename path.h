@@ -310,7 +310,7 @@ inline Path Path::linkTarget(void) const
 
 inline Path::Type Path::getType(void) const
 {
-	if (roottype == UNK) {
+	if (roottype == UNKN) {
 		throw Exception("Unable to get type of unknown path!");
 	}
 	struct stat st;
@@ -331,7 +331,7 @@ inline Path::Type Path::getType(void) const
 
 inline bool Path::exists(void) const
 {
-	if (roottype == UNK) {
+	if (roottype == UNKN) {
 		throw Exception("Unable to chcek if unknown path exists!");
 	}
 	struct stat st;
