@@ -20,6 +20,9 @@ public:
 	// How boundinvolume is related to viewfrustum
 	enum VFResult { OUTSIDE, PARTIALLY_INSIDE, INSIDE };
 
+	// Default constructor makes Viewfrustum that contains nothing
+	inline Viewfrustum(void);
+
 	// Constructor. Vrts means vertices of frustrum polygon that are on a
 	// plane that is one unit from the position of viewfrustrum.
 	inline Viewfrustum(Vector3 const& pos,
@@ -70,6 +73,11 @@ private:
 
 };
 typedef std::vector< Viewfrustum > Viewfrustums;
+
+inline Viewfrustum::Viewfrustum(void) :
+type(EMPTY)
+{
+}
 
 inline Viewfrustum::Viewfrustum(Vector3 const& pos,
                                 Vector3 const& dir, Vector3 const& up, Vector3 const& right,
