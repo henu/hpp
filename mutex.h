@@ -165,7 +165,7 @@ inline void Mutex::lock(void)
 	#endif
 	#endif
 	#ifndef NDEBUG
-	HppAssert(locked_thread == getThisThreadID() || locked == 0, "Mutex has failed!");
+	HppAssertCC(locked_thread == getThisThreadID() || locked == 0, "Mutex has failed!");
 	locked ++;
 	locked_thread = getThisThreadID();
 	#endif
@@ -204,7 +204,7 @@ inline void Mutex::ensureLocked(std::string const& file, size_t line, std::strin
 		std::cerr << "Function: " << func << std::endl;
 		throw Exception("Mutex is not locked for the asking thread!");
 	}
-	HppAssert(locked > 0 && locked_thread == getThisThreadID(), "Mutex is not locked for the asking thread!");
+	HppAssertCC(locked > 0 && locked_thread == getThisThreadID(), "Mutex is not locked for the asking thread!");
 	#else
 	(void)file;
 	(void)line;
