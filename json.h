@@ -27,7 +27,7 @@ public:
 	inline Json(std::string const& json);
 
 	inline void decode(std::string const& json);
-	inline std::string encode(void) const;
+	inline std::string encode(bool nice = false) const;
 
 	inline Type getType(void) const;
 
@@ -62,6 +62,8 @@ private:
 	Object obj;
 	Array arr;
 
+	inline std::string doEncode(size_t indent, bool nice = false) const;
+
 	inline void clear(void);
 
 	inline void loadRecursively(std::string::const_iterator& it, std::string::const_iterator end);
@@ -94,55 +96,9 @@ inline void Json::decode(std::string const& json)
 	}
 }
 
-inline std::string Json::encode(void) const
+inline std::string Json::encode(bool nice) const
 {
-	switch (type)
-	{
-	case NUMBER:
-		return floatToStr(num);
-	case STRING:
-		return "\"" + slashEncode(str, "\"") + "\"";
-	case BOOLEAN:
-		if (num > 0) return "true";
-		else return "false";
-	case OBJECT:
-		{
-			std::string result;
-			result += "{";
-			for (Object::const_iterator obj_it = obj.begin();
-			     obj_it != obj.end();
-			     ++ obj_it) {
-				result += "\"" + slashEncode(obj_it->first, "\"") + "\":" + obj_it->second.encode() + ",";
-			}
-			if (obj.empty()) {
-				result += "}";
-			} else {
-				result[result.size()-1] = '}';
-			}
-			return result;
-		}
-	case ARRAY:
-		{
-			std::string result;
-			result += "[";
-			for (Array::const_iterator arr_it = arr.begin();
-			     arr_it != arr.end();
-			     ++ arr_it) {
-				result += arr_it->encode() + ",";
-			}
-			if (arr.empty()) {
-				result += "]";
-			} else {
-				result[result.size()-1] = ']';
-			}
-			return result;
-		}
-	case NUL:
-		return "null";
-	default:
-		break;
-	}
-	HppAssert(false, "Invalid JSON type!");
+	return doEncode(0, nice);
 }
 
 inline Json::Type Json::getType(void) const
@@ -284,6 +240,82 @@ inline bool Json::getBoolean(void) const
 	return num > 0;
 }
 
+inline std::string Json::doEncode(size_t indent, bool nice) const
+{
+	switch (type)
+	{
+	case NUMBER:
+		return floatToStr(num);
+	case STRING:
+		return "\"" + slashEncode(str, "\"") + "\"";
+	case BOOLEAN:
+		if (num > 0) return "true";
+		else return "false";
+	case OBJECT:
+		{
+			std::string result;
+
+			std::string indent_str;
+			if (nice) indent_str = std::string(indent, '\t');
+
+			result += "{";
+			if (nice) result += "\n";
+			for (Object::const_iterator obj_it = obj.begin();
+			     obj_it != obj.end();
+			     ++ obj_it) {
+				if (nice) result += indent_str + "\t";
+				result += "\"" + slashEncode(obj_it->first, "\"") + "\":";
+				if (nice) result += " ";
+				result += obj_it->second.doEncode(indent + 1, nice) + ",";
+				if (nice) result += "\n";
+			}
+			if (!obj.empty()) {
+				if (!nice) {
+					result.resize(result.size()-1);
+				} else {
+					result.resize(result.size()-2);
+					result += "\n";
+				}
+			}
+			result += indent_str + "}";
+
+			return result;
+		}
+	case ARRAY:
+		{
+			std::string result;
+
+			std::string indent_str;
+			if (nice) indent_str = std::string(indent, '\t');
+
+			result += "[";
+			if (nice) result += "\n";
+			for (Array::const_iterator arr_it = arr.begin();
+			     arr_it != arr.end();
+			     ++ arr_it) {
+				result += arr_it->doEncode(indent + 1, nice) + ",";
+				if (nice) result += "\n";
+			}
+			if (!arr.empty()) {
+				if (!nice) {
+					result.resize(result.size()-1);
+				} else {
+					result.resize(result.size()-2);
+					result += "\n";
+				}
+			}
+			result += indent_str + "]";
+			if (nice) result += "\n";
+
+			return result;
+		}
+	case NUL:
+		return "null";
+	default:
+		break;
+	}
+	HppAssert(false, "Invalid JSON type!");
+}
 
 inline void Json::clear(void)
 {
