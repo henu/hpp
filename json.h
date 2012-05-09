@@ -302,6 +302,7 @@ inline std::string Json::doEncode(size_t indent, bool nice) const
 			for (Array::const_iterator arr_it = arr.begin();
 			     arr_it != arr.end();
 			     ++ arr_it) {
+				if (nice) result += indent_str + "\t";
 				result += arr_it->doEncode(indent + 1, nice) + ",";
 				if (nice) result += "\n";
 			}
@@ -314,7 +315,6 @@ inline std::string Json::doEncode(size_t indent, bool nice) const
 				}
 			}
 			result += indent_str + "]";
-			if (nice) result += "\n";
 
 			return result;
 		}
