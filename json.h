@@ -50,6 +50,7 @@ public:
 	inline bool keyExists(std::string const& key) const;
 	inline Json getMember(std::string const& key) const;
 	inline Array getArray(void) const;
+	inline size_t getArraySize(void) const;
 	inline Json getItem(size_t index) const;
 	inline bool getBoolean(void) const;
 
@@ -219,6 +220,14 @@ inline Json::Array Json::getArray(void) const
 		throw Exception("Unable to get array, because this JSON is not an array!");
 	}
 	return arr;
+}
+
+inline size_t Json::getArraySize(void) const
+{
+	if (type != ARRAY) {
+		throw Exception("Unable to get size of array, because this JSON is not an array!");
+	}
+	return arr.size();
 }
 
 inline Json Json::getItem(size_t index) const
