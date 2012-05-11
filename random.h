@@ -1,9 +1,10 @@
 #ifndef RANDOM_H
 #define RANDOM_H
 
-#include "assert.h"
 #include "vector2.h"
 #include "vector3.h"
+#include "angle.h"
+#include "assert.h"
 #include "real.h"
 
 #include <cstdlib>
@@ -16,6 +17,8 @@ inline Real random(Real min, Real max);
 
 // Returns a value in range [min, max]
 inline ssize_t randomInt(ssize_t min, ssize_t max);
+
+inline Angle randomAngle(void);
 
 inline Vector2 randomVector2(Real max_radius);
 inline Vector3 randomVector3(Real max_radius);
@@ -30,6 +33,11 @@ inline ssize_t randomInt(ssize_t min, ssize_t max)
 {
 	ssize_t range = max - min + 1;
 	return min + (rand() % range);
+}
+
+inline Angle randomAngle(void)
+{
+	return Angle::fromDegrees(random(-180, 180));
 }
 
 inline Vector2 randomVector2(Real max_radius)
