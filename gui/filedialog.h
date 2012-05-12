@@ -71,7 +71,7 @@ type(SAVE),
 callback(NULL)
 {
 	Path maps_path = Path::getConfig() / "hme_mapeditor" / "levels";
-	ensurePathExists(maps_path);
+	maps_path.ensureDirExists();
 
 	// Main container
 	maincontainer.setDirection(Vectorcontainer::VERTICAL);

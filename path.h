@@ -64,6 +64,8 @@ public:
 	inline bool isLink(void) const { return getType() == SYMLINK; }
 
 	inline bool exists(void) const;
+
+	inline void ensureDirExists(void) const;
 	
 	// Renames file/dir that this Path points to. Note, that
 	// pointing of this Path will be modified. Also, if this
@@ -126,8 +128,6 @@ private:
 	inline static bool compareDirChildren(DirChild const& child1, DirChild const& child2);
 
 };
-
-inline void ensurePathExists(Path const& p);
 
 
 // ----------------------------------------
@@ -351,6 +351,41 @@ inline bool Path::exists(void) const
 		return true;
 	}
 	return errno != ENOENT;
+}
+
+inline void Path::ensureDirExists(void) const
+{
+	if (isUnknown()) {
+		throw Exception("Unable to ensure existence of unknown path!");
+	}
+	Path p2(*this);
+	p2.convertToAbsolute();
+
+	#ifndef WIN32
+	std::string p_test("/");
+	#else
+	std::string p_test;
+	#endif
+	for (size_t part_id = 0; part_id < p2.partsSize(); part_id ++) {
+
+		std::string part = p2[part_id];
+		p_test += part + "/";
+
+		// Ensure current path part exists.
+		struct stat sttmp;
+		if (stat(convertFromUtf8ToSystemCharset(p_test).c_str(), &sttmp) == -1) {
+			#ifndef WIN32
+			if (mkdir(convertFromUtf8ToSystemCharset(p_test).c_str(), 0700) == -1) {
+				throw Exception("Unable to create directory \"" + p_test + "\"!");
+			}
+			#else
+			mkdir(convertFromUtf8ToSystemCharset(p_test).c_str());
+			#endif
+		} else if (!S_ISDIR(sttmp.st_mode)) {
+			throw Exception("\"" + p_test + "\" is not a directory!");
+		}
+
+	}
 }
 
 inline void Path::rename(Path const& new_path) const
@@ -803,41 +838,6 @@ inline bool Path::operator==(Path const& path) const
 inline bool Path::operator!=(Path const& path) const
 {
 	return !(*this == path);
-}
-
-inline void ensurePathExists(Path const& p)
-{
-	if (p.isUnknown()) {
-		throw Exception("Unable to ensure existence of unknown path!");
-	}
-	Path p2(p);
-	p2.convertToAbsolute();
-
-	#ifndef WIN32
-	std::string p_test("/");
-	#else
-	std::string p_test;
-	#endif
-	for (size_t part_id = 0; part_id < p2.partsSize(); part_id ++) {
-
-		std::string part = p2[part_id];
-		p_test += part + "/";
-
-		// Ensure current path part exists.
-		struct stat sttmp;
-		if (stat(convertFromUtf8ToSystemCharset(p_test).c_str(), &sttmp) == -1) {
-			#ifndef WIN32
-			if (mkdir(convertFromUtf8ToSystemCharset(p_test).c_str(), 0700) == -1) {
-				throw Exception("Unable to create directory \"" + p_test + "\"!");
-			}
-			#else
-			mkdir(convertFromUtf8ToSystemCharset(p_test).c_str());
-			#endif
-		} else if (!S_ISDIR(sttmp.st_mode)) {
-			throw Exception("\"" + p_test + "\" is not a directory!");
-		}
-
-	}
 }
 
 inline bool Path::compareDirChildren(DirChild const& child1, DirChild const& child2)
