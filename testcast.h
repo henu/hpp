@@ -14,6 +14,7 @@ namespace Hpp
 namespace Tests
 {
 
+// TODO: Make 64bit tests!
 inline void testCast(void)
 {
 	uint8_t testbuf[4];

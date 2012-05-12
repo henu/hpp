@@ -12,6 +12,7 @@
 #include <sstream>
 #include <cstdlib>
 
+// TODO: Use (u)int64_t instead of (u)int32_t in casting functions with variable bytesize!
 namespace Hpp
 {
 
@@ -22,14 +23,18 @@ inline float		cStrToFloat(uint8_t const* c_str, bool bigendian = true);
 inline ssize_t		cStrToInt(uint8_t const* c_str, uint8_t bytesize, bool bigendian = true);
 inline int16_t		cStrToInt16(uint8_t const* c_str, bool bigendian = true);
 inline int32_t		cStrToInt32(uint8_t const* c_str, bool bigendian = true);
+inline int64_t		cStrToInt64(uint8_t const* c_str, bool bigendian = true);
 inline size_t		cStrToUInt(uint8_t const* c_str, uint8_t bytesize, bool bigendian = true);
 inline uint16_t		cStrToUInt16(uint8_t const* c_str, bool bigendian = true);
 inline uint32_t		cStrToUInt32(uint8_t const* c_str, bool bigendian = true);
+inline uint64_t		cStrToUInt64(uint8_t const* c_str, bool bigendian = true);
 inline float		cStrToFloat(char const* c_str, bool bigendian = true) { return cStrToFloat((uint8_t const*)c_str, bigendian); }
 inline int16_t		cStrToInt16(char const* c_str, bool bigendian = true) { return cStrToInt16((uint8_t const*)c_str, bigendian); }
 inline int32_t		cStrToInt32(char const* c_str, bool bigendian = true) { return cStrToInt32((uint8_t const*)c_str, bigendian); }
+inline int64_t		cStrToInt64(char const* c_str, bool bigendian = true) { return cStrToInt64((uint8_t const*)c_str, bigendian); }
 inline uint16_t		cStrToUInt16(char const* c_str, bool bigendian = true) { return cStrToUInt16((uint8_t const*)c_str, bigendian); }
 inline uint32_t		cStrToUInt32(char const* c_str, bool bigendian = true) { return cStrToUInt32((uint8_t const*)c_str, bigendian); }
+inline uint64_t		cStrToUInt64(char const* c_str, bool bigendian = true) { return cStrToUInt64((uint8_t const*)c_str, bigendian); }
 inline ByteV		dStrToByteV(std::string const& dstr);
 inline ByteV		floatToByteV(float f, bool bigendian = true);
 inline void		floatToCStr(float f, uint8_t* c_str, bool bigendian = true);
@@ -40,6 +45,8 @@ inline ByteV		int16ToByteV(int16_t i, bool bigendian = true);
 inline void		int16ToCStr(int16_t i, uint8_t* c_str, bool bigendian = true);
 inline ByteV		int32ToByteV(int32_t i, bool bigendian = true);
 inline void		int32ToCStr(int32_t i, uint8_t* c_str, bool bigendian = true);
+inline ByteV		int64ToByteV(int64_t i, bool bigendian = true);
+inline void		int64ToCStr(int64_t i, uint8_t* c_str, bool bigendian = true);
 inline ByteV		matrix3ToBytes(Matrix3 const& m, bool bigendian = true);
 inline ByteV		matrix4ToBytes(Matrix4 const& m, bool bigendian = true);
 inline std::string 	sizeToStr(size_t i);
@@ -53,6 +60,8 @@ inline ByteV		uInt16ToByteV(uint16_t i, bool bigendian = true);
 inline void		uInt16ToCStr(uint16_t i, uint8_t* c_str, bool bigendian = true);
 inline ByteV		uInt32ToByteV(uint32_t i, bool bigendian = true);
 inline void		uInt32ToCStr(uint32_t i, uint8_t* c_str, bool bigendian = true);
+inline ByteV		uInt64ToByteV(uint64_t i, bool bigendian = true);
+inline void		uInt64ToCStr(uint64_t i, uint8_t* c_str, bool bigendian = true);
 inline ByteV		uIntToByteV(size_t i, uint8_t bytesize, bool bigendian = true);
 inline void		uIntToCStr(size_t i, uint8_t* c_str, uint8_t bytesize, bool bigendian = true);
 
@@ -166,6 +175,11 @@ inline int32_t cStrToInt32(uint8_t const* c_str, bool bigendian)
 	return (int32_t)cStrToUInt32(c_str, bigendian);
 }
 
+inline int64_t cStrToInt64(uint8_t const* c_str, bool bigendian)
+{
+	return (int64_t)cStrToUInt64(c_str, bigendian);
+}
+
 inline size_t cStrToUInt(uint8_t const* c_str, uint8_t bytesize, bool bigendian)
 {
 	uint32_t i = 0;
@@ -207,6 +221,31 @@ inline uint32_t cStrToUInt32(uint8_t const* c_str, bool bigendian)
 		i += c_str[1] << 8;
 		i += c_str[2] << 16;
 		i += c_str[3] << 24;
+	}
+	return i;
+}
+
+inline uint64_t cStrToUInt64(uint8_t const* c_str, bool bigendian)
+{
+	uint64_t i = 0;
+	if (bigendian) {
+		i += c_str[7] << 0;
+		i += c_str[6] << 8;
+		i += c_str[5] << 16;
+		i += c_str[4] << 24;
+		i += (uint64_t)c_str[3] << 32;
+		i += (uint64_t)c_str[2] << 40;
+		i += (uint64_t)c_str[1] << 48;
+		i += (uint64_t)c_str[0] << 56;
+	} else {
+		i += c_str[0] << 0;
+		i += c_str[1] << 8;
+		i += c_str[2] << 16;
+		i += c_str[3] << 24;
+		i += (uint64_t)c_str[4] << 32;
+		i += (uint64_t)c_str[5] << 40;
+		i += (uint64_t)c_str[6] << 48;
+		i += (uint64_t)c_str[7] << 56;
 	}
 	return i;
 }
@@ -368,6 +407,16 @@ inline void int32ToCStr(int32_t i, uint8_t* c_str, bool bigendian)
 	uInt32ToCStr((uint32_t)i, c_str, bigendian);
 }
 
+inline ByteV int64ToByteV(int64_t i, bool bigendian)
+{
+	return uInt64ToByteV((uint64_t)i, bigendian);
+}
+
+inline void int64ToCStr(int64_t i, uint8_t* c_str, bool bigendian)
+{
+	uInt64ToCStr((uint64_t)i, c_str, bigendian);
+}
+
 inline ByteV matrix3ToBytes(Matrix3 const& m, bool bigendian)
 {
 	ByteV result;
@@ -523,6 +572,55 @@ inline void uInt32ToCStr(uint32_t i, uint8_t* c_str, bool bigendian)
 		c_str[1] = static_cast< uint8_t >(i >> 8);
 		c_str[2] = static_cast< uint8_t >(i >> 16);
 		c_str[3] = static_cast< uint8_t >(i >> 24);
+	}
+}
+
+inline ByteV uInt64ToByteV(uint64_t i, bool bigendian)
+{
+	ByteV result;
+	result.reserve(8);
+	if (bigendian) {
+		result.push_back(static_cast< uint8_t >(i >> 56));
+		result.push_back(static_cast< uint8_t >(i >> 48));
+		result.push_back(static_cast< uint8_t >(i >> 40));
+		result.push_back(static_cast< uint8_t >(i >> 32));
+		result.push_back(static_cast< uint8_t >(i >> 24));
+		result.push_back(static_cast< uint8_t >(i >> 16));
+		result.push_back(static_cast< uint8_t >(i >> 8));
+		result.push_back(static_cast< uint8_t >(i >> 0));
+	} else {
+		result.push_back(static_cast< uint8_t >(i >> 0));
+		result.push_back(static_cast< uint8_t >(i >> 8));
+		result.push_back(static_cast< uint8_t >(i >> 16));
+		result.push_back(static_cast< uint8_t >(i >> 24));
+		result.push_back(static_cast< uint8_t >(i >> 32));
+		result.push_back(static_cast< uint8_t >(i >> 40));
+		result.push_back(static_cast< uint8_t >(i >> 48));
+		result.push_back(static_cast< uint8_t >(i >> 56));
+	}
+	return result;
+}
+
+inline void uInt64ToCStr(uint64_t i, uint8_t* c_str, bool bigendian)
+{
+	if (bigendian) {
+		c_str[7] = static_cast< uint8_t >(i >> 0);
+		c_str[6] = static_cast< uint8_t >(i >> 8);
+		c_str[5] = static_cast< uint8_t >(i >> 16);
+		c_str[4] = static_cast< uint8_t >(i >> 24);
+		c_str[3] = static_cast< uint8_t >(i >> 32);
+		c_str[2] = static_cast< uint8_t >(i >> 40);
+		c_str[1] = static_cast< uint8_t >(i >> 48);
+		c_str[0] = static_cast< uint8_t >(i >> 56);
+	} else {
+		c_str[0] = static_cast< uint8_t >(i >> 0);
+		c_str[1] = static_cast< uint8_t >(i >> 8);
+		c_str[2] = static_cast< uint8_t >(i >> 16);
+		c_str[3] = static_cast< uint8_t >(i >> 24);
+		c_str[4] = static_cast< uint8_t >(i >> 32);
+		c_str[5] = static_cast< uint8_t >(i >> 40);
+		c_str[6] = static_cast< uint8_t >(i >> 48);
+		c_str[7] = static_cast< uint8_t >(i >> 56);
 	}
 }
 
