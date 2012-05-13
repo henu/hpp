@@ -56,7 +56,7 @@ HppAssert(false, "Not implemented yet!");
 	// There was some displaymodes available. Go them through and put them
 	// to vector.
 	Modes result;
-	for (SDL_Rect** modes_it = modes; *modes_it; modes_it ++) {
+	for (SDL_Rect** modes_it = modes; *modes_it; ++ modes_it) {
 		Mode new_mode;
 		new_mode.width = (*modes_it)->w;
 		new_mode.height = (*modes_it)->h;
@@ -188,7 +188,7 @@ void Display::endRendering(void)
 		Time last_needed = time_now;
 		for (Videorecorders::iterator recorders_it = instance.recorders.begin();
 		     recorders_it != instance.recorders.end();
-		     recorders_it ++) {
+		     ++ recorders_it) {
 			Videorecorder* recorder = *recorders_it;
 			recorder->newFrameAvailable(time_now);
 			last_needed = std::min(last_needed, recorder->getOldestNeededFrame());
@@ -290,7 +290,7 @@ void Display::getVideoframesFromRange(Rawframes& result, Time const& min, Time c
 	Lock rawframes_lock(rawframes_mutex);
 	for (Rawframes::const_iterator rawframes_it = rawframes.lower_bound(min);
 	     rawframes_it != rawframes.end() && rawframes_it->first < max;
-	     rawframes_it ++) {
+	     ++ rawframes_it) {
 	     	result[rawframes_it->first] = rawframes_it->second;
 	}
 	HppAssert(!result.empty(), "No frames found!");
@@ -320,7 +320,7 @@ void Display::setScissorFromStack(void)
 	stotal.size_y = height;
 	for (Scissorstack::const_iterator sstack_it = sstack.begin();
 	     sstack_it != sstack.end();
-	     sstack_it ++) {
+	     ++ sstack_it) {
 		Scissoritem const& sitem = *sstack_it;
 		if (sitem.pos_x > stotal.pos_x) {
 			size_t diff = sitem.pos_x - stotal.pos_x;

@@ -75,7 +75,7 @@ skel_uptodate(false)
 	     	catch ( ... ) {
 			for (Subentities::iterator subents_it = subents.begin();
 			     subents_it != subents.end();
-			     subents_it ++) {
+			     ++ subents_it) {
 				delete *subents_it;
 			}
 			throw;
@@ -97,7 +97,7 @@ inline Entity::~Entity(void)
 	HppAssert(ahandles.empty(), "Found unreleased actionhandles!");
 	for (Subentities::iterator subents_it = subents.begin();
 	     subents_it != subents.end();
-	     subents_it ++) {
+	     ++ subents_it) {
 	     	delete *subents_it;
 	}
 }
@@ -112,7 +112,7 @@ inline void Entity::setMaterial(Material* mat)
 {
 	for (Subentities::iterator subents_it = subents.begin();
 	     subents_it != subents.end();
-	     subents_it ++) {
+	     ++ subents_it) {
 	     	Subentity* subent = *subents_it;
 	     	subent->setMaterial(mat);
 	}
@@ -145,7 +145,7 @@ inline void Entity::absoluteTransformUpdated(void)
 	Transform const transf_abs = getAbsoluteTransform();
 	for (Subentities::iterator subents_it = subents.begin();
 	     subents_it != subents.end();
-	     subents_it ++) {
+	     ++ subents_it) {
 		Subentity* subent = *subents_it;
 		subent->updateAbsoluteTransform(transf_abs);
 	}

@@ -119,7 +119,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	std::string flags_srcmod;
 	for (Flags::const_iterator flags_it = flags.begin();
 	     flags_it != flags.end();
-	     flags_it ++) {
+	     ++ flags_it) {
 	     	std::string const& flag = *flags_it;
 	     	flags_srcmod += "#define " + flag + "\n";
 	}
@@ -127,7 +127,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	// Compile shaders
 	for (Shaders::const_iterator shaders_it = shaders.begin();
 	     shaders_it != shaders.end();
-	     shaders_it ++) {
+	     ++ shaders_it) {
 		Shader const* shader = *shaders_it;
 
 		HppCheckGlErrors();
@@ -183,7 +183,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	// Attach shaders
 	for (std::vector< GLhandleARB >::const_iterator shaders_it = new_lprog.shaders.begin();
 	     shaders_it != new_lprog.shaders.end();
-	     shaders_it ++) {
+	     ++ shaders_it) {
 		GlSystem::AttachObject(new_lprog.program, *shaders_it);
 	}
 
@@ -216,7 +216,7 @@ inline void Shaderprogram::cleanLinkedPrograms(void)
 	HppAssert(!enabled, "Must not be enabled!");
 	for (LinkedPrograms::iterator lprogs_it = lprogs.begin();
 	     lprogs_it != lprogs.end();
-	     lprogs_it ++) {
+	     ++ lprogs_it) {
 	     	LinkedProgram& lprog = lprogs_it->second;
 	     	GlSystem::DeleteObject(lprog.program);
 	     	cleanCompiledShaders(lprog.shaders);
@@ -228,7 +228,7 @@ inline void Shaderprogram::cleanCompiledShaders(std::vector< GLhandleARB > const
 {
 	for (std::vector< GLhandleARB >::const_iterator shaders_it = shaders.begin();
 	     shaders_it != shaders.end();
-	     shaders_it ++) {
+	     ++ shaders_it) {
 		GlSystem::DeleteObject(*shaders_it);
 	}
 }

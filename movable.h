@@ -240,7 +240,7 @@ inline void Movable::transformChanged(void)
 	// Mark all children to need recalculation too
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
-	     children_it ++) {
+	     ++ children_it) {
 	     	Movable* child = *children_it;
      		child->transformChangedRecursive();
 	}
@@ -332,7 +332,7 @@ inline void Movable::getAllVisibles(Visibles& result, Viewfrustums const& vfrust
 		// hides this boundingsphere.
 		for (Viewfrustums::const_iterator ofrusts_it = ofrusts.begin();
 		     ofrusts_it != ofrusts.end();
-		     ofrusts_it ++) {
+		     ++ ofrusts_it) {
 			Viewfrustum const& ofrust = *ofrusts_it;
 			Viewfrustum::VFResult inside = ofrust.testBoundingsphere(totalbs_t);
 			// If fully inside, then this scenenode and
@@ -352,7 +352,7 @@ inline void Movable::getAllVisibles(Visibles& result, Viewfrustums const& vfrust
 			bool fully_outside = true;
 			for (Viewfrustums::const_iterator vfrusts_it = vfrusts.begin();
 			     vfrusts_it != vfrusts.end();
-			     vfrusts_it ++) {
+			     ++ vfrusts_it) {
 				Viewfrustum const& vfrust = *vfrusts_it;
 				Viewfrustum::VFResult inside = vfrust.testBoundingsphere(totalbs_t);
 				// If fully inside, then no view frustums are
@@ -385,7 +385,7 @@ inline void Movable::getAllVisibles(Visibles& result, Viewfrustums const& vfrust
 	if (boundingsphereVisible(bs, my_absolute_transf, children_vfrusts, children_ofrusts)) {
 		for (Renderables::const_iterator renderables_it = renderables.begin();
 		     renderables_it != renderables.end();
-		     renderables_it ++) {
+		     ++ renderables_it) {
 		     	Renderable* renderable = *renderables_it;
 		     	if (renderable->needsLight()) {
 				result.normal.push_back(renderable);
@@ -398,7 +398,7 @@ inline void Movable::getAllVisibles(Visibles& result, Viewfrustums const& vfrust
 	// Get visibles from children
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
-	     children_it ++) {
+	     ++ children_it) {
 	     	Movable* child = *children_it;
 	     	child->getAllVisibles(result, children_vfrusts, children_ofrusts);
 	}
@@ -410,7 +410,7 @@ inline void Movable::checkIfAllChildrenHasAbsoluteTransformsUpToDate(void)
 	bool all_up_to_date = true;
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
-	     children_it ++) {
+	     ++ children_it) {
 	     	Movable* child = *children_it;
 	     	// Skip children that are hidden
 	     	if (!child->visible) {
@@ -454,7 +454,7 @@ inline void Movable::updateAbsoluteTransform(Transform const& parent_transf_abs)
 	// Go children through and make required updates
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
-	     children_it ++) {
+	     ++ children_it) {
 		Movable* child = *children_it;
 		if (child->transf_abs_uptodate != YES) {
 			child->updateAbsoluteTransform(transf_abs);
@@ -469,7 +469,7 @@ inline void Movable::transformChangedRecursive(void)
 
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
-	     children_it ++) {
+	     ++ children_it) {
 		Movable* child = *children_it;
 		child->transformChangedRecursive();
 	}
@@ -485,7 +485,7 @@ inline void Movable::updateTotalBoundingsphereRecursive(void)
 	// First ensure children have their total boundingspheres up-to-date
 	for (Children::iterator children_it = children.begin();
 	     children_it != children.end();
-	     children_it ++) {
+	     ++ children_it) {
 		Movable* child = *children_it;
 		if (!child->totalbs_uptodate) {
 			child->updateTotalBoundingsphereRecursive();
@@ -512,7 +512,7 @@ inline void Movable::updateTotalBoundingsphereRecursive(void)
 
 		for (Children::iterator children_it = children.begin();
 		     children_it != children.end();
-		     children_it ++) {
+		     ++ children_it) {
 			Movable* child = *children_it;
 			// Skip children that are hidden
 			if (!child->visible) {
@@ -578,7 +578,7 @@ inline bool Movable::boundingsphereVisible(Boundingsphere const& bs, Transform c
 		bool visible = false;
 		for (Viewfrustums::const_iterator vfrusts_it = vfrusts.begin();
 		     vfrusts_it != vfrusts.end();
-		     vfrusts_it ++) {
+		     ++ vfrusts_it) {
 			Viewfrustum const& vfrust = *vfrusts_it;
 			if (vfrust.testBoundingsphere(bs_fixed) != Viewfrustum::OUTSIDE) {
 				visible = true;
@@ -591,7 +591,7 @@ inline bool Movable::boundingsphereVisible(Boundingsphere const& bs, Transform c
 	}
 	for (Viewfrustums::const_iterator ofrusts_it = ofrusts.begin();
 	     ofrusts_it != ofrusts.end();
-	     ofrusts_it ++) {
+	     ++ ofrusts_it) {
 		Viewfrustum const& ofrust = *ofrusts_it;
 		if (ofrust.testBoundingsphere(bs_fixed) != Viewfrustum::INSIDE) {
 			return false;

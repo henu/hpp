@@ -10,7 +10,8 @@ namespace Gui
 {
 
 Menuitem::Menuitem(void) :
-callback(NULL)
+callback(NULL),
+callback_data(NULL)
 {
 }
 

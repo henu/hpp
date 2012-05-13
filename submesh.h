@@ -138,7 +138,7 @@ default_mat(rawsubmesh.mat)
 
 	for (Rawmesh::Tris::const_iterator tris_it = rawsubmesh_tris.begin();
 	     tris_it != rawsubmesh_tris.end();
-	     tris_it ++) {
+	     ++ tris_it) {
 	     	Rawmesh::Tri const& tri = *tris_it;
 		addFaceToStaticparts(submesh_id, tri, vrts, vrts_snormal, uvs_exist, vgis_exist);
 	}
@@ -163,7 +163,7 @@ inline Submesh::~Submesh(void)
 {
 	for (std::vector< Rendbuf< Real >* >::iterator uvs_it = uvs.begin();
 	     uvs_it != uvs.end();
-	     uvs_it ++) {
+	     ++ uvs_it) {
 		delete *uvs_it;
 	}
 }
@@ -258,7 +258,7 @@ inline void Submesh::addFaceToStaticparts(size_t submesh_id,
 	Staticpart* spart = NULL;
 	for (Staticparts::iterator sparts_it = sparts.begin();
 	     sparts_it != sparts.end();
-	     sparts_it ++) {
+	     ++ sparts_it) {
 	     	if (sparts_it->vginfls == vgi) {
 	     		spart = &*sparts_it;
 	     		break;
@@ -402,7 +402,7 @@ inline void Submesh::addFaceToStaticparts(size_t submesh_id,
 				uint8_t extrafills = 4 - vrt_vgi.size();
 				for (VGInfls::const_iterator vrt_vgi_it = vrt_vgi.begin();
 				     vrt_vgi_it != vrt_vgi.end();
-				     vrt_vgi_it ++) {
+				     ++ vrt_vgi_it) {
 				     	vg_ids.push_back(vrt_vgi_it->first);
 				     	vg_weights.push_back(vrt_vgi_it->second);
 				}
@@ -424,7 +424,7 @@ inline Submesh::TangentsAndBinormals::const_iterator Submesh::findBestTangentAnd
 	Real nearest_to_2 = 99999999;
 	for (TangentsAndBinormals::const_iterator ts_n_bs_it = ts_n_bs.begin();
 	     ts_n_bs_it != ts_n_bs.end();
-	     ts_n_bs_it ++) {
+	     ++ ts_n_bs_it) {
 		UvAndSubmeshId const& key = ts_n_bs_it->first;
 		if (key.submesh_id == uv_n_si.submesh_id) {
 			Real diff = (key.uv - uv_n_si.uv).lengthTo2();

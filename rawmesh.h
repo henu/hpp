@@ -334,7 +334,7 @@ inline void Rawmesh::convertQuadToTris(Tri& tri1, Tri& tri2, Quad const& quad, H
 	tri2.layers.reserve(quad.layers.size());
 	for (FaceLayers::const_iterator quad_layers_it = quad.layers.begin();
 	     quad_layers_it != quad.layers.end();
-	     quad_layers_it ++) {
+	     ++ quad_layers_it) {
 	     	FaceLayer const& quad_layer = *quad_layers_it;
 	     	FaceLayer tri1_layer;
 	     	FaceLayer tri2_layer;

@@ -76,7 +76,7 @@ inline std::string byteVToDStr(ByteV const& v)
 	uint8_t bits_size = 0;
 	for (ByteV::const_iterator v_it = v.begin();
 	     v_it != v.end();
-	     v_it ++) {
+	     ++ v_it) {
 		uint8_t c8 = *v_it;
 		// Read bits to buffer
 		bits <<= 8;
@@ -113,7 +113,7 @@ inline std::string byteVToHexV(ByteV const& bytev)
 	result.reserve(bytev.size() * 2);
 	for (ByteV::const_iterator bytev_it = bytev.begin();
 	     bytev_it != bytev.end();
-	     bytev_it ++) {
+	     ++ bytev_it) {
 		uint8_t part = (*bytev_it >> 4);
 		if (part < 10) {
 			result.push_back('0' + part);
@@ -261,7 +261,7 @@ inline ByteV dStrToByteV(std::string const& dstr)
 	uint8_t bits_size = 0;
 	for (std::string::const_iterator dstr_it = dstr.begin();
 	     dstr_it != dstr.end();
-	     dstr_it ++) {
+	     ++ dstr_it) {
 		char c = *dstr_it;
 		uint8_t c6;
 		// Read bits to buffer
@@ -341,7 +341,7 @@ inline ByteV hexVToByteV(std::string const& hexv)
 	uint32_t valid_chars = 0;
 	for (std::string::const_iterator hexv_it = hexv.begin();
 	     hexv_it != hexv.end();
-	     hexv_it ++) {
+	     ++ hexv_it) {
 		if ((*hexv_it >= '0' && *hexv_it <= '9') ||
 		    (*hexv_it >= 'a' && *hexv_it <= 'f') ||
 		    (*hexv_it >= 'A' && *hexv_it <= 'F')) {
@@ -356,7 +356,7 @@ inline ByteV hexVToByteV(std::string const& hexv)
 	}
 	for (std::string::const_iterator hexv_it = hexv.begin();
 	     hexv_it != hexv.end();
-	     hexv_it ++) {
+	     ++ hexv_it) {
 		uint8_t ival;
 		if (*hexv_it >= '0' && *hexv_it <= '9') {
 			ival = *hexv_it - '0';

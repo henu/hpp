@@ -31,7 +31,7 @@ inline VGInfls calculateFixedVertexgroupinfluence(VGInfls const& raw)
 	std::multimap< float, uint32_t > sort_by_infl;
 	for (VGInfls::const_iterator raw_it = raw.begin();
 	     raw_it != raw.end();
-	     raw_it ++) {
+	     ++ raw_it) {
 	     	sort_by_infl.insert(std::pair< float, uint32_t >(raw_it->second, raw_it->first));
 	}
 	size_t skip = raw.size() - 4;
@@ -40,7 +40,7 @@ inline VGInfls calculateFixedVertexgroupinfluence(VGInfls const& raw)
 	VGInfls result;
 	for (std::multimap< float, uint32_t >::const_iterator sort_by_infl_it = sort_by_infl.begin();
 	     sort_by_infl_it != sort_by_infl.end();
-	     sort_by_infl_it ++) {
+	     ++ sort_by_infl_it) {
 	     	Hpp::Real weight = sort_by_infl_it->first;
 	     	if (skip > 0) {
 	     		skipped_totalweight += weight;
@@ -54,7 +54,7 @@ inline VGInfls calculateFixedVertexgroupinfluence(VGInfls const& raw)
 	// Add removed weight
 	for (VGInfls::iterator result_it = result.begin();
 	     result_it != result.end();
-	     result_it ++) {
+	     ++ result_it) {
 	     	Hpp::Real weight = result_it->second;
 	     	HppAssert(nonskipped_totalweight != 0, "Division by zero!");
 	     	result_it->second += (weight / nonskipped_totalweight) * skipped_totalweight;

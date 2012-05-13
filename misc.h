@@ -78,13 +78,13 @@ inline std::vector< ByteV > splitString(ByteV const& v, char separator)
 	ByteV::const_iterator part_begin = v.begin();
 	for (ByteV::const_iterator v_it = v.begin();
 	     v_it != v.end();
-	     v_it ++) {
+	     ++ v_it) {
 		char c = *v_it;
 		if (c == separator) {
 			ByteV part(part_begin, v_it);
 			result.push_back(part);
 			part_begin = v_it;
-			part_begin ++;
+			++ part_begin;
 		}
 	}
 	if (part_begin != v.end()) {
@@ -99,13 +99,13 @@ inline std::vector< std::string > splitString(std::string const& str, char separ
 	std::string::const_iterator part_begin = str.begin();
 	for (std::string::const_iterator str_it = str.begin();
 	     str_it != str.end();
-	     str_it ++) {
+	     ++ str_it) {
 		char c = *str_it;
 		if (c == separator) {
 			std::string part(part_begin, str_it);
 			result.push_back(part);
 			part_begin = str_it;
-			part_begin ++;
+			++ part_begin;
 		}
 	}
 	if (part_begin != str.end()) {

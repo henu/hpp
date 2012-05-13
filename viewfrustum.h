@@ -269,7 +269,7 @@ inline Viewfrustum Viewfrustum::doIntersection(Viewfrustum const& vfrust) const
 	bool infinites_found = false;
 	for (std::vector< Vector2 >::const_iterator vrts_it = vfrust.vrts.begin();
 	     vrts_it != vfrust.vrts.end();
-	     vrts_it ++) {
+	     ++ vrts_it) {
 		Vector2 const& vrt = *vrts_it;
 		Vector3 diff = vfrust.dir + vfrust.right * vrt.x + vfrust.up * vrt.y;
 		// Check if this vertex would go to infinity

@@ -78,7 +78,7 @@ inline Videorecorder::~Videorecorder(void)
 	// Wait for threads to finish
 	for (Threads::iterator encoders_it = encoders.begin();
 	     encoders_it != encoders.end();
-	     encoders_it ++) {
+	     ++ encoders_it) {
 	     	encoders_it->wait();
 	}
 	disp->unregisterVideorecorder(this);
@@ -208,7 +208,7 @@ inline void Videorecorder::encoder(void* recorder_raw)
 				std::vector< size_t > result(result_size, 0);
 				for (Display::Rawframes::const_iterator rawframes_it = rawframes.begin();
 				     rawframes_it != rawframes.end();
-				     rawframes_it ++) {
+				     ++ rawframes_it) {
 				     	Image const& rawframe = rawframes_it->second;
 				     	ByteV rawframe_data = rawframe.getData();
 				     	for (size_t offset = 0; offset < result_size; offset ++) {

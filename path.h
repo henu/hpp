@@ -200,7 +200,7 @@ inline Path::Path(std::string const& p)
 			parts.push_back(part);
 			part.clear();
 		}
-		p_it ++;
+		++ p_it;
 	}
 	if (!part.empty()) {
 		parts.push_back(part);
@@ -278,7 +278,7 @@ inline std::string Path::toString(bool compact) const
 	#ifdef WIN32
 	for (std::string::iterator result_it = result.begin();
 	     result_it != result.end();
-	     result_it ++) {
+	     ++ result_it) {
 		if (*result_it == '\\') {
 			*result_it = '/';
 		}
@@ -287,7 +287,7 @@ inline std::string Path::toString(bool compact) const
 
 	for (Parts::const_iterator parts_it = parts.begin();
 	     parts_it != parts.end();
-	     parts_it ++) {
+	     ++ parts_it) {
 		if (parts_it == parts.begin()) {
 			result += *parts_it;
 		} else {
@@ -512,7 +512,7 @@ HppAssert(false, "Not implemented yet!");
 	#ifdef WIN32
 	for (std::string::iterator parts_begin_str_it = parts_begin_str.begin();
 	     parts_begin_str_it != parts_begin_str.end();
-	     parts_begin_str_it ++) {
+	     ++ parts_begin_str_it) {
 		if (*parts_begin_str_it == '\\') {
 			*parts_begin_str_it = '/';
 		}
@@ -524,7 +524,7 @@ HppAssert(false, "Not implemented yet!");
 	Parts parts_begin_fixed;
 	for (Parts::const_iterator parts_begin_it = parts_begin.begin();
 	     parts_begin_it != parts_begin.end();
-	     parts_begin_it ++) {
+	     ++ parts_begin_it) {
 	     	if (!parts_begin_it->empty()) {
 			parts_begin_fixed.push_back(*parts_begin_it);
 	     	}
@@ -710,7 +710,7 @@ inline void Path::ensureAbsoluteOrRelative(void)
 	#ifdef WIN32
 	for (std::string::iterator parts_begin_str_it = parts_begin_str.begin();
 	     parts_begin_str_it != parts_begin_str.end();
-	     parts_begin_str_it ++) {
+	     ++ parts_begin_str_it) {
 		if (*parts_begin_str_it == '\\') {
 			*parts_begin_str_it = '/';
 		}

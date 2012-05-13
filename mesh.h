@@ -63,14 +63,14 @@ inline Mesh::Mesh(Rawmesh const& rawmesh, Rawmesh::Halvingstyle hstyle)
 	tris_n_quads.reserve(rawmesh.submeshes.size());
 	for (Rawmesh::Submeshes::const_iterator submeshes_it = rawmesh.submeshes.begin();
 	     submeshes_it != rawmesh.submeshes.end();
-	     submeshes_it ++) {
+	     ++ submeshes_it) {
 	     	Rawmesh::Submesh const& submesh = *submeshes_it;
 	     	Rawmesh::Tris submesh_tnq;
 	     	submesh_tnq.reserve(submesh.tris.size() + submesh.quads.size() * 2);
 	     	submesh_tnq.insert(submesh_tnq.end(), submesh.tris.begin(), submesh.tris.end());
 	     	for (Rawmesh::Quads::const_iterator quads_it = submesh.quads.begin();
 	     	     quads_it != submesh.quads.end();
-	     	     quads_it ++) {
+	     	     ++ quads_it) {
 	     	     	Rawmesh::Tri newtri1;
 	     	     	Rawmesh::Tri newtri2;
 			Rawmesh::convertQuadToTris(newtri1, newtri2, *quads_it, hstyle, &rawmesh.vrts);
@@ -101,7 +101,7 @@ inline Mesh::Mesh(Rawmesh const& rawmesh, Rawmesh::Halvingstyle hstyle)
 	// Init Vertexgroups
 	for (Rawmesh::VGroups::const_iterator vgroups_it = rawmesh.vgroups.begin();
 	     vgroups_it != rawmesh.vgroups.end();
-	     vgroups_it ++) {
+	     ++ vgroups_it) {
 		std::string const& vgroup = *vgroups_it;
 		size_t vgroup_id = vgroups.size();
 		vgroups[vgroup] = vgroup_id;
@@ -114,7 +114,7 @@ inline Mesh::~Mesh(void)
 	delete skel;
 	for (Submeshes::iterator submeshes_it = submeshes.begin();
 	     submeshes_it != submeshes.end();
-	     submeshes_it ++) {
+	     ++ submeshes_it) {
 		delete *submeshes_it;
 	}
 }
@@ -126,7 +126,7 @@ inline Boundingsphere Mesh::getDefaultBoundingsphere(void) const
 	Vector3 vrts_max(-99999.9, -99999.9, -99999.9);;
 	for (Submeshes::const_iterator submeshes_it = submeshes.begin();
 	     submeshes_it != submeshes.end();
-	     submeshes_it ++) {
+	     ++ submeshes_it) {
 		Submesh const* submesh = *submeshes_it;
 		submesh->getVertexBoundings(vrts_min, vrts_max);
 	}
@@ -134,7 +134,7 @@ inline Boundingsphere Mesh::getDefaultBoundingsphere(void) const
 	Real bsphere_radius_to_2 = 0.0;
 	for (Submeshes::const_iterator submeshes_it = submeshes.begin();
 	     submeshes_it != submeshes.end();
-	     submeshes_it ++) {
+	     ++ submeshes_it) {
 		Submesh const* submesh = *submeshes_it;
 		submesh->getMaxVertexDistance(bsphere_radius_to_2, bsphere_pos);
 	}
@@ -152,7 +152,7 @@ inline void Mesh::findSharedNormals(Submesh::VrtsSNormals& result,
 	     	Rawmesh::Tris const& submesh_tris_n_quads = tris_n_quads[submesh_id];
 		for (Rawmesh::Tris::const_iterator tris_it = submesh_tris_n_quads.begin();
 		     tris_it != submesh_tris_n_quads.end();
-		     tris_it ++) {
+		     ++ tris_it) {
 			Rawmesh::Tri const& tri = *tris_it;
 			// Skip solid faces. They cannot make vertices dynamic
 			if (!tri.smooth) {
@@ -194,7 +194,7 @@ inline void Mesh::findSharedNormals(Submesh::VrtsSNormals& result,
 		// Normalize tangents and binormals of all UVs
 		for (Submesh::TangentsAndBinormals::iterator ts_n_bs_it = result_find->second.ts_n_bs.begin();
 		     ts_n_bs_it != result_find->second.ts_n_bs.end();
-		     ts_n_bs_it ++) {
+		     ++ ts_n_bs_it) {
 			Submesh::TangentAndBinormal& t_n_b = ts_n_bs_it->second;
 
 			// Make sure tangent and binormal is 90° to normal.
