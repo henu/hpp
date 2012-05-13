@@ -81,6 +81,7 @@
 				"randomizer.h",
 				"rbuf.h",
 				"real.h",
+				"runnable.h",
 				"serialize.h",
 				"thread.h",
 				"time.h",
@@ -112,7 +113,8 @@
 				"commandexec.cc",
 				"concurrencywatcher.cc",
 				"memwatch.cc",
-				"profilermanager.cc"
+				"profilermanager.cc",
+				"thread.cc"
 			]
 		},
 

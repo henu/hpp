@@ -2,6 +2,7 @@
 #define HPP_THREAD_H
 
 #include "exception.h"
+#include "runnable.h"
 
 #include "assert.h"
 #ifdef HPP_USE_SDL_MUTEX
@@ -40,11 +41,15 @@ public:
 	// Constructors. Note, that destroying thread does not stop it!
 	inline Thread(void);
 	inline Thread(Func func, void* data);
+	inline Thread(Runnable* runnable);
 
 	// Copy constructor and assignment operator. Notice, that thread
 	// objects may be copied but only one of them can call wait!
 	inline Thread(Thread const& t);
 	inline Thread operator=(Thread const& t);
+
+	// Starts thread that has Runnable set
+	void start(void);
 
 	// Checks if thread is running
 	inline bool isRunning(void) const;
@@ -67,6 +72,8 @@ private:
 		#endif
 	};
 
+	Runnable* runnable;
+
 	#ifdef HPP_USE_SDL_MUTEX
 	SDL_Thread* thrd;
 	#else
@@ -82,6 +89,8 @@ private:
 	// Pointer to error string. This also tells if thread is being ran or
 	// not.
 	std::string* error;
+
+	inline void startRunningThread(Func func, void* data);
 
 	// The real function that runs thread
 	#ifdef HPP_USE_SDL_MUTEX
@@ -105,6 +114,7 @@ inline Thread::Id getThisThreadID(void);
 // ----------------------------------------
 
 inline Thread::Thread(void) :
+runnable(NULL),
 #ifndef HPP_USE_SDL_MUTEX
 thrd_result(NULL),
 #endif
@@ -112,37 +122,15 @@ error(NULL)
 {
 }
 
-inline Thread::Thread(Func func, void* data)
+inline Thread::Thread(Func func, void* data) :
+runnable(NULL)
 {
-	error = new std::string;
-	#ifndef HPP_USE_SDL_MUTEX
-	thrd_result = new int;
-	#endif
+	startRunningThread(func, data);
+}
 
-	Runinfo* runinfo = new Runinfo;
-	runinfo->data = data;
-	runinfo->func = func;
-	runinfo->error = error;
-	#ifndef HPP_USE_SDL_MUTEX
-	runinfo->result = thrd_result;
-	#endif
-	#ifdef HPP_USE_SDL_MUTEX
-	thrd = SDL_CreateThread(threadRunner, runinfo);
-	if (!thrd) {
-		delete error;
-		throw Exception("Thread creation has failed!");
-	}
-	#else
-	#ifndef WIN32
-	if (pthread_create(&thrd, NULL, threadRunner, runinfo) != 0) {
-		delete error;
-		delete thrd_result;
-		throw Exception("Thread creation has failed!");
-	}
-	#else
-	thrd = CreateThread(NULL, 0, threadRunner, runinfo, 0, &thrd_id);
-	#endif
-	#endif
+inline Thread::Thread(Runnable* runnable) :
+runnable(runnable)
+{
 }
 
 inline Thread::Thread(Thread const& t) :
@@ -209,6 +197,39 @@ inline Thread::Id Thread::getId(void)
 	#endif
 }
 
+inline void Thread::startRunningThread(Func func, void* data)
+{
+	error = new std::string;
+	#ifndef HPP_USE_SDL_MUTEX
+	thrd_result = new int;
+	#endif
+
+	Runinfo* runinfo = new Runinfo;
+	runinfo->data = data;
+	runinfo->func = func;
+	runinfo->error = error;
+	#ifndef HPP_USE_SDL_MUTEX
+	runinfo->result = thrd_result;
+	#endif
+	#ifdef HPP_USE_SDL_MUTEX
+	thrd = SDL_CreateThread(threadRunner, runinfo);
+	if (!thrd) {
+		delete error;
+		throw Exception("Thread creation has failed!");
+	}
+	#else
+	#ifndef WIN32
+	if (pthread_create(&thrd, NULL, threadRunner, runinfo) != 0) {
+		delete error;
+		delete thrd_result;
+		throw Exception("Thread creation has failed!");
+	}
+	#else
+	thrd = CreateThread(NULL, 0, threadRunner, runinfo, 0, &thrd_id);
+	#endif
+	#endif
+}
+
 #ifdef HPP_USE_SDL_MUTEX
 inline int Thread::threadRunner(void* runinfo_raw)
 #else
@@ -269,7 +290,6 @@ inline DWORD WINAPI Thread::threadRunner(LPVOID runinfo_raw)
 	#endif
 	#endif
 }
-
 
 inline Thread::Id getThisThreadID(void)
 {
