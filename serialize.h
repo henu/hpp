@@ -12,6 +12,7 @@
 
 #include <istream>
 
+// TODO: Use (u)int64_t instead of (u)int32_t in casting functions with variable bytesize!
 namespace Hpp
 {
 
@@ -20,10 +21,12 @@ inline void serializeString(ByteV& result, std::string const& str, uint8_t bytes
 inline int8_t deserializeInt8(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end);
 inline int16_t deserializeInt16(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
 inline int32_t deserializeInt32(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
+inline int64_t deserializeInt64(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
 inline int32_t deserializeInt(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, uint8_t bytesize, bool bigendian = true);
 inline uint8_t deserializeUInt8(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end);
 inline uint16_t deserializeUInt16(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
 inline uint32_t deserializeUInt32(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
+inline uint64_t deserializeUInt64(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
 inline uint32_t deserializeUInt(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, uint8_t bytesize, bool bigendian = true);
 inline float deserializeFloat(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
 inline std::string deserializeString(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, uint8_t bytes, bool bigendian = true);
@@ -35,6 +38,7 @@ inline Matrix4 deserializeMatrix4(ByteV::const_iterator& data_it, ByteV::const_i
 inline uint8_t deserializeUInt8(std::istream& strm);
 inline uint16_t deserializeUInt16(std::istream& strm, bool bigendian = true);
 inline uint32_t deserializeUInt32(std::istream& strm, bool bigendian = true);
+inline uint64_t deserializeUInt64(std::istream& strm, bool bigendian = true);
 inline float deserializeFloat(std::istream& strm, bool bigendian = true);
 inline std::string deserializeString(std::istream& strm, uint8_t bytes, bool bigendian = true);
 inline Vector2 deserializeVector2(std::istream& strm, bool bigendian = true);
@@ -88,6 +92,16 @@ inline int32_t deserializeInt32(ByteV::const_iterator& data_it, ByteV::const_ite
 	return result;
 }
 
+inline int64_t deserializeInt64(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian)
+{
+	if (data_end - data_it < 8) {
+		throw Exception("Unexpected end of data!");
+	}
+	int64_t result = cStrToInt64(&*data_it, bigendian);
+	data_it += 4;
+	return result;
+}
+
 inline int32_t deserializeInt(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, uint8_t bytesize, bool bigendian)
 {
 	if (data_end - data_it < bytesize) {
@@ -124,6 +138,16 @@ inline uint32_t deserializeUInt32(ByteV::const_iterator& data_it, ByteV::const_i
 		throw Exception("Unexpected end of data!");
 	}
 	uint32_t result = cStrToUInt32(&*data_it, bigendian);
+	data_it += 4;
+	return result;
+}
+
+inline uint64_t deserializeUInt64(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian)
+{
+	if (data_end - data_it < 8) {
+		throw Exception("Unexpected end of data!");
+	}
+	uint64_t result = cStrToUInt64(&*data_it, bigendian);
 	data_it += 4;
 	return result;
 }
@@ -230,6 +254,16 @@ inline uint32_t deserializeUInt32(std::istream& strm, bool bigendian)
 		throw Exception("Unexpected data end!");
 	}
 	return cStrToUInt32(buf, bigendian);
+}
+
+inline uint64_t deserializeUInt64(std::istream& strm, bool bigendian)
+{
+	char buf[8];
+	strm.read(buf, 8);
+	if (strm.eof()) {
+		throw Exception("Unexpected data end!");
+	}
+	return cStrToUInt64(buf, bigendian);
 }
 
 inline float deserializeFloat(std::istream& strm, bool bigendian)
