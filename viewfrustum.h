@@ -12,6 +12,7 @@
 namespace Hpp
 {
 
+// TODO: Make this class to precalculate all planes!
 class Viewfrustum
 {
 
@@ -51,6 +52,8 @@ public:
 
 	inline VFResult testBoundingsphere(Boundingsphere const& bs) const;
 
+	inline bool testPoint(Vector3 const& point) const;
+
 	inline Viewfrustum doIntersection(Viewfrustum const& vfrust) const;
 
 private:
@@ -70,6 +73,9 @@ private:
 
 	// Checks if at least some part of boundingsphere is at the front of plane.
 	inline static VFResult bsInFront(Boundingsphere const& bs, Vector3 const& pos, Vector3 const& nrm);
+
+	// Checks if point is at the front of plane.
+	inline static bool pointInFront(Vector3 const& point, Vector3 const& pos, Vector3 const& nrm);
 
 };
 typedef std::vector< Viewfrustum > Viewfrustums;
@@ -190,6 +196,49 @@ inline Viewfrustum::VFResult Viewfrustum::testBoundingsphere(Boundingsphere cons
 	}
 }
 
+inline bool Viewfrustum::testPoint(Vector3 const& point) const
+{
+	if (type == EMPTY) {
+		return OUTSIDE;
+	}
+	if (type == ALL) {
+		return INSIDE;
+	}
+
+	HppAssert(dir.lengthTo2() > 0.999 && dir.lengthTo2() < 1.001, "Not normalized!");
+	HppAssert(up.lengthTo2() > 0.999 && up.lengthTo2() < 1.001, "Not normalized!");
+	HppAssert(right.lengthTo2() > 0.999 && right.lengthTo2() < 1.001, "Not normalized!");
+
+	// Check if boundingsphere is behind near plane.
+	bool subresult = pointInFront(point, pos + dir * nearplane, dir);
+	if (!subresult) {
+		return false;
+	}
+
+	// Check all sides of viewfrustum
+// TODO/Improve: This is not accurate enough! Some boundingspheres get drawn even when they are not shown!
+	HppAssert(vrts.size() >= 3, "Not enough vertices!");
+	Vector3 v0_v = vrts[0].x * right + vrts[0].y * up + dir;
+	for (size_t side_id = 0; side_id < vrts.size(); side_id ++) {
+		Vector2 vrt = vrts[(side_id + 1) % vrts.size()];
+		Vector3 v1_v = vrt.x * right + vrt.y * up + dir;
+
+		// Calculate normal of this plane. Normal
+		// is facing inside Viewfrustum
+// TODO/Optimize: Should these be recalculated?
+		Vector3 normal = crossProduct(v1_v, v0_v);
+		// Check if boundngsphere is fully behind this plane.
+		bool subresult = pointInFront(point, pos, normal.normalized());
+		if (!subresult) {
+			return false;
+		}
+
+		v0_v = v1_v;
+	}
+
+	return true;
+}
+
 inline Viewfrustum Viewfrustum::doIntersection(Viewfrustum const& vfrust) const
 {
 	HppAssert((pos - vfrust.pos).lengthTo2() < 0.000001, "Unable to merge two viewfrustrums because they don\'t have the same position!");
@@ -261,6 +310,13 @@ inline Viewfrustum::VFResult Viewfrustum::bsInFront(Boundingsphere const& bs, Ve
 		return PARTIALLY_INSIDE;
 	}
 	return INSIDE;
+}
+
+inline bool Viewfrustum::pointInFront(Vector3 const& point, Vector3 const& pos, Vector3 const& nrm)
+{
+	HppAssert(nrm.lengthTo2() > 0.999 && nrm.lengthTo2() < 1.001, "Not normalized!");
+	Real dst = distanceToPlane(pos, nrm, point);
+	return dst >= 0;
 }
 
 }
