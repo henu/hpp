@@ -149,6 +149,7 @@ inline Json Matrix3::toJson(void) const
 	for (uint8_t cell_id = 0; cell_id < 9; ++ cell_id) {
 		result.addItem(Json::newNumber(cells[cell_id]));
 	}
+	return result;
 }
 
 inline bool Matrix3::operator==(Matrix3 const& m) const

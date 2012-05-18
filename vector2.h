@@ -110,7 +110,8 @@ inline Json Vector2::toJson(void) const
 {
 	Json result = Json::newObject();
 	result.setMember("x", Json::newNumber(x));
-	result.setMember("y", Json::newNumber(x));
+	result.setMember("y", Json::newNumber(y));
+	return result;
 }
 
 inline Vector2 Vector2::operator-(void) const

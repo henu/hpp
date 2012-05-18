@@ -113,8 +113,9 @@ inline Json Vector3::toJson(void) const
 {
 	Json result = Json::newObject();
 	result.setMember("x", Json::newNumber(x));
-	result.setMember("y", Json::newNumber(x));
+	result.setMember("y", Json::newNumber(y));
 	result.setMember("z", Json::newNumber(z));
+	return result;
 }
 
 inline Vector3 Vector3::operator-(void) const

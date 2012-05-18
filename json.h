@@ -25,6 +25,10 @@ public:
 	inline Json(void);
 	inline Json(std::string const& json);
 
+	// Copy constructor and assignment operator
+	inline Json(Json const& json);
+	inline Json const& operator=(Json const& json);
+
 	inline void decode(std::string const& json);
 	inline std::string encode(bool nice = false) const;
 
@@ -83,6 +87,52 @@ inline Json::Json(std::string const& json) :
 type(NUL)
 {
 	decode(json);
+}
+
+inline Json::Json(Json const& json) :
+type(json.type)
+{
+	switch (type) {
+	case NUMBER:
+	case BOOLEAN:
+		num = json.num;
+		break;
+	case STRING:
+		str = json.str;
+		break;
+	case OBJECT:
+		obj = json.obj;
+		break;
+	case ARRAY:
+		arr = json.arr;
+		break;
+	default:
+		break;
+	}
+}
+
+inline Json const& Json::operator=(Json const& json)
+{
+	clear();
+	type = json.type;
+	switch (type) {
+	case NUMBER:
+	case BOOLEAN:
+		num = json.num;
+		break;
+	case STRING:
+		str = json.str;
+		break;
+	case OBJECT:
+		obj = json.obj;
+		break;
+	case ARRAY:
+		arr = json.arr;
+		break;
+	default:
+		break;
+	}
+	return *this;
 }
 
 inline void Json::decode(std::string const& json)
@@ -248,6 +298,7 @@ inline void Json::clear(void)
 		break;
 	case ARRAY:
 		arr.clear();
+		break;
 	default:
 		break;
 	}
