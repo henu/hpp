@@ -1,6 +1,7 @@
 #ifndef HPP_VECTOR2_H
 #define HPP_VECTOR2_H
 
+#include "json.h"
 #include "real.h"
 #include "assert.h"
 
@@ -28,6 +29,9 @@ public:
 	inline Real lengthTo2(void) const;
 	inline void normalize(void);
 	inline Vector2 normalized(void) const;
+
+	// Conversion functions
+	inline Json toJson(void) const;
 
 	// Operators between Vector2s
 	inline Vector2 operator-(void) const;
@@ -100,6 +104,13 @@ inline Vector2 Vector2::normalized(void) const
 	result.x = x / len;
 	result.y = y / len;
 	return result;
+}
+
+inline Json Vector2::toJson(void) const
+{
+	Json result = Json::newObject();
+	result.setMember("x", Json::newNumber(x));
+	result.setMember("y", Json::newNumber(x));
 }
 
 inline Vector2 Vector2::operator-(void) const

@@ -112,6 +112,7 @@
 				"3dconstants.cc",
 				"commandexec.cc",
 				"concurrencywatcher.cc",
+				"json.cc",
 				"memwatch.cc",
 				"profilermanager.cc",
 				"thread.cc"

@@ -3,7 +3,6 @@
 
 #include "bytev.h"
 #include "exception.h"
-#include "cast.h"
 #include "misc.h"
 
 #include <map>
@@ -51,7 +50,7 @@ public:
 	inline Json getMember(std::string const& key) const;
 	inline Array getArray(void) const;
 	inline size_t getArraySize(void) const;
-	inline Json getItem(size_t index) const;
+	Json getItem(size_t index) const;
 	inline bool getBoolean(void) const;
 
 private:
@@ -63,7 +62,7 @@ private:
 	Object obj;
 	Array arr;
 
-	inline std::string doEncode(size_t indent, bool nice = false) const;
+	std::string doEncode(size_t indent, bool nice = false) const;
 
 	inline void clear(void);
 
@@ -230,100 +229,12 @@ inline size_t Json::getArraySize(void) const
 	return arr.size();
 }
 
-inline Json Json::getItem(size_t index) const
-{
-	if (type != ARRAY) {
-		throw Exception("Unable to get index, because this JSON is not an array!");
-	}
-	if (index >= arr.size()) {
-		throw Exception("Index " + sizeToStr(index) + " is out of range!");
-	}
-	return arr[index];
-}
-
 inline bool Json::getBoolean(void) const
 {
 	if (type != BOOLEAN) {
 		throw Exception("Unable to get boolean, because this JSON is not a boolean!");
 	}
 	return num > 0;
-}
-
-inline std::string Json::doEncode(size_t indent, bool nice) const
-{
-	switch (type)
-	{
-	case NUMBER:
-		return floatToStr(num);
-	case STRING:
-		return "\"" + slashEncode(str, "\"") + "\"";
-	case BOOLEAN:
-		if (num > 0) return "true";
-		else return "false";
-	case OBJECT:
-		{
-			std::string result;
-
-			std::string indent_str;
-			if (nice) indent_str = std::string(indent, '\t');
-
-			result += "{";
-			if (nice) result += "\n";
-			for (Object::const_iterator obj_it = obj.begin();
-			     obj_it != obj.end();
-			     ++ obj_it) {
-				if (nice) result += indent_str + "\t";
-				result += "\"" + slashEncode(obj_it->first, "\"") + "\":";
-				if (nice) result += " ";
-				result += obj_it->second.doEncode(indent + 1, nice) + ",";
-				if (nice) result += "\n";
-			}
-			if (!obj.empty()) {
-				if (!nice) {
-					result.resize(result.size()-1);
-				} else {
-					result.resize(result.size()-2);
-					result += "\n";
-				}
-			}
-			result += indent_str + "}";
-
-			return result;
-		}
-	case ARRAY:
-		{
-			std::string result;
-
-			std::string indent_str;
-			if (nice) indent_str = std::string(indent, '\t');
-
-			result += "[";
-			if (nice) result += "\n";
-			for (Array::const_iterator arr_it = arr.begin();
-			     arr_it != arr.end();
-			     ++ arr_it) {
-				if (nice) result += indent_str + "\t";
-				result += arr_it->doEncode(indent + 1, nice) + ",";
-				if (nice) result += "\n";
-			}
-			if (!arr.empty()) {
-				if (!nice) {
-					result.resize(result.size()-1);
-				} else {
-					result.resize(result.size()-2);
-					result += "\n";
-				}
-			}
-			result += indent_str + "]";
-
-			return result;
-		}
-	case NUL:
-		return "null";
-	default:
-		break;
-	}
-	HppAssert(false, "Invalid JSON type!");
 }
 
 inline void Json::clear(void)

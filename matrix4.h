@@ -1,6 +1,7 @@
 #ifndef HPP_MATRIX4_H
 #define HPP_MATRIX4_H
 
+#include "json.h"
 #include "angle.h"
 #include "vector3.h"
 #include "quaternion.h"
@@ -32,6 +33,9 @@ public:
 	               Real e, Real f, Real g, Real h,
 	               Real i, Real j, Real k, Real l,
 	               Real m, Real n, Real o, Real p);
+
+	// Conversion functions
+	inline Json toJson(void) const;
 
 	// Comparison operators
 	inline bool operator==(Matrix4 const& m) const;
@@ -180,6 +184,14 @@ inline Matrix4::Matrix4(Real a, Real b, Real c, Real d,
 	cells[13] = n;
 	cells[14] = o;
 	cells[15] = p;
+}
+
+inline Json Matrix4::toJson(void) const
+{
+	Json result = Json::newArray();
+	for (uint8_t cell_id = 0; cell_id < 16; ++ cell_id) {
+		result.addItem(Json::newNumber(cells[cell_id]));
+	}
 }
 
 inline bool Matrix4::operator==(Matrix4 const& m) const

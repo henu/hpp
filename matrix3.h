@@ -1,6 +1,7 @@
 #ifndef HPP_MATRIX3_H
 #define HPP_MATRIX3_H
 
+#include "json.h"
 #include "angle.h"
 #include "vector2.h"
 #include "real.h"
@@ -29,6 +30,9 @@ public:
 	inline Matrix3(Real a, Real b, Real c,
 	               Real d, Real e, Real f,
 	               Real g, Real h, Real i);
+
+	// Conversion functions
+	inline Json toJson(void) const;
 
 	// Comparison operators
 	inline bool operator==(Matrix3 const& m) const;
@@ -137,6 +141,14 @@ inline Matrix3::Matrix3(Real a, Real b, Real c,
 	cells[6] = g;
 	cells[7] = h;
 	cells[8] = i;
+}
+
+inline Json Matrix3::toJson(void) const
+{
+	Json result = Json::newArray();
+	for (uint8_t cell_id = 0; cell_id < 9; ++ cell_id) {
+		result.addItem(Json::newNumber(cells[cell_id]));
+	}
 }
 
 inline bool Matrix3::operator==(Matrix3 const& m) const
