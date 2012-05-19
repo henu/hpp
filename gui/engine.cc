@@ -38,6 +38,12 @@ void Engine::setRenderer(Renderer* rend)
 
 void Engine::render(void)
 {
+	HppAssert(rend, "Render not set!");
+
+	if (!content) {
+		return;
+	}
+
 	rend->initRendering();
 
 	content->render(0, 0);
