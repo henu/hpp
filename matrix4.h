@@ -33,6 +33,7 @@ public:
 	               Real e, Real f, Real g, Real h,
 	               Real i, Real j, Real k, Real l,
 	               Real m, Real n, Real o, Real p);
+	inline Matrix4(Json const& json);
 
 	// Conversion functions
 	inline Json toJson(void) const;
@@ -184,6 +185,17 @@ inline Matrix4::Matrix4(Real a, Real b, Real c, Real d,
 	cells[13] = n;
 	cells[14] = o;
 	cells[15] = p;
+}
+
+inline Matrix4::Matrix4(Json const& json)
+{
+	// Check JSON validity
+	if (json.getType() != Json::ARRAY || json.getArraySize() != 16) throw Hpp::Exception("JSON for Matrix4 must be array that has 16 numbers!");
+	for (uint8_t cell_id = 0; cell_id < 16; ++ cell_id) {
+		Hpp::Json const& cell_json = json.getItem(cell_id);
+		if (cell_json.getType() != Json::NUMBER) throw Hpp::Exception("Found non-number cell from Matrix4 JSON!");
+		cells[cell_id] = cell_json.getNumber();
+	}
 }
 
 inline Json Matrix4::toJson(void) const

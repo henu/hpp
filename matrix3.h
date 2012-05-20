@@ -30,6 +30,7 @@ public:
 	inline Matrix3(Real a, Real b, Real c,
 	               Real d, Real e, Real f,
 	               Real g, Real h, Real i);
+	inline Matrix3(Json const& json);
 
 	// Conversion functions
 	inline Json toJson(void) const;
@@ -141,6 +142,17 @@ inline Matrix3::Matrix3(Real a, Real b, Real c,
 	cells[6] = g;
 	cells[7] = h;
 	cells[8] = i;
+}
+
+inline Matrix3::Matrix3(Json const& json)
+{
+	// Check JSON validity
+	if (json.getType() != Json::ARRAY || json.getArraySize() != 9) throw Hpp::Exception("JSON for Matrix3 must be array that has 9 numbers!");
+	for (uint8_t cell_id = 0; cell_id < 9; ++ cell_id) {
+		Hpp::Json const& cell_json = json.getItem(cell_id);
+		if (cell_json.getType() != Json::NUMBER) throw Hpp::Exception("Found non-number cell from Matrix3 JSON!");
+		cells[cell_id] = cell_json.getNumber();
+	}
 }
 
 inline Json Matrix3::toJson(void) const
