@@ -84,9 +84,9 @@ inline Vector3::Vector3(Json const& json)
 {
 	// Check JSON validity
 	if (json.getType() != Json::OBJECT) throw Hpp::Exception("JSON for Vector3 must be object!");
-	if (json.keyExists("x") || json.getMember("x").getType() != Json::NUMBER) throw Hpp::Exception("JSON for Vector3 must contain number named \"x\"!");
-	if (json.keyExists("y") || json.getMember("y").getType() != Json::NUMBER) throw Hpp::Exception("JSON for Vector3 must contain number named \"y\"!");
-	if (json.keyExists("z") || json.getMember("z").getType() != Json::NUMBER) throw Hpp::Exception("JSON for Vector3 must contain number named \"z\"!");
+	if (!json.keyExists("x") || json.getMember("x").getType() != Json::NUMBER) throw Hpp::Exception("JSON for Vector3 must contain number named \"x\"!");
+	if (!json.keyExists("y") || json.getMember("y").getType() != Json::NUMBER) throw Hpp::Exception("JSON for Vector3 must contain number named \"y\"!");
+	if (!json.keyExists("z") || json.getMember("z").getType() != Json::NUMBER) throw Hpp::Exception("JSON for Vector3 must contain number named \"z\"!");
 	// Construct
 	x = json.getMember("x").getNumber();
 	y = json.getMember("y").getNumber();
