@@ -16,7 +16,7 @@
 namespace Hpp
 {
 
-inline void serializeString(ByteV& result, std::string const& str, uint8_t bytes);
+inline void serializeString(ByteV& result, std::string const& str, uint8_t bytes, bool bigendian = true);
 
 inline int8_t deserializeInt8(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end);
 inline int16_t deserializeInt16(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
@@ -46,18 +46,18 @@ inline Vector3 deserializeVector3(std::istream& strm, bool bigendian = true);
 inline Matrix3 deserializeMatrix3(std::istream& strm, bool bigendian = true);
 inline Matrix4 deserializeMatrix4(std::istream& strm, bool bigendian = true);
 
-inline void serializeString(ByteV& result, std::string const& str, uint8_t bytes)
+inline void serializeString(ByteV& result, std::string const& str, uint8_t bytes, bool bigendian)
 {
 	if (bytes == 1) {
 		HppAssert(str.size() <= 0xff, "String is too long!");
 		result.push_back(str.size());
 	} else if (bytes == 2) {
 		HppAssert(str.size() <= 0xffff, "String is too long!");
-		result += uInt16ToByteV(str.size());
+		result += uInt16ToByteV(str.size(), bigendian);
 	} else {
 		HppAssert(bytes == 4, "Unsupported byte count!");
 		HppAssert(str.size() <= 0xffffffff, "String is too long!");
-		result += uInt32ToByteV(str.size());
+		result += uInt32ToByteV(str.size(), bigendian);
 	}
 	result += str;
 }
@@ -98,7 +98,7 @@ inline int64_t deserializeInt64(ByteV::const_iterator& data_it, ByteV::const_ite
 		throw Exception("Unexpected end of data!");
 	}
 	int64_t result = cStrToInt64(&*data_it, bigendian);
-	data_it += 4;
+	data_it += 8;
 	return result;
 }
 
@@ -148,7 +148,7 @@ inline uint64_t deserializeUInt64(ByteV::const_iterator& data_it, ByteV::const_i
 		throw Exception("Unexpected end of data!");
 	}
 	uint64_t result = cStrToUInt64(&*data_it, bigendian);
-	data_it += 4;
+	data_it += 8;
 	return result;
 }
 
