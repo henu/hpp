@@ -535,13 +535,13 @@ HppAssert(false, "Not implemented yet!");
 inline void Path::readBytes(ByteV& result) const
 {
 	if (isUnknown()) {
-		throw Exception("Unable to read from unknown path!");
-	}
-	if (!isFile()) {
-		throw Exception("Unable to read! Reason: \"" + toString() + "\" is not file!");
+		throw Exception("Unable to read bytes from unknown path!");
 	}
 	if (!exists()) {
-		throw Exception("Unable to read! Reason: \"" + toString() + "\" does not exist!");
+		throw Exception("Unable to read bytes from file! Reason: \"" + toString() + "\" does not exist!");
+	}
+	if (!isFile()) {
+		throw Exception("Unable to read bytes from file! Reason: \"" + toString() + "\" is not file!");
 	}
 	// Open file
 	std::ifstream file(toString().c_str(), std::ios::binary);
@@ -570,13 +570,13 @@ inline void Path::readBytes(ByteV& result) const
 inline void Path::readString(std::string& result) const
 {
 	if (isUnknown()) {
-		throw Exception("Unable to read from unknown path!");
-	}
-	if (!isFile()) {
-		throw Exception("Unable to read! Reason: \"" + toString() + "\" is not file!");
+		throw Exception("Unable to read string from unknown path!");
 	}
 	if (!exists()) {
-		throw Exception("Unable to read! Reason: \"" + toString() + "\" does not exist!");
+		throw Exception("Unable to read string from file! Reason: \"" + toString() + "\" does not exist!");
+	}
+	if (!isFile()) {
+		throw Exception("Unable to read string from file! Reason: \"" + toString() + "\" is not file!");
 	}
 	// Open file
 	std::ifstream file(toString().c_str(), std::ios::binary);
