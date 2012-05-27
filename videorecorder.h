@@ -88,7 +88,7 @@ void Videorecorder::saveFrames(Path const& basepath, std::string const& filename
 {
 	// Wait until there is no more to encode
 	while (isEncodingPossible()) {
-		sleep(Hpp::Delay::msecs(250));
+		Delay::msecs(250).sleep();
 	}
 
 	Lock frames_lock(frames_mutex);

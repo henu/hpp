@@ -105,9 +105,9 @@ void Statemanager::start(void)
 
 		// Check if program is running too fast
 		if (instance.max_fps > 0 && dtime < dtime_min) {
-			sleep(dtime_min - dtime);
+			(dtime_min - dtime).sleep();
 // TODO: Is this really needed twice? Why?
-			sleep(dtime_min - dtime);
+			(dtime_min - dtime).sleep();
 			dtime = dtime_min;
 		}
 		// If seconds multiplier exceeds the maximum value then store

@@ -40,6 +40,9 @@ public:
 
 	inline double getSecondsAsDouble(void) const { return getSeconds() + getNanoseconds() / (double)MLRD; }
 
+	// Sleep
+	inline void sleep(void) const;
+
 	// Operators
 	inline Delay operator+(Delay const& d) const;
 	inline Delay operator+=(Delay const& d);
@@ -106,8 +109,6 @@ private:
 
 inline Time now(void);
 
-inline void sleep(Delay const& delay);
-
 inline Time operator+(Time const& t, Delay const& d);
 inline Time operator-(Time const& t, Delay const& d);
 inline std::ostream& operator<<(std::ostream& strm, Time const& t);
@@ -141,6 +142,27 @@ inline Time now(void)
 	size_t secs = time_now_64 / MLRD;
 	uint32_t nsecs = time_now_64 % MLRD;
 	return Time(secs, nsecs);
+	#endif
+}
+
+inline void Delay::sleep(void) const
+{
+	#ifndef WIN32
+	timespec sleeptime;
+	sleeptime.tv_sec = getSeconds();
+	sleeptime.tv_nsec = getNanoseconds();
+	if (nanosleep(&sleeptime, NULL) != 0) {
+/*
+	size_t msecs = delay.getSeconds() * 1000000 + delay.getNanoseconds() / 1000;
+	if (usleep(msecs)) {
+*/		if (errno == EINTR) {
+			return;
+		}
+		throw Exception("Sleeping has failed!");
+	}
+	#else
+	size_t msecs = getSeconds() * 1000 + getNanoseconds() / 1000000;
+	Sleep(msecs);
 	#endif
 }
 
@@ -389,27 +411,6 @@ inline Time Time::operator-=(Delay const& d)
 {
 // TODO: Optimize?
 	return *this = *this - d;
-}
-
-inline void sleep(Delay const& delay)
-{
-	#ifndef WIN32
-	timespec sleeptime;
-	sleeptime.tv_sec = delay.getSeconds();
-	sleeptime.tv_nsec = delay.getNanoseconds();
-	if (nanosleep(&sleeptime, NULL) != 0) {
-/*
-	size_t msecs = delay.getSeconds() * 1000000 + delay.getNanoseconds() / 1000;
-	if (usleep(msecs)) {
-*/		if (errno == EINTR) {
-			return;
-		}
-		throw Exception("Sleeping has failed!");
-	}
-	#else
-	size_t msecs = delay.getSeconds() * 1000 + delay.getNanoseconds() / 1000000;
-	Sleep(msecs);
-	#endif
 }
 
 inline Time operator+(Time const& t, Delay const& d)
