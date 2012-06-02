@@ -19,6 +19,13 @@ inline Real crossProduct(Vector2 const& v1, Vector2 const& v2);
 inline Angle angleBetweenVectors(Vector3 const& v1, Vector3 const& v2);
 inline Angle angleBetweenVectors(Vector2 const& v1, Vector2 const& v2);
 
+// Returns the amount of right hand rotation that needs to be added to vector
+// #1 so it would become vector #2 when the rotation is done at given plane.
+// The result is between [-180 - 180]. Note! Positions do not need to be at the
+// given plane, the result is always their real angle in 3D space. The plane is
+// used only to determine if the angle should be negative or positive.
+inline Angle angleAtPlane(Vector3 const& v1, Vector3 const& v2, Vector3 const& normal);
+
 // Returns angle from compontents of Vector2. Positive Y
 // axis is 0°, negative X axis is 90° and so on. This means
 // right hand rotation. Result is between [-180° and 180°).
@@ -190,6 +197,18 @@ inline Angle angleBetweenVectors(Vector2 const& v1, Vector2 const& v2)
 	}
 	return Angle::fromRadians(radians);
 
+}
+
+inline Angle angleAtPlane(Vector3 const& v1, Vector3 const& v2, Vector3 const& normal)
+{
+	// Get rotation between vectors in case where there is no plane
+	Angle angle = angleBetweenVectors(v1, v2);
+	// Check which side the rotation is
+	Real dp = dotProduct(normal, crossProduct(v1, v2));
+	if (dp < 0) {
+		angle = -angle;
+	}
+	return angle;
 }
 
 inline Angle angleOfVector(Vector2 const& v)

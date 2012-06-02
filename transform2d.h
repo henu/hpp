@@ -35,7 +35,7 @@ public:
 
 	// Modifiers. Rotation is counterclockwise when X is right and Y up.
 	inline void translate(Vector2 const& v) { transf = transf * Matrix3::translMatrix(v); }
-	inline void rotate(Angle const& angle) { transf = transf * Matrix3::rotMatrix(angle); }
+	inline void rotate(Angle const& angle) { transf = transf * Matrix3::rotMatrix2d(angle); }
 	inline void scale(Vector2 const& v) { transf = transf * Matrix3::scaleMatrix(v); }
 
 	// Combines this and another so that first this current transform is
@@ -62,7 +62,7 @@ transf(Matrix3::translMatrix(pos))
 }
 
 inline Transform2D::Transform2D(Angle const& angle) :
-transf(Matrix3::rotMatrix(angle))
+transf(Matrix3::rotMatrix2d(angle))
 {
 }
 
@@ -100,9 +100,9 @@ inline Vector2 Transform2D::getYVector(void) const
 inline Transform2D Transform2D::getRotScale(void) const
 {
 	Real const* cells = transf.getCells();
-	return Transform2D(Hpp::Matrix3(cells[0], cells[1], 0,
-	                                cells[3], cells[4], 0,
-	                                cells[6], cells[7], 1));
+	return Transform2D(Matrix3(cells[0], cells[1], 0,
+	                           cells[3], cells[4], 0,
+	                           cells[6], cells[7], 1));
 }
 
 inline Transform2D Transform2D::addAnotherTransform(Transform2D const& transf2) const

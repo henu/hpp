@@ -71,6 +71,7 @@ public:
 	// Static functions for generating rotation matrices
 	static inline Matrix4 rotMatrix(Axis axis, Angle const& angle);
 	static inline Matrix4 rotMatrix(Quaternion const& q);
+	static inline Matrix4 rotMatrix(Vector3 const& axis, Angle const& angle);
 	static inline Matrix4 rotMatrixX(Angle const& angle);
 	static inline Matrix4 rotMatrixY(Angle const& angle);
 	static inline Matrix4 rotMatrixZ(Angle const& angle);
@@ -190,10 +191,10 @@ inline Matrix4::Matrix4(Real a, Real b, Real c, Real d,
 inline Matrix4::Matrix4(Json const& json)
 {
 	// Check JSON validity
-	if (json.getType() != Json::ARRAY || json.getArraySize() != 16) throw Hpp::Exception("JSON for Matrix4 must be array that has 16 numbers!");
+	if (json.getType() != Json::ARRAY || json.getArraySize() != 16) throw Exception("JSON for Matrix4 must be array that has 16 numbers!");
 	for (uint8_t cell_id = 0; cell_id < 16; ++ cell_id) {
-		Hpp::Json const& cell_json = json.getItem(cell_id);
-		if (cell_json.getType() != Json::NUMBER) throw Hpp::Exception("Found non-number cell from Matrix4 JSON!");
+		Json const& cell_json = json.getItem(cell_id);
+		if (cell_json.getType() != Json::NUMBER) throw Exception("Found non-number cell from Matrix4 JSON!");
 		cells[cell_id] = cell_json.getNumber();
 	}
 }
@@ -591,6 +592,31 @@ inline Matrix4 Matrix4::rotMatrix(Quaternion const& q)
 	               2*q_unit.x*q_unit.y + 2*q_unit.w*q_unit.z,     1 - 2*q_unit.x*q_unit.x - 2*q_unit.z*q_unit.z, 2*q_unit.y*q_unit.z - 2*q_unit.w*q_unit.x,     0,
 	               2*q_unit.x*q_unit.z - 2*q_unit.w*q_unit.y,     2*q_unit.y*q_unit.z + 2*q_unit.w*q_unit.x,     1 - 2*q_unit.x*q_unit.x - 2*q_unit.y*q_unit.y, 0,
 	               0,                                             0,                                             0,                                             1);
+}
+
+inline Matrix4 Matrix4::rotMatrix(Vector3 const& axis, Angle const& angle)
+{
+	Real axis_len = axis.length();
+	// Componets of axis as normalized vector
+	Real u = axis.x / axis_len;
+	Real v = axis.y / axis_len;
+	Real w = axis.z / axis_len;
+	// Multiplication of components
+	Real uu = u*u;
+	Real vv = v*v;
+	Real ww = w*w;
+	Real uv = u*v;
+	Real uw = u*w;
+	Real vw = v*w;
+	// Sine, cosine and subractions from one
+	Real s = angle.sin();
+	Real c = angle.cos();
+	Real cm = 1 - c;
+	// Calculate result
+	return Matrix4(uu + (1 - uu)*c, uv*cm - w*s,     uw*cm + v*s,     0,
+	               uv*cm + w*s,     vv + (1 - vv)*c, vw*cm - u*s,     0,
+	               uw*cm - v*s,     vw*cm + u*s,     ww + (1 - ww)*c, 0,
+	               0,               0,               0,               1);
 }
 
 inline Matrix4 Matrix4::rotMatrixX(Angle const& angle)

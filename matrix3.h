@@ -4,7 +4,9 @@
 #include "json.h"
 #include "angle.h"
 #include "vector2.h"
+#include "quaternion.h"
 #include "real.h"
+#include "axis.h"
 
 #include <stdint.h>
 
@@ -66,7 +68,13 @@ public:
 	inline Real const& cell(uint8_t row, uint8_t offset) const;
 
 	// Static functions for generating rotation matrices
-	static inline Matrix3 rotMatrix(Angle const& angle);
+	static inline Matrix3 rotMatrix2d(Angle const& angle);
+	static inline Matrix3 rotMatrix(Axis axis, Angle const& angle);
+	static inline Matrix3 rotMatrix(Quaternion const& q);
+	static inline Matrix3 rotMatrixX(Angle const& angle);
+	static inline Matrix3 rotMatrixY(Angle const& angle);
+	static inline Matrix3 rotMatrixZ(Angle const& angle);
+	static inline Matrix3 rotMatrix(Vector3 const& axis, Angle const& angle);
 
 	// Static function for generating translation matrix
 	static inline Matrix3 translMatrix(Vector2 const& v);
@@ -147,10 +155,10 @@ inline Matrix3::Matrix3(Real a, Real b, Real c,
 inline Matrix3::Matrix3(Json const& json)
 {
 	// Check JSON validity
-	if (json.getType() != Json::ARRAY || json.getArraySize() != 9) throw Hpp::Exception("JSON for Matrix3 must be array that has 9 numbers!");
+	if (json.getType() != Json::ARRAY || json.getArraySize() != 9) throw Exception("JSON for Matrix3 must be array that has 9 numbers!");
 	for (uint8_t cell_id = 0; cell_id < 9; ++ cell_id) {
-		Hpp::Json const& cell_json = json.getItem(cell_id);
-		if (cell_json.getType() != Json::NUMBER) throw Hpp::Exception("Found non-number cell from Matrix3 JSON!");
+		Json const& cell_json = json.getItem(cell_id);
+		if (cell_json.getType() != Json::NUMBER) throw Exception("Found non-number cell from Matrix3 JSON!");
 		cells[cell_id] = cell_json.getNumber();
 	}
 }
@@ -352,7 +360,85 @@ inline Real const& Matrix3::cell(uint8_t row, uint8_t col) const
 	return cells[(row / 3) + col];
 }
 
-inline Matrix3 Matrix3::rotMatrix(Angle const& angle)
+inline Matrix3 Matrix3::rotMatrix2d(Angle const& angle)
+{
+	Real const s = angle.sin();
+	Real const c = angle.cos();
+	return Matrix3(c, -s, 0,
+	               s, c, 0,
+	               0, 0, 1);
+}
+
+inline Matrix3 Matrix3::rotMatrix(Axis axis, Angle const& angle)
+{
+	switch (axis) {
+	case X:
+		return rotMatrixX(angle);
+		break;
+	case Y:
+		return rotMatrixY(angle);
+		break;
+	case Z:
+		return rotMatrixZ(angle);
+		break;
+	default:
+		HppAssert(false, "");
+		break;
+	}
+	return Matrix3();
+}
+
+inline Matrix3 Matrix3::rotMatrix(Quaternion const& q)
+{
+	Quaternion q_unit = q.normalized();
+	return Matrix3(1 - 2*q_unit.y*q_unit.y - 2*q_unit.z*q_unit.z, 2*q_unit.x*q_unit.y - 2*q_unit.w*q_unit.z,     2*q_unit.x*q_unit.z + 2*q_unit.w*q_unit.y,
+	               2*q_unit.x*q_unit.y + 2*q_unit.w*q_unit.z,     1 - 2*q_unit.x*q_unit.x - 2*q_unit.z*q_unit.z, 2*q_unit.y*q_unit.z - 2*q_unit.w*q_unit.x,
+	               2*q_unit.x*q_unit.z - 2*q_unit.w*q_unit.y,     2*q_unit.y*q_unit.z + 2*q_unit.w*q_unit.x,     1 - 2*q_unit.x*q_unit.x - 2*q_unit.y*q_unit.y);
+}
+
+inline Matrix3 Matrix3::rotMatrix(Vector3 const& axis, Angle const& angle)
+{
+	Real axis_len = axis.length();
+	// Componets of axis as normalized vector
+	Real u = axis.x / axis_len;
+	Real v = axis.y / axis_len;
+	Real w = axis.z / axis_len;
+	// Multiplication of components
+	Real uu = u*u;
+	Real vv = v*v;
+	Real ww = w*w;
+	Real uv = u*v;
+	Real uw = u*w;
+	Real vw = v*w;
+	// Sine, cosine and subractions from one
+	Real s = angle.sin();
+	Real c = angle.cos();
+	Real cm = 1 - c;
+	// Calculate result
+	return Matrix3(uu + (1 - uu)*c, uv*cm - w*s,     uw*cm + v*s,
+	               uv*cm + w*s,     vv + (1 - vv)*c, vw*cm - u*s,
+	               uw*cm - v*s,     vw*cm + u*s,     ww + (1 - ww)*c);
+}
+
+inline Matrix3 Matrix3::rotMatrixX(Angle const& angle)
+{
+	Real const s = angle.sin();
+	Real const c = angle.cos();
+	return Matrix3(1, 0, 0,
+	               0, c, -s,
+	               0, s, c);
+}
+
+inline Matrix3 Matrix3::rotMatrixY(Angle const& angle)
+{
+	Real const s = angle.sin();
+	Real const c = angle.cos();
+	return Matrix3(c, 0, s,
+	               0, 1, 0,
+	               -s, 0, c);
+}
+
+inline Matrix3 Matrix3::rotMatrixZ(Angle const& angle)
 {
 	Real const s = angle.sin();
 	Real const c = angle.cos();
