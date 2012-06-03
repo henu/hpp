@@ -20,6 +20,7 @@ public:
 	inline Transform(void);
 	inline Transform(Vector3 const& pos);
 	inline Transform(Axis axis, Angle const& angle);
+	inline Transform(Matrix3 const& m);
 	inline Transform(Matrix4 const& m);
 	inline Transform(Quaternion const& q);
 
@@ -75,6 +76,11 @@ transf(Matrix4::translMatrix(pos))
 
 inline Transform::Transform(Axis axis, Angle const& angle) :
 transf(Matrix4::rotMatrix(axis, angle))
+{
+}
+
+inline Transform::Transform(Matrix3 const& m) :
+transf(matrix3ToMatrix4(m))
 {
 }
 
