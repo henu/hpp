@@ -31,6 +31,10 @@ inline void toZero(Type* buf, size_t size)
 template< typename Type >
 inline Type clamp(Type min, Type max, Type val);
 
+// Calculates median. Range must be sorted
+template< typename Type, typename Iter1, typename Iter2 >
+inline void median(Type& result, Iter1 const& begin, Iter2 const& end);
+
 // Divides ByteV/string to parts using separator character. Last functions do
 // this in parts to save memory. They return true whenever subsearch was found.
 inline std::vector< ByteV > splitString(ByteV const& v, char separator);
@@ -70,6 +74,21 @@ inline Type clamp(Type min, Type max, Type val)
 	if (val < min) return min;
 	if (val > max) return max;
 	return val;
+}
+
+template< typename Type, typename Iter1, typename Iter2 >
+inline void median(Type& result, Iter1 const& begin, Iter2 const& end)
+{
+	size_t items = end - begin;
+	if (items % 2 == 1) {
+		size_t offset = items/2;
+		result = *(begin + offset);
+	} else {
+		size_t offset = items/2;
+		result = *(begin + offset - 1);
+		result += *(begin + offset);
+		result /= 2.0;
+	}
 }
 
 inline std::vector< ByteV > splitString(ByteV const& v, char separator)
