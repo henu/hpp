@@ -66,9 +66,11 @@ public:
 	inline uint8_t readUInt8(void);
 	inline uint16_t readUInt16(void);
 	inline uint32_t readUInt32(void);
+	inline uint64_t readUInt64(void);
 	inline int8_t readInt8(void);
 	inline int16_t readInt16(void);
 	inline int32_t readInt32(void);
+	inline int64_t readInt64(void);
 	inline float readFloat(void);
 	inline ByteV readByteV(size_t size);
 	inline std::string readString(size_t size);
@@ -79,9 +81,11 @@ public:
 	inline void writeUInt8(uint8_t i);
 	inline void writeUInt16(uint16_t i);
 	inline void writeUInt32(uint32_t i);
+	inline void writeUInt64(uint64_t i);
 	inline void writeInt8(int8_t i);
 	inline void writeInt16(int16_t i);
 	inline void writeInt32(int32_t i);
+	inline void writeInt64(int64_t i);
 	inline void writeFloat(float f);
 	inline void writeByteV(ByteV const& v);
 	inline void writeString(std::string const& s);
@@ -246,6 +250,29 @@ inline uint32_t TCPConnection::readUInt32(void)
 	return cStrToUInt32(result_bytes);
 }
 
+inline uint64_t TCPConnection::readUInt64(void)
+{
+	HppAssert(inbuffer_rcv.size() >= 8, "Not enough data in input buffer!");
+	uint8_t result_bytes[8];
+	result_bytes[0] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[1] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[2] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[3] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[4] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[5] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[6] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[7] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	return cStrToUInt64(result_bytes);
+}
+
 inline int8_t TCPConnection::readInt8(void)
 {
 	HppAssert(inbuffer_rcv.size() >= 1, "Not enough data in input buffer!");
@@ -278,6 +305,29 @@ inline int32_t TCPConnection::readInt32(void)
 	result_bytes[3] = inbuffer_rcv.front();
 	inbuffer_rcv.pop();
 	return cStrToInt32(result_bytes);
+}
+
+inline int64_t TCPConnection::readInt64(void)
+{
+	HppAssert(inbuffer_rcv.size() >= 8, "Not enough data in input buffer!");
+	uint8_t result_bytes[8];
+	result_bytes[0] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[1] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[2] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[3] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[4] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[5] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[6] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	result_bytes[7] = inbuffer_rcv.front();
+	inbuffer_rcv.pop();
+	return cStrToInt64(result_bytes);
 }
 
 inline float TCPConnection::readFloat(void)
@@ -342,6 +392,19 @@ inline void TCPConnection::writeUInt32(uint32_t i)
 	outbuffer_pending.push_back(buf[3]);
 }
 
+inline void TCPConnection::writeUInt64(uint64_t i)
+{
+	uint8_t buf[8];
+	uInt64ToCStr(i, buf);
+	outbuffer_pending.push_back(buf[0]);
+	outbuffer_pending.push_back(buf[1]);
+	outbuffer_pending.push_back(buf[2]);
+	outbuffer_pending.push_back(buf[3]);
+	outbuffer_pending.push_back(buf[4]);
+	outbuffer_pending.push_back(buf[5]);
+	outbuffer_pending.push_back(buf[6]);
+	outbuffer_pending.push_back(buf[7]);
+}
 
 inline void TCPConnection::writeInt8(int8_t i)
 {
@@ -364,6 +427,20 @@ inline void TCPConnection::writeInt32(int32_t i)
 	outbuffer_pending.push_back(buf[1]);
 	outbuffer_pending.push_back(buf[2]);
 	outbuffer_pending.push_back(buf[3]);
+}
+
+inline void TCPConnection::writeInt64(int64_t i)
+{
+	uint8_t buf[8];
+	int64ToCStr(i, buf);
+	outbuffer_pending.push_back(buf[0]);
+	outbuffer_pending.push_back(buf[1]);
+	outbuffer_pending.push_back(buf[2]);
+	outbuffer_pending.push_back(buf[3]);
+	outbuffer_pending.push_back(buf[4]);
+	outbuffer_pending.push_back(buf[5]);
+	outbuffer_pending.push_back(buf[6]);
+	outbuffer_pending.push_back(buf[7]);
 }
 
 inline void TCPConnection::writeFloat(float f)
