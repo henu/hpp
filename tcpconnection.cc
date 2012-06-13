@@ -548,12 +548,15 @@ void TCPConnection::close(bool closed_by_remote_server)
 	#endif
 
 	// Inform possible data receiver about closed connection.
+	// Do this only when connection is closed by remote host.
 	Lock destroyable_lock(destroyable_mutex);
 	if (!destroyable) {
 		destroyable_lock.unlock();
-		Lock receiver_lock(receiver_mutex);
-		if (receiver) {
-			receiver(this, receiver_data);
+		if (closed_by_remote_server) {
+			Lock receiver_lock(receiver_mutex);
+			if (receiver) {
+				receiver(this, receiver_data);
+			}
 		}
 	}
 }
