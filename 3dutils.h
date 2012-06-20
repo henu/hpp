@@ -8,6 +8,7 @@
 #include "assert.h"
 #include "constants.h"
 
+#include <iostream>
 namespace Hpp
 {
 
@@ -72,8 +73,10 @@ inline Real distanceToRay(Vector2 const& point, Vector2 const& ray_begin, Vector
 // Calculates nearest point between line/ray and a point. It is possible to get
 // the nearest point in two ways and it is possible to get the distance between
 // nearest and given points. The nearest point is defined in these ways:
-// nearest_point = line_pos1 + (line_pos2 - line_pos1) * m = ray_begin + ray_dir * m
-// Note, that these functions assume that line/ray is infinite long from both ends!
+// nearest_point = line_pos1 + (line_pos2 - line_pos1)
+// nearest_point = ray_begin + ray_dir * m
+// Note, that these functions assume that line is infinite long from both ends
+// but ray is infinite only from head!
 inline void nearestPointToLine(Vector3 const& point,
                                Vector3 const& line_pos1, Vector3 const& line_pos2,
                                Vector3* nearest_point, Real* m, Real* dst_to_point);
@@ -83,6 +86,9 @@ inline void nearestPointToRay(Vector3 const& point,
 
 inline Real distanceBetweenLines(Vector3 const& begin1, Vector3 const& dir1,
                                  Vector3 const& begin2, Vector3 const& dir2);
+
+inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
+                                Vector3 const& begin2, Vector3 const& dir2);
 
 // Transforms a 3D or 2D point at the plane of triangle to the space of it so
 // that the point can be defined using axes of triangle. This can be used to
@@ -373,16 +379,46 @@ inline void nearestPointToLine(Vector3 const& point,
                                Vector3 const& line_pos1, Vector3 const& line_pos2,
                                Vector3* nearest_point, Real* m, Real* dst_to_point)
 {
-	nearestPointToRay(point, line_pos1, line_pos2 - line_pos1, nearest_point, m, dst_to_point);
+	Vector3 dir = line_pos2 - line_pos1;
+	Real dp_rd_rd = dotProduct(dir, dir);
+	HppAssert(dp_rd_rd != 0.0, "Line positions are too near each others!");
+	Real m2 = dotProduct(dir, point - line_pos1) / dp_rd_rd;
+	// Store results
+	if (m) {
+		*m = m2;
+	}
+	if (nearest_point) {
+		*nearest_point = line_pos1 + dir * m2;
+		if (dst_to_point) {
+			*dst_to_point = (*nearest_point - point).length();
+		}
+	} else if (dst_to_point) {
+		*dst_to_point = ((line_pos1 + dir * m2) - point).length();
+	}
 }
 
 inline void nearestPointToRay(Vector3 const& point,
                               Vector3 const& ray_begin, Vector3 const& ray_dir,
                               Vector3* nearest_point, Real* m, Real* dst_to_point)
 {
+	// First check if point is behind the ray begin
+	Real dp_rd_pd = dotProduct(ray_dir, point - ray_begin);
+	if (dp_rd_pd < 0) {
+		if (nearest_point) {
+			*nearest_point = ray_begin;
+		}
+		if (m) {
+			*m = 0;
+		}
+		if (dst_to_point) {
+			*dst_to_point = (ray_begin - point).length();
+		}
+		return;
+	}
+
 	Real dp_rd_rd = dotProduct(ray_dir, ray_dir);
-	HppAssert(dp_rd_rd != 0.0, "Division by zero!");
-	Real m2 = dotProduct(ray_dir, point - ray_begin) / dp_rd_rd;
+	HppAssert(dp_rd_rd != 0.0, "Ray direction is too short!");
+	Real m2 = dp_rd_pd / dp_rd_rd;
 	// Store results
 	if (m) {
 		*m = m2;
@@ -409,6 +445,99 @@ inline Real distanceBetweenLines(Vector3 const& begin1, Vector3 const& dir1,
 	Real cp_d1_d2_len = ::sqrt(cp_d1_d2_len_to_2);
 	Vector3 n = cp_d1_d2 / cp_d1_d2_len;
 	return ::fabs(dotProduct(n, begin1 - begin2));
+}
+
+inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
+                                Vector3 const& begin2, Vector3 const& dir2)
+{
+	Hpp::Real dp_d1_d2 = Hpp::dotProduct(dir1, dir2);
+
+	// Check on which side beginning of rays are compared to the plane
+	// that other ray forms (begin as position and dir as normal).
+	bool ray1_begins_front = dotProduct(begin1 - begin2, dir2) > 0;
+	bool ray2_begins_front = dotProduct(begin2 - begin1, dir1) > 0;
+
+	// Angle between rays is less than 90 °
+	if (dp_d1_d2 > 0) {
+
+		// If both rays begin from the backside of each others,
+		// then this means that they will never get any closer.
+		if (!ray1_begins_front && !ray2_begins_front) {
+			return (begin1 - begin2).length();
+		}
+
+		// If both rays begin from the frontside of each
+		// others, then it means they will get closer
+		// and distance between lines can be used.
+		if (ray1_begins_front && ray2_begins_front) {
+			return distanceBetweenLines(begin1, dir1, begin2, dir2);
+		}
+
+		// If another begin is at frontside and another at
+		// backside, then find the position where ray becomes
+		// to frontside. If this ray is assumed to begin from
+		// this new position and another ray is back of it, then
+		// their possible nearest point is between old and new
+		// begins of that ray that was actually backside.
+		if (ray1_begins_front && !ray2_begins_front) {
+			Hpp::Real move_amount = (Hpp::dotProduct(dir1, begin1) - Hpp::dotProduct(dir1, begin2)) / dp_d1_d2;
+			Hpp::Vector3 new_begin = begin2 + dir2 * move_amount;
+			// If ray #1 is at backside of new_begin,
+			// then rays cannot get any closer.
+			if (dotProduct(begin1 - new_begin, dir2) <= 0) {
+				Real result;
+				nearestPointToRay(begin1, new_begin, dir2, NULL, NULL, &result);
+				return result;
+			} else {
+				return distanceBetweenLines(begin1, dir1, begin2, dir2);
+			}
+		} else {
+			Hpp::Real move_amount = (Hpp::dotProduct(dir2, begin2) - Hpp::dotProduct(dir2, begin1)) / dp_d1_d2;
+			Hpp::Vector3 new_begin = begin1 + dir1 * move_amount;
+			// If ray #2 is at backside of new_begin,
+			// then rays cannot get any closer.
+			if (dotProduct(begin2 - new_begin, dir1) <= 0) {
+				Real result;
+				nearestPointToRay(begin2, new_begin, dir1, NULL, NULL, &result);
+				return result;
+			} else {
+				return distanceBetweenLines(begin1, dir1, begin2, dir2);
+			}
+		}
+
+	// Angle between rays is more than 90 °
+	} else if (dp_d1_d2 < 0) {
+
+		// If both of rays begin from the backside of eachothers,
+		// then it means that rays can never get any closer
+		if (!ray1_begins_front && !ray2_begins_front) {
+			return (begin1 - begin2).length();
+		}
+
+		// If only one ray begins from the backside of the
+		// another, then calculate distance from point to ray.
+		if (ray1_begins_front && !ray2_begins_front) {
+			Real result;
+			nearestPointToRay(begin1, begin2, dir2, NULL, NULL, &result);
+			return result;
+		}
+		if (!ray1_begins_front && ray2_begins_front) {
+			Real result;
+			nearestPointToRay(begin2, begin1, dir1, NULL, NULL, &result);
+			return result;
+		}
+
+// TODO: Code this!
+std::cerr << __FILE__ << ":" << __LINE__ << " WARNING: Not implemented yet, so giving rough estimation!" << std::endl;
+return distanceBetweenLines(begin1, dir1, begin2, dir2);
+
+	}
+	// Angle between rays is exactly 90 °
+	else {
+// TODO: Code this!
+std::cerr << __FILE__ << ":" << __LINE__ << " WARNING: Not implemented yet, so giving rough estimation!" << std::endl;
+return distanceBetweenLines(begin1, dir1, begin2, dir2);
+	}
 }
 
 inline Vector2 transformPointToTrianglespace(Vector3 const& pos, Vector3 const& x_axis, Vector3 const& y_axis)
