@@ -86,20 +86,12 @@ private:
 
 };
 
-inline Mutex::Mutex(void)
+inline Mutex::Mutex(void) :
 #ifndef HPP_USE_SDL_MUTEX
- :
-destroyed(false)
-#ifndef NDEBUG
-, locked(0),
+destroyed(false),
+#endif
+locked(0),
 locked_thread(0)
-#endif
-#else
-#ifndef NDEBUG
-: locked(0),
-locked_thread(0)
-#endif
-#endif
 {
 	#ifdef HPP_USE_SDL_MUTEX
 	mutex = SDL_CreateMutex();
