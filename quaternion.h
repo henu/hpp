@@ -3,6 +3,7 @@
 
 #include "real.h"
 #include "vector3.h"
+#include "angle.h"
 
 #include <cmath>
 #include <ostream>
@@ -39,6 +40,8 @@ public:
 	inline Quaternion inverse(void) const;
 
 	inline Vector3 getXYZ(void) const { return Hpp::Vector3(x, y, z); }
+	inline Vector3 getAxis(void) const;
+	inline Angle getAngle(void) const;
 
 	// Some constant quaternions
 	static const Quaternion IDENTITY;
@@ -145,6 +148,22 @@ inline Quaternion Quaternion::inverse(void) const
 	Real div = x*x + y*y + z*z + w*w;
 	HppAssert(div != 0.0, "Division by zero!");
 	return Quaternion(conj.x / div, conj.y / div, conj.z / div, conj.w / div);
+}
+
+inline Vector3 Quaternion::getAxis(void) const
+{
+	Real scale = sqrt(x*x + y*y + z*z);
+	HppAssert(scale != 0, "Division by zero!");
+	Vector3 result;
+	result.x = x / scale;
+	result.y = y / scale;
+	result.z = z / scale;
+	return result;
+}
+
+inline Angle Quaternion::getAngle(void) const
+{
+	return Angle::fromRadians(::acos(w) * 2);
 }
 
 inline std::ostream& operator<<(std::ostream& strm, Quaternion const& q)
