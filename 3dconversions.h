@@ -21,13 +21,13 @@ inline Quaternion matrix3ToQuaternion(Matrix3 const& m)
 	Quaternion result;
 	Real m_trace = m.cell(0) + m.cell(4) + m.cell(8) + 1.0;
 
-	if (m_trace > 0.0) {
-		Real s = 0.5 / sqrt(m_trace);
+	if (m_trace > 0.00001) {
+		Real s = sqrt(m_trace) * 2;
 		HppAssert(s != 0.0, "Division by zero!");
-		result.w = 0.25 / s;
-		result.x = (m.cell(5) - m.cell(7)) * s;
-		result.y = (m.cell(6) - m.cell(2)) * s;
-		result.z = (m.cell(1) - m.cell(3)) * s;
+		result.w = 0.25 * s;
+		result.x = (m.cell(5) - m.cell(7)) / s;
+		result.y = (m.cell(6) - m.cell(2)) / s;
+		result.z = (m.cell(1) - m.cell(3)) / s;
 	} else {
 		uint8_t greatest_diag = 0;
 		Real greatest_diag_value = m.cell(0);
@@ -44,31 +44,31 @@ inline Quaternion matrix3ToQuaternion(Matrix3 const& m)
 		case 0:
 			s = sqrt(1.0 + m.cell(0) - m.cell(4) - m.cell(8)) * 2;
 			HppAssert(s != 0.0, "Division by zero!");
-			result.w = (m.cell(7) + m.cell(5)) / s;
-			result.x = 0.5 / s;
+			result.x = 0.25 * s;
 			result.y = (m.cell(3) + m.cell(1)) / s;
 			result.z = (m.cell(6) + m.cell(2)) / s;
+			result.w = (m.cell(5) - m.cell(7)) / s;
 			break;
 		case 1:
 			s = sqrt(1.0 + m.cell(4) - m.cell(0) - m.cell(8)) * 2;
 			HppAssert(s != 0.0, "Division by zero!");
-			result.w = (m.cell(6) + m.cell(2)) / s;
 			result.x = (m.cell(3) + m.cell(1)) / s;
-			result.y = 0.5 / s;
+			result.y = 0.25 * s;
 			result.z = (m.cell(7) + m.cell(5)) / s;
+			result.w = (m.cell(6) - m.cell(2)) / s;
 			break;
 		case 2:
 			s = sqrt(1.0 + m.cell(8) - m.cell(0) - m.cell(4)) * 2;
 			HppAssert(s != 0.0, "Division by zero!");
-			result.w = (m.cell(3) + m.cell(1)) / s;
 			result.x = (m.cell(6) + m.cell(2)) / s;
 			result.y = (m.cell(7) + m.cell(5)) / s;
-			result.z = 0.5 / s;
+			result.z = 0.25 * s;
+			result.w = (m.cell(1) - m.cell(3)) / s;
 			break;
 		}
 	}
 	#ifndef NDEBUG
-	Matrix3 check_m = quaternionToMatrix3(result);
+        Matrix3 check_m = quaternionToMatrix3(result);
 	HppAssert(fabs(m.cell(0) - check_m.cell(0)) < 0.001, "");
 	HppAssert(fabs(m.cell(1) - check_m.cell(1)) < 0.001, "");
 	HppAssert(fabs(m.cell(2) - check_m.cell(2)) < 0.001, "");
@@ -105,18 +105,23 @@ inline Matrix3 matrix4ToMatrix3(Matrix4 const& m)
 inline Matrix3 quaternionToMatrix3(Quaternion const& q)
 {
 	Quaternion q_unit = q.normalized();
-	return Matrix3(1 - 2*q_unit.y*q_unit.y - 2*q_unit.z*q_unit.z, 2*q_unit.x*q_unit.y + 2*q_unit.w*q_unit.z,     2*q_unit.x*q_unit.z - 2*q_unit.w*q_unit.y,
-	               2*q_unit.x*q_unit.y - 2*q_unit.w*q_unit.z,     1 - 2*q_unit.x*q_unit.x - 2*q_unit.z*q_unit.z, 2*q_unit.y*q_unit.z + 2*q_unit.w*q_unit.x,
-	               2*q_unit.x*q_unit.z + 2*q_unit.w*q_unit.y,     2*q_unit.y*q_unit.z - 2*q_unit.w*q_unit.x,     1 - 2*q_unit.x*q_unit.x - 2*q_unit.y*q_unit.y);
+	Real xx = q_unit.x * q_unit.x;
+	Real xy = q_unit.x * q_unit.y;
+	Real xz = q_unit.x * q_unit.z;
+	Real xw = q_unit.x * q_unit.w;
+	Real yy = q_unit.y * q_unit.y;
+	Real yz = q_unit.y * q_unit.z;
+	Real yw = q_unit.y * q_unit.w;
+	Real zz = q_unit.z * q_unit.z;
+	Real zw = q_unit.z * q_unit.w;
+	return Matrix3(1 - 2*yy - 2*zz,     2*xy + 2*zw,     2*xz - 2*yw,
+	                   2*xy - 2*zw, 1 - 2*xx - 2*zz,     2*yz + 2*xw,
+	                   2*xz + 2*yw,     2*yz - 2*xw, 1 - 2*xx - 2*yy);
 }
 
 inline Matrix4 quaternionToMatrix4(Quaternion const& q)
 {
-	Quaternion q_unit = q.normalized();
-	return Matrix4(1 - 2*q_unit.y*q_unit.y - 2*q_unit.z*q_unit.z, 2*q_unit.x*q_unit.y - 2*q_unit.w*q_unit.z,     2*q_unit.x*q_unit.z + 2*q_unit.w*q_unit.y,     0,
-	               2*q_unit.x*q_unit.y + 2*q_unit.w*q_unit.z,     1 - 2*q_unit.x*q_unit.x - 2*q_unit.z*q_unit.z, 2*q_unit.y*q_unit.z - 2*q_unit.w*q_unit.x,     0,
-	               2*q_unit.x*q_unit.z - 2*q_unit.w*q_unit.y,     2*q_unit.y*q_unit.z + 2*q_unit.w*q_unit.x,     1 - 2*q_unit.x*q_unit.x - 2*q_unit.y*q_unit.y, 0,
-	               0,                                             0,                                             0,                                             1);
+	return matrix3ToMatrix4(quaternionToMatrix3(q));
 }
 
 inline Vector3 quaternionToVector(Quaternion const& q)
