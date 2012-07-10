@@ -41,6 +41,7 @@ inline uint32_t deserializeUInt32(std::istream& strm, bool bigendian = true);
 inline uint64_t deserializeUInt64(std::istream& strm, bool bigendian = true);
 inline float deserializeFloat(std::istream& strm, bool bigendian = true);
 inline std::string deserializeString(std::istream& strm, uint8_t bytes, bool bigendian = true);
+inline ByteV deserializeByteV(std::istream& strm, size_t size);
 inline Vector2 deserializeVector2(std::istream& strm, bool bigendian = true);
 inline Vector3 deserializeVector3(std::istream& strm, bool bigendian = true);
 inline Matrix3 deserializeMatrix3(std::istream& strm, bool bigendian = true);
@@ -231,7 +232,7 @@ inline uint8_t deserializeUInt8(std::istream& strm)
 {
 	uint8_t result = strm.get();
 	if (strm.eof()) {
-		throw Exception("Unexpected data end!");
+		throw Exception("Unexpected end of data!");
 	}
 	return result;
 }
@@ -241,7 +242,7 @@ inline uint16_t deserializeUInt16(std::istream& strm, bool bigendian)
 	char buf[2];
 	strm.read(buf, 2);
 	if (strm.eof()) {
-		throw Exception("Unexpected data end!");
+		throw Exception("Unexpected end of data!");
 	}
 	return cStrToUInt16(buf, bigendian);
 }
@@ -251,7 +252,7 @@ inline uint32_t deserializeUInt32(std::istream& strm, bool bigendian)
 	char buf[4];
 	strm.read(buf, 4);
 	if (strm.eof()) {
-		throw Exception("Unexpected data end!");
+		throw Exception("Unexpected end of data!");
 	}
 	return cStrToUInt32(buf, bigendian);
 }
@@ -261,7 +262,7 @@ inline uint64_t deserializeUInt64(std::istream& strm, bool bigendian)
 	char buf[8];
 	strm.read(buf, 8);
 	if (strm.eof()) {
-		throw Exception("Unexpected data end!");
+		throw Exception("Unexpected end of data!");
 	}
 	return cStrToUInt64(buf, bigendian);
 }
@@ -271,7 +272,7 @@ inline float deserializeFloat(std::istream& strm, bool bigendian)
 	char buf[4];
 	strm.read(buf, 4);
 	if (strm.eof()) {
-		throw Exception("Unexpected data end!");
+		throw Exception("Unexpected end of data!");
 	}
 	return cStrToFloat(buf, bigendian);
 }
@@ -292,7 +293,7 @@ inline std::string deserializeString(std::istream& strm, uint8_t bytes, bool big
 		result_size = cStrToUInt32(buf, bigendian);
 	}
 	if (strm.eof()) {
-		throw Exception("Unexpected data end!");
+		throw Exception("Unexpected end of data!");
 	}
 	std::string result;
 	result.reserve(result_size);
@@ -300,7 +301,18 @@ inline std::string deserializeString(std::istream& strm, uint8_t bytes, bool big
 		result += (char)strm.get();
 	}
 	if (strm.eof()) {
-		throw Exception("Unexpected data end!");
+		throw Exception("Unexpected end of data!");
+	}
+	return result;
+}
+
+inline ByteV deserializeByteV(std::istream& strm, size_t size)
+{
+	ByteV result;
+	result.assign(size, 0);
+	strm.read((char*)&result[0], size);
+	if (strm.eof()) {
+		throw Exception("Unexpected end of data!");
 	}
 	return result;
 }
