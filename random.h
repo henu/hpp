@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <algorithm>
 
 namespace Hpp
 {
@@ -19,6 +20,9 @@ inline Real random(Real min, Real max);
 
 // Returns a value in range [min, max]
 inline ssize_t randomInt(ssize_t min, ssize_t max);
+
+// Returns a value in range [0, 2^n)
+inline size_t randomNBitInt(size_t n);
 
 // Returns random angle between [-180 - 180) degrees.
 inline Angle randomAngle(void);
@@ -39,6 +43,30 @@ inline ssize_t randomInt(ssize_t min, ssize_t max)
 {
 	ssize_t range = max - min + 1;
 	return min + (rand() % range);
+}
+
+inline size_t randomNBitInt(size_t n)
+{
+	size_t result;
+	HppAssert(n > 1, "n must be at least 2!");
+
+	size_t rand_max_bits;
+	if (RAND_MAX == 0x7fffffff) {
+		rand_max_bits = 31;
+	} else {
+		rand_max_bits = 15;
+	}
+
+	size_t bits_left = n;
+	result = 0;
+	while (bits_left > 0) {
+		size_t bits_get = std::min(rand_max_bits, bits_left);
+		bits_left -= bits_get;
+		result <<= bits_get;
+		result += rand() % (1 << bits_get);
+	}
+
+	return result;
 }
 
 inline Angle randomAngle(void)
