@@ -230,7 +230,10 @@
 			"headers": [
 				"hasher.h",
 				"opensslhasher.h",
-				"sha256hasher.h"
+				"sha256hasher.h",
+				"cipher.h",
+				"opensslcipher.h",
+				"aes256cbccipher.h"
 			],
 			"sources": [ ],
 			"deps": [ "main" ]
