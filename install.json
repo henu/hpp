@@ -231,6 +231,7 @@
 				"hasher.h",
 				"opensslhasher.h",
 				"sha256hasher.h",
+				"sha512hasher.h",
 				"cipher.h",
 				"opensslcipher.h",
 				"aes256cbccipher.h"
