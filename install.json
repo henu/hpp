@@ -234,7 +234,8 @@
 				"sha512hasher.h",
 				"cipher.h",
 				"opensslcipher.h",
-				"aes256cbccipher.h"
+				"aes256cbccipher.h",
+				"aes256ofbcipher.h"
 			],
 			"sources": [ ],
 			"deps": [ "main" ]

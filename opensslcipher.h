@@ -64,14 +64,10 @@ public:
 		}
 
 		// Set padding
-		// TODO: Manual says that without padding size must be multiple of block! Is this true? If so, implement some system that allows non multiples!
 		EVP_CIPHER_CTX_set_padding(&enc_cipher, padding);
 		EVP_CIPHER_CTX_set_padding(&dec_cipher, padding);
 
 		initialized = true;
-		this->padding = padding;
-		encrypted = 0;
-		decrypted = 0;
 	}
 
 private:
@@ -82,14 +78,6 @@ private:
 	// Ciphers
 	EVP_CIPHER_CTX enc_cipher;
 	EVP_CIPHER_CTX dec_cipher;
-
-	// Should padding be used? OpenSSL is not happy if padding is not used
-	// and other size than multiple of block is processed. That is why this
-	// option is tracked here, so some manual padding hacks can be done.
-	// The counters are also required.
-	bool padding;
-	size_t encrypted;
-	size_t decrypted;
 
 	inline virtual void doEncryption(ByteV& result, uint8_t const* data, size_t data_size)
 	{
@@ -113,8 +101,6 @@ private:
 
 		// Resize result to correct size
 		result.erase(result.begin() + subresult_begin + subresult_size, result.end());
-
-		encrypted += data_size;
 	}
 
 	inline virtual void finalizeEncryption(ByteV& result)
@@ -124,18 +110,6 @@ private:
 		}
 
 		size_t const BLOCKSIZE = EVP_CIPHER_CTX_block_size(&enc_cipher);
-
-		// If padding is not used, and amount of processed data
-		// is not multiple of block size, then add some zeros.
-		size_t extra_padding = 0;
-		if (!padding) {
-			size_t remaining_bytes = encrypted % BLOCKSIZE;
-			extra_padding = (BLOCKSIZE - remaining_bytes) % BLOCKSIZE;
-			if (extra_padding > 0) {
-				ByteV zerodata(extra_padding, 0);
-				doEncryption(result, &zerodata[0], extra_padding);
-			}
-		}
 
 		// Make some space to result
 		size_t subresult_reserve = BLOCKSIZE * 3;
@@ -151,12 +125,6 @@ private:
 
 		// Resize result to correct size
 		result.erase(result.begin() + subresult_begin + subresult_size, result.end());
-
-		// Reduce possible extra padding
-		HppAssert(extra_padding <= result.size(), "Padding is too big!");
-		result.erase(result.end() - extra_padding, result.end());
-
-		encrypted = 0;
 	}
 
 	inline virtual void doDecryption(ByteV& result, uint8_t const* data, size_t data_size)
@@ -181,8 +149,6 @@ private:
 
 		// Resize result to correct size
 		result.erase(result.begin() + subresult_begin + subresult_size, result.end());
-
-		decrypted += data_size;
 	}
 
 	inline virtual void finalizeDecryption(ByteV& result)
@@ -192,18 +158,6 @@ private:
 		}
 
 		size_t const BLOCKSIZE = EVP_CIPHER_CTX_block_size(&dec_cipher);
-
-		// If padding is not used, and amount of processed data
-		// is not multiple of block size, then add some zeros.
-		size_t extra_padding = 0;
-		if (!padding) {
-			size_t remaining_bytes = decrypted % BLOCKSIZE;
-			extra_padding = (BLOCKSIZE - remaining_bytes) % BLOCKSIZE;
-			if (extra_padding > 0) {
-				ByteV zerodata(extra_padding, 0);
-				doDecryption(result, &zerodata[0], extra_padding);
-			}
-		}
 
 		// Make some space to result
 		size_t subresult_reserve = BLOCKSIZE * 3;
@@ -219,12 +173,6 @@ private:
 
 		// Resize result to correct size
 		result.erase(result.begin() + subresult_begin + subresult_size, result.end());
-
-		// Reduce possible extra padding
-		HppAssert(extra_padding <= result.size(), "Padding is too big!");
-		result.erase(result.end() - extra_padding, result.end());
-
-		decrypted = 0;
 	}
 
 };
