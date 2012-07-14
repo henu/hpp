@@ -35,6 +35,11 @@ inline Type clamp(Type min, Type max, Type val);
 template< typename Type, typename Iter1, typename Iter2 >
 inline void median(Type& result, Iter1 const& begin, Iter2 const& end);
 
+// Compares two ranges. Returns greater than, equal, or less than zero
+// if range #1 is greater, equal, or less than range #2, respectively.
+template< typename Iter1, typename Iter2, typename Iter3 >
+inline int compare(Iter1 range1_begin, Iter2 range1_end, Iter3 range2_begin);
+
 // Divides ByteV/string to parts using separator character. Last functions do
 // this in parts to save memory. They return true whenever subsearch was found.
 inline std::vector< ByteV > splitString(ByteV const& v, char separator);
@@ -89,6 +94,21 @@ inline void median(Type& result, Iter1 const& begin, Iter2 const& end)
 		result += *(begin + offset);
 		result /= 2.0;
 	}
+}
+
+template< typename Iter1, typename Iter2, typename Iter3 >
+inline int compare(Iter1 range1_begin, Iter2 range1_end, Iter3 range2_begin)
+{
+	while (range1_begin != range1_end) {
+		if (*range1_begin < *range2_begin) {
+			return -1;
+		} else if (*range1_begin > *range2_begin) {
+			return 1;
+		}
+		++ range1_begin;
+		++ range2_begin;
+	}
+	return 0;
 }
 
 inline std::vector< ByteV > splitString(ByteV const& v, char separator)
