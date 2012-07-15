@@ -86,6 +86,9 @@ public:
 	inline void writeBytes(ByteV const& bytes) const;
 	inline void writeString(std::string const& str) const;
 
+	// Returns name of that single file/folder at the end of whole Path
+	inline std::string getFilename(void) const;
+
 	// Returns the parent of this file/dir
 	inline Path getParent(void) const;
 
@@ -628,6 +631,22 @@ inline void Path::writeString(std::string const& str) const
 	}
 	file.write(&str[0], str.size());
 	file.close();
+}
+
+inline std::string Path::getFilename(void) const
+{
+	if (isUnknown()) {
+		throw Exception("Unable to filename of unknown path!");
+	}
+	if (parts.empty()) {
+		if (roottype == REL || roottype == HOME || roottype == CONFIG) {
+			Path abs = *this;
+			abs.convertToAbsolute();
+			return abs.getFilename();
+		}
+		throw Exception("Unable to get filename of root!");
+	}
+	return parts.back();
 }
 
 inline Path Path::getParent(void) const
