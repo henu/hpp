@@ -30,6 +30,7 @@ inline uint64_t deserializeUInt64(ByteV::const_iterator& data_it, ByteV::const_i
 inline uint32_t deserializeUInt(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, uint8_t bytesize, bool bigendian = true);
 inline float deserializeFloat(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
 inline std::string deserializeString(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, uint8_t bytes, bool bigendian = true);
+inline ByteV deserializeByteV(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, size_t size);
 inline Vector2 deserializeVector2(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
 inline Vector3 deserializeVector3(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
 inline Matrix3 deserializeMatrix3(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, bool bigendian = true);
@@ -190,6 +191,16 @@ inline std::string deserializeString(ByteV::const_iterator& data_it, ByteV::cons
 	data_it += bytes;
 	std::string result = std::string((char const*)&*data_it, result_size);
 	data_it += result_size;
+	return result;
+}
+
+inline ByteV deserializeByteV(ByteV::const_iterator& data_it, ByteV::const_iterator const& data_end, size_t size)
+{
+	if (data_end - data_it < (ssize_t)size) {
+		throw Exception("Unexpected end of data!");
+	}
+	ByteV result(data_it, data_it + size);
+	data_it += size;
 	return result;
 }
 
