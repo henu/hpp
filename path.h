@@ -66,7 +66,7 @@ public:
 	inline bool exists(void) const;
 
 	inline void ensureDirExists(void) const;
-	
+
 	// Renames file/dir that this Path points to. Note, that
 	// pointing of this Path will be modified. Also, if this
 	// cannot be done atomically, then Exception is thrown.
@@ -482,6 +482,7 @@ HppAssert(false, "Not implemented yet!");
 			}
 			parts_begin_str = cwd;
 		}
+		break;
 	case ABS:
 		return;
 	case HOME:
