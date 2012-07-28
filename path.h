@@ -76,7 +76,13 @@ public:
 	// ".." entries, set show_dotdots to true.
 	inline void listDir(DirChildren& result, bool show_dotdots = false) const;
 
+	// Converts relative Path to absolute using current working directory
 	inline void convertToAbsolute(void);
+
+	// Forces relative Path to absolute without any conversions.
+	// Basically just adds "/" at the beginning. If path is
+	// already absolute, then does nothing.
+	inline void forceToAbsolute(void);
 
 	// Reads pointed file as bytes/string. If target
 	// is not file, then exception is thrown.
@@ -89,7 +95,8 @@ public:
 	// Returns name of that single file/folder at the end of whole Path
 	inline std::string getFilename(void) const;
 
-	// Returns the parent of this file/dir
+	// Get/check parent of this file/dir
+	inline bool hasParent(void) const;
 	inline Path getParent(void) const;
 
 	inline size_t partsSize(void) const;
@@ -467,7 +474,9 @@ inline void Path::listDir(DirChildren& result, bool show_dotdots) const
 
 inline void Path::convertToAbsolute(void)
 {
-	HppAssert(roottype != UNKN, "Type cannot be unknown when ensuring absolute/relative.");
+	if (isUnknown()) {
+		throw Exception("Unable to convert unknown path to absolute!");
+	}
 	std::string parts_begin_str;
 	switch (roottype) {
 	case REL:
@@ -534,6 +543,16 @@ HppAssert(false, "Not implemented yet!");
 	     	}
 	}
 	parts.insert(parts.begin(), parts_begin_fixed.begin(), parts_begin_fixed.end());
+}
+
+inline void Path::forceToAbsolute(void)
+{
+	if (isUnknown()) {
+		throw Exception("Unable to force unknown path to absolute!");
+	}
+	if (roottype == REL) {
+		roottype = ABS;
+	}
 }
 
 inline void Path::readBytes(ByteV& result) const
@@ -650,16 +669,28 @@ inline std::string Path::getFilename(void) const
 	return parts.back();
 }
 
+inline bool Path::hasParent(void) const
+{
+	// If there are no parts to reduce, then path needs to be
+	// converted to absolute and hope it brings some parts
+	if (parts.empty()) {
+		Path abs(*this);
+		abs.convertToAbsolute();
+		return !abs.parts.empty();
+	}
+	return true;
+}
+
 inline Path Path::getParent(void) const
 {
 	Path result(*this);
 	// If there are no parts to reduce, then path needs to be
 	// converted to absolute and hope it brings some parts
-	if (!result.parts.empty()) {
-		result.convertToAbsolute();
-	}
 	if (result.parts.empty()) {
-		throw Hpp::Exception("Path has no parent!");
+		result.convertToAbsolute();
+		if (result.parts.empty()) {
+			throw Hpp::Exception("Path has no parent!");
+		}
 	}
 	result.parts.pop_back();
 	return result;
