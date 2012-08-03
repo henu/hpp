@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <string>
+#include <strings.h>
 
 #define HppFuncStr() (std::string(__FUNCTION__) + ": ")
 
