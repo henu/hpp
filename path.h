@@ -15,13 +15,14 @@
 #include <climits>
 #include <sys/stat.h>
 #include <sys/types.h>
-#ifdef WIN32
+#ifndef WIN32
+#include <grp.h>
+#include <pwd.h>
+#else
 #include <io.h>
 #include <shlobj.h>
 #endif
 #include <dirent.h>
-#include <grp.h>
-#include <pwd.h>
 
 namespace Hpp
 {
@@ -441,6 +442,7 @@ inline Path::Metadata Path::getMetadata(void) const
 	else result.type = UNKNOWN;
 
 	// Owner and group
+	#ifndef WIN32
 	uid_t owner_id = st.st_uid;
 	gid_t group_id = st.st_gid;
 	struct passwd* owner_pw = getpwuid(owner_id);
@@ -451,6 +453,7 @@ inline Path::Metadata Path::getMetadata(void) const
 	if (group_gr) {
 		result.group = group_gr->gr_name;
 	}
+	#endif
 
 	// Last modification time
 	result.modified = Time(st.st_mtime, 0);
