@@ -5,6 +5,7 @@
 #include "assert.h"
 #include "exception.h"
 #include "misc.h"
+#include "time.h"
 
 #include <string>
 #include <vector>
@@ -19,6 +20,8 @@
 #include <shlobj.h>
 #endif
 #include <dirent.h>
+#include <grp.h>
+#include <pwd.h>
 
 namespace Hpp
 {
@@ -37,6 +40,18 @@ public:
 	};
 	typedef std::vector< DirChild > DirChildren;
 
+	struct Metadata
+	{
+		Type type;
+
+		std::string owner;
+		// Always empty on windows 
+		std::string group;
+
+		// Seconds is zero, if these are not supported
+		Time modified;
+		Time created;
+	};
 
 	inline static Path getHome(void);
 	inline static Path getConfig(void);
@@ -66,6 +81,8 @@ public:
 	inline bool exists(void) const;
 
 	inline void ensureDirExists(void) const;
+
+	inline Metadata getMetadata(void) const;
 
 	// Renames file/dir that this Path points to. Note, that
 	// pointing of this Path will be modified. Also, if this
@@ -396,6 +413,52 @@ inline void Path::ensureDirExists(void) const
 		}
 
 	}
+}
+
+inline Path::Metadata Path::getMetadata(void) const
+{
+	if (isUnknown()) {
+		throw Exception("Unable to get metadata of unknown path!");
+	}
+
+	struct stat st;
+	#ifndef WIN32
+	if (lstat(toString().c_str(), &st)) {
+	#else
+	if (stat(toString().c_str(), &st)) {
+	#endif
+		throw Exception("Unable to get metadata of \"" + toString() + "\"!");
+	}
+
+	Metadata result;
+
+	// Type
+	if (S_ISREG(st.st_mode)) result.type = FILE;
+	else if (S_ISDIR(st.st_mode)) result.type = DIRECTORY;
+	#ifndef WIN32
+	else if (S_ISLNK(st.st_mode)) result.type = SYMLINK;
+	#endif
+	else result.type = UNKNOWN;
+
+	// Owner and group
+	uid_t owner_id = st.st_uid;
+	gid_t group_id = st.st_gid;
+	struct passwd* owner_pw = getpwuid(owner_id);
+	if (owner_pw) {
+		result.owner = owner_pw->pw_name;
+	}
+	struct group* group_gr = getgrgid(group_id);
+	if (group_gr) {
+		result.group = group_gr->gr_name;
+	}
+
+	// Last modification time
+	result.modified = Time(st.st_mtime, 0);
+
+	// Creation time is not yet supported
+	result.created = Time(0, 0);
+
+	return result;
 }
 
 inline void Path::rename(Path const& new_path) const
