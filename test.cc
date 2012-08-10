@@ -81,6 +81,7 @@
 #include "trigon.h"
 #include "unicode.h"
 #include "unicodestring.h"
+#include "userinfo.h"
 #include "vector2.h"
 #include "vector3.h"
 #include "xmldocument.h"

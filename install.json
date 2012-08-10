@@ -90,6 +90,7 @@
 				"trigon.h",
 				"unicode.h",
 				"unicodestring.h",
+				"userinfo.h",
 				"vector2.h",
 				"vector3.h",
 				"xmldocument.h",
