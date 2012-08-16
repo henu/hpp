@@ -1,8 +1,11 @@
 #ifndef HPP_DECOMPRESSOR_H
 #define HPP_DECOMPRESSOR_H
 
+#include "assert.h"
+#include "exception.h"
 #include "bytev.h"
 #include "byteq.h"
+
 #include <zlib.h>
 
 namespace Hpp
