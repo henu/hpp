@@ -15,17 +15,21 @@ namespace Hpp
 PFNGLACTIVETEXTUREARBPROC GlSystem::systemActiveTexture = NULL;
 PFNGLATTACHOBJECTARBPROC GlSystem::systemAttachObject = NULL;
 PFNGLBINDBUFFERARBPROC GlSystem::systemBindBuffer = NULL;
+PFNGLBINDVERTEXARRAYPROC GlSystem::systemBindVertexArray = NULL;
 PFNGLBUFFERDATAARBPROC GlSystem::systemBufferData = NULL;
 PFNGLCLIENTACTIVETEXTUREARBPROC GlSystem::systemClientActiveTexture = NULL;
 PFNGLCOMPILESHADERARBPROC GlSystem::systemCompileShader = NULL;
 PFNGLCREATEPROGRAMOBJECTARBPROC GlSystem::systemCreateProgramObject = NULL;
 PFNGLCREATESHADEROBJECTARBPROC GlSystem::systemCreateShaderObject = NULL;
 PFNGLGENBUFFERSARBPROC GlSystem::systemGenBuffers = NULL;
+PFNGLGENVERTEXARRAYSPROC GlSystem::systemGenVertexArrays = NULL;
 PFNGLGETINFOLOGARBPROC GlSystem::systemGetInfoLog = NULL;
 PFNGLGETOBJECTPARAMETERIVARBPROC GlSystem::systemGetObjectParameteriv = NULL;
 PFNGLGETUNIFORMLOCATIONARBPROC GlSystem::systemGetUniformLocation = NULL;
 PFNGLDELETEBUFFERSARBPROC GlSystem::systemDeleteBuffers = NULL;
 PFNGLDELETEOBJECTARBPROC GlSystem::systemDeleteObject = NULL;
+PFNGLDISABLEVERTEXATTRIBARRAYPROC GlSystem::systemDisableVertexAttribArray = NULL;
+PFNGLENABLEVERTEXATTRIBARRAYPROC GlSystem::systemEnableVertexAttribArray = NULL;
 PFNGLLINKPROGRAMARBPROC GlSystem::systemLinkProgram = NULL;
 PFNGLSHADERSOURCEARBPROC GlSystem::systemShaderSource = NULL;
 PFNGLUNIFORM1IARBPROC GlSystem::systemUniform1i = NULL;
@@ -37,6 +41,8 @@ PFNGLUNIFORM2FARBPROC GlSystem::systemUniform2f = NULL;
 PFNGLUNIFORM3FARBPROC GlSystem::systemUniform3f = NULL;
 PFNGLUNIFORM4FARBPROC GlSystem::systemUniform4f = NULL;
 PFNGLUSEPROGRAMOBJECTARBPROC GlSystem::systemUseProgramObject = NULL;
+PFNGLVERTEXATTRIBPOINTERPROC GlSystem::systemVertexAttribPointer = NULL;
+
 GLint GlSystem::tunit_count = 0;
 GLint GlSystem::max_lights = 0;
 size_t GlSystem::opengl_version_big;
@@ -52,6 +58,7 @@ void GlSystem::initialize(void)
 	systemActiveTexture = reinterpret_cast< PFNGLACTIVETEXTUREARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glActiveTextureARB")));
 	systemAttachObject = reinterpret_cast< PFNGLATTACHOBJECTARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glAttachObjectARB")));
 	systemBindBuffer = reinterpret_cast< PFNGLBINDBUFFERARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBindBufferARB")));
+	systemBindVertexArray = reinterpret_cast< PFNGLBINDVERTEXARRAYPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBindVertexArray")));
 	systemBufferData = reinterpret_cast< PFNGLBUFFERDATAARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBufferDataARB")));
 	systemClientActiveTexture = reinterpret_cast< PFNGLCLIENTACTIVETEXTUREARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glClientActiveTextureARB")));
 	systemCompileShader = reinterpret_cast< PFNGLCOMPILESHADERARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCompileShaderARB")));
@@ -59,7 +66,10 @@ void GlSystem::initialize(void)
 	systemCreateShaderObject = reinterpret_cast< PFNGLCREATESHADEROBJECTARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCreateShaderObjectARB")));
 	systemDeleteBuffers = reinterpret_cast< PFNGLDELETEBUFFERSARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glDeleteBuffersARB")));
 	systemDeleteObject = reinterpret_cast< PFNGLDELETEOBJECTARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glDeleteObjectARB")));
+	systemDisableVertexAttribArray = reinterpret_cast< PFNGLDISABLEVERTEXATTRIBARRAYPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glDisableVertexAttribArray")));
+	systemEnableVertexAttribArray = reinterpret_cast< PFNGLENABLEVERTEXATTRIBARRAYPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glEnableVertexAttribArray")));
 	systemGenBuffers = reinterpret_cast< PFNGLGENBUFFERSARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGenBuffersARB")));
+	systemGenVertexArrays = reinterpret_cast< PFNGLGENVERTEXARRAYSPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGenVertexArrays")));
 	systemGetInfoLog = reinterpret_cast< PFNGLGETINFOLOGARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGetInfoLogARB")));
 	systemGetObjectParameteriv = reinterpret_cast< PFNGLGETOBJECTPARAMETERIVARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGetObjectParameterivARB")));
 	systemGetUniformLocation = reinterpret_cast< PFNGLGETUNIFORMLOCATIONARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGetUniformLocationARB")));
@@ -74,10 +84,12 @@ void GlSystem::initialize(void)
 	systemUniform3f = reinterpret_cast< PFNGLUNIFORM3FARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniform3fARB")));
 	systemUniform4f = reinterpret_cast< PFNGLUNIFORM4FARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniform4fARB")));
 	systemUseProgramObject = reinterpret_cast< PFNGLUSEPROGRAMOBJECTARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUseProgramObjectARB")));
+	systemVertexAttribPointer = reinterpret_cast< PFNGLVERTEXATTRIBPOINTERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glVertexAttribPointer")));
 	#else
 	systemActiveTexture = reinterpret_cast< PFNGLACTIVETEXTUREARBPROC >(wglGetProcAddress("glActiveTextureARB"));
 	systemAttachObject = reinterpret_cast< PFNGLATTACHOBJECTARBPROC >(wglGetProcAddress("glAttachObjectARB"));
 	systemBindBuffer = reinterpret_cast< PFNGLBINDBUFFERARBPROC >(wglGetProcAddress("glBindBufferARB"));
+	systemBindVertexArray = reinterpret_cast< PFNGLBINDVERTEXARRAYPROC >(wglGetProcAddress("glBindVertexBufferARB"));
 	systemBufferData = reinterpret_cast< PFNGLBUFFERDATAARBPROC >(wglGetProcAddress("glBufferDataARB"));
 	systemClientActiveTexture = reinterpret_cast< PFNGLCLIENTACTIVETEXTUREARBPROC >(wglGetProcAddress("glClientActiveTextureARB"));
 	systemCompileShader = reinterpret_cast< PFNGLCOMPILESHADERARBPROC >(wglGetProcAddress("glCompileShaderARB"));
@@ -85,7 +97,10 @@ void GlSystem::initialize(void)
 	systemCreateShaderObject = reinterpret_cast< PFNGLCREATESHADEROBJECTARBPROC >(wglGetProcAddress("glCreateShaderObjectARB"));
 	systemDeleteBuffers = reinterpret_cast< PFNGLDELETEBUFFERSARBPROC >(wglGetProcAddress("glDeleteBuffersARB"));
 	systemDeleteObject = reinterpret_cast< PFNGLDELETEOBJECTARBPROC >(wglGetProcAddress("glDeleteObjectARB"));
+	systemDisableVertexAttribArray = reinterpret_cast< PFNGLDISABLEVERTEXATTRIBARRAYPROC >(wglGetProcAddress("glDisableVertexAttribArray"));
+	systemEnableVertexAttribArray = reinterpret_cast< PFNGLENABLEVERTEXATTRIBARRAYPROC >(wglGetProcAddress("glEnableVertexAttribArray"));
 	systemGenBuffers = reinterpret_cast< PFNGLGENBUFFERSARBPROC >(wglGetProcAddress("glGenBuffersARB"));
+	systemGenVertexArrays = reinterpret_cast< PFNGLGENVERTEXARRAYSPROC >(wglGetProcAddress("glGenVertexArraysARB"));
 	systemGetInfoLog = reinterpret_cast< PFNGLGETINFOLOGARBPROC >(wglGetProcAddress("glGetInfoLogARB"));
 	systemGetObjectParameteriv = reinterpret_cast< PFNGLGETOBJECTPARAMETERIVARBPROC >(wglGetProcAddress("glGetObjectParameterivARB"));
 	systemGetUniformLocation = reinterpret_cast< PFNGLGETUNIFORMLOCATIONARBPROC >(wglGetProcAddress("glGetUniformLocationARB"));
@@ -100,6 +115,7 @@ void GlSystem::initialize(void)
 	systemUniform3f = reinterpret_cast< PFNGLUNIFORM3FARBPROC >(wglGetProcAddress("glUniform3fARB"));
 	systemUniform4f = reinterpret_cast< PFNGLUNIFORM4FARBPROC >(wglGetProcAddress("glUniform4fARB"));
 	systemUseProgramObject = reinterpret_cast< PFNGLUSEPROGRAMOBJECTARBPROC >(wglGetProcAddress("glUseProgramObjectARB"));
+	systemVertexAttribPointer = reinterpret_cast< PFNGLVERTEXATTRIBPOINTERPROC >(wglGetProcAddress("glVertexAttribPointer"));
 	#endif
 
 	// Get properties

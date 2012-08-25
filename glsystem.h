@@ -23,6 +23,7 @@ public:
 	inline static void ActiveTexture(GLenum texture);
 	inline static void AttachObject(GLhandleARB program, GLhandleARB shader);
 	inline static void BindBuffer(GLenum target, GLuint id);
+	inline static void BindVertexArray(GLuint array);
 	inline static void BufferData(GLenum target, GLsizei size, const void* data, GLenum usage);
 	inline static void ClientActiveTexture(GLenum texture);
 	inline static GLhandleARB CreateProgramObject(void);
@@ -30,7 +31,10 @@ public:
 	inline static void CompileShader(GLhandleARB shader);
 	inline static void DeleteBuffers(GLsizei n, GLuint const* buffers);
 	inline static void DeleteObject(GLhandleARB shader);
+	inline static void DisableVertexAttribArray(GLuint index);
+	inline static void EnableVertexAttribArray(GLuint index);
 	inline static void GenBuffers(GLsizei n, GLuint* ids);
+	inline static void GenVertexArrays(GLsizei n, GLuint* arrays);
 	inline static void GetInfoLog(GLhandleARB shader, GLsizei max_len, GLsizei* len, GLcharARB* log);
 	inline static void GetObjectParameteriv(GLhandleARB shader, GLenum param, GLint* value);
 	inline static GLint GetUniformLocation(GLhandleARB program, GLchar const* name);
@@ -45,6 +49,7 @@ public:
 	inline static void Uniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
 	inline static void Uniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
 	inline static void UseProgramObject(GLhandleARB program);
+	inline static void VertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer);
 
 	// Get functions
 	inline static GLint GetInteger(GLenum pname);
@@ -73,6 +78,7 @@ private:
 	static PFNGLACTIVETEXTUREARBPROC systemActiveTexture;
 	static PFNGLATTACHOBJECTARBPROC systemAttachObject;
 	static PFNGLBINDBUFFERARBPROC systemBindBuffer;
+	static PFNGLBINDVERTEXARRAYPROC systemBindVertexArray;
 	static PFNGLBUFFERDATAARBPROC systemBufferData;
 	static PFNGLCLIENTACTIVETEXTUREARBPROC systemClientActiveTexture;
 	static PFNGLCOMPILESHADERARBPROC systemCompileShader;
@@ -80,7 +86,10 @@ private:
 	static PFNGLCREATESHADEROBJECTARBPROC systemCreateShaderObject;
 	static PFNGLDELETEBUFFERSARBPROC systemDeleteBuffers;
 	static PFNGLDELETEOBJECTARBPROC systemDeleteObject;
+	static PFNGLDISABLEVERTEXATTRIBARRAYPROC systemDisableVertexAttribArray;
+	static PFNGLENABLEVERTEXATTRIBARRAYPROC systemEnableVertexAttribArray;
 	static PFNGLGENBUFFERSARBPROC systemGenBuffers;
+	static PFNGLGENVERTEXARRAYSPROC systemGenVertexArrays;
 	static PFNGLGETINFOLOGARBPROC systemGetInfoLog;
 	static PFNGLGETOBJECTPARAMETERIVARBPROC systemGetObjectParameteriv;
 	static PFNGLGETUNIFORMLOCATIONARBPROC systemGetUniformLocation;
@@ -95,6 +104,7 @@ private:
 	static PFNGLUNIFORM3FARBPROC systemUniform3f;
 	static PFNGLUNIFORM4FARBPROC systemUniform4f;
 	static PFNGLUSEPROGRAMOBJECTARBPROC systemUseProgramObject;
+	static PFNGLVERTEXATTRIBPOINTERPROC systemVertexAttribPointer;
 
 	// Static values of various GL properties
 	static GLint tunit_count;
@@ -122,6 +132,12 @@ inline void GlSystem::BindBuffer(GLenum target, GLuint id)
 {
 	HppAssert(systemBindBuffer, "Function does not exist!");
 	systemBindBuffer(target, id);
+}
+
+inline void GlSystem::BindVertexArray(GLuint array)
+{
+	HppAssert(systemBindVertexArray, "Function does not exist!");
+	systemBindVertexArray(array);
 }
 
 inline void GlSystem::BufferData(GLenum target, GLsizei size, const void* data, GLenum usage)
@@ -172,10 +188,28 @@ inline void GlSystem::DeleteObject(GLhandleARB shader)
 	systemDeleteObject(shader);
 }
 
+inline void GlSystem::DisableVertexAttribArray(GLuint index)
+{
+	HppAssert(systemDisableVertexAttribArray, "Function does not exist!");
+	systemDisableVertexAttribArray(index);
+}
+
+inline void GlSystem::EnableVertexAttribArray(GLuint index)
+{
+	HppAssert(systemEnableVertexAttribArray, "Function does not exist!");
+	systemEnableVertexAttribArray(index);
+}
+
 inline void GlSystem::GenBuffers(GLsizei n, GLuint* ids)
 {
 	HppAssert(systemGenBuffers, "Function does not exist!");
 	systemGenBuffers(n, ids);
+}
+
+inline void GlSystem::GenVertexArrays(GLsizei n, GLuint* arrays)
+{
+	HppAssert(systemGenVertexArrays, "Function does not exist!");
+	systemGenVertexArrays(n, arrays);
 }
 
 inline void GlSystem::GetInfoLog(GLhandleARB shader, GLsizei max_len, GLsizei* len, GLcharARB* log)
@@ -260,6 +294,12 @@ inline void GlSystem::UseProgramObject(GLhandleARB program)
 {
 	HppAssert(systemUseProgramObject, "Function does not exist!");
 	systemUseProgramObject(program);
+}
+
+inline void GlSystem::VertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer)
+{
+	HppAssert(systemVertexAttribPointer, "Function does not exist!");
+	systemVertexAttribPointer(index, size, type, normalized, stride, pointer);
 }
 
 inline GLint GlSystem::GetInteger(GLenum pname)
