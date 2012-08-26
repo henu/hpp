@@ -26,11 +26,12 @@ public:
 	inline static void BindVertexArray(GLuint array);
 	inline static void BufferData(GLenum target, GLsizei size, const void* data, GLenum usage);
 	inline static void ClientActiveTexture(GLenum texture);
-	inline static GLhandleARB CreateProgramObject(void);
-	inline static GLhandleARB CreateShaderObject(GLenum type);
+	inline static GLhandleARB CreateProgram(void);
+	inline static GLhandleARB CreateShader(GLenum type);
 	inline static void CompileShader(GLhandleARB shader);
 	inline static void DeleteBuffers(GLsizei n, GLuint const* buffers);
-	inline static void DeleteObject(GLhandleARB shader);
+	inline static void DeleteProgram(GLuint program);
+	inline static void DeleteShader(GLuint shader);
 	inline static void DisableVertexAttribArray(GLuint index);
 	inline static void EnableVertexAttribArray(GLuint index);
 	inline static void GenBuffers(GLsizei n, GLuint* ids);
@@ -40,15 +41,23 @@ public:
 	inline static GLint GetUniformLocation(GLhandleARB program, GLchar const* name);
 	inline static void LinkProgram(GLhandleARB program);
 	inline static void ShaderSource(GLhandleARB shader, GLuint strs_count, GLcharARB const** strs, GLint* lens);
-	inline static void Uniform1i(GLint location, GLint v0);
-	inline static void Uniform2i(GLint location, GLint v0, GLint v1);
-	inline static void Uniform3i(GLint location, GLint v0, GLint v1, GLint v2);
-	inline static void Uniform4i(GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
 	inline static void Uniform1f(GLint location, GLfloat v0);
+	inline static void Uniform1fv(GLint location, GLsizei count, GLfloat const* value);
 	inline static void Uniform2f(GLint location, GLfloat v0, GLfloat v1);
+	inline static void Uniform2fv(GLint location, GLsizei count, GLfloat const* value);
 	inline static void Uniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
+	inline static void Uniform3fv(GLint location, GLsizei count, GLfloat const* value);
 	inline static void Uniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
-	inline static void UseProgramObject(GLhandleARB program);
+	inline static void Uniform4fv(GLint location, GLsizei count, GLfloat const* value);
+	inline static void Uniform1i(GLint location, GLint v0);
+	inline static void Uniform1iv(GLint location, GLsizei count, GLint const* value);
+	inline static void Uniform2i(GLint location, GLint v0, GLint v1);
+	inline static void Uniform2iv(GLint location, GLsizei count, GLint const* value);
+	inline static void Uniform3i(GLint location, GLint v0, GLint v1, GLint v2);
+	inline static void Uniform3iv(GLint location, GLsizei count, GLint const* value);
+	inline static void Uniform4i(GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
+	inline static void Uniform4iv(GLint location, GLsizei count, GLint const* value);
+	inline static void UseProgram(GLuint program);
 	inline static void VertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer);
 
 	// Get functions
@@ -82,10 +91,11 @@ private:
 	static PFNGLBUFFERDATAARBPROC systemBufferData;
 	static PFNGLCLIENTACTIVETEXTUREARBPROC systemClientActiveTexture;
 	static PFNGLCOMPILESHADERARBPROC systemCompileShader;
-	static PFNGLCREATEPROGRAMOBJECTARBPROC systemCreateProgramObject;
-	static PFNGLCREATESHADEROBJECTARBPROC systemCreateShaderObject;
+	static PFNGLCREATEPROGRAMPROC systemCreateProgram;
+	static PFNGLCREATESHADERPROC systemCreateShader;
 	static PFNGLDELETEBUFFERSARBPROC systemDeleteBuffers;
-	static PFNGLDELETEOBJECTARBPROC systemDeleteObject;
+	static PFNGLDELETEPROGRAMPROC systemDeleteProgram;
+	static PFNGLDELETESHADERPROC systemDeleteShader;
 	static PFNGLDISABLEVERTEXATTRIBARRAYPROC systemDisableVertexAttribArray;
 	static PFNGLENABLEVERTEXATTRIBARRAYPROC systemEnableVertexAttribArray;
 	static PFNGLGENBUFFERSARBPROC systemGenBuffers;
@@ -95,15 +105,23 @@ private:
 	static PFNGLGETUNIFORMLOCATIONARBPROC systemGetUniformLocation;
 	static PFNGLLINKPROGRAMARBPROC systemLinkProgram;
 	static PFNGLSHADERSOURCEARBPROC systemShaderSource;
-	static PFNGLUNIFORM1IARBPROC systemUniform1i;
-	static PFNGLUNIFORM2IARBPROC systemUniform2i;
-	static PFNGLUNIFORM3IARBPROC systemUniform3i;
-	static PFNGLUNIFORM4IARBPROC systemUniform4i;
 	static PFNGLUNIFORM1FARBPROC systemUniform1f;
+	static PFNGLUNIFORM1FVARBPROC systemUniform1fv;
 	static PFNGLUNIFORM2FARBPROC systemUniform2f;
+	static PFNGLUNIFORM2FVARBPROC systemUniform2fv;
 	static PFNGLUNIFORM3FARBPROC systemUniform3f;
+	static PFNGLUNIFORM3FVARBPROC systemUniform3fv;
 	static PFNGLUNIFORM4FARBPROC systemUniform4f;
-	static PFNGLUSEPROGRAMOBJECTARBPROC systemUseProgramObject;
+	static PFNGLUNIFORM4FVARBPROC systemUniform4fv;
+	static PFNGLUNIFORM1IARBPROC systemUniform1i;
+	static PFNGLUNIFORM1IVARBPROC systemUniform1iv;
+	static PFNGLUNIFORM2IARBPROC systemUniform2i;
+	static PFNGLUNIFORM2IVARBPROC systemUniform2iv;
+	static PFNGLUNIFORM3IARBPROC systemUniform3i;
+	static PFNGLUNIFORM3IVARBPROC systemUniform3iv;
+	static PFNGLUNIFORM4IARBPROC systemUniform4i;
+	static PFNGLUNIFORM4IVARBPROC systemUniform4iv;
+	static PFNGLUSEPROGRAMPROC systemUseProgram;
 	static PFNGLVERTEXATTRIBPOINTERPROC systemVertexAttribPointer;
 
 	// Static values of various GL properties
@@ -158,16 +176,16 @@ inline void GlSystem::AttachObject(GLhandleARB program, GLhandleARB shader)
 	systemAttachObject(program, shader);
 }
 
-inline GLhandleARB GlSystem::CreateProgramObject(void)
+inline GLhandleARB GlSystem::CreateProgram(void)
 {
-	HppAssert(systemCreateProgramObject, "Function does not exist!");
-	return systemCreateProgramObject();
+	HppAssert(systemCreateProgram, "Function does not exist!");
+	return systemCreateProgram();
 }
 
-inline GLhandleARB GlSystem::CreateShaderObject(GLenum type)
+inline GLhandleARB GlSystem::CreateShader(GLenum type)
 {
-	HppAssert(systemCreateShaderObject, "Function does not exist!");
-	return systemCreateShaderObject(type);
+	HppAssert(systemCreateShader, "Function does not exist!");
+	return systemCreateShader(type);
 }
 
 inline void GlSystem::CompileShader(GLhandleARB shader)
@@ -182,10 +200,16 @@ inline void GlSystem::DeleteBuffers(GLsizei n, GLuint const* buffers)
 	systemDeleteBuffers(n, buffers);
 }
 
-inline void GlSystem::DeleteObject(GLhandleARB shader)
+inline void GlSystem::DeleteProgram(GLuint program)
 {
-	HppAssert(systemDeleteObject, "Function does not exist!");
-	systemDeleteObject(shader);
+	HppAssert(systemDeleteProgram, "Function does not exist!");
+	systemDeleteProgram(program);
+}
+
+inline void GlSystem::DeleteShader(GLuint shader)
+{
+	HppAssert(systemDeleteShader, "Function does not exist!");
+	systemDeleteShader(shader);
 }
 
 inline void GlSystem::DisableVertexAttribArray(GLuint index)
@@ -242,58 +266,106 @@ inline void GlSystem::ShaderSource(GLhandleARB shader, GLuint strs_count, GLchar
 	systemShaderSource(shader, strs_count, strs, lens);
 }
 
+inline void GlSystem::Uniform1f(GLint location, GLfloat v0)
+{
+	HppAssert(systemUniform1f, "Function does not exist!");
+	systemUniform1f(location, v0);
+}
+
+inline void GlSystem::Uniform1fv(GLint location, GLsizei count, GLfloat const* value)
+{
+	HppAssert(systemUniform1fv, "Function does not exist!");
+	systemUniform1fv(location, count, value);
+}
+
+inline void GlSystem::Uniform2f(GLint location, GLfloat v0, GLfloat v1)
+{
+	HppAssert(systemUniform2f, "Function does not exist!");
+	systemUniform2f(location, v0, v1);
+}
+
+inline void GlSystem::Uniform2fv(GLint location, GLsizei count, GLfloat const* value)
+{
+	HppAssert(systemUniform2fv, "Function does not exist!");
+	systemUniform2fv(location, count, value);
+}
+
+inline void GlSystem::Uniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
+{
+	HppAssert(systemUniform3f, "Function does not exist!");
+	systemUniform3f(location, v0, v1, v2);
+}
+
+inline void GlSystem::Uniform3fv(GLint location, GLsizei count, GLfloat const* value)
+{
+	HppAssert(systemUniform3fv, "Function does not exist!");
+	systemUniform3fv(location, count, value);
+}
+
+inline void GlSystem::Uniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
+{
+	HppAssert(systemUniform4f, "Function does not exist!");
+	systemUniform4f(location, v0, v1, v2, v3);
+}
+
+inline void GlSystem::Uniform4fv(GLint location, GLsizei count, GLfloat const* value)
+{
+	HppAssert(systemUniform4fv, "Function does not exist!");
+	systemUniform4fv(location, count, value);
+}
+
 inline void GlSystem::Uniform1i(GLint location, GLint v0)
 {
 	HppAssert(systemUniform1i, "Function does not exist!");
 	systemUniform1i(location, v0);
 }
 
+inline void GlSystem::Uniform1iv(GLint location, GLsizei count, GLint const* value)
+{
+	HppAssert(systemUniform1iv, "Function does not exist!");
+	systemUniform1iv(location, count, value);
+}
+
 inline void GlSystem::Uniform2i(GLint location, GLint v0, GLint v1)
 {
-	HppAssert(systemUniform1i, "Function does not exist!");
+	HppAssert(systemUniform2i, "Function does not exist!");
 	systemUniform2i(location, v0, v1);
+}
+
+inline void GlSystem::Uniform2iv(GLint location, GLsizei count, GLint const* value)
+{
+	HppAssert(systemUniform2iv, "Function does not exist!");
+	systemUniform2iv(location, count, value);
 }
 
 inline void GlSystem::Uniform3i(GLint location, GLint v0, GLint v1, GLint v2)
 {
-	HppAssert(systemUniform1i, "Function does not exist!");
+	HppAssert(systemUniform3i, "Function does not exist!");
 	systemUniform3i(location, v0, v1, v2);
+}
+
+inline void GlSystem::Uniform3iv(GLint location, GLsizei count, GLint const* value)
+{
+	HppAssert(systemUniform3iv, "Function does not exist!");
+	systemUniform3iv(location, count, value);
 }
 
 inline void GlSystem::Uniform4i(GLint location, GLint v0, GLint v1, GLint v2, GLint v3)
 {
-	HppAssert(systemUniform1i, "Function does not exist!");
+	HppAssert(systemUniform4i, "Function does not exist!");
 	systemUniform4i(location, v0, v1, v2, v3);
 }
 
-inline void GlSystem::Uniform1f(GLint location, GLfloat v0)
+inline void GlSystem::Uniform4iv(GLint location, GLsizei count, GLint const* value)
 {
-	HppAssert(systemUniform1i, "Function does not exist!");
-	systemUniform1f(location, v0);
+	HppAssert(systemUniform4iv, "Function does not exist!");
+	systemUniform4iv(location, count, value);
 }
 
-inline void GlSystem::Uniform2f(GLint location, GLfloat v0, GLfloat v1)
+inline void GlSystem::UseProgram(GLuint program)
 {
-	HppAssert(systemUniform1i, "Function does not exist!");
-	systemUniform2f(location, v0, v1);
-}
-
-inline void GlSystem::Uniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
-{
-	HppAssert(systemUniform1i, "Function does not exist!");
-	systemUniform3f(location, v0, v1, v2);
-}
-
-inline void GlSystem::Uniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
-{
-	HppAssert(systemUniform1i, "Function does not exist!");
-	systemUniform4f(location, v0, v1, v2, v3);
-}
-
-inline void GlSystem::UseProgramObject(GLhandleARB program)
-{
-	HppAssert(systemUseProgramObject, "Function does not exist!");
-	systemUseProgramObject(program);
+	HppAssert(systemUseProgram, "Function does not exist!");
+	systemUseProgram(program);
 }
 
 inline void GlSystem::VertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer)

@@ -35,21 +35,18 @@ public:
 
 	// Returns GLSL Id of enabled program. This may deprecate between
 	// enables and disables.
-	inline GLhandleARB getGLSLProgram(void) const { HppAssert(enabled, "Not enabled!"); return glsl_id; }
+	inline GLuint getGLSLProgram(void) const { HppAssert(enabled, "Not enabled!"); return glsl_id; }
 
 private:
 
 	typedef std::vector< Shader const* > Shaders;
 
-	struct LinkedProgram
-	{
-		std::vector< GLhandleARB > shaders;
-		GLhandleARB program;
-	};
-	typedef std::map< Flags, LinkedProgram > LinkedPrograms;
+	typedef std::map< Flags, GLuint > LinkedPrograms;
+
+	typedef std::vector< GLuint > CompiledShaders;
 
 	bool enabled;
-	GLhandleARB glsl_id;
+	GLuint glsl_id;
 
 	Shaders shaders;
 
@@ -58,7 +55,7 @@ private:
 	inline void linkProgram(Flags const& flags);
 
 	inline void cleanLinkedPrograms(void);
-	inline static void cleanCompiledShaders(std::vector< GLhandleARB > const& shaders);
+	inline static void cleanCompiledShaders(CompiledShaders& shaders);
 
 };
 
@@ -96,8 +93,8 @@ inline void Shaderprogram::enable(Flags const& flags)
 	}
 
 	HppAssert(lprogs.find(flags) != lprogs.end(), "Fail!");
-	glsl_id = lprogs[flags].program;
-	GlSystem::UseProgramObject(glsl_id);
+	glsl_id = lprogs[flags];
+	GlSystem::UseProgram(glsl_id);
 	HppCheckGlErrors();
 
 	enabled = true;
@@ -107,14 +104,14 @@ inline void Shaderprogram::disable(void)
 {
 	HppCheckForCorrectThread();
 	HppAssert(enabled, "Not enabled!");
-	GlSystem::UseProgramObject(0);
+	GlSystem::UseProgram(0);
 	HppCheckGlErrors();
 	enabled = false;
 }
 
 inline void Shaderprogram::linkProgram(Flags const& flags)
 {
-	LinkedProgram new_lprog;
+	GLuint new_lprog;
 
 	std::string flags_srcmod;
 	for (Flags::const_iterator flags_it = flags.begin();
@@ -125,6 +122,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	}
 
 	// Compile shaders
+	CompiledShaders compiled_shaders;
 	for (Shaders::const_iterator shaders_it = shaders.begin();
 	     shaders_it != shaders.end();
 	     ++ shaders_it) {
@@ -133,18 +131,18 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 		HppCheckGlErrors();
 
 		// Create and load shader
-		GLhandleARB shader_id;
+		GLuint shader_id;
 		if (shader->getType() == Shader::FRAGMENT_SHADER) {
-			shader_id = GlSystem::CreateShaderObject(GL_FRAGMENT_SHADER);
+			shader_id = GlSystem::CreateShader(GL_FRAGMENT_SHADER);
 		} else {
-			shader_id = GlSystem::CreateShaderObject(GL_VERTEX_SHADER);
+			shader_id = GlSystem::CreateShader(GL_VERTEX_SHADER);
 		}
 		if (shader_id == 0) {
-			cleanCompiledShaders(new_lprog.shaders);
+			cleanCompiledShaders(compiled_shaders);
 			throw Exception("Unable to create new shader object!");
 		}
 		// Add it already, so it becomes released in case of error
-		new_lprog.shaders.push_back(shader_id);
+		compiled_shaders.push_back(shader_id);
 
 		// Get shader source and do modifications that are requested by flags
 		std::string shader_src = flags_srcmod + shader->getSource();
@@ -162,7 +160,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 			GLchar* error_c_str = new GLchar[error_str_len+1];
 			GlSystem::GetInfoLog(shader_id, error_str_len+1, reinterpret_cast< GLsizei* >(&error_str_len), error_c_str);
 			// Clean Shaders
-			cleanCompiledShaders(new_lprog.shaders);
+			cleanCompiledShaders(compiled_shaders);
 			// Throw exception
 			std::string error_str(error_c_str, error_str_len);
 			delete[] error_c_str;
@@ -172,40 +170,43 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	}
 
 	// Create new program
-	new_lprog.program = GlSystem::CreateProgramObject();
+	new_lprog = GlSystem::CreateProgram();
 	HppCheckGlErrors();
-	if (new_lprog.program == 0) {
-		cleanCompiledShaders(new_lprog.shaders);
+	if (new_lprog == 0) {
+		cleanCompiledShaders(compiled_shaders);
 		throw Exception("Unable to create new program object!");
 	}
 	HppCheckGlErrors();
 
 	// Attach shaders
-	for (std::vector< GLhandleARB >::const_iterator shaders_it = new_lprog.shaders.begin();
-	     shaders_it != new_lprog.shaders.end();
+	for (CompiledShaders::const_iterator shaders_it = compiled_shaders.begin();
+	     shaders_it != compiled_shaders.end();
 	     ++ shaders_it) {
-		GlSystem::AttachObject(new_lprog.program, *shaders_it);
+		GlSystem::AttachObject(new_lprog, *shaders_it);
 	}
 
 	// Link program
-	GlSystem::LinkProgram(new_lprog.program);
+	GlSystem::LinkProgram(new_lprog);
 	GLint link_status;
-	GlSystem::GetObjectParameteriv(new_lprog.program, GL_LINK_STATUS, &link_status);
+	GlSystem::GetObjectParameteriv(new_lprog, GL_LINK_STATUS, &link_status);
 	if (!link_status) {
 		// Get error string
 		GLint error_str_len;
-		GlSystem::GetObjectParameteriv(new_lprog.program, GL_INFO_LOG_LENGTH, &error_str_len);
+		GlSystem::GetObjectParameteriv(new_lprog, GL_INFO_LOG_LENGTH, &error_str_len);
 		GLchar* error_c_str = new GLchar[error_str_len+1];
-		GlSystem::GetInfoLog(new_lprog.program, error_str_len+1, reinterpret_cast< GLsizei* >(&error_str_len), error_c_str);
+		GlSystem::GetInfoLog(new_lprog, error_str_len+1, reinterpret_cast< GLsizei* >(&error_str_len), error_c_str);
 		// Clean Shaderprogram
-		GlSystem::DeleteObject(new_lprog.program);
+		GlSystem::DeleteProgram(new_lprog);
 		// Clean Shaders
-		cleanCompiledShaders(new_lprog.shaders);
+		cleanCompiledShaders(compiled_shaders);
 		// Throw exception
 		std::string error_str(error_c_str, error_str_len);
 		delete[] error_c_str;
 		throw Exception(std::string("Unable to link GLSL shader! Reason: ") + error_str);
 	}
+
+	// Clean Shaders
+	cleanCompiledShaders(compiled_shaders);
 
 	lprogs[flags] = new_lprog;
 
@@ -217,19 +218,18 @@ inline void Shaderprogram::cleanLinkedPrograms(void)
 	for (LinkedPrograms::iterator lprogs_it = lprogs.begin();
 	     lprogs_it != lprogs.end();
 	     ++ lprogs_it) {
-	     	LinkedProgram& lprog = lprogs_it->second;
-	     	GlSystem::DeleteObject(lprog.program);
-	     	cleanCompiledShaders(lprog.shaders);
+	     	GLuint lprog = lprogs_it->second;
+	     	GlSystem::DeleteProgram(lprog);
 	}
 	lprogs.clear();
 }
 
-inline void Shaderprogram::cleanCompiledShaders(std::vector< GLhandleARB > const& shaders)
+inline void Shaderprogram::cleanCompiledShaders(CompiledShaders& shaders)
 {
-	for (std::vector< GLhandleARB >::const_iterator shaders_it = shaders.begin();
+	for (CompiledShaders::const_iterator shaders_it = shaders.begin();
 	     shaders_it != shaders.end();
 	     ++ shaders_it) {
-		GlSystem::DeleteObject(*shaders_it);
+		GlSystem::DeleteShader(*shaders_it);
 	}
 }
 
