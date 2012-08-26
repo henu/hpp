@@ -152,13 +152,13 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 		GlSystem::ShaderSource(shader_id, 1, &src_c_str, &src_size);
 		GlSystem::CompileShader(shader_id);
 		GLint compile_status;
-		GlSystem::GetObjectParameteriv(shader_id, GL_COMPILE_STATUS, &compile_status);
+		GlSystem::GetShaderiv(shader_id, GL_COMPILE_STATUS, &compile_status);
 		if (!compile_status) {
 			// Get error string
 			GLint error_str_len;
-			GlSystem::GetObjectParameteriv(shader_id, GL_INFO_LOG_LENGTH, &error_str_len);
+			GlSystem::GetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &error_str_len);
 			GLchar* error_c_str = new GLchar[error_str_len+1];
-			GlSystem::GetInfoLog(shader_id, error_str_len+1, reinterpret_cast< GLsizei* >(&error_str_len), error_c_str);
+			GlSystem::GetShaderInfoLog(shader_id, error_str_len+1, reinterpret_cast< GLsizei* >(&error_str_len), error_c_str);
 			// Clean Shaders
 			cleanCompiledShaders(compiled_shaders);
 			// Throw exception
@@ -182,19 +182,19 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	for (CompiledShaders::const_iterator shaders_it = compiled_shaders.begin();
 	     shaders_it != compiled_shaders.end();
 	     ++ shaders_it) {
-		GlSystem::AttachObject(new_lprog, *shaders_it);
+		GlSystem::AttachShader(new_lprog, *shaders_it);
 	}
 
 	// Link program
 	GlSystem::LinkProgram(new_lprog);
 	GLint link_status;
-	GlSystem::GetObjectParameteriv(new_lprog, GL_LINK_STATUS, &link_status);
+	GlSystem::GetProgramiv(new_lprog, GL_LINK_STATUS, &link_status);
 	if (!link_status) {
 		// Get error string
 		GLint error_str_len;
-		GlSystem::GetObjectParameteriv(new_lprog, GL_INFO_LOG_LENGTH, &error_str_len);
+		GlSystem::GetProgramiv(new_lprog, GL_INFO_LOG_LENGTH, &error_str_len);
 		GLchar* error_c_str = new GLchar[error_str_len+1];
-		GlSystem::GetInfoLog(new_lprog, error_str_len+1, reinterpret_cast< GLsizei* >(&error_str_len), error_c_str);
+		GlSystem::GetProgramInfoLog(new_lprog, error_str_len+1, reinterpret_cast< GLsizei* >(&error_str_len), error_c_str);
 		// Clean Shaderprogram
 		GlSystem::DeleteProgram(new_lprog);
 		// Clean Shaders

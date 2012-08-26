@@ -21,14 +21,15 @@ public:
 	// Functions related to extensions. These are got automatically. You
 	// have to ensure the correct extension exists!
 	inline static void ActiveTexture(GLenum texture);
-	inline static void AttachObject(GLhandleARB program, GLhandleARB shader);
+	inline static void AttachShader(GLuint program, GLuint shader);
+	inline static void BindAttribLocation(GLuint program, GLuint index, GLchar const* name);
 	inline static void BindBuffer(GLenum target, GLuint id);
 	inline static void BindVertexArray(GLuint array);
 	inline static void BufferData(GLenum target, GLsizei size, const void* data, GLenum usage);
 	inline static void ClientActiveTexture(GLenum texture);
-	inline static GLhandleARB CreateProgram(void);
-	inline static GLhandleARB CreateShader(GLenum type);
-	inline static void CompileShader(GLhandleARB shader);
+	inline static GLuint CreateProgram(void);
+	inline static GLuint CreateShader(GLenum type);
+	inline static void CompileShader(GLuint shader);
 	inline static void DeleteBuffers(GLsizei n, GLuint const* buffers);
 	inline static void DeleteProgram(GLuint program);
 	inline static void DeleteShader(GLuint shader);
@@ -36,11 +37,13 @@ public:
 	inline static void EnableVertexAttribArray(GLuint index);
 	inline static void GenBuffers(GLsizei n, GLuint* ids);
 	inline static void GenVertexArrays(GLsizei n, GLuint* arrays);
-	inline static void GetInfoLog(GLhandleARB shader, GLsizei max_len, GLsizei* len, GLcharARB* log);
-	inline static void GetObjectParameteriv(GLhandleARB shader, GLenum param, GLint* value);
-	inline static GLint GetUniformLocation(GLhandleARB program, GLchar const* name);
-	inline static void LinkProgram(GLhandleARB program);
-	inline static void ShaderSource(GLhandleARB shader, GLuint strs_count, GLcharARB const** strs, GLint* lens);
+	inline static void GetProgramInfoLog(GLuint program, GLsizei max_len, GLsizei* len, GLchar* log);
+	inline static void GetShaderInfoLog(GLuint shader, GLsizei max_len, GLsizei* len, GLchar* log);
+	inline static void GetProgramiv(GLuint program, GLenum param, GLint* value);
+	inline static void GetShaderiv(GLuint shader, GLenum param, GLint* value);
+	inline static GLint GetUniformLocation(GLuint program, GLchar const* name);
+	inline static void LinkProgram(GLuint program);
+	inline static void ShaderSource(GLuint shader, GLuint strs_count, GLchar const** strs, GLint* lens);
 	inline static void Uniform1f(GLint location, GLfloat v0);
 	inline static void Uniform1fv(GLint location, GLsizei count, GLfloat const* value);
 	inline static void Uniform2f(GLint location, GLfloat v0, GLfloat v1);
@@ -85,12 +88,13 @@ private:
 
 	// Static pointers to functions of extensions
 	static PFNGLACTIVETEXTUREARBPROC systemActiveTexture;
-	static PFNGLATTACHOBJECTARBPROC systemAttachObject;
+	static PFNGLATTACHSHADERPROC systemAttachShader;
+	static PFNGLBINDATTRIBLOCATIONPROC systemBindAttribLocation;
 	static PFNGLBINDBUFFERARBPROC systemBindBuffer;
 	static PFNGLBINDVERTEXARRAYPROC systemBindVertexArray;
 	static PFNGLBUFFERDATAARBPROC systemBufferData;
 	static PFNGLCLIENTACTIVETEXTUREARBPROC systemClientActiveTexture;
-	static PFNGLCOMPILESHADERARBPROC systemCompileShader;
+	static PFNGLCOMPILESHADERPROC systemCompileShader;
 	static PFNGLCREATEPROGRAMPROC systemCreateProgram;
 	static PFNGLCREATESHADERPROC systemCreateShader;
 	static PFNGLDELETEBUFFERSARBPROC systemDeleteBuffers;
@@ -100,27 +104,29 @@ private:
 	static PFNGLENABLEVERTEXATTRIBARRAYPROC systemEnableVertexAttribArray;
 	static PFNGLGENBUFFERSARBPROC systemGenBuffers;
 	static PFNGLGENVERTEXARRAYSPROC systemGenVertexArrays;
-	static PFNGLGETINFOLOGARBPROC systemGetInfoLog;
-	static PFNGLGETOBJECTPARAMETERIVARBPROC systemGetObjectParameteriv;
-	static PFNGLGETUNIFORMLOCATIONARBPROC systemGetUniformLocation;
-	static PFNGLLINKPROGRAMARBPROC systemLinkProgram;
-	static PFNGLSHADERSOURCEARBPROC systemShaderSource;
-	static PFNGLUNIFORM1FARBPROC systemUniform1f;
-	static PFNGLUNIFORM1FVARBPROC systemUniform1fv;
-	static PFNGLUNIFORM2FARBPROC systemUniform2f;
-	static PFNGLUNIFORM2FVARBPROC systemUniform2fv;
-	static PFNGLUNIFORM3FARBPROC systemUniform3f;
-	static PFNGLUNIFORM3FVARBPROC systemUniform3fv;
-	static PFNGLUNIFORM4FARBPROC systemUniform4f;
-	static PFNGLUNIFORM4FVARBPROC systemUniform4fv;
-	static PFNGLUNIFORM1IARBPROC systemUniform1i;
-	static PFNGLUNIFORM1IVARBPROC systemUniform1iv;
-	static PFNGLUNIFORM2IARBPROC systemUniform2i;
-	static PFNGLUNIFORM2IVARBPROC systemUniform2iv;
-	static PFNGLUNIFORM3IARBPROC systemUniform3i;
-	static PFNGLUNIFORM3IVARBPROC systemUniform3iv;
-	static PFNGLUNIFORM4IARBPROC systemUniform4i;
-	static PFNGLUNIFORM4IVARBPROC systemUniform4iv;
+	static PFNGLGETPROGRAMINFOLOGPROC systemGetProgramInfoLog;
+	static PFNGLGETSHADERINFOLOGPROC systemGetShaderInfoLog;
+	static PFNGLGETPROGRAMIVPROC systemGetProgramiv;
+	static PFNGLGETSHADERIVPROC systemGetShaderiv;
+	static PFNGLGETUNIFORMLOCATIONPROC systemGetUniformLocation;
+	static PFNGLLINKPROGRAMPROC systemLinkProgram;
+	static PFNGLSHADERSOURCEPROC systemShaderSource;
+	static PFNGLUNIFORM1FPROC systemUniform1f;
+	static PFNGLUNIFORM1FVPROC systemUniform1fv;
+	static PFNGLUNIFORM2FPROC systemUniform2f;
+	static PFNGLUNIFORM2FVPROC systemUniform2fv;
+	static PFNGLUNIFORM3FPROC systemUniform3f;
+	static PFNGLUNIFORM3FVPROC systemUniform3fv;
+	static PFNGLUNIFORM4FPROC systemUniform4f;
+	static PFNGLUNIFORM4FVPROC systemUniform4fv;
+	static PFNGLUNIFORM1IPROC systemUniform1i;
+	static PFNGLUNIFORM1IVPROC systemUniform1iv;
+	static PFNGLUNIFORM2IPROC systemUniform2i;
+	static PFNGLUNIFORM2IVPROC systemUniform2iv;
+	static PFNGLUNIFORM3IPROC systemUniform3i;
+	static PFNGLUNIFORM3IVPROC systemUniform3iv;
+	static PFNGLUNIFORM4IPROC systemUniform4i;
+	static PFNGLUNIFORM4IVPROC systemUniform4iv;
 	static PFNGLUSEPROGRAMPROC systemUseProgram;
 	static PFNGLVERTEXATTRIBPOINTERPROC systemVertexAttribPointer;
 
@@ -144,6 +150,12 @@ inline void GlSystem::ActiveTexture(GLenum texture)
 {
 	HppAssert(systemActiveTexture, "Function does not exist!");
 	systemActiveTexture(texture);
+}
+
+inline void GlSystem::BindAttribLocation(GLuint program, GLuint index, GLchar const* name)
+{
+	HppAssert(systemBindAttribLocation, "Function does not exist!");
+	systemBindAttribLocation(program, index, name);
 }
 
 inline void GlSystem::BindBuffer(GLenum target, GLuint id)
@@ -170,25 +182,25 @@ inline void GlSystem::ClientActiveTexture(GLenum texture)
 	systemClientActiveTexture(texture);
 }
 
-inline void GlSystem::AttachObject(GLhandleARB program, GLhandleARB shader)
+inline void GlSystem::AttachShader(GLuint program, GLuint shader)
 {
-	HppAssert(systemAttachObject, "Function does not exist!");
-	systemAttachObject(program, shader);
+	HppAssert(systemAttachShader, "Function does not exist!");
+	systemAttachShader(program, shader);
 }
 
-inline GLhandleARB GlSystem::CreateProgram(void)
+inline GLuint GlSystem::CreateProgram(void)
 {
 	HppAssert(systemCreateProgram, "Function does not exist!");
 	return systemCreateProgram();
 }
 
-inline GLhandleARB GlSystem::CreateShader(GLenum type)
+inline GLuint GlSystem::CreateShader(GLenum type)
 {
 	HppAssert(systemCreateShader, "Function does not exist!");
 	return systemCreateShader(type);
 }
 
-inline void GlSystem::CompileShader(GLhandleARB shader)
+inline void GlSystem::CompileShader(GLuint shader)
 {
 	HppAssert(systemCompileShader, "Function does not exist!");
 	systemCompileShader(shader);
@@ -236,31 +248,43 @@ inline void GlSystem::GenVertexArrays(GLsizei n, GLuint* arrays)
 	systemGenVertexArrays(n, arrays);
 }
 
-inline void GlSystem::GetInfoLog(GLhandleARB shader, GLsizei max_len, GLsizei* len, GLcharARB* log)
+inline void GlSystem::GetProgramInfoLog(GLuint program, GLsizei max_len, GLsizei* len, GLchar* log)
 {
-	HppAssert(systemGetInfoLog, "Function does not exist!");
-	systemGetInfoLog(shader, max_len, len, log);
+	HppAssert(systemGetProgramInfoLog, "Function does not exist!");
+	systemGetProgramInfoLog(program, max_len, len, log);
 }
 
-inline void GlSystem::GetObjectParameteriv(GLhandleARB shader, GLenum param, GLint* value)
+inline void GlSystem::GetShaderInfoLog(GLuint shader, GLsizei max_len, GLsizei* len, GLchar* log)
 {
-	HppAssert(systemGetObjectParameteriv, "Function does not exist!");
-	systemGetObjectParameteriv(shader, param, value);
+	HppAssert(systemGetShaderInfoLog, "Function does not exist!");
+	systemGetShaderInfoLog(shader, max_len, len, log);
 }
 
-inline GLint GlSystem::GetUniformLocation(GLhandleARB program, GLchar const* name)
+inline void GlSystem::GetProgramiv(GLuint program, GLenum param, GLint* value)
+{
+	HppAssert(systemGetProgramiv, "Function does not exist!");
+	systemGetProgramiv(program, param, value);
+}
+
+inline void GlSystem::GetShaderiv(GLuint shader, GLenum param, GLint* value)
+{
+	HppAssert(systemGetShaderiv, "Function does not exist!");
+	systemGetShaderiv(shader, param, value);
+}
+
+inline GLint GlSystem::GetUniformLocation(GLuint program, GLchar const* name)
 {
 	HppAssert(systemGetUniformLocation, "Function does not exist!");
 	return systemGetUniformLocation(program, name);
 }
 
-inline void GlSystem::LinkProgram(GLhandleARB program)
+inline void GlSystem::LinkProgram(GLuint program)
 {
 	HppAssert(systemLinkProgram, "Function does not exist!");
 	systemLinkProgram(program);
 }
 
-inline void GlSystem::ShaderSource(GLhandleARB shader, GLuint strs_count, GLcharARB const** strs, GLint* lens)
+inline void GlSystem::ShaderSource(GLuint shader, GLuint strs_count, GLchar const** strs, GLint* lens)
 {
 	HppAssert(systemShaderSource, "Function does not exist!");
 	systemShaderSource(shader, strs_count, strs, lens);
