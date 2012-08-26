@@ -12,24 +12,24 @@
 namespace Hpp
 {
 
-PFNGLACTIVETEXTUREARBPROC GlSystem::systemActiveTexture = NULL;
+PFNGLACTIVETEXTUREPROC GlSystem::systemActiveTexture = NULL;
 PFNGLATTACHSHADERPROC GlSystem::systemAttachShader = NULL;
 PFNGLBINDATTRIBLOCATIONPROC GlSystem::systemBindAttribLocation = NULL;
-PFNGLBINDBUFFERARBPROC GlSystem::systemBindBuffer = NULL;
+PFNGLBINDBUFFERPROC GlSystem::systemBindBuffer = NULL;
 PFNGLBINDVERTEXARRAYPROC GlSystem::systemBindVertexArray = NULL;
-PFNGLBUFFERDATAARBPROC GlSystem::systemBufferData = NULL;
-PFNGLCLIENTACTIVETEXTUREARBPROC GlSystem::systemClientActiveTexture = NULL;
+PFNGLBUFFERDATAPROC GlSystem::systemBufferData = NULL;
+PFNGLCLIENTACTIVETEXTUREPROC GlSystem::systemClientActiveTexture = NULL;
 PFNGLCOMPILESHADERPROC GlSystem::systemCompileShader = NULL;
 PFNGLCREATEPROGRAMPROC GlSystem::systemCreateProgram = NULL;
 PFNGLCREATESHADERPROC GlSystem::systemCreateShader = NULL;
-PFNGLGENBUFFERSARBPROC GlSystem::systemGenBuffers = NULL;
+PFNGLGENBUFFERSPROC GlSystem::systemGenBuffers = NULL;
 PFNGLGENVERTEXARRAYSPROC GlSystem::systemGenVertexArrays = NULL;
 PFNGLGETPROGRAMINFOLOGPROC GlSystem::systemGetProgramInfoLog = NULL;
 PFNGLGETSHADERINFOLOGPROC GlSystem::systemGetShaderInfoLog = NULL;
 PFNGLGETPROGRAMIVPROC GlSystem::systemGetProgramiv = NULL;
 PFNGLGETSHADERIVPROC GlSystem::systemGetShaderiv = NULL;
 PFNGLGETUNIFORMLOCATIONPROC GlSystem::systemGetUniformLocation = NULL;
-PFNGLDELETEBUFFERSARBPROC GlSystem::systemDeleteBuffers = NULL;
+PFNGLDELETEBUFFERSPROC GlSystem::systemDeleteBuffers = NULL;
 PFNGLDELETEPROGRAMPROC GlSystem::systemDeleteProgram = NULL;
 PFNGLDELETESHADERPROC GlSystem::systemDeleteShader = NULL;
 PFNGLDISABLEVERTEXATTRIBARRAYPROC GlSystem::systemDisableVertexAttribArray = NULL;
@@ -67,22 +67,22 @@ void GlSystem::initialize(void)
 
 	// Get pointers to functions of extensions
 	#ifndef WIN32
-	systemActiveTexture = reinterpret_cast< PFNGLACTIVETEXTUREARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glActiveTextureARB")));
+	systemActiveTexture = reinterpret_cast< PFNGLACTIVETEXTUREPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glActiveTexture")));
 	systemAttachShader = reinterpret_cast< PFNGLATTACHSHADERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glAttachShader")));
 	systemBindAttribLocation = reinterpret_cast< PFNGLBINDATTRIBLOCATIONPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBindAttribLocation")));
-	systemBindBuffer = reinterpret_cast< PFNGLBINDBUFFERARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBindBufferARB")));
+	systemBindBuffer = reinterpret_cast< PFNGLBINDBUFFERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBindBuffer")));
 	systemBindVertexArray = reinterpret_cast< PFNGLBINDVERTEXARRAYPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBindVertexArray")));
-	systemBufferData = reinterpret_cast< PFNGLBUFFERDATAARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBufferDataARB")));
-	systemClientActiveTexture = reinterpret_cast< PFNGLCLIENTACTIVETEXTUREARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glClientActiveTextureARB")));
+	systemBufferData = reinterpret_cast< PFNGLBUFFERDATAPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBufferData")));
+	systemClientActiveTexture = reinterpret_cast< PFNGLCLIENTACTIVETEXTUREPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glClientActiveTexture")));
 	systemCompileShader = reinterpret_cast< PFNGLCOMPILESHADERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCompileShader")));
 	systemCreateProgram = reinterpret_cast< PFNGLCREATEPROGRAMPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCreateProgram")));
 	systemCreateShader = reinterpret_cast< PFNGLCREATESHADERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCreateShader")));
-	systemDeleteBuffers = reinterpret_cast< PFNGLDELETEBUFFERSARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glDeleteBuffersARB")));
+	systemDeleteBuffers = reinterpret_cast< PFNGLDELETEBUFFERSPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glDeleteBuffers")));
 	systemDeleteProgram = reinterpret_cast< PFNGLDELETEPROGRAMPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glDeleteProgram")));
 	systemDeleteShader = reinterpret_cast< PFNGLDELETESHADERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glDeleteShader")));
 	systemDisableVertexAttribArray = reinterpret_cast< PFNGLDISABLEVERTEXATTRIBARRAYPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glDisableVertexAttribArray")));
 	systemEnableVertexAttribArray = reinterpret_cast< PFNGLENABLEVERTEXATTRIBARRAYPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glEnableVertexAttribArray")));
-	systemGenBuffers = reinterpret_cast< PFNGLGENBUFFERSARBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGenBuffersARB")));
+	systemGenBuffers = reinterpret_cast< PFNGLGENBUFFERSPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGenBuffers")));
 	systemGenVertexArrays = reinterpret_cast< PFNGLGENVERTEXARRAYSPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGenVertexArrays")));
 	systemGetProgramInfoLog = reinterpret_cast< PFNGLGETPROGRAMINFOLOGPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGetProgramInfoLog")));
 	systemGetShaderInfoLog = reinterpret_cast< PFNGLGETSHADERINFOLOGPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGetShaderInfoLog")));
@@ -110,22 +110,22 @@ void GlSystem::initialize(void)
 	systemUseProgram = reinterpret_cast< PFNGLUSEPROGRAMPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUseProgram")));
 	systemVertexAttribPointer = reinterpret_cast< PFNGLVERTEXATTRIBPOINTERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glVertexAttribPointer")));
 	#else
-	systemActiveTexture = reinterpret_cast< PFNGLACTIVETEXTUREARBPROC >(wglGetProcAddress("glActiveTextureARB"));
+	systemActiveTexture = reinterpret_cast< PFNGLACTIVETEXTUREPROC >(wglGetProcAddress("glActiveTexture"));
 	systemAttachShader = reinterpret_cast< PFNGLATTACHSHADERPROC >(wglGetProcAddress("glAttachShader"));
 	systemBindAttribLocation = reinterpret_cast< PFNGLBINDATTRIBLOCATIONPROC >(wglGetProcAddress("glBindAttribLocation"));
-	systemBindBuffer = reinterpret_cast< PFNGLBINDBUFFERARBPROC >(wglGetProcAddress("glBindBufferARB"));
+	systemBindBuffer = reinterpret_cast< PFNGLBINDBUFFERPROC >(wglGetProcAddress("glBindBuffer"));
 	systemBindVertexArray = reinterpret_cast< PFNGLBINDVERTEXARRAYPROC >(wglGetProcAddress("glBindVertexBuffer"));
-	systemBufferData = reinterpret_cast< PFNGLBUFFERDATAARBPROC >(wglGetProcAddress("glBufferDataARB"));
-	systemClientActiveTexture = reinterpret_cast< PFNGLCLIENTACTIVETEXTUREARBPROC >(wglGetProcAddress("glClientActiveTextureARB"));
+	systemBufferData = reinterpret_cast< PFNGLBUFFERDATAPROC >(wglGetProcAddress("glBufferData"));
+	systemClientActiveTexture = reinterpret_cast< PFNGLCLIENTACTIVETEXTUREPROC >(wglGetProcAddress("glClientActiveTexture"));
 	systemCompileShader = reinterpret_cast< PFNGLCOMPILESHADERPROC >(wglGetProcAddress("glCompileShader"));
 	systemCreateProgram = reinterpret_cast< PFNGLCREATEPROGRAMPROC >(wglGetProcAddress("glCreateProgram"));
 	systemCreateShader = reinterpret_cast< PFNGLCREATESHADERPROC >(wglGetProcAddress("glCreateShader"));
-	systemDeleteBuffers = reinterpret_cast< PFNGLDELETEBUFFERSARBPROC >(wglGetProcAddress("glDeleteBuffersARB"));
+	systemDeleteBuffers = reinterpret_cast< PFNGLDELETEBUFFERSPROC >(wglGetProcAddress("glDeleteBuffers"));
 	systemDeleteProgram = reinterpret_cast< PFNGLDELETEPROGRAMPROC >(wglGetProcAddress("glDeleteProgram"));
 	systemDeleteShader = reinterpret_cast< PFNGLDELETESHADERPROC >(wglGetProcAddress("glDeleteShader"));
 	systemDisableVertexAttribArray = reinterpret_cast< PFNGLDISABLEVERTEXATTRIBARRAYPROC >(wglGetProcAddress("glDisableVertexAttribArray"));
 	systemEnableVertexAttribArray = reinterpret_cast< PFNGLENABLEVERTEXATTRIBARRAYPROC >(wglGetProcAddress("glEnableVertexAttribArray"));
-	systemGenBuffers = reinterpret_cast< PFNGLGENBUFFERSARBPROC >(wglGetProcAddress("glGenBuffersARB"));
+	systemGenBuffers = reinterpret_cast< PFNGLGENBUFFERSPROC >(wglGetProcAddress("glGenBuffers"));
 	systemGenVertexArrays = reinterpret_cast< PFNGLGENVERTEXARRAYSPROC >(wglGetProcAddress("glGenVertexArrays"));
 	systemGetProgramInfoLog = reinterpret_cast< PFNGLGETPROGRAMINFOLOGPROC >(wglGetProcAddress("glGetProgramInfoLog"));
 	systemGetShaderInfoLog = reinterpret_cast< PFNGLGETSHADERINFOLOGPROC >(wglGetProcAddress("glGetShaderInfoLog"));
@@ -156,12 +156,12 @@ void GlSystem::initialize(void)
 
 	// Get properties
 	glGetIntegerv(GL_MAX_LIGHTS, &max_lights);
-// TODO: Ensure GL_MAX_TEXTURE_UNITS_ARB is the correct constant for this. Maybe it should be GL_MAX_TEXTURE_COORDS
-//	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &tunit_count);
+// TODO: Ensure GL_MAX_TEXTURE_UNITS is the correct constant for this. Maybe it should be GL_MAX_TEXTURE_COORDS
+//	glGetIntegerv(GL_MAX_TEXTURE_UNITS_, &tunit_count);
 	HppCheckGlErrors();
 
 	// Try to get number of texture units
-	glGetIntegerv(GL_MAX_TEXTURE_COORDS_ARB, &tunit_count);
+	glGetIntegerv(GL_MAX_TEXTURE_COORDS, &tunit_count);
         GLenum error = glGetError();
 	if (error != GL_NO_ERROR) {
 		if (error == GL_INVALID_ENUM) {

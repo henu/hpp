@@ -87,22 +87,22 @@ private:
 private:
 
 	// Static pointers to functions of extensions
-	static PFNGLACTIVETEXTUREARBPROC systemActiveTexture;
+	static PFNGLACTIVETEXTUREPROC systemActiveTexture;
 	static PFNGLATTACHSHADERPROC systemAttachShader;
 	static PFNGLBINDATTRIBLOCATIONPROC systemBindAttribLocation;
-	static PFNGLBINDBUFFERARBPROC systemBindBuffer;
+	static PFNGLBINDBUFFERPROC systemBindBuffer;
 	static PFNGLBINDVERTEXARRAYPROC systemBindVertexArray;
-	static PFNGLBUFFERDATAARBPROC systemBufferData;
-	static PFNGLCLIENTACTIVETEXTUREARBPROC systemClientActiveTexture;
+	static PFNGLBUFFERDATAPROC systemBufferData;
+	static PFNGLCLIENTACTIVETEXTUREPROC systemClientActiveTexture;
 	static PFNGLCOMPILESHADERPROC systemCompileShader;
 	static PFNGLCREATEPROGRAMPROC systemCreateProgram;
 	static PFNGLCREATESHADERPROC systemCreateShader;
-	static PFNGLDELETEBUFFERSARBPROC systemDeleteBuffers;
+	static PFNGLDELETEBUFFERSPROC systemDeleteBuffers;
 	static PFNGLDELETEPROGRAMPROC systemDeleteProgram;
 	static PFNGLDELETESHADERPROC systemDeleteShader;
 	static PFNGLDISABLEVERTEXATTRIBARRAYPROC systemDisableVertexAttribArray;
 	static PFNGLENABLEVERTEXATTRIBARRAYPROC systemEnableVertexAttribArray;
-	static PFNGLGENBUFFERSARBPROC systemGenBuffers;
+	static PFNGLGENBUFFERSPROC systemGenBuffers;
 	static PFNGLGENVERTEXARRAYSPROC systemGenVertexArrays;
 	static PFNGLGETPROGRAMINFOLOGPROC systemGetProgramInfoLog;
 	static PFNGLGETSHADERINFOLOGPROC systemGetShaderInfoLog;
