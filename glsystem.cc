@@ -52,6 +52,15 @@ PFNGLUNIFORM3IPROC GlSystem::systemUniform3i = NULL;
 PFNGLUNIFORM3IVPROC GlSystem::systemUniform3iv = NULL;
 PFNGLUNIFORM4IPROC GlSystem::systemUniform4i = NULL;
 PFNGLUNIFORM4IVPROC GlSystem::systemUniform4iv = NULL;
+PFNGLUNIFORMMATRIX2FVPROC GlSystem::systemUniformMatrix2fv = NULL;
+PFNGLUNIFORMMATRIX3FVPROC GlSystem::systemUniformMatrix3fv = NULL;
+PFNGLUNIFORMMATRIX4FVPROC GlSystem::systemUniformMatrix4fv = NULL;
+PFNGLUNIFORMMATRIX2X3FVPROC GlSystem::systemUniformMatrix2x3fv = NULL;
+PFNGLUNIFORMMATRIX3X2FVPROC GlSystem::systemUniformMatrix3x2fv = NULL;
+PFNGLUNIFORMMATRIX2X4FVPROC GlSystem::systemUniformMatrix2x4fv = NULL;
+PFNGLUNIFORMMATRIX4X2FVPROC GlSystem::systemUniformMatrix4x2fv = NULL;
+PFNGLUNIFORMMATRIX3X4FVPROC GlSystem::systemUniformMatrix3x4fv = NULL;
+PFNGLUNIFORMMATRIX4X3FVPROC GlSystem::systemUniformMatrix4x3fv = NULL;
 PFNGLUSEPROGRAMPROC GlSystem::systemUseProgram = NULL;
 PFNGLVERTEXATTRIBPOINTERPROC GlSystem::systemVertexAttribPointer = NULL;
 
@@ -107,6 +116,15 @@ void GlSystem::initialize(void)
 	systemUniform3iv = reinterpret_cast< PFNGLUNIFORM3IVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniform3iv")));
 	systemUniform4i = reinterpret_cast< PFNGLUNIFORM4IPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniform4i")));
 	systemUniform4iv = reinterpret_cast< PFNGLUNIFORM4IVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniform4iv")));
+	systemUniformMatrix2fv = reinterpret_cast< PFNGLUNIFORMMATRIX2FVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniformMatrix2fv")));
+	systemUniformMatrix3fv = reinterpret_cast< PFNGLUNIFORMMATRIX3FVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniformMatrix3fv")));
+	systemUniformMatrix4fv = reinterpret_cast< PFNGLUNIFORMMATRIX4FVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniformMatrix4fv")));
+	systemUniformMatrix2x3fv = reinterpret_cast< PFNGLUNIFORMMATRIX2X3FVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniformMatrix2x3fv")));
+	systemUniformMatrix3x2fv = reinterpret_cast< PFNGLUNIFORMMATRIX3X2FVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniformMatrix3x2fv")));
+	systemUniformMatrix2x4fv = reinterpret_cast< PFNGLUNIFORMMATRIX2X4FVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniformMatrix2x4fv")));
+	systemUniformMatrix4x2fv = reinterpret_cast< PFNGLUNIFORMMATRIX4X2FVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniformMatrix4x2fv")));
+	systemUniformMatrix3x4fv = reinterpret_cast< PFNGLUNIFORMMATRIX3X4FVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniformMatrix3x4fv")));
+	systemUniformMatrix4x3fv = reinterpret_cast< PFNGLUNIFORMMATRIX4X3FVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUniformMatrix4x3fv")));
 	systemUseProgram = reinterpret_cast< PFNGLUSEPROGRAMPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glUseProgram")));
 	systemVertexAttribPointer = reinterpret_cast< PFNGLVERTEXATTRIBPOINTERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glVertexAttribPointer")));
 	#else
@@ -150,6 +168,15 @@ void GlSystem::initialize(void)
 	systemUniform3iv = reinterpret_cast< PFNGLUNIFORM3IVPROC >(wglGetProcAddress("glUniform3iv"));
 	systemUniform4i = reinterpret_cast< PFNGLUNIFORM4IPROC >(wglGetProcAddress("glUniform4i"));
 	systemUniform4iv = reinterpret_cast< PFNGLUNIFORM4IVPROC >(wglGetProcAddress("glUniform4iv"));
+	systemUniformMatrix2fv = reinterpret_cast< PFNGLUNIFORMMATRIX2FVPROC >(wglGetProcAddress("glUniformMatrix2fv"));
+	systemUniformMatrix3fv = reinterpret_cast< PFNGLUNIFORMMATRIX3FVPROC >(wglGetProcAddress("glUniformMatrix3fv"));
+	systemUniformMatrix4fv = reinterpret_cast< PFNGLUNIFORMMATRIX4FVPROC >(wglGetProcAddress("glUniformMatrix4fv"));
+	systemUniformMatrix2x3fv = reinterpret_cast< PFNGLUNIFORMMATRIX2X3FVPROC >(wglGetProcAddress("glUniformMatrix2x3fv"));
+	systemUniformMatrix3x2fv = reinterpret_cast< PFNGLUNIFORMMATRIX3X2FVPROC >(wglGetProcAddress("glUniformMatrix3x2fv"));
+	systemUniformMatrix2x4fv = reinterpret_cast< PFNGLUNIFORMMATRIX2X4FVPROC >(wglGetProcAddress("glUniformMatrix2x4fv"));
+	systemUniformMatrix4x2fv = reinterpret_cast< PFNGLUNIFORMMATRIX4X2FVPROC >(wglGetProcAddress("glUniformMatrix4x2fv"));
+	systemUniformMatrix3x4fv = reinterpret_cast< PFNGLUNIFORMMATRIX3X4FVPROC >(wglGetProcAddress("glUniformMatrix3x4fv"));
+	systemUniformMatrix4x3fv = reinterpret_cast< PFNGLUNIFORMMATRIX4X3FVPROC >(wglGetProcAddress("glUniformMatrix4x3fv"));
 	systemUseProgram = reinterpret_cast< PFNGLUSEPROGRAMPROC >(wglGetProcAddress("glUseProgram"));
 	systemVertexAttribPointer = reinterpret_cast< PFNGLVERTEXATTRIBPOINTERPROC >(wglGetProcAddress("glVertexAttribPointer"));
 	#endif

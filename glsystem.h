@@ -60,6 +60,15 @@ public:
 	inline static void Uniform3iv(GLint location, GLsizei count, GLint const* value);
 	inline static void Uniform4i(GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
 	inline static void Uniform4iv(GLint location, GLsizei count, GLint const* value);
+	inline static void UniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+	inline static void UniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+	inline static void UniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+	inline static void UniformMatrix2x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+	inline static void UniformMatrix3x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+	inline static void UniformMatrix2x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+	inline static void UniformMatrix4x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+	inline static void UniformMatrix3x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
+	inline static void UniformMatrix4x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
 	inline static void UseProgram(GLuint program);
 	inline static void VertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer);
 
@@ -127,6 +136,15 @@ private:
 	static PFNGLUNIFORM3IVPROC systemUniform3iv;
 	static PFNGLUNIFORM4IPROC systemUniform4i;
 	static PFNGLUNIFORM4IVPROC systemUniform4iv;
+	static PFNGLUNIFORMMATRIX2FVPROC systemUniformMatrix2fv;
+	static PFNGLUNIFORMMATRIX3FVPROC systemUniformMatrix3fv;
+	static PFNGLUNIFORMMATRIX4FVPROC systemUniformMatrix4fv;
+	static PFNGLUNIFORMMATRIX2X3FVPROC systemUniformMatrix2x3fv;
+	static PFNGLUNIFORMMATRIX3X2FVPROC systemUniformMatrix3x2fv;
+	static PFNGLUNIFORMMATRIX2X4FVPROC systemUniformMatrix2x4fv;
+	static PFNGLUNIFORMMATRIX4X2FVPROC systemUniformMatrix4x2fv;
+	static PFNGLUNIFORMMATRIX3X4FVPROC systemUniformMatrix3x4fv;
+	static PFNGLUNIFORMMATRIX4X3FVPROC systemUniformMatrix4x3fv;
 	static PFNGLUSEPROGRAMPROC systemUseProgram;
 	static PFNGLVERTEXATTRIBPOINTERPROC systemVertexAttribPointer;
 
@@ -384,6 +402,60 @@ inline void GlSystem::Uniform4iv(GLint location, GLsizei count, GLint const* val
 {
 	HppAssert(systemUniform4iv, "Function does not exist!");
 	systemUniform4iv(location, count, value);
+}
+
+inline void GlSystem::UniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+	HppAssert(systemUniformMatrix2fv, "Function does not exist!");
+	systemUniformMatrix2fv(location, count, transpose, value);
+}
+
+inline void GlSystem::UniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+	HppAssert(systemUniformMatrix3fv, "Function does not exist!");
+	systemUniformMatrix3fv(location, count, transpose, value);
+}
+
+inline void GlSystem::UniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+	HppAssert(systemUniformMatrix4fv, "Function does not exist!");
+	systemUniformMatrix4fv(location, count, transpose, value);
+}
+
+inline void GlSystem::UniformMatrix2x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+	HppAssert(systemUniformMatrix2x3fv, "Function does not exist!");
+	systemUniformMatrix2x3fv(location, count, transpose, value);
+}
+
+inline void GlSystem::UniformMatrix3x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+	HppAssert(systemUniformMatrix3x2fv, "Function does not exist!");
+	systemUniformMatrix3x2fv(location, count, transpose, value);
+}
+
+inline void GlSystem::UniformMatrix2x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+	HppAssert(systemUniformMatrix2x4fv, "Function does not exist!");
+	systemUniformMatrix2x4fv(location, count, transpose, value);
+}
+
+inline void GlSystem::UniformMatrix4x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+	HppAssert(systemUniformMatrix4x2fv, "Function does not exist!");
+	systemUniformMatrix4x2fv(location, count, transpose, value);
+}
+
+inline void GlSystem::UniformMatrix3x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+	HppAssert(systemUniformMatrix3x4fv, "Function does not exist!");
+	systemUniformMatrix3x4fv(location, count, transpose, value);
+}
+
+inline void GlSystem::UniformMatrix4x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+	HppAssert(systemUniformMatrix4x3fv, "Function does not exist!");
+	systemUniformMatrix4x3fv(location, count, transpose, value);
 }
 
 inline void GlSystem::UseProgram(GLuint program)
