@@ -34,6 +34,9 @@ void NCursesRenderer::setColors(NC::Color text, NC::Color bg)
 
 void NCursesRenderer::printChar(char c)
 {
+	if (c < 0x20) {
+		throw Hpp::Exception("Invalid character!");
+	}
 	size_t visible_left = getVisibleLeft();
 	if (visible_left > 0) {
 		hideTextCursor(1);
@@ -44,6 +47,17 @@ void NCursesRenderer::printChar(char c)
 
 void NCursesRenderer::printString(Hpp::UnicodeString const& str)
 {
+	// Ensure there are no invalid characters in string
+	for (Hpp::UnicodeString::const_iterator str_it = str.begin();
+	     str_it != str.end();
+	     ++ str_it) {
+		Hpp::UChr c = *str_it;
+		if (c < 0x20) {
+			throw Hpp::Exception("String contains invalid characters!");
+		}
+	}
+
+	// Do printing
 	size_t ofs = 0;
 	while (ofs < str.size()) {
 		size_t visible_left = getVisibleLeft();

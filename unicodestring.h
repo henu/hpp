@@ -55,6 +55,7 @@ public:
 	{
 		friend class UnicodeString;
 	public:
+		inline const_iterator(iterator const& it);
 		inline ~const_iterator(void);
 		// Comparison operators
 		inline bool operator==(const_iterator const& it) const;
@@ -751,6 +752,11 @@ loc(loc)
 //
 // ----------------------------------------
 // ----------------------------------------
+
+inline UnicodeString::const_iterator::const_iterator(iterator const& it) :
+loc(it.loc)
+{
+}
 
 inline UnicodeString::const_iterator::~const_iterator(void)
 {

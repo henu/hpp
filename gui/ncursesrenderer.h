@@ -18,7 +18,8 @@ public:
 	NCursesRenderer(void);
 	virtual ~NCursesRenderer(void);
 
-	// Helper functions for writing stuff to screen
+	// Helper functions for writing stuff to screen. It is not
+	// allowed to print characters with ASCII code less than 0x20.
 	void setCursor(int32_t col, int32_t row);
 	void setColors(NC::Color text, NC::Color bg);
 	void printChar(char c);
