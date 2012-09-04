@@ -27,13 +27,13 @@ public:
 
 protected:
 
-	inline Camera(Real near, Real far,
+	inline Camera(Real nearplane, Real farplane,
 	              size_t viewport_x, size_t viewport_y,
 	              size_t viewport_width, size_t viewport_height);
 
 	Transform transf;
 
-	Real near, far;
+	Real nearplane, farplane;
 
 	size_t viewport_x, viewport_y;
 	size_t viewport_width, viewport_height;
@@ -62,11 +62,11 @@ inline Matrix4 Camera::getProjectionviewmatrix(void) const
 	return projviewmat;
 }
 
-inline Camera::Camera(Real near, Real far,
+inline Camera::Camera(Real nearplane, Real farplane,
                       size_t viewport_x, size_t viewport_y,
                       size_t viewport_width, size_t viewport_height) :
-near(near),
-far(far),
+nearplane(nearplane),
+farplane(farplane),
 viewport_x(viewport_x),
 viewport_y(viewport_y),
 viewport_width(viewport_width),

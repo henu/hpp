@@ -92,7 +92,7 @@ public:
 	static inline Matrix4 scaleMatrix(Vector3 const& v);
 	static inline Matrix4 projectionMatrix(Hpp::Angle const& fov_y,
 	                                       Real aspectratio,
-	                                       Real near, Real far);
+	                                       Real nearplane, Real farplane);
 
 private:
 
@@ -614,13 +614,13 @@ inline Matrix4 Matrix4::scaleMatrix(Vector3 const& v)
 
 inline Matrix4 Matrix4::projectionMatrix(Hpp::Angle const& fov_y,
                                          Real aspectratio,
-                                         Real near, Real far)
+                                         Real nearplane, Real farplane)
 {
 	Real f = 1 / (fov_y / 2).tan();
-	return Matrix4(f / aspectratio, 0, 0,                       0,
-	               0,               f, 0,                       0,
-	               0,               0, (far+near) / (near-far), 2*far*near / (near-far),
-	               0,               0, -1,                      0);
+	return Matrix4(f / aspectratio, 0, 0,                                           0,
+	               0,               f, 0,                                           0,
+	               0,               0, (farplane+nearplane) / (nearplane-farplane), 2*farplane*nearplane / (nearplane-farplane),
+	               0,               0, -1,                                          0);
 }
 
 inline Real Matrix4::complement(uint8_t cell_id) const
