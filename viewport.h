@@ -3,7 +3,7 @@
 
 #include "texture.h"
 #include "renderingenvironment.h"
-#include "camera.h"
+#include "oldcamera.h"
 #include "lightsource.h"
 #include "visibles.h"
 #include "color.h"
@@ -34,7 +34,7 @@ public:
 	inline void clearBackground(void);
 
 	// Renders some visibles with some lights using specific camera
-	inline void renderVisibles(Camera* cam, Visibles& visibles, Lightsources const& lights = Lightsources(), Color const& ambient_light = Color(0.2, 0.2, 0.2)) const;
+	inline void renderVisibles(OldCamera* cam, Visibles& visibles, Lightsources const& lights = Lightsources(), Color const& ambient_light = Color(0.2, 0.2, 0.2)) const;
 
 	// 2D rendering stuff
 	inline void init2DRendering(void) const;
@@ -87,7 +87,7 @@ inline void Viewport::clearBackground(void)
 	}
 }
 
-inline void Viewport::renderVisibles(Camera* cam, Visibles& visibles, Lightsources const& lights, Color const& ambient_light) const
+inline void Viewport::renderVisibles(OldCamera* cam, Visibles& visibles, Lightsources const& lights, Color const& ambient_light) const
 {
 	// Set viewport
 	HppCheckForCorrectThread();
@@ -184,6 +184,7 @@ inline void Viewport::renderSprite(Texture const& tex,
 	glBindTexture(GL_TEXTURE_2D, tex.getGlTexture());
 
 	HppCheckGlErrors();
+// TODO: Remove glBegin() and glEnd()!
 	glBegin(GL_QUADS);
 
 	glColor3f(color.red, color.green, color.blue);

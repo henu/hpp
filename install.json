@@ -150,6 +150,8 @@
 				"meshmanager.h",
 				"mousekey.h",
 				"movable.h",
+				"oldcamera.h",
+				"perspectivecamera.h",
 				"rawmaterial.h",
 				"rawmesh.h",
 				"rbuf.h",

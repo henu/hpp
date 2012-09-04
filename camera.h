@@ -1,103 +1,78 @@
 #ifndef HPP_CAMERA_H
 #define HPP_CAMERA_H
 
-#include "movable.h"
-#include "angle.h"
-#include "3dutils.h"
-#include "assert.h"
-#include "gldebug.h"
+#include "transform.h"
+#include "matrix4.h"
 #include "inc_gl.h"
+
+#include <cstdlib>
 
 namespace Hpp
 {
 
-class Camera : public Movable
+class Camera
 {
 
 public:
 
-	inline Camera(void);
+	inline void setTransform(Transform const& transf);
 
-	// Setters
-	inline void setFovX(Angle const& fov_x) { this->fov_x = fov_x; }
-	inline void setFovY(Angle const& fov_y) { this->fov_y = fov_y; }
-	inline void setNear(Real clip_near) { this->clip_near = clip_near; }
-	inline void setFar(Real clip_far) { this->clip_far = clip_far; }
-	inline void setNearAndFar(Real clip_near, Real clip_far) { this->clip_near = clip_near; this->clip_far = clip_far; }
-	inline void setRotationFromUpRight(Vector3 const& up, Vector3 const& right);
+	inline Matrix4 getProjectionviewmatrix(void) const;
 
-	// Getters
-	inline Angle getFovX(void) const { return fov_x; }
-	inline Angle getFovY(void) const { return fov_y; }
-	inline Real getNear(void) const { return clip_near; }
-	inline Real getFar(void) const { return clip_far; }
+	// Tells OpenGL to use viewport from this camera
+	inline void setUpViewport(void) const;
 
-	inline void prepareProjection(Real viewport_width, Real viewport_height);
+	// Updates precalculated stuff after transform or viewport is changed.
+	inline virtual void update(void) = 0;
 
-	// Get all Renderables from given Movable and and its children that
-	// visible from this Camera. Movable must not have parent.
-	inline void getVisibles(Visibles& result, Movable const* movable) const;
+protected:
+
+	inline Camera(Real near, Real far,
+	              size_t viewport_x, size_t viewport_y,
+	              size_t viewport_width, size_t viewport_height);
+
+	Transform transf;
+
+	Real near, far;
+
+	size_t viewport_x, viewport_y;
+	size_t viewport_width, viewport_height;
+
+	Real aspectratio;
+
+	// Projection * View matrix
+	Matrix4 projviewmat;
 
 private:
 
-	static size_t const CLIP_NEAR_DEFAULT = 1;
-	static size_t const CLIP_FAR_DEFAULT = 1000;
-
-	Angle fov_x, fov_y;
-	Real clip_near, clip_far;
-
 };
 
-inline Camera::Camera(void) :
-fov_x(Angle::fromDegrees(90)),
-fov_y(Angle::fromDegrees(90)),
-clip_near(CLIP_NEAR_DEFAULT),
-clip_far(CLIP_FAR_DEFAULT)
+inline void Camera::setTransform(Transform const& transf)
 {
+	this->transf = transf;
 }
 
-inline void Camera::setRotationFromUpRight(Vector3 const& up, Vector3 const& right)
+inline void Camera::setUpViewport(void) const
 {
-	transf.setRotationFromUpRight(up, right);
-	transformChanged();
+	glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
 }
 
-inline void Camera::prepareProjection(Real viewport_width, Real viewport_height)
+inline Matrix4 Camera::getProjectionviewmatrix(void) const
 {
-	// Tune projection
-	HppCheckGlErrors();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	GLdouble aspect = viewport_width / viewport_height;
-	GLdouble ymax = clip_near * (fov_y / 2.0).tan();
-	GLdouble ymin = -ymax;
-	GLdouble xmin = ymin * aspect;
-	GLdouble xmax = ymax * aspect;
-	glFrustum(xmin, xmax, ymin, ymax, clip_near, clip_far);
-
-	// Apply location and projection of Camera
-	HppCheckGlErrors();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	Transform transf = getAbsoluteTransform();
-	glLoadMatrixf(transpose(transf.getMatrix()).inverse().getCells());
-	HppCheckGlErrors();
+	return projviewmat;
 }
 
-inline void Camera::getVisibles(Visibles& result, Movable const* movable) const
+inline Camera::Camera(Real near, Real far,
+                      size_t viewport_x, size_t viewport_y,
+                      size_t viewport_width, size_t viewport_height) :
+near(near),
+far(far),
+viewport_x(viewport_x),
+viewport_y(viewport_y),
+viewport_width(viewport_width),
+viewport_height(viewport_height),
+aspectratio(viewport_width / Real(viewport_height))
 {
-	HppAssert(!movable->getParent(), "This function can be only called to root Movables!");
-	Transform cam_transf = getAbsoluteTransform();
-	Viewfrustum vfrust = Viewfrustum::fromCamera(cam_transf.getPosition(),
-	                                             -cam_transf.getZVector(),
-	                                             cam_transf.getYVector(),
-	                                             cam_transf.getXVector(),
-	                                             getFovY(),
-	                                             getFovX(),
-	                                             clip_near);
-	Viewfrustums vfrusts;
-	vfrusts.push_back(vfrust);
-	movable->getAllVisibles(result, vfrusts);
 }
 
 }

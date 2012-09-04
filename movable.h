@@ -14,7 +14,7 @@ namespace Hpp
 class Movable
 {
 
-	friend class Camera;
+	friend class OldCamera;
 
 public:
 
