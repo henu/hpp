@@ -203,6 +203,20 @@ void Display::endRendering(void)
 
 }
 
+void Display::clearScreen(Color const& color, bool clear_color, bool clear_depth)
+{
+	if (clear_color) {
+		glClearColor(color.getRed(), color.getGreen(), color.getBlue(), 0);
+	}
+	if (clear_color && clear_depth) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	} else if (clear_color && !clear_depth) {
+		glClear(GL_COLOR_BUFFER_BIT);
+	} else if (clear_depth) {
+		glClear(GL_DEPTH_BUFFER_BIT);
+	}
+}
+
 void Display::setMouseVisible(bool visible)
 {
 	if (visible) {

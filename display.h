@@ -1,6 +1,7 @@
 #ifndef HPP_DISPLAY_H
 #define HPP_DISPLAY_H
 
+#include "color.h"
 #include "vbomanager.h"
 #include "inc_gl.h"
 #include "image.h"
@@ -62,6 +63,8 @@ public:
 	// Prepares and finsihes everything for rendering process.
 	static void beginRendering(void);
 	static void endRendering(void);
+
+	static void clearScreen(Color const& color, bool clear_color = true, bool clear_depth = true);
 
 	// Functions to get size and bpp of Display
 	inline static uint32_t getWidth(void) { return instance.width; }
