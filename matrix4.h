@@ -85,11 +85,14 @@ public:
 	static inline Matrix4 yawMatrix(Angle const& angle) { return rotMatrixZ(angle); }
 	#endif
 
-	// Static function for generating translation matrix
+	// Static function for generating various special matrices.
+	// In projectionMatrix FOV means angle between opposite
+	// viewfrustum planes.
 	static inline Matrix4 translMatrix(Vector3 const& v);
-
-	// Static function for generating scaling matrix
 	static inline Matrix4 scaleMatrix(Vector3 const& v);
+	static inline Matrix4 projectionMatrix(Hpp::Angle const& fov_y,
+	                                       Real aspectratio,
+	                                       Real near, Real far);
 
 private:
 
@@ -226,43 +229,15 @@ inline bool Matrix4::operator!=(Matrix4 const& m) const
 inline Matrix4 Matrix4::operator*(Matrix4 const& m) const
 {
 	Matrix4 out;
-
-	out.cells[0] = cells[0] * m.cells[0] + cells[4] * m.cells[1] +
-	               cells[8] * m.cells[2] + cells[12] * m.cells[3];
-	out.cells[1] = cells[1] * m.cells[0] + cells[5] * m.cells[1] +
-	               cells[9] * m.cells[2] + cells[13] * m.cells[3];
-	out.cells[2] = cells[2] * m.cells[0] + cells[6] * m.cells[1] +
-	               cells[10] * m.cells[2] + cells[14] * m.cells[3];
-	out.cells[3] = cells[3] * m.cells[0] + cells[7] * m.cells[1] +
-	               cells[11] * m.cells[2] + cells[15] * m.cells[3];
-
-	out.cells[4] = cells[0] * m.cells[4] + cells[4] * m.cells[5] +
-	               cells[8] * m.cells[6] + cells[12] * m.cells[7];
-	out.cells[5] = cells[1] * m.cells[4] + cells[5] * m.cells[5] +
-	               cells[9] * m.cells[6] + cells[13] * m.cells[7];
-	out.cells[6] = cells[2] * m.cells[4] + cells[6] * m.cells[5] +
-	               cells[10] * m.cells[6] + cells[14] * m.cells[7];
-	out.cells[7] = cells[3] * m.cells[4] + cells[7] * m.cells[5] +
-	               cells[11] * m.cells[6] + cells[15] * m.cells[7];
-
-	out.cells[8] = cells[0] * m.cells[8] + cells[4] * m.cells[9] +
-	               cells[8] * m.cells[10] + cells[12] * m.cells[11];
-	out.cells[9] = cells[1] * m.cells[8] + cells[5] * m.cells[9] +
-	               cells[9] * m.cells[10] + cells[13] * m.cells[11];
-	out.cells[10] = cells[2] * m.cells[8] + cells[6] * m.cells[9] +
-	                cells[10] * m.cells[10] + cells[14] * m.cells[11];
-	out.cells[11] = cells[3] * m.cells[8] + cells[7] * m.cells[9] +
-	                cells[11] * m.cells[10] + cells[15] * m.cells[11];
-
-	out.cells[12] = cells[0] * m.cells[12] + cells[4] * m.cells[13] +
-	                cells[8] * m.cells[14] + cells[12] * m.cells[15];
-	out.cells[13] = cells[1] * m.cells[12] + cells[5] * m.cells[13] +
-	                cells[9] * m.cells[14] + cells[13] * m.cells[15];
-	out.cells[14] = cells[2] * m.cells[12] + cells[6] * m.cells[13] +
-	                cells[10] * m.cells[14] + cells[14] * m.cells[15];
-	out.cells[15] = cells[3] * m.cells[12] + cells[7] * m.cells[13] +
-	                cells[11] * m.cells[14] + cells[15] * m.cells[15];
-
+	for (uint8_t row = 0; row < 4; ++ row) {
+		for (uint8_t col = 0; col < 4; ++ col) {
+			uint8_t ofs = row*4 + col;
+			out.cells[ofs] = 0;
+			for (uint8_t mult = 0; mult < 4; ++ mult) {
+				out.cells[ofs] += cells[row*4 + mult] * m.cells[mult*4 + col];
+			}
+		}
+	}
 	return out;
 }
 
@@ -297,43 +272,15 @@ inline Matrix4 const& Matrix4::operator*=(Matrix4 const& m)
 	     cells_id ++) {
 		cells_old[cells_id] = cells[cells_id];
 	}
-
-	cells[0] = cells_old[0] * m.cells[0] + cells_old[4] * m.cells[1] +
-	           cells_old[8] * m.cells[2] + cells_old[12] * m.cells[3];
-	cells[1] = cells_old[1] * m.cells[0] + cells_old[5] * m.cells[1] +
-	           cells_old[9] * m.cells[2] + cells_old[13] * m.cells[3];
-	cells[2] = cells_old[2] * m.cells[0] + cells_old[6] * m.cells[1] +
-	           cells_old[10] * m.cells[2] + cells_old[14] * m.cells[3];
-	cells[3] = cells_old[3] * m.cells[0] + cells_old[7] * m.cells[1] +
-	           cells_old[11] * m.cells[2] + cells_old[15] * m.cells[3];
-
-	cells[4] = cells_old[0] * m.cells[4] + cells_old[4] * m.cells[5] +
-	           cells_old[8] * m.cells[6] + cells_old[12] * m.cells[7];
-	cells[5] = cells_old[1] * m.cells[4] + cells_old[5] * m.cells[5] +
-	           cells_old[9] * m.cells[6] + cells_old[13] * m.cells[7];
-	cells[6] = cells_old[2] * m.cells[4] + cells_old[6] * m.cells[5] +
-	           cells_old[10] * m.cells[6] + cells_old[14] * m.cells[7];
-	cells[7] = cells_old[3] * m.cells[4] + cells_old[7] * m.cells[5] +
-	           cells_old[11] * m.cells[6] + cells_old[15] * m.cells[7];
-
-	cells[8] = cells_old[0] * m.cells[8] + cells_old[4] * m.cells[9] +
-	           cells_old[8] * m.cells[10] + cells_old[12] * m.cells[11];
-	cells[9] = cells_old[1] * m.cells[8] + cells_old[5] * m.cells[9] +
-	           cells_old[9] * m.cells[10] + cells_old[13] * m.cells[11];
-	cells[10] = cells_old[2] * m.cells[8] + cells_old[6] * m.cells[9] +
-	            cells_old[10] * m.cells[10] + cells_old[14] * m.cells[11];
-	cells[11] = cells_old[3] * m.cells[8] + cells_old[7] * m.cells[9] +
-	            cells_old[11] * m.cells[10] + cells_old[15] * m.cells[11];
-
-	cells[12] = cells_old[0] * m.cells[12] + cells_old[4] * m.cells[13] +
-	                cells_old[8] * m.cells[14] + cells_old[12] * m.cells[15];
-	cells[13] = cells_old[1] * m.cells[12] + cells_old[5] * m.cells[13] +
-	                cells_old[9] * m.cells[14] + cells_old[13] * m.cells[15];
-	cells[14] = cells_old[2] * m.cells[12] + cells_old[6] * m.cells[13] +
-	                cells_old[10] * m.cells[14] + cells_old[14] * m.cells[15];
-	cells[15] = cells_old[3] * m.cells[12] + cells_old[7] * m.cells[13] +
-	                cells_old[11] * m.cells[14] + cells_old[15] * m.cells[15];
-
+	for (uint8_t row = 0; row < 4; ++ row) {
+		for (uint8_t col = 0; col < 4; ++ col) {
+			uint8_t ofs = row*4 + col;
+			cells[ofs] = 0;
+			for (uint8_t mult = 0; mult < 4; ++ mult) {
+				cells[ofs] += cells_old[row*4 + mult] * m.cells[mult*4 + col];
+			}
+		}
+	}
 	return *this;
 }
 
@@ -663,6 +610,17 @@ inline Matrix4 Matrix4::scaleMatrix(Vector3 const& v)
 	               0,   v.y, 0,   0,
 	               0,   0,   v.z, 0,
 	               0,   0,   0,   1);
+}
+
+inline Matrix4 Matrix4::projectionMatrix(Hpp::Angle const& fov_y,
+                                         Real aspectratio,
+                                         Real near, Real far)
+{
+	Real f = 1 / (fov_y / 2).tan();
+	return Matrix4(f / aspectratio, 0, 0,                       0,
+	               0,               f, 0,                       0,
+	               0,               0, (far+near) / (near-far), 2*far*near / (near-far),
+	               0,               0, -1,                      0);
 }
 
 inline Real Matrix4::complement(uint8_t cell_id) const

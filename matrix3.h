@@ -76,10 +76,8 @@ public:
 	static inline Matrix3 rotMatrixZ(Angle const& angle);
 	static inline Matrix3 rotMatrix(Vector3 const& axis, Angle const& angle);
 
-	// Static function for generating translation matrix
+	// Static function for generating various special matrices.
 	static inline Matrix3 translMatrix(Vector2 const& v);
-
-	// Static function for generating scaling matrix
 	static inline Matrix3 scaleMatrix(Vector2 const& v);
 
 private:
@@ -190,19 +188,15 @@ inline bool Matrix3::operator!=(Matrix3 const& m) const
 inline Matrix3 Matrix3::operator*(Matrix3 const& m) const
 {
 	Matrix3 out;
-
-	out.cells[0] = cells[0] * m.cells[0] + cells[3] * m.cells[1] + cells[6] * m.cells[2];
-	out.cells[1] = cells[1] * m.cells[0] + cells[4] * m.cells[1] + cells[7] * m.cells[2];
-	out.cells[2] = cells[2] * m.cells[0] + cells[5] * m.cells[1] + cells[8] * m.cells[2];
-
-	out.cells[3] = cells[0] * m.cells[3] + cells[3] * m.cells[4] + cells[6] * m.cells[5];
-	out.cells[4] = cells[1] * m.cells[3] + cells[4] * m.cells[4] + cells[7] * m.cells[5];
-	out.cells[5] = cells[2] * m.cells[3] + cells[5] * m.cells[4] + cells[8] * m.cells[5];
-
-	out.cells[6] = cells[0] * m.cells[6] + cells[3] * m.cells[7] + cells[6] * m.cells[8];
-	out.cells[7] = cells[1] * m.cells[6] + cells[4] * m.cells[7] + cells[7] * m.cells[8];
-	out.cells[8] = cells[2] * m.cells[6] + cells[5] * m.cells[7] + cells[8] * m.cells[8];
-
+	for (uint8_t row = 0; row < 3; ++ row) {
+		for (uint8_t col = 0; col < 3; ++ col) {
+			uint8_t ofs = row*3 + col;
+			out.cells[ofs] = 0;
+			for (uint8_t mult = 0; mult < 3; ++ mult) {
+				out.cells[ofs] += cells[row*3 + mult] * m.cells[mult*3 + col];
+			}
+		}
+	}
 	return out;
 }
 
@@ -230,18 +224,15 @@ inline Matrix3 const& Matrix3::operator*=(Matrix3 const& m)
 	     cells_id ++) {
 		cells_old[cells_id] = cells[cells_id];
 	}
-
-	cells[0] = cells_old[0] * m.cells[0] + cells_old[3] * m.cells[1] + cells_old[6] * m.cells[2];
-	cells[1] = cells_old[1] * m.cells[0] + cells_old[4] * m.cells[1] + cells_old[7] * m.cells[2];
-	cells[2] = cells_old[2] * m.cells[0] + cells_old[5] * m.cells[1] + cells_old[8] * m.cells[2];
-
-	cells[3] = cells_old[0] * m.cells[3] + cells_old[3] * m.cells[4] + cells_old[6] * m.cells[5];
-	cells[4] = cells_old[1] * m.cells[3] + cells_old[4] * m.cells[4] + cells_old[7] * m.cells[5];
-	cells[5] = cells_old[2] * m.cells[3] + cells_old[5] * m.cells[4] + cells_old[8] * m.cells[5];
-
-	cells[6] = cells_old[0] * m.cells[6] + cells_old[3] * m.cells[7] + cells_old[6] * m.cells[8];
-	cells[7] = cells_old[1] * m.cells[6] + cells_old[4] * m.cells[7] + cells_old[7] * m.cells[8];
-	cells[8] = cells_old[2] * m.cells[6] + cells_old[5] * m.cells[7] + cells_old[8] * m.cells[8];
+	for (uint8_t row = 0; row < 3; ++ row) {
+		for (uint8_t col = 0; col < 3; ++ col) {
+			uint8_t ofs = row*3 + col;
+			cells[ofs] = 0;
+			for (uint8_t mult = 0; mult < 3; ++ mult) {
+				cells[ofs] += cells_old[row*3 + mult] * m.cells[mult*3 + col];
+			}
+		}
+	}
 
 	return *this;
 }

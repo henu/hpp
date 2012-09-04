@@ -43,13 +43,13 @@ public:
 	// Modifiers. Right hand rotations, where your thumb is rotation axis
 	// and your fingers show the direction of turning when your fingers are
 	// in "fist form".
-	inline void translate(Vector3 const& v) { transf = transf * Matrix4::translMatrix(v); }
-	inline void rotateX(Angle const& angle) { transf = transf * Matrix4::rotMatrixX(angle); }
-	inline void rotateY(Angle const& angle) { transf = transf * Matrix4::rotMatrixY(angle); }
-	inline void rotateZ(Angle const& angle) { transf = transf * Matrix4::rotMatrixZ(angle); }
-	inline void rotate(Quaternion const& q) { transf = transf * quaternionToMatrix4(q); }
-	inline void rotate(Vector3 const& axis, Angle const& angle) { transf = transf * Matrix4::rotMatrix(axis, angle); }
-	inline void scale(Vector3 const& v) { transf = transf * Matrix4::scaleMatrix(v); }
+	inline void translate(Vector3 const& v) { transf = Matrix4::translMatrix(v) * transf; }
+	inline void rotateX(Angle const& angle) { transf = Matrix4::rotMatrixX(angle) * transf; }
+	inline void rotateY(Angle const& angle) { transf = Matrix4::rotMatrixY(angle) * transf; }
+	inline void rotateZ(Angle const& angle) { transf = Matrix4::rotMatrixZ(angle) * transf; }
+	inline void rotate(Quaternion const& q) { transf = quaternionToMatrix4(q) * transf; }
+	inline void rotate(Vector3 const& axis, Angle const& angle) { transf = Matrix4::rotMatrix(axis, angle) * transf; }
+	inline void scale(Vector3 const& v) { transf = Matrix4::scaleMatrix(v) * transf; }
 
 	// Combines this and another so that first this current transform is
 	// done and then another one.
@@ -152,7 +152,7 @@ inline Transform Transform::getRotScale(void) const
 
 inline Transform Transform::addAnotherTransform(Transform const& transf2) const
 {
-	return Transform(transf * transf2.transf);
+	return Transform(transf2.transf * transf);
 }
 
 inline Vector3 Transform::applyToPosition(Vector3 const& pos) const
