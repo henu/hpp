@@ -6,6 +6,8 @@
 #include "shader.h"
 #include "inc_gl.h"
 #include "noncopyable.h"
+#include "matrix3.h"
+#include "matrix4.h"
 
 #include <string>
 #include <map>
@@ -32,6 +34,10 @@ public:
 	// Enables/disables shader
 	inline void enable(Flags const& flags = Flags());
 	inline void disable(void);
+
+	// Functions to set uniforms
+	inline void setUniform(Matrix3 const& mat, std::string const& name, bool transpose = false);
+	inline void setUniform(Matrix4 const& mat, std::string const& name, bool transpose = false);
 
 	// Returns GLSL Id of enabled program. This may deprecate between
 	// enables and disables.
@@ -107,6 +113,28 @@ inline void Shaderprogram::disable(void)
 	GlSystem::UseProgram(0);
 	HppCheckGlErrors();
 	enabled = false;
+}
+
+inline void Shaderprogram::setUniform(Matrix3 const& mat, std::string const& name, bool transpose)
+{
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = Hpp::GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	if (transpose) {
+		Hpp::GlSystem::UniformMatrix3fv(uniform_id, 1, GL_TRUE, mat.getCells());
+	} else {
+		Hpp::GlSystem::UniformMatrix3fv(uniform_id, 1, GL_FALSE, mat.getCells());
+	}
+}
+
+inline void Shaderprogram::setUniform(Matrix4 const& mat, std::string const& name, bool transpose)
+{
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = Hpp::GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	if (transpose) {
+		Hpp::GlSystem::UniformMatrix4fv(uniform_id, 1, GL_TRUE, mat.getCells());
+	} else {
+		Hpp::GlSystem::UniformMatrix4fv(uniform_id, 1, GL_FALSE, mat.getCells());
+	}
 }
 
 inline void Shaderprogram::linkProgram(Flags const& flags)
