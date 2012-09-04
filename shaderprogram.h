@@ -130,11 +130,7 @@ inline void Shaderprogram::setUniform(Matrix4 const& mat, std::string const& nam
 {
 	HppAssert(enabled, "Not enabled!");
 	GLuint uniform_id = Hpp::GlSystem::GetUniformLocation(glsl_id, name.c_str());
-	if (transpose) {
-		Hpp::GlSystem::UniformMatrix4fv(uniform_id, 1, GL_TRUE, mat.getCells());
-	} else {
-		Hpp::GlSystem::UniformMatrix4fv(uniform_id, 1, GL_FALSE, mat.getCells());
-	}
+	Hpp::GlSystem::UniformMatrix4fv(uniform_id, 1, transpose, mat.getCells());
 }
 
 inline void Shaderprogram::linkProgram(Flags const& flags)
