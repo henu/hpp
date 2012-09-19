@@ -229,19 +229,19 @@ inline uint64_t cStrToUInt64(uint8_t const* c_str, bool bigendian)
 {
 	uint64_t i = 0;
 	if (bigendian) {
-		i += c_str[7] << 0;
-		i += c_str[6] << 8;
-		i += c_str[5] << 16;
-		i += c_str[4] << 24;
+		i += (uint64_t)c_str[7] << 0;
+		i += (uint64_t)c_str[6] << 8;
+		i += (uint64_t)c_str[5] << 16;
+		i += (uint64_t)c_str[4] << 24;
 		i += (uint64_t)c_str[3] << 32;
 		i += (uint64_t)c_str[2] << 40;
 		i += (uint64_t)c_str[1] << 48;
 		i += (uint64_t)c_str[0] << 56;
 	} else {
-		i += c_str[0] << 0;
-		i += c_str[1] << 8;
-		i += c_str[2] << 16;
-		i += c_str[3] << 24;
+		i += (uint64_t)c_str[0] << 0;
+		i += (uint64_t)c_str[1] << 8;
+		i += (uint64_t)c_str[2] << 16;
+		i += (uint64_t)c_str[3] << 24;
 		i += (uint64_t)c_str[4] << 32;
 		i += (uint64_t)c_str[5] << 40;
 		i += (uint64_t)c_str[6] << 48;
