@@ -7,6 +7,7 @@
 #include "assert.h"
 #include "real.h"
 #include "bytev.h"
+#include "unicodestring.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -32,6 +33,8 @@ inline Vector3 randomVector3(Real max_radius);
 
 // Returns data from secure random source
 inline ByteV randomSecureData(size_t size);
+
+inline UnicodeString randomString(size_t size, UnicodeString const& chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_., ");
 
 inline Real random(Real min, Real max)
 {
@@ -119,6 +122,17 @@ inline ByteV randomSecureData(size_t size)
 
 	#endif
 
+	return result;
+}
+
+inline UnicodeString randomString(size_t size, UnicodeString const& chars)
+{
+	HppAssert(!chars.empty(), "No chars given!");
+	UnicodeString result;
+	result.reserve(size);
+	while (result.size() < size) {
+		result += chars[randomInt(0, chars.size() - 1)];
+	}
 	return result;
 }
 

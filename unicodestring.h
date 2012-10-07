@@ -112,8 +112,8 @@ public:
 	inline const_iterator end(void) const;
 
 	inline size_t size(void) const;
-
 	inline bool empty(void) const;
+	inline void reserve(size_t size);
 
 	inline void clear(void);
 
@@ -147,7 +147,7 @@ public:
 
 private:
 
-	size_t reserve;
+	size_t res;
 	size_t len;
 	UChr* buf;
 
@@ -168,7 +168,7 @@ inline UnicodeString operator+(char const* c_str, UnicodeString const& ustr);
 // ----------------------------------------
 
 inline UnicodeString::UnicodeString(void) :
-reserve(0),
+res(0),
 len(0),
 buf(NULL)
 {
@@ -176,13 +176,13 @@ buf(NULL)
 
 inline UnicodeString::UnicodeString(std::string const& str)
 {
-	reserve = sizeUTF8(str.begin(), str.end());
-	len = reserve;
-	if (reserve > 0) {
-		buf = new UChr[reserve];
+	res = sizeUTF8(str.begin(), str.end());
+	len = res;
+	if (res > 0) {
+		buf = new UChr[res];
 		std::string::const_iterator str_it = str.begin();
 		try {
-			for (size_t offset = 0; offset < len; offset ++) {
+			for (size_t offset = 0; offset < len; ++ offset) {
 				try {
 					buf[offset] = extractUTF8(str_it, str.end());
 				}
@@ -204,12 +204,12 @@ inline UnicodeString::UnicodeString(std::string const& str)
 inline UnicodeString::UnicodeString(char const* c_str)
 {
 	char const* c_str_end = c_str + strlen(c_str);
-	reserve = sizeUTF8(c_str, c_str_end);
-	len = reserve;
-	if (reserve > 0) {
-		buf = new UChr[reserve];
+	res = sizeUTF8(c_str, c_str_end);
+	len = res;
+	if (res > 0) {
+		buf = new UChr[res];
 		std::string::const_iterator str_it;
-		for (size_t offset = 0; offset < len; offset ++) {
+		for (size_t offset = 0; offset < len; ++ offset) {
 			try {
 				buf[offset] = extractUTF8(c_str, c_str_end);
 			}
@@ -225,11 +225,11 @@ inline UnicodeString::UnicodeString(char const* c_str)
 }
 
 inline UnicodeString::UnicodeString(UnicodeString const& ustr) :
-reserve(ustr.len),
+res(ustr.len),
 len(ustr.len)
 {
-	if (reserve > 0) {
-		buf = new UChr[reserve];
+	if (res > 0) {
+		buf = new UChr[res];
 		memcpy(buf, ustr.buf, sizeof(UChr)*len);
 	} else {
 		buf = NULL;
@@ -238,12 +238,12 @@ len(ustr.len)
 
 inline UnicodeString::UnicodeString(size_t len, UChr c)
 {
-	reserve = len;
+	res = len;
 	this->len = len;
-	if (reserve > 0) {
-		buf = new UChr[reserve];
+	if (res > 0) {
+		buf = new UChr[res];
 		UChr* buf_end = buf + len;
-		for (UChr* buf_it = buf; buf_it != buf_end; buf_it ++) {
+		for (UChr* buf_it = buf; buf_it != buf_end; ++ buf_it) {
 			*buf_it = c;
 		}
 	} else {
@@ -253,10 +253,10 @@ inline UnicodeString::UnicodeString(size_t len, UChr c)
 
 inline UnicodeString::UnicodeString(UChr const* ustr, size_t len)
 {
-	reserve = len;
+	res = len;
 	this->len = len;
-	if (reserve > 0) {
-		buf = new UChr[reserve];
+	if (res > 0) {
+		buf = new UChr[res];
 		memcpy(buf, ustr, sizeof(UChr)*len);
 	} else {
 		buf = NULL;
@@ -270,13 +270,13 @@ inline UnicodeString::~UnicodeString(void)
 
 inline UnicodeString UnicodeString::operator=(UnicodeString const& ustr)
 {
-	if (reserve > 0) {
+	if (res > 0) {
 		delete[] buf;
 	}
-	reserve = ustr.len;
+	res = ustr.len;
 	len = ustr.len;
-	if (reserve > 0) {
-		buf = new UChr[reserve];
+	if (res > 0) {
+		buf = new UChr[res];
 		memcpy(buf, ustr.buf, sizeof(UChr)*len);
 	} else {
 		buf = NULL;
@@ -288,9 +288,9 @@ inline UnicodeString UnicodeString::operator+(UnicodeString const& ustr) const
 {
 	UnicodeString result;
 	if (len + ustr.len > 0) {
-		result.reserve = len + ustr.len;
-		result.len = result.reserve;
-		result.buf = new UChr[result.reserve];
+		result.res = len + ustr.len;
+		result.len = result.res;
+		result.buf = new UChr[result.res];
 		memcpy(result.buf, buf, sizeof(UChr)*len);
 		memcpy(result.buf + len, ustr.buf, sizeof(UChr)*ustr.len);
 	}
@@ -300,9 +300,9 @@ inline UnicodeString UnicodeString::operator+(UnicodeString const& ustr) const
 inline UnicodeString UnicodeString::operator+(UChr c) const
 {
 	UnicodeString result;
-	result.reserve = len + 1;
-	result.len = result.reserve;
-	result.buf = new UChr[result.reserve];
+	result.res = len + 1;
+	result.len = result.res;
+	result.buf = new UChr[result.res];
 	memcpy(result.buf, buf, sizeof(UChr)*len);
 	result.buf[len] = c;
 	return result;
@@ -311,13 +311,7 @@ inline UnicodeString UnicodeString::operator+(UChr c) const
 inline UnicodeString UnicodeString::operator+=(UnicodeString const& ustr)
 {
 	if (len + ustr.len > 0) {
-		if (reserve < len + ustr.len) {
-			reserve = len + ustr.len;
-			UChr* new_buf = new UChr[reserve];
-			memcpy(new_buf, buf, sizeof(UChr)*len);
-			delete[] buf;
-			buf = new_buf;
-		}
+		reserve(len + ustr.len);
 		memcpy(buf + len, ustr.buf, sizeof(UChr)*ustr.len);
 		len += ustr.len;
 	}
@@ -326,15 +320,11 @@ inline UnicodeString UnicodeString::operator+=(UnicodeString const& ustr)
 
 inline UnicodeString UnicodeString::operator+=(UChr c)
 {
-	if (reserve < len + 1) {
-		reserve = 1 + reserve*2;
-		UChr* new_buf = new UChr[reserve];
-		memcpy(new_buf, buf, sizeof(UChr)*len);
-		delete[] buf;
-		buf = new_buf;
+	if (res < len + 1) {
+		reserve(1 + res*2);
 	}
 	buf[len] = c;
-	len ++;
+	++ len;
 	return *this;
 }
 
@@ -343,10 +333,10 @@ inline bool UnicodeString::operator==(UnicodeString const& ustr) const
 	if (size() != ustr.size()) return false;
 	const_iterator it = begin();
 	const_iterator ustr_it = ustr.begin();
-	for (size_t ofs = 0; ofs < size(); ofs ++) {
+	for (size_t ofs = 0; ofs < size(); ++ ofs) {
 		if (*it != *ustr_it) return false;
-		it ++;
-		ustr_it ++;
+		++ it;
+		++ ustr_it;
 	}
 	return true;
 }
@@ -360,8 +350,8 @@ inline bool UnicodeString::operator<(UnicodeString const& ustr) const
 		if (it == end()) return true;
 		if (*it < *ustr_it) return true;
 		if (*it > *ustr_it) return false;
-		it ++;
-		ustr_it ++;
+		++ it;
+		++ ustr_it;
 	}
 }
 
@@ -407,23 +397,34 @@ inline bool UnicodeString::empty(void) const
 	return len == 0;
 }
 
+inline void UnicodeString::reserve(size_t size)
+{
+	if (res < size) {
+		res = size;
+		UChr* new_buf = new UChr[res];
+		memcpy(new_buf, buf, sizeof(UChr)*len);
+		delete[] buf;
+		buf = new_buf;
+	}
+}
+
 inline void UnicodeString::clear(void)
 {
 	len = 0;
-	reserve = 0;
+	res = 0;
 	delete[] buf;
 	buf = NULL;
 }
 
 inline void UnicodeString::swap(UnicodeString& ustr)
 {
-	size_t swap_reserve = reserve;
+	size_t swap_res = res;
 	size_t swap_len = len;
 	UChr* swap_buf = buf;
-	reserve = ustr.reserve;
+	res = ustr.res;
 	len = ustr.len;
 	buf = ustr.buf;
-	ustr.reserve = swap_reserve;
+	ustr.res = swap_res;
 	ustr.len = swap_len;
 	ustr.buf = swap_buf;
 }
@@ -447,7 +448,7 @@ inline UnicodeString::size_type UnicodeString::find(UChr c, size_type index) con
 		if (c2 == c) {
 			return index;
 		}
-		index ++;
+		++ index;
 	}
 	return npos;
 }
@@ -460,7 +461,7 @@ inline UnicodeString::size_type UnicodeString::find_first_of(UnicodeString const
 		if (chars.find(c) != npos) {
 			return index;
 		}
-		index ++;
+		++ index;
 	}
 	return npos;
 }
@@ -473,7 +474,7 @@ inline UnicodeString::size_type UnicodeString::find_first_not_of(UnicodeString c
 		if (chars.find(c) == npos) {
 			return index;
 		}
-		index ++;
+		++ index;
 	}
 	return npos;
 }
@@ -482,7 +483,7 @@ inline UnicodeString::size_type UnicodeString::find_last_not_of(UnicodeString co
 {
 	if (index == npos || index > size()) index = size();
 	while (index > 0) {
-		index --;
+		-- index;
 		UChr c = (*this)[index];
 		if (chars.find(c) == npos) {
 			return index;
@@ -506,7 +507,7 @@ inline UnicodeString UnicodeString::tolower(void) const
 	UnicodeString result(*this);
 	for (UnicodeString::iterator result_it = result.begin();
 	     result_it != result.end();
-	     result_it ++) {
+	     ++ result_it) {
 		*result_it = Hpp::tolower(*result_it);
 	}
 	return result;
@@ -517,7 +518,7 @@ inline UnicodeString UnicodeString::toupper(void) const
 	UnicodeString result(*this);
 	for (UnicodeString::iterator result_it = result.begin();
 	     result_it != result.end();
-	     result_it ++) {
+	     ++ result_it) {
 		*result_it = Hpp::toupper(*result_it);
 	}
 	return result;
@@ -526,7 +527,7 @@ inline UnicodeString UnicodeString::toupper(void) const
 inline std::string UnicodeString::stl_string(void) const
 {
 	std::string result;
-	for (const_iterator it = begin(); it != end(); it ++) {
+	for (const_iterator it = begin(); it != end(); ++ it) {
 		result += uChrToUTF8(*it);
 	}
 	return result;
@@ -536,7 +537,7 @@ inline std::vector< UnicodeString > UnicodeString::split(UChr separator) const
 {
 	std::vector< UnicodeString > result;
 	UnicodeString subresult;
-	for (const_iterator it = begin(); it != end(); it ++) {
+	for (const_iterator it = begin(); it != end(); ++ it) {
 		UChr c = *it;
 		if (c == separator) {
 			result.push_back(subresult);
@@ -553,7 +554,7 @@ inline std::vector< UnicodeString > UnicodeString::split(UnicodeString const& se
 {
 	std::vector< UnicodeString > result;
 	UnicodeString subresult;
-	for (size_type ofs = 0; ofs < size(); ofs ++) {
+	for (size_type ofs = 0; ofs < size(); ++ ofs) {
 		if (substr(ofs, separator.size()) == separator) {
 			result.push_back(subresult);
 			subresult.clear();
@@ -570,7 +571,7 @@ inline std::vector< UnicodeString > UnicodeString::split(std::vector< UChr > con
 {
 	std::vector< UnicodeString > result;
 	UnicodeString subresult;
-	for (const_iterator it = begin(); it != end(); it ++) {
+	for (const_iterator it = begin(); it != end(); ++ it) {
 		UChr c = *it;
 		if (std::find(separators.begin(), separators.end(), c) != separators.end()) {
 			result.push_back(subresult);
@@ -587,11 +588,11 @@ inline std::vector< UnicodeString > UnicodeString::split(std::vector< UnicodeStr
 {
 	std::vector< UnicodeString > result;
 	UnicodeString subresult;
-	for (size_type ofs = 0; ofs < size(); ofs ++) {
+	for (size_type ofs = 0; ofs < size(); ++ ofs) {
 		bool separator_found = false;
 		for (std::vector< UnicodeString >::const_iterator separators_it = separators.begin();
 		     separators_it != separators.end();
-		     separators_it ++) {
+		     ++ separators_it) {
 			UnicodeString const& separator = *separators_it;
 			if (substr(ofs, separator.size()) == separator) {
 				result.push_back(subresult);
@@ -628,7 +629,7 @@ inline std::ostream& operator<<(std::ostream& strm, UnicodeString const& ustr)
 	str.reserve(ustr.size() * 2);
 	for (UnicodeString::const_iterator ustr_it = ustr.begin();
 	     ustr_it != ustr.end();
-	     ustr_it ++) {
+	     ++ ustr_it) {
 	     	UChr uchr = *ustr_it;
 		str += uChrToUTF8(uchr);
 	}
@@ -686,27 +687,27 @@ inline bool UnicodeString::iterator::operator>=(iterator const& it) const
 
 inline UnicodeString::iterator UnicodeString::iterator::operator++(void)
 {
-	loc ++;
+	++ loc;
 	return *this;
 }
 
 inline UnicodeString::iterator UnicodeString::iterator::operator--(void)
 {
-	loc --;
+	-- loc;
 	return *this;
 }
 
 inline UnicodeString::iterator UnicodeString::iterator::operator++(int)
 {
 	iterator result = *this;
-	loc ++;
+	++ loc;
 	return result;
 }
 
 inline UnicodeString::iterator UnicodeString::iterator::operator--(int)
 {
 	iterator result = *this;
-	loc --;
+	-- loc;
 	return result;
 }
 
@@ -794,27 +795,27 @@ inline bool UnicodeString::const_iterator::operator>=(const_iterator const& it) 
 
 inline UnicodeString::const_iterator UnicodeString::const_iterator::operator++(void)
 {
-	loc ++;
+	++ loc;
 	return *this;
 }
 
 inline UnicodeString::const_iterator UnicodeString::const_iterator::operator--(void)
 {
-	loc --;
+	-- loc;
 	return *this;
 }
 
 inline UnicodeString::const_iterator UnicodeString::const_iterator::operator++(int)
 {
 	const_iterator result = *this;
-	loc ++;
+	++ loc;
 	return result;
 }
 
 inline UnicodeString::const_iterator UnicodeString::const_iterator::operator--(int)
 {
 	const_iterator result = *this;
-	loc --;
+	-- loc;
 	return result;
 }
 
