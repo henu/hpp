@@ -75,7 +75,12 @@ def main(pname, args):
 	# Some hard coded options
 	libname = 'hpp'
 	arch = 'amd64'
-	version = '0.' + runCommand('svn info 2> /dev/null|grep Revision|cut -d \" \" -f 2', return_output = True).split('\n')[0]
+	if os.path.exists('.hg'):
+		version = '0.' + str(int(runCommand('hg log|grep changeset|head -n 1|cut -d : -f 2', return_output = True).split('\n')[0]))
+	elif os.path.exists('.svn'):
+		version = '0.' + runCommand('svn info 2> /dev/null|grep Revision|cut -d \" \" -f 2', return_output = True).split('\n')[0]
+	else:
+		version = '0.1'
 	install_path = '/usr'
 
 	# Run commands
