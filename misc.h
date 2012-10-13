@@ -69,6 +69,8 @@ inline Angle fovXToFovY(Angle const& fov_x, Real display_w, Real display_h);
 // Converts tab, enter, \ and given characters to slashes
 inline std::string slashEncode(std::string str, std::string const& chars = "\"\'");
 
+inline std::string wrapWords(std::string const& text, std::string const& prefix = "", size_t terminal_width = 80);
+
 
 // ----------------------------------------
 // Implementation of functions
@@ -284,6 +286,98 @@ inline std::string slashEncode(std::string str, std::string const& chars)
 			result += c;
 		}
 	}
+	return result;
+}
+
+inline std::string wrapWords(std::string const& text, std::string const& prefix, size_t terminal_width)
+{
+	// Calculate how much there is terminal width left after prefix
+	size_t termline_left = terminal_width;
+	for (std::string::const_iterator prefix_it = prefix.begin();
+	     prefix_it != prefix.end();
+	     ++ prefix_it) {
+		char c = *prefix_it;
+		if (c == '\t') {
+			termline_left -= 8;
+		} else {
+			-- termline_left;
+		}
+	}
+
+	// Split line to words
+	std::vector< std::string > words = splitString(text, ' ');
+	
+	// Form nice lines
+	std::string result;
+	size_t line_len = 0;
+	for (std::vector< std::string >::const_iterator words_it = words.begin();
+	     words_it != words.end();
+	     ++ words_it) {
+		std::string const& word = *words_it;
+		// When word is the first in line
+		if (line_len == 0) {
+			// Word fits
+			if (word.size() <= termline_left) {
+				result += prefix + word;
+				line_len = word.size();
+			}
+			// Word does not fit
+			else {
+				std::string word_left = word;
+				while (true) {
+					result += prefix + word_left.substr(0, termline_left);
+					line_len = word_left.size();
+					if (word_left.size() <= termline_left) {
+						break;
+					} else {
+						word_left = word_left.substr(termline_left);
+						result += '\n';
+					}
+				}
+			}
+		}
+		// When word is not the first in line
+		else {
+			// Word fits
+			if (line_len + 1 + word.size() <= termline_left) {
+				result += ' ' + word;
+				line_len += 1 + word.size();
+			}
+			// Word does not fit to this line,
+			// but it fits to the next line
+			else if (word.size() <= termline_left) {
+				result += '\n' + prefix + word;
+				line_len = word.size();
+			}
+			// Word does not fit to this line
+			// and not to the next line
+			else {
+				// Fill rest of current line with the beginning of the word
+				std::string word_left;
+				size_t line_left = termline_left - line_len;
+				if (line_left < 2) {
+					word_left = word;
+					result += '\n';
+				} else {
+					result += ' ' + word.substr(0, line_left - 1) + '\n';
+					word_left = word.substr(line_left - 1);
+				}
+
+				while (true) {
+					result += prefix + word_left.substr(0, termline_left);
+					line_len = word_left.size();
+					if (word_left.size() <= termline_left) {
+						break;
+					} else {
+						word_left = word_left.substr(termline_left);
+						result += '\n';
+					}
+				}
+
+			}
+		}
+	}
+
 	return result;
 }
 
