@@ -2,6 +2,7 @@
 #define HPP_ARGUMENTS_H
 
 #include "cast.h"
+#include "misc.h"
 
 #include <vector>
 #include <string>
@@ -45,7 +46,7 @@ public:
 
 	// Forms help string of all allowed arguments,
 	// or just from onle argument, if given.
-	inline std::string getHelp(uint8_t inc_what = INC_ALL, std::string const& arg = "") const;
+	inline std::string getHelp(uint8_t inc_what = INC_ALL, std::string const& arg = "", std::string const& prefix = "") const;
 
 private:
 
@@ -128,34 +129,32 @@ inline size_t Arguments::argsLeft(void) const
 	return args.end() - args_it;
 }
 
-inline std::string Arguments::getHelp(uint8_t inc_what, std::string const& arg) const
+inline std::string Arguments::getHelp(uint8_t inc_what, std::string const& arg, std::string const& prefix) const
 {
 	std::string result;
 	if (arg == "") {
-		bool first_arg = true;
 		for (AllowedArgs::const_iterator aas_it = aas.begin();
 		     aas_it != aas.end();
 		     aas_it ++) {
-		     	if (!first_arg) {
-		     		result += '\n';
-		     	}
-		     	// Print name, aliases and required parameters of argument.
-			std::string const& arg2 = aas_it->first;
+
+			std::string const& arg_name = aas_it->first;
 			AllowedArg const& aa = aas_it->second;
-			result += arg2;
-			for (Aliases::const_iterator aliases_it = aliases.begin();
-			     aliases_it != aliases.end();
-			     aliases_it ++) {
-			     	if (aliases_it->second == arg2) {
-			     		result += ", " + aliases_it->first;
-			     	}
+
+			// Arguments and parameters line
+			std::string argline;
+			if (inc_what & INC_ALL_BUT_DESC) {
+				argline = getHelp(inc_what & INC_ALL_BUT_DESC, arg_name);
+				result += wrapWords(argline, prefix) + '\n';
 			}
-			result += " " + aa.params + '\n';
-			// Print description of argument
-// TODO: Make nice format in future!
-// TODO: Use inc_what options!
-			result += "    " + aa.description + '\n';
-			first_arg = false;
+
+			// Description
+			if (inc_what & INC_DESC) {
+				if (!argline.empty()) {
+					result += wrapWords(aa.description, prefix + "\t") + '\n';
+				} else {
+					result += wrapWords(aa.description, prefix) + '\n';
+				}
+			}
 		}
 	} else {
 		AllowedArgs::const_iterator aas_find = aas.find(arg);
@@ -205,3 +204,4 @@ inline std::string Arguments::getHelp(uint8_t inc_what, std::string const& arg) 
 }
 
 #endif
+
