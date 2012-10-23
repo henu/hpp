@@ -1,6 +1,7 @@
 #ifndef HPP_SHADERPROGRAM_H
 #define HPP_SHADERPROGRAM_H
 
+#include "bufferobject.h"
 #include "gldebug.h"
 #include "glsystem.h"
 #include "shader.h"
@@ -39,6 +40,8 @@ public:
 	inline void setUniform(Matrix3 const& mat, std::string const& name, bool transpose = false);
 	inline void setUniform(Matrix4 const& mat, std::string const& name, bool transpose = false);
 
+	inline void setBufferobject(std::string const& name, Bufferobject const* buf);
+
 	// Returns GLSL Id of enabled program. This may deprecate between
 	// enables and disables.
 	inline GLuint getGLSLProgram(void) const { HppAssert(enabled, "Not enabled!"); return glsl_id; }
@@ -51,12 +54,23 @@ private:
 
 	typedef std::vector< GLuint > CompiledShaders;
 
+	// Index is same as vertex attribute index. If buf is NULL, then
+	// it means there is no buffer and vertex attribute is disabled.
+	struct BoundBufferobject
+	{
+		std::string name;
+		Bufferobject const* buf;
+	};
+	typedef std::vector< BoundBufferobject > BoundBufferobjects;
+
 	bool enabled;
 	GLuint glsl_id;
 
 	Shaders shaders;
 
 	LinkedPrograms lprogs;
+
+	BoundBufferobjects bbufs;
 
 	inline void linkProgram(Flags const& flags);
 
@@ -103,6 +117,8 @@ inline void Shaderprogram::enable(Flags const& flags)
 	GlSystem::UseProgram(glsl_id);
 	HppCheckGlErrors();
 
+	HppAssert(bbufs.empty(), "There are already bound Bufferobjects!");
+
 	enabled = true;
 }
 
@@ -112,25 +128,79 @@ inline void Shaderprogram::disable(void)
 	HppAssert(enabled, "Not enabled!");
 	GlSystem::UseProgram(0);
 	HppCheckGlErrors();
+
+	// Disable bufferobjects
+	for (BoundBufferobjects::iterator bbufs_it = bbufs.begin();
+	     bbufs_it != bbufs.end();
+	     ++ bbufs_it) {
+		BoundBufferobject& bbuf = *bbufs_it;
+		if (bbuf.buf) {
+			GlSystem::DisableVertexAttribArray(bbufs_it - bbufs.begin());
+		}
+	}
+	bbufs.clear();
+
 	enabled = false;
 }
 
 inline void Shaderprogram::setUniform(Matrix3 const& mat, std::string const& name, bool transpose)
 {
 	HppAssert(enabled, "Not enabled!");
-	GLuint uniform_id = Hpp::GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
 	if (transpose) {
-		Hpp::GlSystem::UniformMatrix3fv(uniform_id, 1, GL_TRUE, mat.getCells());
+		GlSystem::UniformMatrix3fv(uniform_id, 1, GL_TRUE, mat.getCells());
 	} else {
-		Hpp::GlSystem::UniformMatrix3fv(uniform_id, 1, GL_FALSE, mat.getCells());
+		GlSystem::UniformMatrix3fv(uniform_id, 1, GL_FALSE, mat.getCells());
 	}
 }
 
 inline void Shaderprogram::setUniform(Matrix4 const& mat, std::string const& name, bool transpose)
 {
 	HppAssert(enabled, "Not enabled!");
-	GLuint uniform_id = Hpp::GlSystem::GetUniformLocation(glsl_id, name.c_str());
-	Hpp::GlSystem::UniformMatrix4fv(uniform_id, 1, transpose, mat.getCells());
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GlSystem::UniformMatrix4fv(uniform_id, 1, transpose, mat.getCells());
+}
+
+inline void Shaderprogram::setBufferobject(std::string const& name, Bufferobject const* buf)
+{
+	// First check if buffer with same name is already bound
+	ssize_t vertexattrib_index = -1;
+	for (BoundBufferobjects::iterator bbufs_it = bbufs.begin();
+	     bbufs_it != bbufs.end();
+	     ++ bbufs_it) {
+		BoundBufferobject& bbuf = *bbufs_it;
+		if (bbuf.buf && bbuf.name == name) {
+			vertexattrib_index = bbufs_it - bbufs.begin();
+			break;
+		}
+	}
+
+	// If old buffer was not found, then new one needs to be enabled
+	if (vertexattrib_index < 0) {
+		vertexattrib_index = 0;
+		while (vertexattrib_index < ssize_t(bbufs.size()) && bbufs[vertexattrib_index].buf) {
+			++ vertexattrib_index;
+		}
+		// If no empty slot was found, then add new one
+		if (vertexattrib_index == ssize_t(bbufs.size())) {
+			bbufs.push_back(BoundBufferobject());
+		}
+		BoundBufferobject& bbuf = bbufs[vertexattrib_index];
+		bbuf.name = name;
+		bbuf.buf = NULL;
+		// New vertexarray attribute needs to be enabled
+		if (vertexattrib_index >= GlSystem::getMaxNumOfVertexattributes()) {
+			throw Exception("Too many bufferobjects bound!");
+		}
+		GlSystem::EnableVertexAttribArray(vertexattrib_index);
+	}
+
+	// Set Bufferobject
+	bbufs[vertexattrib_index].buf = buf;
+	GlSystem::BindAttribLocation(glsl_id, vertexattrib_index, name.c_str());
+	GlSystem::BindBuffer(GL_ARRAY_BUFFER, buf->getBufferId());
+	GlSystem::VertexAttribPointer(vertexattrib_index, buf->getComponents(), buf->getType(), buf->getNormalized(), 0, NULL);
+
 }
 
 inline void Shaderprogram::linkProgram(Flags const& flags)

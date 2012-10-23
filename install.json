@@ -129,6 +129,7 @@
 				"action.h",
 				"actionhandle.h",
 				"boundingsphere.h",
+				"bufferobject.h",
 				"camera.h",
 				"coloredmaterial.h",
 				"datamanagerbase.h",
