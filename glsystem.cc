@@ -65,6 +65,7 @@ PFNGLUSEPROGRAMPROC GlSystem::systemUseProgram = NULL;
 PFNGLVERTEXATTRIBPOINTERPROC GlSystem::systemVertexAttribPointer = NULL;
 
 GLint GlSystem::tunit_count = 0;
+GLint GlSystem::max_vertexattributes = 0;
 GLint GlSystem::max_lights = 0;
 size_t GlSystem::opengl_version_big;
 size_t GlSystem::opengl_version_small;
@@ -195,6 +196,17 @@ void GlSystem::initialize(void)
 			tunit_count = 1;
 		} else {
 			throw Exception("Unable to get number of texture units! OpenGL error code: " + sizeToStr(error));
+		}
+	}
+
+	// Try to get maximum number of vertex attributes
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &max_vertexattributes);
+        error = glGetError();
+	if (error != GL_NO_ERROR) {
+		if (error == GL_INVALID_ENUM) {
+			max_vertexattributes = 1;
+		} else {
+			throw Exception("Unable to get maximum number of vertexattributes! OpenGL error code: " + sizeToStr(error));
 		}
 	}
 

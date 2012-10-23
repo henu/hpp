@@ -77,6 +77,7 @@ public:
 
 	// Functions to get GL properties
 	inline static GLint getNumOfTextureunits(void);
+	inline static GLint getMaxNumOfVertexattributes(void);
 	inline static GLint getMaxNumOfLights(void);
 
 	inline static bool extensionExists(std::string const& ext);
@@ -150,6 +151,7 @@ private:
 
 	// Static values of various GL properties
 	static GLint tunit_count;
+	static GLint max_vertexattributes;
 	static GLint max_lights;
 
 	// OpenGL Version
@@ -479,13 +481,19 @@ inline GLint GlSystem::GetInteger(GLenum pname)
 
 inline GLint GlSystem::getNumOfTextureunits(void)
 {
-	HppAssert(tunit_count > 0, "");
+	HppAssert(tunit_count > 0, "Value not retrieved!");
 	return tunit_count;
+}
+
+inline GLint GlSystem::getMaxNumOfVertexattributes(void)
+{
+	HppAssert(max_vertexattributes > 0, "Value not retrieved!");
+	return max_vertexattributes;
 }
 
 inline GLint GlSystem::getMaxNumOfLights(void)
 {
-	HppAssert(max_lights > 0, "");
+	HppAssert(max_lights > 0, "Value not retrieved!");
 	return max_lights;
 }
 
