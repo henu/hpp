@@ -14,12 +14,13 @@ class Bufferobject : public NonCopyable
 
 public:
 
-	inline Bufferobject(GLenum type, GLenum usage, GLint components, GLvoid const* data, size_t size);
+	inline Bufferobject(GLenum target, GLenum type, GLenum usage, GLint components, GLvoid const* data, size_t size);
 	inline ~Bufferobject(void);
 
 	inline void setNormalized(bool normalized) { this->normalized = normalized; }
 
 	inline GLuint getBufferId(void) const { return buf_id; }
+	inline GLenum getTarget(void) const { return target; }
 	inline GLenum getType(void) const { return type; }
 	inline GLint getComponents(void) const { return components; }
 	inline bool getNormalized(void) const { return normalized; }
@@ -27,6 +28,7 @@ public:
 private:
 
 	GLuint buf_id;
+	GLenum target;
 	GLenum type;
 	GLint components;
 
@@ -34,13 +36,14 @@ private:
 
 };
 
-inline Bufferobject::Bufferobject(GLenum type, GLenum usage, GLint components, GLvoid const* data, size_t size) :
+inline Bufferobject::Bufferobject(GLenum target, GLenum type, GLenum usage, GLint components, GLvoid const* data, size_t size) :
+target(target),
 type(type),
 components(components)
 {
 	Hpp::GlSystem::GenBuffers(1, &buf_id);
-	Hpp::GlSystem::BindBuffer(GL_ARRAY_BUFFER, buf_id);
-	Hpp::GlSystem::BufferData(GL_ARRAY_BUFFER, size, data, usage);
+	Hpp::GlSystem::BindBuffer(target, buf_id);
+	Hpp::GlSystem::BufferData(target, size, data, usage);
 }
 
 inline Bufferobject::~Bufferobject(void)

@@ -198,7 +198,7 @@ inline void Shaderprogram::setBufferobject(std::string const& name, Bufferobject
 	// Set Bufferobject
 	bbufs[vertexattrib_index].buf = buf;
 	GlSystem::BindAttribLocation(glsl_id, vertexattrib_index, name.c_str());
-	GlSystem::BindBuffer(GL_ARRAY_BUFFER, buf->getBufferId());
+	GlSystem::BindBuffer(buf->getTarget(), buf->getBufferId());
 	GlSystem::VertexAttribPointer(vertexattrib_index, buf->getComponents(), buf->getType(), buf->getNormalized(), 0, NULL);
 
 }
