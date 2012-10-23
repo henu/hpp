@@ -37,8 +37,8 @@ public:
 	inline void disable(void);
 
 	// Functions to set uniforms
-	inline void setUniform(Matrix3 const& mat, std::string const& name, bool transpose = false);
-	inline void setUniform(Matrix4 const& mat, std::string const& name, bool transpose = false);
+	inline void setUniform(std::string const& name, Matrix3 const& mat, bool transpose = false);
+	inline void setUniform(std::string const& name, Matrix4 const& mat, bool transpose = false);
 
 	inline void setBufferobject(std::string const& name, Bufferobject const* buf);
 
@@ -143,7 +143,7 @@ inline void Shaderprogram::disable(void)
 	enabled = false;
 }
 
-inline void Shaderprogram::setUniform(Matrix3 const& mat, std::string const& name, bool transpose)
+inline void Shaderprogram::setUniform(std::string const& name, Matrix3 const& mat, bool transpose)
 {
 	HppAssert(enabled, "Not enabled!");
 	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
@@ -154,7 +154,7 @@ inline void Shaderprogram::setUniform(Matrix3 const& mat, std::string const& nam
 	}
 }
 
-inline void Shaderprogram::setUniform(Matrix4 const& mat, std::string const& name, bool transpose)
+inline void Shaderprogram::setUniform(std::string const& name, Matrix4 const& mat, bool transpose)
 {
 	HppAssert(enabled, "Not enabled!");
 	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
