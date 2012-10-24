@@ -3,9 +3,9 @@
 
 #include "camera.h"
 #include "angle.h"
+#include "viewfrustum.h"
+#include "3dutils.h"
 
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
 namespace Hpp
 {
 
@@ -23,6 +23,8 @@ public:
 	// Updates precalculated stuff after transform,
 	// fov, nearplane, farplane or viewport is changed.
 	inline virtual void update(void);
+
+	inline Viewfrustum getViewfrustum(void) const;
 
 private:
 
@@ -47,6 +49,23 @@ inline void Perspectivecamera::update(void)
 	Matrix4 view = transf.getMatrix().inverse();
 	Matrix4 proj = Matrix4::projectionMatrix(fov_y, aspectratio, nearplane, farplane);
 	projviewmat = proj * view;
+}
+
+inline Viewfrustum Perspectivecamera::getViewfrustum(void) const
+{
+	Vector3 dir(0, 0, -1);
+	Vector3 up(0, 1, 0);
+	Vector3 right(1, 0, 0);
+
+	dir = transf.applyToPosition(dir);
+	up = transf.applyToPosition(up);
+	right = transf.applyToPosition(right);
+
+	return Viewfrustum::fromCamera(transf.getPosition(),
+	                                dir, up, right,
+	                                fov_y,
+	                                calculateFovXFromAspectRatio(fov_y, aspectratio),
+	                                nearplane);
 }
 
 }
