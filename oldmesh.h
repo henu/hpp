@@ -14,15 +14,15 @@
 namespace Hpp
 {
 
-class Mesh
+class OldMesh
 {
 
 	friend class Entity;
 
 public:
 
-	inline Mesh(Rawmesh const& rawmesh, Rawmesh::Halvingstyle hstyle = Rawmesh::SHORTER);
-	inline ~Mesh(void);
+	inline OldMesh(Rawmesh const& rawmesh, Rawmesh::Halvingstyle hstyle = Rawmesh::SHORTER);
+	inline ~OldMesh(void);
 
 	inline size_t getSubmeshesSize(void) const { return submeshes.size(); }
 	inline Submesh const* getSubmesh(size_t submesh_id) const { HppAssert(submesh_id < submeshes.size(), "Submesh ID out of range!"); return submeshes[submesh_id]; }
@@ -56,7 +56,7 @@ private:
 
 };
 
-inline Mesh::Mesh(Rawmesh const& rawmesh, Rawmesh::Halvingstyle hstyle)
+inline OldMesh::OldMesh(Rawmesh const& rawmesh, Rawmesh::Halvingstyle hstyle)
 {
 	// Convert all quads to triangles and merge them with triangles
 	std::vector< Rawmesh::Tris > tris_n_quads;
@@ -109,7 +109,7 @@ inline Mesh::Mesh(Rawmesh const& rawmesh, Rawmesh::Halvingstyle hstyle)
 
 }
 
-inline Mesh::~Mesh(void)
+inline OldMesh::~OldMesh(void)
 {
 	delete skel;
 	for (Submeshes::iterator submeshes_it = submeshes.begin();
@@ -119,7 +119,7 @@ inline Mesh::~Mesh(void)
 	}
 }
 
-inline Boundingsphere Mesh::getDefaultBoundingsphere(void) const
+inline Boundingsphere OldMesh::getDefaultBoundingsphere(void) const
 {
 	Boundingsphere result;
 	Vector3 vrts_min(99999.9, 99999.9, 99999.9);
@@ -141,7 +141,7 @@ inline Boundingsphere Mesh::getDefaultBoundingsphere(void) const
 	return Boundingsphere(bsphere_pos, sqrt(bsphere_radius_to_2));
 }
 
-inline void Mesh::findSharedNormals(Submesh::VrtsSNormals& result,
+inline void OldMesh::findSharedNormals(Submesh::VrtsSNormals& result,
                                     Rawmesh const& rawmesh,
                                     std::vector< Rawmesh::Tris > const& tris_n_quads)
 {
@@ -228,7 +228,7 @@ inline void Mesh::findSharedNormals(Submesh::VrtsSNormals& result,
 
 }
 
-inline void Mesh::addNormalToSharedNormals(Submesh::VrtsSNormals& result, uint8_t face_vrts_size, uint32_t const* face_vrts, Vector3 const& normal)
+inline void OldMesh::addNormalToSharedNormals(Submesh::VrtsSNormals& result, uint8_t face_vrts_size, uint32_t const* face_vrts, Vector3 const& normal)
 {
 	for (uint8_t face_vrt_id = 0; face_vrt_id < face_vrts_size; face_vrt_id ++) {
 		uint32_t vrt_id = face_vrts[face_vrt_id];
@@ -241,7 +241,7 @@ inline void Mesh::addNormalToSharedNormals(Submesh::VrtsSNormals& result, uint8_
 	}
 }
 
-inline void Mesh::addTangentAndBinormalToSharedNormals(Submesh::VrtsSNormals& result, uint8_t face_vrts_size, uint32_t const* face_vrts, size_t submesh_id, Vector2 const* uvs, Vector3 const& tangent, Vector3 const& binormal)
+inline void OldMesh::addTangentAndBinormalToSharedNormals(Submesh::VrtsSNormals& result, uint8_t face_vrts_size, uint32_t const* face_vrts, size_t submesh_id, Vector2 const* uvs, Vector3 const& tangent, Vector3 const& binormal)
 {
 	for (uint8_t face_vrt_id = 0; face_vrt_id < face_vrts_size; face_vrt_id ++) {
 		uint32_t vrt_id = face_vrts[face_vrt_id];

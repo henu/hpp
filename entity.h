@@ -4,7 +4,7 @@
 #include "actionhandle.h"
 #include "materialmanager.h"
 #include "subentity.h"
-#include "mesh.h"
+#include "oldmesh.h"
 #include "movable.h"
 #include "matrix4.h"
 
@@ -21,7 +21,7 @@ class Entity : public Movable
 
 public:
 
-	inline Entity(Mesh const* mesh);
+	inline Entity(OldMesh const* mesh);
 	inline ~Entity(void);
 
 	inline void setMaterial(size_t submesh_id, Material* mat);
@@ -42,7 +42,7 @@ private:
 	typedef std::set< Actionhandle* > Actionhandles;
 	typedef std::vector< Matrix4 > BoneTransforms;
 
-	Mesh const* mesh;
+	OldMesh const* mesh;
 	Subentities subents;
 
 	// Possible skeleton in use, actionhandles to its actions and
@@ -57,7 +57,7 @@ private:
 
 };
 
-inline Entity::Entity(Mesh const* mesh) :
+inline Entity::Entity(OldMesh const* mesh) :
 mesh(mesh),
 // TODO: Make it possible to select other skeletons!
 skel(mesh->getSkeleton()),
