@@ -14,8 +14,6 @@ namespace Hpp
 class Movable
 {
 
-	friend class OldCamera;
-
 public:
 
 	inline Movable(void);
@@ -54,12 +52,6 @@ public:
 
 	inline void setVisible(bool visible = true);
 	inline bool getVisible(void) const { return visible; }
-
-private:
-
-	// ----------------------------------------
-	// Functions for friends
-	// ----------------------------------------
 
 	// Gets visibles from this Movable and from all of it's children. ofrusts is optional. It means occluding viewfrustums.
 	inline void getAllVisibles(Visibles& result, Viewfrustums const& vfrusts, Viewfrustums const& ofrusts = Viewfrustums()) const;

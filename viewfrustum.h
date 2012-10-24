@@ -68,6 +68,7 @@ private:
 	std::vector< Vector2 > vrts;
 	// Depth of near plane
 	Real nearplane;
+// TODO: Code support for farplane!
 
 	inline Viewfrustum(Type const& type, Vector3 const& pos) : type(type), pos(pos) { }
 
