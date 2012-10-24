@@ -147,6 +147,7 @@
 				"lightsource.h",
 				"material.h",
 				"materialmanager.h",
+				"mesh.h",
 				"meshmanager.h",
 				"mousekey.h",
 				"movable.h",
