@@ -41,12 +41,15 @@ inline void median(Type& result, Iter1 const& begin, Iter2 const& end);
 template< typename Iter1, typename Iter2, typename Iter3 >
 inline int compare(Iter1 range1_begin, Iter2 range1_end, Iter3 range2_begin);
 
-// Divides ByteV/string to parts using separator character. Last functions do
-// this in parts to save memory. They return true whenever subsearch was found.
-inline std::vector< ByteV > splitString(ByteV const& v, char separator);
-inline std::vector< std::string > splitString(std::string const& str, char separator);
+// Divides ByteV/string to parts using delimiter character or characters.
+// Last functions do this in parts to save memory. They return true
+// whenever subsearch was found.
+inline std::vector< ByteV > splitString(ByteV const& v, char delimiter, bool skip_empty_strings = false);
+inline std::vector< std::string > splitString(std::string const& str, char delimiter, bool skip_empty_strings = false);
+inline std::vector< ByteV > splitString(ByteV const& v, std::vector< char > delimiters, bool skip_empty_strings = false);
+inline std::vector< std::string > splitString(std::string const& str, std::vector< char > delimiters, bool skip_empty_strings = false);
 template < class Type, class IterIt, class IterEnd, class Char >
-inline bool splitStringInParts(Type& result, IterIt& it, IterEnd const& end, Char separator);
+inline bool splitStringInParts(Type& result, IterIt& it, IterEnd const& end, Char delimiter);
 
 // Removes whitespace from beginning and end of string
 inline std::string trim(std::string const& str, std::string ws = " \t\n");
@@ -114,7 +117,17 @@ inline int compare(Iter1 range1_begin, Iter2 range1_end, Iter3 range2_begin)
 	return 0;
 }
 
-inline std::vector< ByteV > splitString(ByteV const& v, char separator)
+inline std::vector< ByteV > splitString(ByteV const& v, char delimiter, bool skip_empty_strings)
+{
+	return splitString(v, std::vector< char >(1, delimiter), skip_empty_strings);
+}
+
+inline std::vector< std::string > splitString(std::string const& str, char delimiter, bool skip_empty_strings)
+{
+	return splitString(str, std::vector< char >(1, delimiter), skip_empty_strings);
+}
+
+inline std::vector< ByteV > splitString(ByteV const& v, std::vector< char > delimiters, bool skip_empty_strings)
 {
 	std::vector< ByteV > result;
 	ByteV::const_iterator part_begin = v.begin();
@@ -122,9 +135,11 @@ inline std::vector< ByteV > splitString(ByteV const& v, char separator)
 	     v_it != v.end();
 	     ++ v_it) {
 		char c = *v_it;
-		if (c == separator) {
-			ByteV part(part_begin, v_it);
-			result.push_back(part);
+		if (std::find(delimiters.begin(), delimiters.end(), c) != delimiters.end()) {
+			if (part_begin != v_it || !skip_empty_strings) {
+				ByteV part(part_begin, v_it);
+				result.push_back(part);
+			}
 			part_begin = v_it;
 			++ part_begin;
 		}
@@ -135,7 +150,7 @@ inline std::vector< ByteV > splitString(ByteV const& v, char separator)
 	return result;
 }
 
-inline std::vector< std::string > splitString(std::string const& str, char separator)
+inline std::vector< std::string > splitString(std::string const& str, std::vector< char > delimiters, bool skip_empty_strings)
 {
 	std::vector< std::string > result;
 	std::string::const_iterator part_begin = str.begin();
@@ -143,9 +158,11 @@ inline std::vector< std::string > splitString(std::string const& str, char separ
 	     str_it != str.end();
 	     ++ str_it) {
 		char c = *str_it;
-		if (c == separator) {
-			std::string part(part_begin, str_it);
-			result.push_back(part);
+		if (std::find(delimiters.begin(), delimiters.end(), c) != delimiters.end()) {
+			if (part_begin != str_it || !skip_empty_strings) {
+				std::string part(part_begin, str_it);
+				result.push_back(part);
+			}
 			part_begin = str_it;
 			++ part_begin;
 		}
@@ -157,7 +174,7 @@ inline std::vector< std::string > splitString(std::string const& str, char separ
 }
 
 template < class Type, class IterIt, class IterEnd, class Char >
-inline bool splitStringInParts(Type& result, IterIt& it, IterEnd const& end, Char separator)
+inline bool splitStringInParts(Type& result, IterIt& it, IterEnd const& end, Char delimiter)
 {
 	result.clear();
 
@@ -169,7 +186,7 @@ inline bool splitStringInParts(Type& result, IterIt& it, IterEnd const& end, Cha
 		Char c = *it;
 		it ++;
 
-		if (c == separator) {
+		if (c == delimiter) {
 			break;
 		}
 
@@ -306,7 +323,7 @@ inline std::string wrapWords(std::string const& text, std::string const& prefix,
 
 	// Split line to words
 	std::vector< std::string > words = splitString(text, ' ');
-	
+
 	// Form nice lines
 	std::string result;
 	size_t line_len = 0;
@@ -398,6 +415,29 @@ inline FIter moveToBack(FIter begin, FIter end, CompFunc cfunc)
 		}
 	}
 	return new_end;
+}
+
+template< typename T >
+class VectorMaker
+{
+
+public:
+
+	VectorMaker &operator()(T value) { vec.push_back(value); return *this; }
+
+	operator const std::vector< T > &() const { return vec; }
+
+private:
+
+	std::vector< T > vec;
+
+};
+
+template< typename T >
+VectorMaker< T > makeVector(T value)
+{
+	VectorMaker< T > maker;
+	return maker(value);
 }
 
 }
