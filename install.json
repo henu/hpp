@@ -148,6 +148,7 @@
 				"material.h",
 				"materialmanager.h",
 				"mesh.h",
+				"meshloaderobj.h",
 				"meshmanager.h",
 				"mousekey.h",
 				"movable.h",
