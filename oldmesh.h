@@ -1,5 +1,5 @@
-#ifndef HPP_MESH_H
-#define HPP_MESH_H
+#ifndef HPP_OLDMESH_H
+#define HPP_OLDMESH_H
 
 #include "skeleton.h"
 #include "renderable.h"
