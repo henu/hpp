@@ -147,8 +147,8 @@ inline Mesh* load(Path const& path)
 			nrms.push_back(nrms_raw[(nrm_idx-1)*3 + 2]);
 		}
 		if (uv_idx > 0) {
-			uvs.push_back(nrms_raw[(nrm_idx-1)*2 + 0]);
-			uvs.push_back(nrms_raw[(nrm_idx-1)*2 + 1]);
+			uvs.push_back(uvs_raw[(uv_idx-1)*2 + 0]);
+			uvs.push_back(uvs_raw[(uv_idx-1)*2 + 1]);
 		}
 
 		indexmapping[index_raw] = vertex_index;
@@ -159,17 +159,17 @@ inline Mesh* load(Path const& path)
 	if (!nrms.empty() && poss.size() != nrms.size()) {
 		throw Hpp::Exception("Invalid number of normals in buffer!");
 	}
-	if (!uvs.empty() && poss.size() != uvs.size()) {
-		throw Hpp::Exception("Invalid number of normals in buffer!");
+	if (!uvs.empty() && poss.size() / 3 != uvs.size() / 2) {
+		throw Hpp::Exception("Invalid number of UVs in buffer!");
 	}
 
 	Mesh* result = new Mesh;
 	result->setBuffer("pos", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &poss[0], sizeof(GLfloat) * poss.size());
 	if (!nrms.empty()) {
-		result->setBuffer("normal", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &nrms[0], sizeof(GLfloat) * poss.size());
+		result->setBuffer("normal", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &nrms[0], sizeof(GLfloat) * nrms.size());
 	}
 	if (!uvs.empty()) {
-		result->setBuffer("uv", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], sizeof(GLfloat) * poss.size());
+		result->setBuffer("uv", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], sizeof(GLfloat) * uvs.size());
 	}
 // TODO: In future, convert to GLushort ot GLubyte if there is only small number of vertices!
 	result->setBuffer("index", GL_ELEMENT_ARRAY_BUFFER, GL_UNSIGNED_INT, GL_STATIC_DRAW, 3, &indices[0], sizeof(GLfloat) * indices.size());
