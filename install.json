@@ -131,7 +131,6 @@
 				"boundingsphere.h",
 				"bufferobject.h",
 				"camera.h",
-				"coloredmaterial.h",
 				"datamanagerbase.h",
 				"display.h",
 				"entity.h",
