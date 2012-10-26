@@ -4,6 +4,7 @@
 #include "assert.h"
 #include "misc.h"
 #include "pixelformat.h"
+#include <ostream>
 
 namespace Hpp
 {
@@ -26,9 +27,6 @@ public:
 	// Operators
 	inline Color operator*(float f) const;
 
-	// Values. On grayscale colors, values is stored to red.
-	float red, green, blue, alpha;
-
 	// Getters. These will always return proper values based on format
 	inline float getRed(void) const;
 	inline float getGreen(void) const;
@@ -36,11 +34,18 @@ public:
 	inline float getValue(void) const;
 	inline float getAlpha(void) const;
 
-	Pixelformat format;
+	inline Pixelformat getFormat(void) const { return format; }
 
 private:
 
+	// Values. On grayscale colors, values is stored to red.
+	float red, green, blue, alpha;
+
+	Pixelformat format;
+
 };
+
+inline std::ostream& operator<<(std::ostream& strm, Color const& c);
 
 
 
@@ -200,6 +205,16 @@ inline float Color::getAlpha(void) const
 {
 	if (format == RGBA || format == GRAYSCALE_ALPHA || format == ALPHA) return alpha;
 	return 1.0;
+}
+
+inline std::ostream& operator<<(std::ostream& strm, Color const& c)
+{
+	strm << '[' << c.getRed() << ", " << c.getGreen() << ", " << c.getBlue();
+	if (c.getAlpha() < 1) {
+		strm << ", " << c.getAlpha();
+	}
+	strm << "]";
+	return strm;
 }
 
 }
