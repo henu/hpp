@@ -39,6 +39,17 @@ public:
 	// Functions to set uniforms
 	inline void setUniform(std::string const& name, Matrix3 const& mat, bool transpose = false);
 	inline void setUniform(std::string const& name, Matrix4 const& mat, bool transpose = false);
+	inline void setUniform(std::string const& name, Vector3 const& v);
+	inline void setUniform(std::string const& name, Vector3 const& v, Real w);
+	inline void setUniform(std::string const& name, Color const& color, Pixelformat force_format = RGBA);
+	inline void setUniform1f(std::string const& name, GLfloat f0);
+	inline void setUniform2f(std::string const& name, GLfloat f0, GLfloat f1);
+	inline void setUniform3f(std::string const& name, GLfloat f0, GLfloat f1, GLfloat f2);
+	inline void setUniform4f(std::string const& name, GLfloat f0, GLfloat f1, GLfloat f2, GLfloat f3);
+	inline void setUniform1i(std::string const& name, GLint i0);
+	inline void setUniform2i(std::string const& name, GLint i0, GLint i1);
+	inline void setUniform3i(std::string const& name, GLint i0, GLint i1, GLint i2);
+	inline void setUniform4i(std::string const& name, GLint i0, GLint i1, GLint i2, GLint i3);
 
 	inline void setBufferobject(std::string const& name, Bufferobject const* buf);
 
@@ -126,6 +137,7 @@ inline void Shaderprogram::disable(void)
 {
 	HppCheckForCorrectThread();
 	HppAssert(enabled, "Not enabled!");
+	HppCheckGlErrors();
 	GlSystem::UseProgram(0);
 	HppCheckGlErrors();
 
@@ -145,20 +157,132 @@ inline void Shaderprogram::disable(void)
 
 inline void Shaderprogram::setUniform(std::string const& name, Matrix3 const& mat, bool transpose)
 {
+	HppCheckGlErrors();
 	HppAssert(enabled, "Not enabled!");
 	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
-	if (transpose) {
-		GlSystem::UniformMatrix3fv(uniform_id, 1, GL_TRUE, mat.getCells());
-	} else {
-		GlSystem::UniformMatrix3fv(uniform_id, 1, GL_FALSE, mat.getCells());
-	}
+	GlSystem::UniformMatrix3fv(uniform_id, 1, transpose, mat.getCells());
+	HppCheckGlErrors();
 }
 
 inline void Shaderprogram::setUniform(std::string const& name, Matrix4 const& mat, bool transpose)
 {
+	HppCheckGlErrors();
 	HppAssert(enabled, "Not enabled!");
 	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
 	GlSystem::UniformMatrix4fv(uniform_id, 1, transpose, mat.getCells());
+	HppCheckGlErrors();
+}
+
+inline void Shaderprogram::setUniform(std::string const& name, Vector3 const& v)
+{
+	HppCheckGlErrors();
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GlSystem::Uniform3f(uniform_id, v.x, v.y, v.z);
+	HppCheckGlErrors();
+}
+
+inline void Shaderprogram::setUniform(std::string const& name, Vector3 const& v, Real w)
+{
+	HppCheckGlErrors();
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GlSystem::Uniform4f(uniform_id, v.x, v.y, v.z, w);
+	HppCheckGlErrors();
+}
+
+inline void Shaderprogram::setUniform(std::string const& name, Color const& color, Pixelformat force_format)
+{
+	HppCheckGlErrors();
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	if (force_format == RGBA) {
+		GlSystem::Uniform4f(uniform_id, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+	} else if (force_format == RGB) {
+		GlSystem::Uniform3f(uniform_id, color.getRed(), color.getGreen(), color.getBlue());
+	} else if (force_format == GRAYSCALE) {
+		GlSystem::Uniform1f(uniform_id, color.getValue());
+	} else if (force_format == GRAYSCALE_ALPHA) {
+		GlSystem::Uniform2f(uniform_id, color.getValue(), color.getAlpha());
+	} else if (force_format == ALPHA) {
+		GlSystem::Uniform1f(uniform_id, color.getAlpha());
+	} else {
+		throw Hpp::Exception("Invalid uniform format!");
+	}
+
+	HppCheckGlErrors();
+}
+
+inline void Shaderprogram::setUniform1f(std::string const& name, GLfloat f0)
+{
+	HppCheckGlErrors();
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GlSystem::Uniform1f(uniform_id, f0);
+	HppCheckGlErrors();
+}
+
+inline void Shaderprogram::setUniform2f(std::string const& name, GLfloat f0, GLfloat f1)
+{
+	HppCheckGlErrors();
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GlSystem::Uniform2f(uniform_id, f0, f1);
+	HppCheckGlErrors();
+}
+
+inline void Shaderprogram::setUniform3f(std::string const& name, GLfloat f0, GLfloat f1, GLfloat f2)
+{
+	HppCheckGlErrors();
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GlSystem::Uniform3f(uniform_id, f0, f1, f2);
+	HppCheckGlErrors();
+}
+
+inline void Shaderprogram::setUniform4f(std::string const& name, GLfloat f0, GLfloat f1, GLfloat f2, GLfloat f3)
+{
+	HppCheckGlErrors();
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GlSystem::Uniform4f(uniform_id, f0, f1, f2, f3);
+	HppCheckGlErrors();
+}
+
+inline void Shaderprogram::setUniform1i(std::string const& name, GLint i0)
+{
+	HppCheckGlErrors();
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GlSystem::Uniform1i(uniform_id, i0);
+	HppCheckGlErrors();
+}
+
+inline void Shaderprogram::setUniform2i(std::string const& name, GLint i0, GLint i1)
+{
+	HppCheckGlErrors();
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GlSystem::Uniform2i(uniform_id, i0, i1);
+	HppCheckGlErrors();
+}
+
+inline void Shaderprogram::setUniform3i(std::string const& name, GLint i0, GLint i1, GLint i2)
+{
+	HppCheckGlErrors();
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GlSystem::Uniform3i(uniform_id, i0, i1, i2);
+	HppCheckGlErrors();
+}
+
+inline void Shaderprogram::setUniform4i(std::string const& name, GLint i0, GLint i1, GLint i2, GLint i3)
+{
+	HppCheckGlErrors();
+	HppAssert(enabled, "Not enabled!");
+	GLuint uniform_id = GlSystem::GetUniformLocation(glsl_id, name.c_str());
+	GlSystem::Uniform4i(uniform_id, i0, i1, i2, i3);
+	HppCheckGlErrors();
 }
 
 inline void Shaderprogram::setBufferobject(std::string const& name, Bufferobject const* buf)
