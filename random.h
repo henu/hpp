@@ -1,6 +1,7 @@
 #ifndef RANDOM_H
 #define RANDOM_H
 
+#include "color.h"
 #include "vector2.h"
 #include "vector3.h"
 #include "angle.h"
@@ -30,6 +31,8 @@ inline Angle randomAngle(void);
 
 inline Vector2 randomVector2(Real max_radius);
 inline Vector3 randomVector3(Real max_radius);
+
+inline Color randomColor(bool randomize_alpha = false);
 
 // Returns data from secure random source
 inline ByteV randomSecureData(size_t size);
@@ -97,6 +100,17 @@ inline Vector3 randomVector3(Real max_radius)
 		result.y = random(-max_radius, max_radius);
 		result.z = random(-max_radius, max_radius);
 	} while (result.lengthTo2() > max_radius_to_2);
+	return result;
+}
+
+inline Color randomColor(bool randomize_alpha)
+{
+	Color result;
+	if (randomize_alpha) {
+		result = Color(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX));
+	} else {
+		result = Color(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX));
+	}
 	return result;
 }
 
