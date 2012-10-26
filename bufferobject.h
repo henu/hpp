@@ -3,6 +3,7 @@
 
 #include "glsystem.h"
 #include "noncopyable.h"
+#include "gldebug.h"
 
 #include <GL/gl.h>
 
@@ -59,8 +60,11 @@ inline Bufferobject::~Bufferobject(void)
 
 inline void Bufferobject::drawElements(GLenum mode, size_t offset) const
 {
+	HppCheckGlErrors();
 	Hpp::GlSystem::BindBuffer(target, buf_id);
+	HppCheckGlErrors();
 	glDrawElements(mode, size, type, (GLvoid*)offset);
+	HppCheckGlErrors();
 }
 
 }
