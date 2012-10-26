@@ -91,6 +91,7 @@ std::string Json::doEncode(size_t indent, bool nice) const
 		break;
 	}
 	HppAssert(false, "Invalid JSON type!");
+	return "";
 }
 
 }
