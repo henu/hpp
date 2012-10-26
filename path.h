@@ -46,7 +46,7 @@ public:
 		Type type;
 
 		std::string owner;
-		// Always empty on windows 
+		// Always empty on windows
 		std::string group;
 
 		// Seconds is zero, if these are not supported
@@ -106,6 +106,8 @@ public:
 	// is not file, then exception is thrown.
 	inline void readBytes(ByteV& result) const;
 	inline void readString(std::string& result) const;
+	inline ByteV readBytes(void) const { ByteV result; readBytes(result); return result; }
+	inline std::string readString(void) const { std::string result; readString(result); return result; }
 
 	inline void writeBytes(ByteV const& bytes) const;
 	inline void writeString(std::string const& str) const;
