@@ -1,6 +1,7 @@
 #ifndef HPP_MATERIAL_H
 #define HPP_MATERIAL_H
 
+#include "matrix4.h"
 #include "lightsource.h"
 #include "transform.h"
 #include "glsystem.h"
@@ -44,7 +45,7 @@ public:
 	inline virtual ~Material(void);
 
 	// Begins/ends manual rendering
-	virtual void beginRendering(Color const& ambient_light = Color(0, 0, 0), Lightsource* light = NULL, bool additive_rendering = false) const = 0;
+	virtual void beginRendering(Matrix4 const& viewmatrix, Color const& ambient_light = Color(0, 0, 0), Lightsource* light = NULL, bool additive_rendering = false) const = 0;
 	virtual void endRendering(void) const = 0;
 
 	virtual bool needsLight(Renderable const* renderable) const { (void)renderable; return true; }
