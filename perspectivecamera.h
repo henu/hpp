@@ -46,9 +46,9 @@ inline void Perspectivecamera::update(void)
 {
 	aspectratio = viewport_width / Real(viewport_height);
 
-	Matrix4 view = transf.getMatrix().inverse();
-	Matrix4 proj = Matrix4::projectionMatrix(fov_y, aspectratio, nearplane, farplane);
-	projviewmat = proj * view;
+	viewmat = transf.getMatrix().inverse();
+	projmat = Matrix4::projectionMatrix(fov_y, aspectratio, nearplane, farplane);
+	projviewmat = projmat * viewmat;
 }
 
 inline Viewfrustum Perspectivecamera::getViewfrustum(void) const

@@ -17,6 +17,8 @@ public:
 
 	inline void setTransform(Transform const& transf);
 
+	inline Matrix4 getViewmatrix(void) const;
+	inline Matrix4 getProjectionmatrix(void) const;
 	inline Matrix4 getProjectionviewmatrix(void) const;
 
 	// Tells OpenGL to use viewport from this camera
@@ -40,7 +42,9 @@ protected:
 
 	Real aspectratio;
 
-	// Projection * View matrix
+	// View, Projection and Projection * View matrix
+	Matrix4 viewmat;
+	Matrix4 projmat;
 	Matrix4 projviewmat;
 
 private:
@@ -55,6 +59,16 @@ inline void Camera::setTransform(Transform const& transf)
 inline void Camera::setUpViewport(void) const
 {
 	glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
+}
+
+inline Matrix4 Camera::getViewmatrix(void) const
+{
+	return viewmat;
+}
+
+inline Matrix4 Camera::getProjectionmatrix(void) const
+{
+	return projmat;
 }
 
 inline Matrix4 Camera::getProjectionviewmatrix(void) const
