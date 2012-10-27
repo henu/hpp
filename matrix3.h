@@ -51,6 +51,7 @@ public:
 
 	// Vector operators
 	inline Vector2 operator*(Vector2 const& v) const;
+	inline Vector3 operator*(Vector3 const& v) const;
 
 	// Function to get determinant of this Matrix
 	inline Real determinant(void) const;
@@ -237,48 +238,6 @@ inline Matrix3 const& Matrix3::operator*=(Matrix3 const& m)
 	return *this;
 }
 
-inline Real Matrix3::determinant(void) const
-{
-	return cells[0] * subdeterminant(0)
-	     - cells[1] * subdeterminant(1)
-	     + cells[2] * subdeterminant(2);
-}
-
-inline Matrix3 Matrix3::inverse(void) const
-{
-
-	// First get determinant and ensure it's not zero
-	Real det = determinant();
-	HppAssert(det != 0, "Cannot make inverse matrix because determinant is zero!");
-
-	// Form adjugate matrix
-	Matrix3 adj = Matrix3(+subdeterminant(0), -subdeterminant(3), +subdeterminant(6),
-	                      -subdeterminant(1), +subdeterminant(4), -subdeterminant(7),
-	                      +subdeterminant(2), -subdeterminant(5), +subdeterminant(8));
-
-	// Ensure inverse matrix is valid
-	#ifndef NDEBUG
-// TODO: Check also cond of matrix!
-	Matrix3 check = *this * (adj / det);
-	HppAssert(check.cells[0] > 0.9 && check.cells[0] < 1.1 &&
-	          check.cells[1] > -0.1 && check.cells[1] < 0.1 &&
-	          check.cells[2] > -0.1 && check.cells[2] < 0.1 &&
-	          check.cells[3] > -0.1 && check.cells[3] < 0.1 &&
-	          check.cells[4] > 0.9 && check.cells[4] < 1.1 &&
-	          check.cells[5] > -0.1 && check.cells[5] < 0.1 &&
-	          check.cells[6] > -0.1 && check.cells[6] < 0.1 &&
-	          check.cells[7] > -0.1 && check.cells[7] < 0.1 &&
-	          check.cells[8] > 0.9 && check.cells[8] < 1.1, "Matrix inversion has failed!");
-	#endif
-	return adj / det;
-
-}
-
-inline Real const* Matrix3::getCells(void) const
-{
-	return cells;
-}
-
 inline Matrix3 Matrix3::operator+(Matrix3 const& m) const
 {
 	return Matrix3(cells[0] + m.cells[0],
@@ -323,6 +282,55 @@ inline Vector2 Matrix3::operator*(Vector2 const& v) const
 {
 	return Vector2(cells[0]*v.x + cells[1]*v.y + cells[2],
 	               cells[3]*v.x + cells[4]*v.y + cells[5]);
+}
+
+inline Vector3 Matrix3::operator*(Vector3 const& v) const
+{
+	return Vector3(cells[0]*v.x + cells[1]*v.y + cells[2]*v.z,
+	               cells[3]*v.x + cells[4]*v.y + cells[5]*v.z,
+	               cells[6]*v.x + cells[7]*v.y + cells[8]*v.z);
+}
+
+inline Real Matrix3::determinant(void) const
+{
+	return cells[0] * subdeterminant(0)
+	     - cells[1] * subdeterminant(1)
+	     + cells[2] * subdeterminant(2);
+}
+
+inline Matrix3 Matrix3::inverse(void) const
+{
+
+	// First get determinant and ensure it's not zero
+	Real det = determinant();
+	HppAssert(det != 0, "Cannot make inverse matrix because determinant is zero!");
+
+	// Form adjugate matrix
+	Matrix3 adj = Matrix3(+subdeterminant(0), -subdeterminant(3), +subdeterminant(6),
+	                      -subdeterminant(1), +subdeterminant(4), -subdeterminant(7),
+	                      +subdeterminant(2), -subdeterminant(5), +subdeterminant(8));
+
+	// Ensure inverse matrix is valid
+	#ifndef NDEBUG
+// TODO: Check also cond of matrix!
+	Matrix3 check = *this * (adj / det);
+	HppAssert(check.cells[0] > 0.9 && check.cells[0] < 1.1 &&
+	          check.cells[1] > -0.1 && check.cells[1] < 0.1 &&
+	          check.cells[2] > -0.1 && check.cells[2] < 0.1 &&
+	          check.cells[3] > -0.1 && check.cells[3] < 0.1 &&
+	          check.cells[4] > 0.9 && check.cells[4] < 1.1 &&
+	          check.cells[5] > -0.1 && check.cells[5] < 0.1 &&
+	          check.cells[6] > -0.1 && check.cells[6] < 0.1 &&
+	          check.cells[7] > -0.1 && check.cells[7] < 0.1 &&
+	          check.cells[8] > 0.9 && check.cells[8] < 1.1, "Matrix inversion has failed!");
+	#endif
+	return adj / det;
+
+}
+
+inline Real const* Matrix3::getCells(void) const
+{
+	return cells;
 }
 
 inline Real& Matrix3::cell(uint8_t offset)
