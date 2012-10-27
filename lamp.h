@@ -20,7 +20,16 @@ public:
 	inline void setColor(Color const& color);
 	inline void setEnergy(float energy);
 
-	inline Color getColor(void) const;
+	inline void setConstantAttenuation(float attenu_c) { this->attenu_c = attenu_c; }
+	inline void setLinearAttenuation(float attenu_l) { this->attenu_l = attenu_l; }
+	inline void setQuadraticAttenuation(float attenu_q) { this->attenu_q = attenu_q; }
+
+	inline float getConstantAttenuation(void) const { return attenu_c; }
+	inline float getLinearAttenuation(void) const { return attenu_l; }
+	inline float getQuadraticAttenuation(void) const { return attenu_q; }
+
+	inline virtual Vector3 getPosition(void) const { return getAbsoluteTransform().getPosition(); }
+	inline virtual Color getColor(void) const { return color * energy; }
 
 private:
 
@@ -29,18 +38,28 @@ private:
 
 	float color_buf[4];
 
-	inline virtual void setUpGlLight(GLenum gl_light) const;
+	float attenu_c;
+	float attenu_l;
+	float attenu_q;
+
+	inline virtual void setUpGlLight(GLenum gl_light) const;//DEPRECATED
 
 };
 
-inline Lamp::Lamp(void)
+inline Lamp::Lamp(void) :
+attenu_c(1),
+attenu_l(0),
+attenu_q(0)
 {
 	color_buf[3] = 0.0;
 }
 
 inline Lamp::Lamp(Color const& color, float energy) :
 color(color),
-energy(energy)
+energy(energy),
+attenu_c(1),
+attenu_l(0),
+attenu_q(0)
 {
 	color_buf[0] = color.getRed() * energy;
 	color_buf[1] = color.getGreen() * energy;
@@ -64,11 +83,6 @@ inline void Lamp::setEnergy(float energy)
 	color_buf[2] = color.getBlue() * energy;
 }
 
-inline Color Lamp::getColor(void) const
-{
-	return color;
-}
-
 inline void Lamp::setUpGlLight(GLenum gl_light) const
 {
 	// Get position
@@ -81,11 +95,11 @@ inline void Lamp::setUpGlLight(GLenum gl_light) const
 	// Init gl light
 	HppCheckGlErrors();
 	glEnable(gl_light);
-	glLightfv(gl_light, GL_DIFFUSE, color_buf);
-	glLightfv(gl_light, GL_POSITION, pos_buf);
-	glLightf(gl_light, GL_CONSTANT_ATTENUATION, 0);
-	glLightf(gl_light, GL_LINEAR_ATTENUATION, 0);
-	glLightf(gl_light, GL_QUADRATIC_ATTENUATION, 1);
+	glLightfv(gl_light, GL_DIFFUSE, color_buf);//DEPRECATED
+	glLightfv(gl_light, GL_POSITION, pos_buf);//DEPRECATED
+	glLightf(gl_light, GL_CONSTANT_ATTENUATION, 0);//DEPRECATED
+	glLightf(gl_light, GL_LINEAR_ATTENUATION, 0);//DEPRECATED
+	glLightf(gl_light, GL_QUADRATIC_ATTENUATION, 1);//DEPRECATED
 	HppCheckGlErrors();
 }
 

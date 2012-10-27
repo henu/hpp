@@ -103,7 +103,7 @@ private:
 	static PFNGLBINDBUFFERPROC systemBindBuffer;
 	static PFNGLBINDVERTEXARRAYPROC systemBindVertexArray;
 	static PFNGLBUFFERDATAPROC systemBufferData;
-	static PFNGLCLIENTACTIVETEXTUREPROC systemClientActiveTexture;
+	static PFNGLCLIENTACTIVETEXTUREPROC systemClientActiveTexture; //DEPRECATED
 	static PFNGLCOMPILESHADERPROC systemCompileShader;
 	static PFNGLCREATEPROGRAMPROC systemCreateProgram;
 	static PFNGLCREATESHADERPROC systemCreateShader;

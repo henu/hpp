@@ -1,6 +1,7 @@
 #ifndef HPP_MATERIAL_H
 #define HPP_MATERIAL_H
 
+#include "lightsource.h"
 #include "transform.h"
 #include "glsystem.h"
 #include "gldebug.h"
@@ -42,6 +43,10 @@ public:
 	inline Material(void);
 	inline virtual ~Material(void);
 
+	// Begins/ends manual rendering
+	virtual void beginRendering(Color const& ambient_light = Color(0, 0, 0), Lightsource* light = NULL, bool additive_rendering = false) const = 0;
+	virtual void endRendering(void) const = 0;
+
 	virtual bool needsLight(Renderable const* renderable) const { (void)renderable; return true; }
 
 private:
@@ -49,10 +54,6 @@ private:
 	// ----------------------------------------
 	// Functions for friends
 	// ----------------------------------------
-
-	// Prepares and ends rendering process
-	virtual void initRendering(size_t num_of_lights, Flags flags) const = 0;
-	virtual void deinitRendering(void) const = 0;
 
 	inline void render(Renderable const* renderable,
 	                   Rendbuf< Real > const* poss,

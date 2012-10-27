@@ -2,7 +2,6 @@
 #define HPP_VIEWPORT_H
 
 #include "texture.h"
-#include "renderingenvironment.h"
 #include "oldcamera.h"
 #include "lightsource.h"
 #include "visibles.h"
@@ -87,50 +86,6 @@ inline void Viewport::clearBackground(void)
 	}
 }
 
-inline void Viewport::renderVisibles(OldCamera* cam, Visibles& visibles, Lightsources const& lights, Color const& ambient_light) const
-{
-	// Set viewport
-	HppCheckForCorrectThread();
-	glViewport(x, y, width, height);
-
-	// Set some GL things
-	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glDisable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ZERO);
-
-	// Clear z buffer
-	HppCheckForCorrectThread();
-	glClear(GL_DEPTH_BUFFER_BIT);
-
-	cam->prepareProjection(width, height);
-
-	Renderingenvironment renv;
-	renv.setAmbientLight(ambient_light);
-
-	// Renderables without need for lighting.
-	for (Renderables::iterator renderables_it = visibles.no_light.begin();
-	     renderables_it != visibles.no_light.end();
-	     renderables_it ++) {
-		Renderable* renderable = *renderables_it;
-		renv.render(renderable);
-	}
-
-	// Renderables with need for lighting
-	renv.initMultipassLighting(lights);
-	while (renv.continueMultipassLighting()) {
-		for (Renderables::iterator renderables_it = visibles.normal.begin();
-		     renderables_it != visibles.normal.end();
-		     renderables_it ++) {
-			Renderable* renderable = *renderables_it;
-			renv.render(renderable);
-		}
-	}
-	renv.finishMultipassLighting();
-
-}
-
 inline void Viewport::init2DRendering(void) const
 {
 	// Set viewport
@@ -185,23 +140,23 @@ inline void Viewport::renderSprite(Texture const& tex,
 
 	HppCheckGlErrors();
 // TODO: Remove glBegin() and glEnd()!
-	glBegin(GL_QUADS);
+	glBegin(GL_QUADS);//DEPRECATED
 
-	glColor3f(color.red, color.green, color.blue);
+	glColor3f(color.getRed(), color.getGreen(), color.getBlue());//DEPRECATED
 
-	glTexCoord2f(tex_pos.x, tex_pos.y);
-	glVertex2f(real_pos.x, real_pos.y);
+	glTexCoord2f(tex_pos.x, tex_pos.y);//DEPRECATED
+	glVertex2f(real_pos.x, real_pos.y);//DEPRECATED
 
-	glTexCoord2f(tex_pos.x + tex_size.x, tex_pos.y);
-	glVertex2f(real_pos.x + size.x, real_pos.y);
+	glTexCoord2f(tex_pos.x + tex_size.x, tex_pos.y);//DEPRECATED
+	glVertex2f(real_pos.x + size.x, real_pos.y);//DEPRECATED
 
-	glTexCoord2f(tex_pos.x + tex_size.x, tex_pos.y + tex_size.y);
-	glVertex2f(real_pos.x + size.x, real_pos.y + size.y);
+	glTexCoord2f(tex_pos.x + tex_size.x, tex_pos.y + tex_size.y);//DEPRECATED
+	glVertex2f(real_pos.x + size.x, real_pos.y + size.y);//DEPRECATED
 
-	glTexCoord2f(tex_pos.x, tex_pos.y + tex_size.y);
-	glVertex2f(real_pos.x, real_pos.y + size.y);
+	glTexCoord2f(tex_pos.x, tex_pos.y + tex_size.y);//DEPRECATED
+	glVertex2f(real_pos.x, real_pos.y + size.y);//DEPRECATED
 
-	glEnd();
+	glEnd();//DEPRECATED
 	HppCheckGlErrors();
 }
 

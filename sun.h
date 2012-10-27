@@ -4,6 +4,7 @@
 #include "color.h"
 #include "lightsource.h"
 #include "vector3.h"
+#include "gldebug.h"
 
 namespace Hpp
 {
@@ -21,7 +22,8 @@ public:
 
 	inline void setDirection(Vector3 const& dir);
 
-	inline Color getColor(void) const;
+	inline virtual Vector3 getPosition(void) const { return dir; }
+	inline virtual Color getColor(void) const { return color * energy; }
 
 private:
 
@@ -41,9 +43,9 @@ inline Sun::Sun(void) :
 color(1, 1, 1),
 dir(0, 0, -1)
 {
-	color_buf[0] = color.red;
-	color_buf[1] = color.green;
-	color_buf[2] = color.blue;
+	color_buf[0] = color.getRed();
+	color_buf[1] = color.getGreen();
+	color_buf[2] = color.getBlue();
 	color_buf[3] = 0.0;
 	dir_buf[0] = -dir.x;
 	dir_buf[1] = -dir.y;
@@ -86,19 +88,14 @@ inline void Sun::setDirection(Vector3 const& dir)
 	dir_buf[3] = 0.0;
 }
 
-inline Color Sun::getColor(void) const
-{
-	return color;
-}
-
 inline void Sun::setUpGlLight(GLenum gl_light) const
 {
 	HppCheckGlErrors();
-	glLightfv(gl_light, GL_DIFFUSE, color_buf);
-	glLightfv(gl_light, GL_POSITION, dir_buf);
-	glLightf(gl_light, GL_CONSTANT_ATTENUATION, 0);
-	glLightf(gl_light, GL_LINEAR_ATTENUATION, 0);
-	glLightf(gl_light, GL_QUADRATIC_ATTENUATION, 0);
+	glLightfv(gl_light, GL_DIFFUSE, color_buf);//DEPRECATED
+	glLightfv(gl_light, GL_POSITION, dir_buf);//DEPRECATED
+	glLightf(gl_light, GL_CONSTANT_ATTENUATION, 0);//DEPRECATED
+	glLightf(gl_light, GL_LINEAR_ATTENUATION, 0);//DEPRECATED
+	glLightf(gl_light, GL_QUADRATIC_ATTENUATION, 0);//DEPRECATED
 	HppCheckGlErrors();
 }
 
