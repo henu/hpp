@@ -11,7 +11,7 @@ Actionhandle::~Actionhandle(void)
 }
 
 
-void Actionhandle::addTime(Hpp::Delay const& d)
+void Actionhandle::addTime(Delay const& d)
 {
 	float act_duration = act->end - act->begin;
 	if (act_duration <= 0.0) {

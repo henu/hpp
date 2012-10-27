@@ -37,7 +37,7 @@ public:
 	inline void applyTransform(Transform const& transf);
 
 	// Hit tests
-	inline bool rayHits(Hpp::Vector3 const& begin, Hpp::Vector3 const& dir) const;
+	inline bool rayHits(Vector3 const& begin, Vector3 const& dir) const;
 
 private:
 
@@ -55,7 +55,7 @@ inline void Boundingsphere::applyTransform(Transform const& transf)
 	radius = transf.getMaximumScaling() * radius;
 }
 
-inline bool Boundingsphere::rayHits(Hpp::Vector3 const& begin, Hpp::Vector3 const& dir) const
+inline bool Boundingsphere::rayHits(Vector3 const& begin, Vector3 const& dir) const
 {
 	// Ray begins from front of sphere center
 	if (distanceToPlane(pos, dir, begin) > 0.0) {
@@ -63,7 +63,7 @@ inline bool Boundingsphere::rayHits(Hpp::Vector3 const& begin, Hpp::Vector3 cons
 	}
 	// Ray begins from back of sphere center
 	else {
-		Hpp::Real ray_dst_to_pos;
+		Real ray_dst_to_pos;
 		nearestPointToRay(pos, begin, dir, NULL, NULL, &ray_dst_to_pos);
 		return ray_dst_to_pos < radius;
 	}

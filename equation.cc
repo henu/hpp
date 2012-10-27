@@ -41,7 +41,7 @@ double Equation::eval(Params const& params)
 			{
 				float divider = node->data.oper2.param[1]->value;
 				if (divider == 0) {
-					throw Hpp::Exception("Division by zero!");
+					throw Exception("Division by zero!");
 				}
 				node->value = node->data.oper2.param[0]->value / divider;
 			}
@@ -54,7 +54,7 @@ double Equation::eval(Params const& params)
 				std::string const& param_name = *node->data.name.name;
 				Params::const_iterator params_find = params.find(param_name);
 				if (params_find == params.end()) {
-					throw Hpp::Exception("Variable \"" + param_name + "\" not found!");
+					throw Exception("Variable \"" + param_name + "\" not found!");
 				}
 				node->value = params_find->second;
 			}
@@ -214,7 +214,7 @@ Equation::EqNode* Equation::parseString(std::string eq)
 		if (is_num) {
 			EqNode* result = new EqNode;
 			result->type = NUMBER;
-			result->value = Hpp::strToFloat(eq);
+			result->value = strToFloat(eq);
 			return result;
 		}
 	}
@@ -254,7 +254,7 @@ Equation::EqNode* Equation::parseString(std::string eq)
 		return result;
 	}
 
-	throw Hpp::Exception("Unable to parse \"" + eq + "\"!");
+	throw Exception("Unable to parse \"" + eq + "\"!");
 	return NULL;
 
 }
@@ -271,7 +271,7 @@ size_t Equation::findStringFromEquation(std::string const& eq, std::string const
 			brackets ++;
 		} else if (*it == ')' || *it == ']' || *it == '}') {
 			if (brackets == 0) {
-				throw Hpp::Exception("Missing closing bracket!");
+				throw Exception("Missing closing bracket!");
 			}
 			brackets --;
 		}
@@ -341,7 +341,7 @@ std::string Equation::nodeToString(EqNode const* node, Params const& params)
 {
 	switch (node->type) {
 	case NUMBER:
-		return Hpp::floatToStr(node->value);
+		return floatToStr(node->value);
 	case SUM:
 		return "(" + nodeToString(node->data.oper2.param[0], params) + " + " + nodeToString(node->data.oper2.param[1], params) + ")";
 	case MULTIPLY:
@@ -357,7 +357,7 @@ std::string Equation::nodeToString(EqNode const* node, Params const& params)
 			if (params_find == params.end()) {
 				return var;
 			} else {
-				return Hpp::floatToStr(params_find->second);
+				return floatToStr(params_find->second);
 			}
 		}
 	case LOG:

@@ -7,7 +7,7 @@ namespace Hpp
 class Runnable
 {
 
-	friend void Hpp::runRunnable(void* runnable_raw);
+	friend void runRunnable(void* runnable_raw);
 
 private:
 

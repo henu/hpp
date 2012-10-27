@@ -26,7 +26,7 @@ Windowarea::~Windowarea(void)
 void Windowarea::addWindow(Window* window)
 {
 	if (std::find(windows.begin(), windows.end(), window) != windows.end()) {
-		throw Hpp::Exception("Window is already in stack!");
+		throw Exception("Window is already in stack!");
 	}
 	windows.push_back(window);
 	addChild(window);

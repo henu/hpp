@@ -63,7 +63,7 @@ inline Userinfo Userinfo::getFromUserId(uid_t user_id)
 	// Read password struct
 	struct passwd* pw = getpwuid(user_id);
 	if (!pw) {
-		throw Hpp::Exception("User #" + ssizeToStr(user_id) + " does not exist!");
+		throw Exception("User #" + ssizeToStr(user_id) + " does not exist!");
 	}
 
 	Userinfo result;
@@ -76,7 +76,7 @@ inline Userinfo Userinfo::getFromUserId(uid_t user_id)
 	gid_t group_id = pw->pw_gid;
 	struct group* gr = getgrgid(group_id);
 	if (!gr) {
-		throw Hpp::Exception("Group #" + ssizeToStr(group_id) + " does not exist!");
+		throw Exception("Group #" + ssizeToStr(group_id) + " does not exist!");
 	}
 
 	// Group ID and name

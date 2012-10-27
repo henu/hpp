@@ -113,7 +113,7 @@ inline std::string Arguments::parse(void)
 inline std::string Arguments::popArgument(void)
 {
 	if (args_it == args.end()) {
-		throw Hpp::Exception("No arguments to pop!");
+		throw Exception("No arguments to pop!");
 	}
 	return *(args_it ++);
 }

@@ -23,8 +23,8 @@ public:
 	void setCursor(int32_t col, int32_t row);
 	void setColors(NC::Color text, NC::Color bg);
 	void printChar(char c);
-	void printString(Hpp::UnicodeString const& str);
-	inline void printString(std::string const& str) { printString(Hpp::UnicodeString(str)); }
+	void printString(UnicodeString const& str);
+	inline void printString(std::string const& str) { printString(UnicodeString(str)); }
 
 	virtual void renderTextCursor(int32_t x_origin, int32_t y_origin);
 

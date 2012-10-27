@@ -450,7 +450,7 @@ inline Real distanceBetweenLines(Vector3 const& begin1, Vector3 const& dir1,
 inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
                                 Vector3 const& begin2, Vector3 const& dir2)
 {
-	Hpp::Real dp_d1_d2 = Hpp::dotProduct(dir1, dir2);
+	Real dp_d1_d2 = dotProduct(dir1, dir2);
 
 	// Check on which side beginning of rays are compared to the plane
 	// that other ray forms (begin as position and dir as normal).
@@ -480,8 +480,8 @@ inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
 		// their possible nearest point is between old and new
 		// begins of that ray that was actually backside.
 		if (ray1_begins_front && !ray2_begins_front) {
-			Hpp::Real move_amount = (Hpp::dotProduct(dir1, begin1) - Hpp::dotProduct(dir1, begin2)) / dp_d1_d2;
-			Hpp::Vector3 new_begin = begin2 + dir2 * move_amount;
+			Real move_amount = (dotProduct(dir1, begin1) - dotProduct(dir1, begin2)) / dp_d1_d2;
+			Vector3 new_begin = begin2 + dir2 * move_amount;
 			// If ray #1 is at backside of new_begin,
 			// then rays cannot get any closer.
 			if (dotProduct(begin1 - new_begin, dir2) <= 0) {
@@ -492,8 +492,8 @@ inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
 				return distanceBetweenLines(begin1, dir1, begin2, dir2);
 			}
 		} else {
-			Hpp::Real move_amount = (Hpp::dotProduct(dir2, begin2) - Hpp::dotProduct(dir2, begin1)) / dp_d1_d2;
-			Hpp::Vector3 new_begin = begin1 + dir1 * move_amount;
+			Real move_amount = (dotProduct(dir2, begin2) - dotProduct(dir2, begin1)) / dp_d1_d2;
+			Vector3 new_begin = begin1 + dir1 * move_amount;
 			// If ray #2 is at backside of new_begin,
 			// then rays cannot get any closer.
 			if (dotProduct(begin2 - new_begin, dir1) <= 0) {

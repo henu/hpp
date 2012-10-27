@@ -150,7 +150,7 @@ inline bool Window::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::K
 {
 	int32_t mouse_parent_x = mouse_x + getPositionX();
 	int32_t mouse_parent_y = mouse_y + getPositionY();
-	if (mouse_key == Hpp::Mousekey::LEFT) {
+	if (mouse_key == Mousekey::LEFT) {
 		Part part = getPartUnder(mouse_x, mouse_y);
 		if (movable) {
 			if (part == TITLEBAR ||

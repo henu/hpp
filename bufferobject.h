@@ -48,20 +48,20 @@ type(type),
 components(components),
 size(size)
 {
-	Hpp::GlSystem::GenBuffers(1, &buf_id);
-	Hpp::GlSystem::BindBuffer(target, buf_id);
-	Hpp::GlSystem::BufferData(target, size, data, usage);
+	GlSystem::GenBuffers(1, &buf_id);
+	GlSystem::BindBuffer(target, buf_id);
+	GlSystem::BufferData(target, size, data, usage);
 }
 
 inline Bufferobject::~Bufferobject(void)
 {
-	Hpp::GlSystem::DeleteBuffers(1, &buf_id);
+	GlSystem::DeleteBuffers(1, &buf_id);
 }
 
 inline void Bufferobject::drawElements(GLenum mode, size_t offset) const
 {
 	HppCheckGlErrors();
-	Hpp::GlSystem::BindBuffer(target, buf_id);
+	GlSystem::BindBuffer(target, buf_id);
 	HppCheckGlErrors();
 	glDrawElements(mode, size, type, (GLvoid*)offset);
 	HppCheckGlErrors();

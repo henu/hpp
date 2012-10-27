@@ -35,9 +35,9 @@ public:
 	std::string colormap;
 	std::string normalmap;
 	std::string specularmap;
-	Hpp::Texture* colormap_tex;
-	Hpp::Texture* normalmap_tex;
-	Hpp::Texture* specularmap_tex;
+	Texture* colormap_tex;
+	Texture* normalmap_tex;
+	Texture* specularmap_tex;
 
 };
 typedef std::vector< Rawmaterial > Rawmaterials;

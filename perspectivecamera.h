@@ -15,8 +15,8 @@ class Perspectivecamera : public Camera
 public:
 
 	// Constructor. FOV means angle between opposite viewfrustum planes.
-	inline Perspectivecamera(Hpp::Angle const& fov_y,
-	                          Hpp::Real nearplane, Hpp::Real farplane,
+	inline Perspectivecamera(Angle const& fov_y,
+	                          Real nearplane, Real farplane,
 	                          size_t viewport_x, size_t viewport_y,
 	                          size_t viewport_width, size_t viewport_height);
 
@@ -28,12 +28,12 @@ public:
 
 private:
 
-	Hpp::Angle fov_y;
+	Angle fov_y;
 
 };
 
-inline Perspectivecamera::Perspectivecamera(Hpp::Angle const& fov_y,
-                                             Hpp::Real nearplane, Hpp::Real farplane,
+inline Perspectivecamera::Perspectivecamera(Angle const& fov_y,
+                                             Real nearplane, Real farplane,
                                              size_t viewport_x, size_t viewport_y,
                                              size_t viewport_width, size_t viewport_height) :
 Camera(nearplane, farplane, viewport_x, viewport_y, viewport_width, viewport_height),

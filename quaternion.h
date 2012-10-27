@@ -39,7 +39,7 @@ public:
 	inline Quaternion conjugate(void) const;
 	inline Quaternion inverse(void) const;
 
-	inline Vector3 getXYZ(void) const { return Hpp::Vector3(x, y, z); }
+	inline Vector3 getXYZ(void) const { return Vector3(x, y, z); }
 	inline Vector3 getAxis(void) const;
 	inline Angle getAngle(void) const;
 

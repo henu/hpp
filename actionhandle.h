@@ -18,7 +18,7 @@ public:
 
 	~Actionhandle(void);
 
-	void addTime(Hpp::Delay const& d);
+	void addTime(Delay const& d);
 
 	inline void setWeight(Real weight) { this->weight = weight; }
 

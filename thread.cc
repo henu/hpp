@@ -11,7 +11,7 @@ void Thread::start(void)
 		throw Exception("This is not a thread for Runnable-objects!");
 	}
 
-	startRunningThread(Hpp::runRunnable, runnable);
+	startRunningThread(runRunnable, runnable);
 }
 
 void runRunnable(void* runnable_raw)

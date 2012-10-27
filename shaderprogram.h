@@ -207,7 +207,7 @@ inline void Shaderprogram::setUniform(std::string const& name, Color const& colo
 	} else if (force_format == ALPHA) {
 		GlSystem::Uniform1f(uniform_id, color.getAlpha());
 	} else {
-		throw Hpp::Exception("Invalid uniform format!");
+		throw Exception("Invalid uniform format!");
 	}
 
 	HppCheckGlErrors();

@@ -186,8 +186,8 @@ inline UnicodeString::UnicodeString(std::string const& str)
 				try {
 					buf[offset] = extractUTF8(str_it, str.end());
 				}
-				catch (Hpp::Exception const& e) {
-					throw Hpp::Exception("Unable to construct UnicodeString from std::string \"" + str + "\"! Reason: " + e.what());
+				catch (Exception const& e) {
+					throw Exception("Unable to construct UnicodeString from std::string \"" + str + "\"! Reason: " + e.what());
 				}
 			}
 		}
@@ -213,9 +213,9 @@ inline UnicodeString::UnicodeString(char const* c_str)
 			try {
 				buf[offset] = extractUTF8(c_str, c_str_end);
 			}
-			catch (Hpp::Exception const& e) {
+			catch (Exception const& e) {
 				delete[] buf;
-				throw Hpp::Exception(std::string("Unable to construct UnicodeString from C string \"") + c_str + "\"! Reason: " + e.what());
+				throw Exception(std::string("Unable to construct UnicodeString from C string \"") + c_str + "\"! Reason: " + e.what());
 			}
 		}
 		HppAssert(c_str == c_str_end, "All UTF-8 characters not extracted!");

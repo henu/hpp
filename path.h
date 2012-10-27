@@ -555,7 +555,7 @@ HppAssert(false, "Not implemented yet!");
 		{
 			char cwd[PATH_MAX];
 			if (getcwd(cwd, PATH_MAX) == NULL) {
-				throw Hpp::Exception("Unable to convert path to absolute, because current directory could not be obtained!");
+				throw Exception("Unable to convert path to absolute, because current directory could not be obtained!");
 			}
 			parts_begin_str = cwd;
 		}
@@ -757,7 +757,7 @@ inline Path Path::getParent(void) const
 	if (result.parts.empty()) {
 		result.convertToAbsolute();
 		if (result.parts.empty()) {
-			throw Hpp::Exception("Path has no parent!");
+			throw Exception("Path has no parent!");
 		}
 	}
 	result.parts.pop_back();

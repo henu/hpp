@@ -21,7 +21,7 @@ typedef std::map< uint32_t, float > VGInfls;
 inline VGInfls calculateFixedVertexgroupinfluence(VGInfls const& raw);
 
 inline bool vgiNearEnough(Rendbuf< RIdx > const& vg_ids, Rendbuf< Real > const& vg_weights,
-                          size_t offset4, VGInfls const& vgi, Hpp::Real max_diff_to_2);
+                          size_t offset4, VGInfls const& vgi, Real max_diff_to_2);
 
 inline VGInfls calculateFixedVertexgroupinfluence(VGInfls const& raw)
 {
@@ -35,13 +35,13 @@ inline VGInfls calculateFixedVertexgroupinfluence(VGInfls const& raw)
 	     	sort_by_infl.insert(std::pair< float, uint32_t >(raw_it->second, raw_it->first));
 	}
 	size_t skip = raw.size() - 4;
-	Hpp::Real skipped_totalweight = 0;
-	Hpp::Real nonskipped_totalweight = 0;
+	Real skipped_totalweight = 0;
+	Real nonskipped_totalweight = 0;
 	VGInfls result;
 	for (std::multimap< float, uint32_t >::const_iterator sort_by_infl_it = sort_by_infl.begin();
 	     sort_by_infl_it != sort_by_infl.end();
 	     ++ sort_by_infl_it) {
-	     	Hpp::Real weight = sort_by_infl_it->first;
+	     	Real weight = sort_by_infl_it->first;
 	     	if (skip > 0) {
 	     		skipped_totalweight += weight;
 	     		skip --;
@@ -55,7 +55,7 @@ inline VGInfls calculateFixedVertexgroupinfluence(VGInfls const& raw)
 	for (VGInfls::iterator result_it = result.begin();
 	     result_it != result.end();
 	     ++ result_it) {
-	     	Hpp::Real weight = result_it->second;
+	     	Real weight = result_it->second;
 	     	HppAssert(nonskipped_totalweight != 0, "Division by zero!");
 	     	result_it->second += (weight / nonskipped_totalweight) * skipped_totalweight;
 	}
@@ -63,10 +63,10 @@ inline VGInfls calculateFixedVertexgroupinfluence(VGInfls const& raw)
 }
 
 inline bool vgiNearEnough(Rendbuf< RIdx > const& vg_ids, Rendbuf< Real > const& vg_weights,
-                          size_t offset4, VGInfls const& vgi, Hpp::Real max_diff_to_2)
+                          size_t offset4, VGInfls const& vgi, Real max_diff_to_2)
 {
 	uint8_t skipped = 0;
-	Hpp::Real diff = 0;
+	Real diff = 0;
 	for (uint8_t id = 0; id < 4; id ++) {
 		Real weight = vg_weights[offset4 + id];
 		if (weight <= 0) {

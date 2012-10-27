@@ -28,9 +28,9 @@ public:
 	inline virtual ~GenericMaterial(void);
 
 	inline void setColor(Color const& color);
-	inline void setColormap(Hpp::Texture* cmap);
-	inline void setNormalmap(Hpp::Texture* nmap);
-	inline void setSpecularmap(Hpp::Texture* smap);
+	inline void setColormap(Texture* cmap);
+	inline void setNormalmap(Texture* nmap);
+	inline void setSpecularmap(Texture* smap);
 	inline void setShadeless(bool shadeless);
 
 	inline Color getColor(void) const { return color; }
@@ -176,17 +176,17 @@ inline void GenericMaterial::setColor(Color const& color)
 	updateIsTranslucent();
 }
 
-inline void GenericMaterial::setColormap(Hpp::Texture* cmap)
+inline void GenericMaterial::setColormap(Texture* cmap)
 {
 	colormap = cmap;
 }
 
-inline void GenericMaterial::setNormalmap(Hpp::Texture* nmap)
+inline void GenericMaterial::setNormalmap(Texture* nmap)
 {
 	normalmap = nmap;
 }
 
-inline void GenericMaterial::setSpecularmap(Hpp::Texture* smap)
+inline void GenericMaterial::setSpecularmap(Texture* smap)
 {
 	specularmap = smap;
 }

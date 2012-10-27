@@ -90,7 +90,7 @@ public:
 	// viewfrustum planes.
 	static inline Matrix4 translMatrix(Vector3 const& v);
 	static inline Matrix4 scaleMatrix(Vector3 const& v);
-	static inline Matrix4 projectionMatrix(Hpp::Angle const& fov_y,
+	static inline Matrix4 projectionMatrix(Angle const& fov_y,
 	                                       Real aspectratio,
 	                                       Real nearplane, Real farplane);
 
@@ -612,7 +612,7 @@ inline Matrix4 Matrix4::scaleMatrix(Vector3 const& v)
 	               0,   0,   0,   1);
 }
 
-inline Matrix4 Matrix4::projectionMatrix(Hpp::Angle const& fov_y,
+inline Matrix4 Matrix4::projectionMatrix(Angle const& fov_y,
                                          Real aspectratio,
                                          Real nearplane, Real farplane)
 {

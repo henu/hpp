@@ -90,7 +90,7 @@ inline Path FolderviewContents::getFolder(void) const
 inline Path::DirChild FolderviewContents::getItem(size_t item_id) const
 {
 	if (item_id >= items.size()) {
-		throw Hpp::Exception("Unable to get item because item ID is too big!");
+		throw Exception("Unable to get item because item ID is too big!");
 	}
 	return items[item_id];
 }
