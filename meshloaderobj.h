@@ -1,6 +1,7 @@
 #ifndef HPP_MESHLOADEROBJ
 #define HPP_MESHLOADEROBJ
 
+#include "3dutils.h"
 #include "mesh.h"
 #include "path.h"
 #include "misc.h"
@@ -16,7 +17,7 @@ namespace Hpp
 namespace MeshloaderObj
 {
 
-inline Mesh* load(Path const& path)
+inline Mesh* load(Path const& path, bool calculate_tangent_and_binormal = false)
 {
 	std::ifstream file(path.toString().c_str());
 	if (!file.is_open()) {
@@ -132,7 +133,7 @@ inline Mesh* load(Path const& path)
 			}
 			nrm_idx = strToSize(parts[2]);
 		} else {
-			throw Hpp::Exception("Invalid index: " + index_raw + "!");
+			throw Exception("Invalid index: " + index_raw + "!");
 		}
 
 		HppAssert(poss.size() % 3 == 0, "Fail!");
@@ -157,10 +158,10 @@ inline Mesh* load(Path const& path)
 	}
 
 	if (!nrms.empty() && poss.size() != nrms.size()) {
-		throw Hpp::Exception("Invalid number of normals in buffer!");
+		throw Exception("Invalid number of normals in buffer!");
 	}
 	if (!uvs.empty() && poss.size() / 3 != uvs.size() / 2) {
-		throw Hpp::Exception("Invalid number of UVs in buffer!");
+		throw Exception("Invalid number of UVs in buffer!");
 	}
 
 	Mesh* result = new Mesh;
@@ -173,6 +174,80 @@ inline Mesh* load(Path const& path)
 	}
 // TODO: In future, convert to GLushort ot GLubyte if there is only small number of vertices!
 	result->setBuffer("index", GL_ELEMENT_ARRAY_BUFFER, GL_UNSIGNED_INT, GL_STATIC_DRAW, 3, &indices[0], sizeof(GLfloat) * indices.size());
+
+	// Calculate tangent and binormal if they are requested
+	if (!nrms.empty() && !uvs.empty() && calculate_tangent_and_binormal) {
+		std::vector< GLfloat > tangents(nrms.size(), 0);
+		std::vector< GLfloat > binormals(nrms.size(), 0);
+
+		for (size_t tri_id = 0; tri_id < indices.size()/3; ++ tri_id) {
+			GLuint v0_id = indices[tri_id*3 + 0];
+			GLuint v1_id = indices[tri_id*3 + 1];
+			GLuint v2_id = indices[tri_id*3 + 2];
+
+			Vector3 v0_pos(poss[v0_id*3 + 0], poss[v0_id*3 + 1], poss[v0_id*3 + 2]);
+			Vector3 v1_pos(poss[v1_id*3 + 0], poss[v1_id*3 + 1], poss[v1_id*3 + 2]);
+			Vector3 v2_pos(poss[v2_id*3 + 0], poss[v2_id*3 + 1], poss[v2_id*3 + 2]);
+			Vector3 v0_to_v1_pos = v1_pos - v0_pos;
+			Vector3 v0_to_v2_pos = v2_pos - v0_pos;
+
+			Vector2 v0_uv(uvs[v0_id*2 + 0], uvs[v0_id*2 + 1]);
+			Vector2 v1_uv(uvs[v1_id*2 + 0], uvs[v1_id*2 + 1]);
+			Vector2 v2_uv(uvs[v2_id*2 + 0], uvs[v2_id*2 + 1]);
+			Vector2 v0_to_v1_uv = v1_uv - v0_uv;
+			Vector2 v0_to_v2_uv = v2_uv - v0_uv;
+
+			Vector3 tangent = v0_to_v2_pos * v0_to_v2_uv.y - v0_to_v1_pos * v0_to_v2_uv.x;
+			Vector3 binormal = v0_to_v1_pos * v0_to_v1_uv.x - v0_to_v2_pos * v0_to_v1_uv.y;
+			tangent.normalize();
+			binormal.normalize();
+
+			tangents[v0_id*3 + 0] += tangent.x;
+			tangents[v0_id*3 + 1] += tangent.y;
+			tangents[v0_id*3 + 2] += tangent.z;
+			tangents[v1_id*3 + 0] += tangent.x;
+			tangents[v1_id*3 + 1] += tangent.y;
+			tangents[v1_id*3 + 2] += tangent.z;
+			tangents[v2_id*3 + 0] += tangent.x;
+			tangents[v2_id*3 + 1] += tangent.y;
+			tangents[v2_id*3 + 2] += tangent.z;
+			binormals[v0_id*3 + 0] += binormal.x;
+			binormals[v0_id*3 + 1] += binormal.y;
+			binormals[v0_id*3 + 2] += binormal.z;
+			binormals[v1_id*3 + 0] += binormal.x;
+			binormals[v1_id*3 + 1] += binormal.y;
+			binormals[v1_id*3 + 2] += binormal.z;
+			binormals[v2_id*3 + 0] += binormal.x;
+			binormals[v2_id*3 + 1] += binormal.y;
+			binormals[v2_id*3 + 2] += binormal.z;
+
+		}
+
+		for (size_t v_id = 0; v_id < nrms.size()/3; ++ v_id) {
+			Vector3 const normal(nrms[v_id*3 + 0], nrms[v_id*3 + 1], nrms[v_id*3 + 2]);
+			Vector3 tangent(tangents[v_id*3 + 0], tangents[v_id*3 + 1], tangents[v_id*3 + 2]);
+			Vector3 binormal(binormals[v_id*3 + 0], binormals[v_id*3 + 1], binormals[v_id*3 + 2]);
+			// Ensure tangent and binormal are at the plane that is formed by the normal
+			tangent = posToPlane(tangent, Vector3::ZERO, normal);
+			binormal = posToPlane(binormal, Vector3::ZERO, normal);
+			tangent.normalize();
+			binormal.normalize();
+			// Ensure angle between these is 90 °
+			forceVectorsPerpendicular(tangent, binormal);
+			tangent.normalize();
+			binormal.normalize();
+			// Store modified vectors
+			tangents[v_id*3 + 0] = tangent.x;
+			tangents[v_id*3 + 1] = tangent.y;
+			tangents[v_id*3 + 2] = tangent.z;
+			binormals[v_id*3 + 0] = binormal.x;
+			binormals[v_id*3 + 1] = binormal.y;
+			binormals[v_id*3 + 2] = binormal.z;
+		}
+
+		result->setBuffer("tangent", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &tangents[0], sizeof(GLfloat) * tangents.size());
+		result->setBuffer("binormal", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &binormals[0], sizeof(GLfloat) * binormals.size());
+	}
 
 	return result;
 }
