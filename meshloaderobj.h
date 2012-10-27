@@ -143,9 +143,11 @@ inline Mesh* load(Path const& path, bool calculate_tangent_and_binormal = false)
 		poss.push_back(poss_raw[(pos_idx-1)*3 + 1]);
 		poss.push_back(poss_raw[(pos_idx-1)*3 + 2]);
 		if (nrm_idx > 0) {
-			nrms.push_back(nrms_raw[(nrm_idx-1)*3 + 0]);
-			nrms.push_back(nrms_raw[(nrm_idx-1)*3 + 1]);
-			nrms.push_back(nrms_raw[(nrm_idx-1)*3 + 2]);
+			Hpp::Vector3 normal(nrms_raw[(nrm_idx-1)*3 + 0], nrms_raw[(nrm_idx-1)*3 + 1], nrms_raw[(nrm_idx-1)*3 + 2]);
+			normal.normalize();
+			nrms.push_back(normal.x);
+			nrms.push_back(normal.y);
+			nrms.push_back(normal.z);
 		}
 		if (uv_idx > 0) {
 			uvs.push_back(uvs_raw[(uv_idx-1)*2 + 0]);
@@ -234,8 +236,11 @@ inline Mesh* load(Path const& path, bool calculate_tangent_and_binormal = false)
 			binormal.normalize();
 			// Ensure angle between these is 90 °
 			forceVectorsPerpendicular(tangent, binormal);
+// TODO: Make this more logical!
+			tangent = binormal;
 			tangent.normalize();
-			binormal.normalize();
+			//binormal.normalize();
+			binormal = crossProduct(normal, tangent);
 			// Store modified vectors
 			tangents[v_id*3 + 0] = tangent.x;
 			tangents[v_id*3 + 1] = tangent.y;
