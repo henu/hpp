@@ -2,7 +2,6 @@
 #define HPP_GENERICMATERIAL_H
 
 #include "3dconversions.h"
-#include "lamp.h"
 #include "shaderprogram.h"
 #include "rawmaterial.h"
 #include "color.h"
@@ -40,7 +39,7 @@ public:
 	inline Texture* getSpecularmap(void) const { return specularmap; }
 	inline bool getShadeless(void) const { return shadeless; }
 
-	inline virtual void beginRendering(Matrix4 const& viewmatrix, Color const& ambient_light = Color(0, 0, 0), Lightsource* light = NULL, bool additive_rendering = false) const;
+	inline virtual void beginRendering(Matrix4 const& viewmatrix, Color const& ambient_light = Color(0, 0, 0), Light* light = NULL, bool additive_rendering = false) const;
 	inline virtual void endRendering(void) const;
 
 	// Virtual functions, needed by Material
@@ -198,7 +197,7 @@ inline void GenericMaterial::setShadeless(bool shadeless)
 	updateNeedsLight();
 }
 
-inline void GenericMaterial::beginRendering(Matrix4 const& viewmatrix, Color const& ambient_light, Lightsource* light, bool additive_rendering) const
+inline void GenericMaterial::beginRendering(Matrix4 const& viewmatrix, Color const& ambient_light, Light* light, bool additive_rendering) const
 {
 // TODO: Implement using of normalmap_weight!
 HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
@@ -271,11 +270,10 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 		if (light) {
 			sflags.insert("LIGHT");
 			// Set attenuation light flags
-			Lamp const* lamp = dynamic_cast< Lamp const* >(light);
-			if (lamp) {
-				float attenu_c = lamp->getConstantAttenuation();
-				float attenu_l = lamp->getLinearAttenuation();
-				float attenu_q = lamp->getQuadraticAttenuation();
+			if (light->getType() == Light::POINT) {
+				float attenu_c = light->getConstantAttenuation();
+				float attenu_l = light->getLinearAttenuation();
+				float attenu_q = light->getQuadraticAttenuation();
 				if (attenu_c > 0) sflags.insert("ATTENU_C");
 				if (attenu_l > 0) sflags.insert("ATTENU_L");
 				if (attenu_q > 0) sflags.insert("ATTENU_Q");
@@ -295,21 +293,17 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 			program->setUniform("ambient_light", ambient_light);
 		}
 		if (light) {
-			// TODO: Support spotlight!
-			Lamp const* lamp = dynamic_cast< Lamp const* >(light);
-			float lightsource_w;
-			if (lamp) {
-				float attenu_c = lamp->getConstantAttenuation();
-				float attenu_l = lamp->getLinearAttenuation();
-				float attenu_q = lamp->getQuadraticAttenuation();
+			if (light->getType() == Light::POINT) {
+				float attenu_c = light->getConstantAttenuation();
+				float attenu_l = light->getLinearAttenuation();
+				float attenu_q = light->getQuadraticAttenuation();
 				if (attenu_c > 0) program->setUniform1f("light_constant_attenuation", attenu_c);
 				if (attenu_l > 0) program->setUniform1f("light_linear_attenuation", attenu_c);
 				if (attenu_q > 0) program->setUniform1f("light_quadratic_attenuation", attenu_c);
-				lightsource_w = 1;
+				program->setUniform("light_pos_viewspace", viewmatrix * light->getPosition(), 1);
 			} else {
-				lightsource_w = 0;
+				program->setUniform("light_pos_viewspace", matrix4ToMatrix3(viewmatrix) * -light->getDirection(), 0);
 			}
-			program->setUniform("light_pos_viewspace", matrix4ToMatrix3(viewmatrix) * light->getPosition(), lightsource_w);
 			program->setUniform("light_color", light->getColor(), RGB);
 		}
 	}
