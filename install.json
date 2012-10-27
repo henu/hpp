@@ -143,6 +143,7 @@
 				"inc_glx.h",
 				"joystick.h",
 				"lamp.h",
+				"light.h",
 				"lightsource.h",
 				"material.h",
 				"materialmanager.h",
