@@ -11,11 +11,15 @@ namespace Gui
 Widget::~Widget(void)
 {
 	setParent(NULL);
-	for (Children::iterator children_it = children.begin();
-	     children_it != children.end();
-	     children_it ++) {
-		Widget* child = *children_it;
+	while (!children.empty()) {
+		Widget* child = children.back();
+		#ifndef NDEBUG
+		size_t children_size = children.size();
+		#endif
 		child->setParent(NULL);
+		#ifndef NDEBUG
+		HppAssert(children.size() == children_size - 1, "No child was removed!");
+		#endif
 	}
 	if (engine) {
 		engine->unregisterWidget(this);
