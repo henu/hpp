@@ -30,7 +30,7 @@ public:
 	inline ~Shaderprogram(void);
 
 	// Attachs shaders to program
-	inline void attachShader(Shader const* shader);
+	inline void attachShader(Shader const& shader);
 
 	// Enables/disables shader
 	inline void enable(Flags const& flags = Flags());
@@ -59,7 +59,7 @@ public:
 
 private:
 
-	typedef std::vector< Shader const* > Shaders;
+	typedef std::vector< Shader > Shaders;
 
 	typedef std::map< Flags, GLuint > LinkedPrograms;
 
@@ -104,7 +104,7 @@ HppCheckForCorrectThread();
 	cleanLinkedPrograms();
 }
 
-inline void Shaderprogram::attachShader(Shader const* shader)
+inline void Shaderprogram::attachShader(Shader const& shader)
 {
 // TODO: Code support for threads!
 HppCheckForCorrectThread();
@@ -344,13 +344,13 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	for (Shaders::const_iterator shaders_it = shaders.begin();
 	     shaders_it != shaders.end();
 	     ++ shaders_it) {
-		Shader const* shader = *shaders_it;
+		Shader const& shader = *shaders_it;
 
 		HppCheckGlErrors();
 
 		// Create and load shader
 		GLuint shader_id;
-		if (shader->getType() == Shader::FRAGMENT_SHADER) {
+		if (shader.getType() == Shader::FRAGMENT_SHADER) {
 			shader_id = GlSystem::CreateShader(GL_FRAGMENT_SHADER);
 		} else {
 			shader_id = GlSystem::CreateShader(GL_VERTEX_SHADER);
@@ -363,7 +363,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 		compiled_shaders.push_back(shader_id);
 
 		// Get shader source and do modifications that are requested by flags
-		std::string shader_src = flags_srcmod + shader->getSource();
+		std::string shader_src = flags_srcmod + shader.getSource();
 
 		char const* src_c_str = shader_src.c_str();
 		GLint src_size = shader_src.size();

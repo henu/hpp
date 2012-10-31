@@ -25,6 +25,7 @@ void AreaWithMenubar::addMenu(Menu* menu)
 	addChild(menu);
 	menus.push_back(menu);
 	markSizeChanged();
+	updateWidgetSizesAndPositions();
 }
 
 void AreaWithMenubar::setContent(Containerwidget* widget)
@@ -67,6 +68,19 @@ void AreaWithMenubar::doRendering(int32_t x_origin, int32_t y_origin)
 {
 	// Background
 	getRenderer()->renderMenubarBackground(x_origin, y_origin, getWidth(), this);
+}
+
+void AreaWithMenubar::onChildRemoved(Widget* child)
+{
+	Menus::iterator menus_find = std::find(menus.begin(), menus.end(), child);
+	if (menus_find != menus.end()) {
+		menus.erase(menus_find);
+		updateWidgetSizesAndPositions();
+		return;
+	}
+	if (child == content) {
+		content = NULL;
+	}
 }
 
 void AreaWithMenubar::updateWidgetSizesAndPositions(void)

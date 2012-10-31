@@ -373,6 +373,7 @@ void Display::setScissorFromStack(void)
 	}
 	HppAssert(glIsEnabled(GL_SCISSOR_TEST), "");
 	glScissor(stotal.pos_x, stotal.pos_y, stotal.size_x, stotal.size_y);
+
 }
 
 }

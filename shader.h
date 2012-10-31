@@ -2,7 +2,6 @@
 #define HPP_SHADER_H
 
 #include "path.h"
-#include "noncopyable.h"
 
 #include <string>
 #include <stdint.h>
@@ -11,7 +10,7 @@
 namespace Hpp
 {
 
-class Shader : private NonCopyable
+class Shader
 {
 
 public:

@@ -14,8 +14,8 @@
 #include "slider.h"
 #include "tabs.h"
 
+#include "../renderqueue2d.h"
 #include "../display.h"
-#include "../viewport.h"
 #include "../time.h"
 #include "../assert.h"
 #include <cmath>
@@ -26,8 +26,8 @@ namespace Hpp
 namespace Gui
 {
 
-ViewportRenderer::ViewportRenderer(Viewport const* viewport) :
-viewport(viewport),
+ViewportRenderer::ViewportRenderer(Renderqueue2d* rqueue) :
+rqueue(rqueue),
 spr_x_origin(0.0),
 spr_y_origin(0.0),
 text_color(0, 0, 0),
@@ -78,11 +78,11 @@ void ViewportRenderer::renderSprite(Texture& tex, Vector2 const& pos, Vector2 co
 	} else {
 		size2.y = size.y;
 	}
-	viewport->renderSprite(tex,
-	                       Vector2(spr_x_origin + pos.x, viewport->getHeight() - spr_y_origin - size2.y - pos.y),
-	                       size2,
-	                       Vector2(0.0, 0.0),
-	                       Vector2(size2.x / tex.getWidth(), size2.y / tex.getHeight()));
+	rqueue->renderSprite(&tex,
+	                     Vector2(spr_x_origin + pos.x, rqueue->getHeight() - spr_y_origin - size2.y - pos.y),
+	                     size2,
+	                     Vector2(0.0, 0.0),
+	                     Vector2(size2.x / tex.getWidth(), size2.y / tex.getHeight()));
 }
 
 void ViewportRenderer::renderString(UnicodeString const& str, Real fontsize, Vector2 const& pos, Vector2 const& size)
@@ -105,8 +105,8 @@ void ViewportRenderer::renderString(UnicodeString const& str, Real fontsize, Vec
 	}
 
 	font.renderString(str, fontsize, text_color,
-	                  viewport,
-	                  Vector2(spr_x_origin + pos.x + pos_rel.x, viewport->getHeight() - spr_y_origin - fontsize - pos.y - pos_rel.y));
+	                  rqueue,
+	                  Vector2(spr_x_origin + pos.x + pos_rel.x, rqueue->getHeight() - spr_y_origin - fontsize - pos.y - pos_rel.y));
 }
 
 void ViewportRenderer::renderTextCursor(int32_t x_origin, int32_t y_origin)
@@ -117,24 +117,22 @@ void ViewportRenderer::renderTextCursor(int32_t x_origin, int32_t y_origin)
 
 uint32_t ViewportRenderer::getWidth(void) const
 {
-	HppAssert(viewport, "Viewport not set!");
-	return viewport->getWidth();
+	HppAssert(rqueue, "Viewport not set!");
+	return rqueue->getWidth();
 }
 
 uint32_t ViewportRenderer::getHeight(void) const
 {
-	HppAssert(viewport, "Viewport not set!");
-	return viewport->getHeight();
+	HppAssert(rqueue, "Viewport not set!");
+	return rqueue->getHeight();
 }
 
 void ViewportRenderer::initRendering(void)
 {
-	viewport->init2DRendering();
 }
 
 void ViewportRenderer::deinitRendering(void)
 {
-	viewport->deinit2DRendering();
 }
 
 void ViewportRenderer::renderMenubarBackground(int32_t x_origin, int32_t y_origin, uint32_t width, AreaWithMenubar const* areawithmenubar)
@@ -144,11 +142,11 @@ void ViewportRenderer::renderMenubarBackground(int32_t x_origin, int32_t y_origi
 	uint32_t tex_menubar_width = tex_menubar_bg.getWidth();
 	uint32_t tex_menubar_height = tex_menubar_bg.getHeight();
 
-	viewport->renderSprite(tex_menubar_bg,
-	                       Vector2(x_origin, viewport->getHeight() - tex_menubar_height - y_origin),
-	                       Vector2(width, tex_menubar_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2(width / (Real)tex_menubar_width, 1.0));
+	rqueue->renderSprite(&tex_menubar_bg,
+	                     Vector2(x_origin, rqueue->getHeight() - tex_menubar_height - y_origin),
+	                     Vector2(width, tex_menubar_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2(width / (Real)tex_menubar_width, 1.0));
 }
 
 void ViewportRenderer::renderMenuLabel(int32_t x_origin, int32_t y_origin, Menu const* menu, UnicodeString const& label, bool mouse_over)
@@ -169,8 +167,8 @@ void ViewportRenderer::renderMenuLabel(int32_t x_origin, int32_t y_origin, Menu 
 	font.renderString(label,
 	                  font_menu_size,
 	                  color,
-	                  viewport,
-	                  Vector2(x_origin + (width - label_width) / 2.0, viewport->getHeight() - y_origin - height + (height - font_menu_size) / 2.0));
+	                  rqueue,
+	                  Vector2(x_origin + (width - label_width) / 2.0, rqueue->getHeight() - y_origin - height + (height - font_menu_size) / 2.0));
 }
 
 void ViewportRenderer::renderMenuseparator(int32_t x_origin, int32_t y_origin, Menuseparator const* menusep)
@@ -182,21 +180,21 @@ void ViewportRenderer::renderMenuseparator(int32_t x_origin, int32_t y_origin, M
 	Real tex_menuseparator_leftend_width = tex_menuseparator_leftend.getWidth();
 	Real tex_menuseparator_rightend_width = tex_menuseparator_rightend.getWidth();
 
-	viewport->renderSprite(tex_menuseparator_leftend,
-	                       Vector2(x_origin, viewport->getHeight() - tex_menuseparator_height - y_origin),
-	                       Vector2(tex_menuseparator_leftend_width, tex_menuseparator_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2(1.0, 1.0));
-	viewport->renderSprite(tex_menuseparator,
-	                       Vector2(x_origin + tex_menuseparator_leftend_width, viewport->getHeight() - tex_menuseparator_height - y_origin),
-	                       Vector2(width - tex_menuseparator_leftend_width - tex_menuseparator_rightend_width, tex_menuseparator_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2(width / (Real)tex_menuseparator_width, 1.0));
-	viewport->renderSprite(tex_menuseparator_rightend,
-	                       Vector2(x_origin + width - tex_menuseparator_rightend_width, viewport->getHeight() - tex_menuseparator_height - y_origin),
-	                       Vector2(tex_menuseparator_rightend_width, tex_menuseparator_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2(1.0, 1.0));
+	rqueue->renderSprite(&tex_menuseparator_leftend,
+	                     Vector2(x_origin, rqueue->getHeight() - tex_menuseparator_height - y_origin),
+	                     Vector2(tex_menuseparator_leftend_width, tex_menuseparator_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2(1.0, 1.0));
+	rqueue->renderSprite(&tex_menuseparator,
+	                     Vector2(x_origin + tex_menuseparator_leftend_width, rqueue->getHeight() - tex_menuseparator_height - y_origin),
+	                     Vector2(width - tex_menuseparator_leftend_width - tex_menuseparator_rightend_width, tex_menuseparator_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2(width / (Real)tex_menuseparator_width, 1.0));
+	rqueue->renderSprite(&tex_menuseparator_rightend,
+	                     Vector2(x_origin + width - tex_menuseparator_rightend_width, rqueue->getHeight() - tex_menuseparator_height - y_origin),
+	                     Vector2(tex_menuseparator_rightend_width, tex_menuseparator_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2(1.0, 1.0));
 }
 
 void ViewportRenderer::renderMenuitem(int32_t x_origin, int32_t y_origin, Menuitem const* menuitem, UnicodeString const& label, bool mouse_over)
@@ -208,11 +206,11 @@ void ViewportRenderer::renderMenuitem(int32_t x_origin, int32_t y_origin, Menuit
 	Real tex_menuitem_height = tex_menuitem_bg.getHeight();
 
 	// Render background
-	viewport->renderSprite(tex_menuitem_bg,
-	                       Vector2(x_origin, viewport->getHeight() - height - y_origin),
-	                       Vector2(width, height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2(width / (Real)tex_menuitem_width, height / (Real)tex_menuitem_height));
+	rqueue->renderSprite(&tex_menuitem_bg,
+	                     Vector2(x_origin, rqueue->getHeight() - height - y_origin),
+	                     Vector2(width, height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2(width / (Real)tex_menuitem_width, height / (Real)tex_menuitem_height));
 
 	// Render label
 	Color color;
@@ -221,8 +219,8 @@ void ViewportRenderer::renderMenuitem(int32_t x_origin, int32_t y_origin, Menuit
 	} else {
 		color = Color(0, 0, 0);
 	}
-	font.renderString(label, font_menuitem_size, color, viewport,
-	                  Vector2(x_origin + padding_menuitem_h, viewport->getHeight() - y_origin - height + (height - font_menuitem_size) / 2.0));
+	font.renderString(label, font_menuitem_size, color, rqueue,
+	                  Vector2(x_origin + padding_menuitem_h, rqueue->getHeight() - y_origin - height + (height - font_menuitem_size) / 2.0));
 
 }
 
@@ -241,62 +239,62 @@ void ViewportRenderer::renderWindow(int32_t x_origin, int32_t y_origin, Window c
 	Real edge_bottom_height = tex_window_edge_bottom.getHeight();
 
 	// Titlebar
-	viewport->renderSprite(tex_window_edge_topleft,
-	                       Vector2(x_origin, viewport->getHeight() - y_origin - titlebar_height),
-	                       Vector2(titlebar_leftcorner_width, titlebar_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2(1.0, 1.0));
-	viewport->renderSprite(tex_window_edge_top,
-	                       Vector2(x_origin + titlebar_leftcorner_width, viewport->getHeight() - y_origin - titlebar_height),
-	                       Vector2(window_width - titlebar_leftcorner_width - titlebar_rightcorner_width, titlebar_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2((window_width - titlebar_leftcorner_width - titlebar_rightcorner_width) / tex_window_edge_top.getWidth(), 1.0));
-	viewport->renderSprite(tex_window_edge_topright,
-	                       Vector2(x_origin + window_width - titlebar_rightcorner_width, viewport->getHeight() - y_origin - titlebar_height),
-	                       Vector2(titlebar_rightcorner_width, titlebar_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2(1.0, 1.0));
+	rqueue->renderSprite(&tex_window_edge_topleft,
+	                     Vector2(x_origin, rqueue->getHeight() - y_origin - titlebar_height),
+	                     Vector2(titlebar_leftcorner_width, titlebar_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2(1.0, 1.0));
+	rqueue->renderSprite(&tex_window_edge_top,
+	                     Vector2(x_origin + titlebar_leftcorner_width, rqueue->getHeight() - y_origin - titlebar_height),
+	                     Vector2(window_width - titlebar_leftcorner_width - titlebar_rightcorner_width, titlebar_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2((window_width - titlebar_leftcorner_width - titlebar_rightcorner_width) / tex_window_edge_top.getWidth(), 1.0));
+	rqueue->renderSprite(&tex_window_edge_topright,
+	                     Vector2(x_origin + window_width - titlebar_rightcorner_width, rqueue->getHeight() - y_origin - titlebar_height),
+	                     Vector2(titlebar_rightcorner_width, titlebar_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2(1.0, 1.0));
 
 	// Left and right edges
-	viewport->renderSprite(tex_window_edge_left,
-	                       Vector2(x_origin, viewport->getHeight() - y_origin - window_height + edge_bottom_height),
-	                       Vector2(edge_left_width, window_height - titlebar_height - edge_bottom_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2(1.0, (window_height - titlebar_height - edge_bottom_height) / tex_window_edge_left.getHeight()));
-	viewport->renderSprite(tex_window_edge_right,
-	                       Vector2(x_origin + window_width - edge_right_width, viewport->getHeight() - y_origin - window_height + edge_bottom_height),
-	                       Vector2(edge_right_width, window_height - titlebar_height - edge_bottom_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2(1.0, (window_height - titlebar_height - edge_bottom_height) / tex_window_edge_left.getHeight()));
+	rqueue->renderSprite(&tex_window_edge_left,
+	                     Vector2(x_origin, rqueue->getHeight() - y_origin - window_height + edge_bottom_height),
+	                     Vector2(edge_left_width, window_height - titlebar_height - edge_bottom_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2(1.0, (window_height - titlebar_height - edge_bottom_height) / tex_window_edge_left.getHeight()));
+	rqueue->renderSprite(&tex_window_edge_right,
+	                     Vector2(x_origin + window_width - edge_right_width, rqueue->getHeight() - y_origin - window_height + edge_bottom_height),
+	                     Vector2(edge_right_width, window_height - titlebar_height - edge_bottom_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2(1.0, (window_height - titlebar_height - edge_bottom_height) / tex_window_edge_left.getHeight()));
 
 	// Bottom edge
-	viewport->renderSprite(tex_window_edge_bottomleft,
-	                       Vector2(x_origin, viewport->getHeight() - y_origin - window_height),
-	                       Vector2(edge_left_width, edge_bottom_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2(1.0, 1.0));
-	viewport->renderSprite(tex_window_edge_bottom,
-	                       Vector2(x_origin + edge_left_width, viewport->getHeight() - y_origin - window_height),
-	                       Vector2(window_width - edge_left_width - edge_right_width, edge_bottom_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2((window_width - edge_left_width - edge_right_width) / tex_window_edge_bottom.getWidth(), 1.0));
-	viewport->renderSprite(tex_window_edge_bottomright,
-	                       Vector2(x_origin + window_width - edge_right_width, viewport->getHeight() - y_origin - window_height),
-	                       Vector2(edge_right_width, edge_bottom_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2(1.0, 1.0));
+	rqueue->renderSprite(&tex_window_edge_bottomleft,
+	                     Vector2(x_origin, rqueue->getHeight() - y_origin - window_height),
+	                     Vector2(edge_left_width, edge_bottom_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2(1.0, 1.0));
+	rqueue->renderSprite(&tex_window_edge_bottom,
+	                     Vector2(x_origin + edge_left_width, rqueue->getHeight() - y_origin - window_height),
+	                     Vector2(window_width - edge_left_width - edge_right_width, edge_bottom_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2((window_width - edge_left_width - edge_right_width) / tex_window_edge_bottom.getWidth(), 1.0));
+	rqueue->renderSprite(&tex_window_edge_bottomright,
+	                     Vector2(x_origin + window_width - edge_right_width, rqueue->getHeight() - y_origin - window_height),
+	                     Vector2(edge_right_width, edge_bottom_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2(1.0, 1.0));
 
 	// Render background
-	viewport->renderSprite(tex_window_bg,
-	                       Vector2(x_origin + edge_left_width, viewport->getHeight() - y_origin - window_height + edge_bottom_height),
-	                       Vector2(window_width - edge_left_width - edge_right_width, window_height - titlebar_height - edge_bottom_height),
-	                       Vector2(0.0, 0.0),
-	                       Vector2((window_width - edge_left_width - edge_right_width) / tex_window_bg.getWidth(), (window_height - titlebar_height - edge_bottom_height) / tex_window_bg.getWidth()));
+	rqueue->renderSprite(&tex_window_bg,
+	                     Vector2(x_origin + edge_left_width, rqueue->getHeight() - y_origin - window_height + edge_bottom_height),
+	                     Vector2(window_width - edge_left_width - edge_right_width, window_height - titlebar_height - edge_bottom_height),
+	                     Vector2(0.0, 0.0),
+	                     Vector2((window_width - edge_left_width - edge_right_width) / tex_window_bg.getWidth(), (window_height - titlebar_height - edge_bottom_height) / tex_window_bg.getWidth()));
 
 	// Title
 	Color color(0.25, 0.25, 0.25);
-	font.renderString(title, font_titlebar_size, color, viewport,
-	                  Vector2(x_origin + (window_width - font.getStringWidth(title, font_titlebar_size)) / 2.0, viewport->getHeight() - y_origin - titlebar_height + (titlebar_height - font_titlebar_size) / 2.0));
+	font.renderString(title, font_titlebar_size, color, rqueue,
+	                  Vector2(x_origin + (window_width - font.getStringWidth(title, font_titlebar_size)) / 2.0, rqueue->getHeight() - y_origin - titlebar_height + (titlebar_height - font_titlebar_size) / 2.0));
 
 }
 
@@ -313,8 +311,8 @@ void ViewportRenderer::renderLabel(int32_t x_origin, int32_t y_origin, Label con
 	font.renderString(label_str,
 	                  font_label_size,
 	                  color,
-	                  viewport,
-	                  Vector2(x_origin + (width - label_width) / 2.0, viewport->getHeight() - y_origin - height + (height - font_label_size) / 2.0));
+	                  rqueue,
+	                  Vector2(x_origin + (width - label_width) / 2.0, rqueue->getHeight() - y_origin - height + (height - font_label_size) / 2.0));
 }
 
 void ViewportRenderer::renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput)
@@ -802,8 +800,8 @@ uint32_t ViewportRenderer::getScrollbarHeight(void) const
 
 void ViewportRenderer::setRenderareaLimit(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
-	x += viewport->getPositionX();
-	y = viewport->getPositionY() + viewport->getHeight() - y - height;
+	x += rqueue->getPositionX();
+	y = rqueue->getPositionY() + rqueue->getHeight() - y - height;
 	Display::pushScissor(x, y, width, height);
 }
 

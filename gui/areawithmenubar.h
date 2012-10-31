@@ -43,6 +43,8 @@ private:
 	virtual void doRendering(int32_t x_origin, int32_t y_origin);
 	inline virtual void onSizeChange(void) { updateWidgetSizesAndPositions(); }
 	inline virtual void onChildSizeChange(void) { updateWidgetSizesAndPositions(); }
+	virtual void onChildRemoved(Widget* child);
+	inline virtual void onEnvironmentUpdated(void) { updateWidgetSizesAndPositions(); }
 
 	void updateWidgetSizesAndPositions(void);
 

@@ -9,7 +9,7 @@
 namespace Hpp
 {
 
-class Viewport;
+class Renderqueue2d;
 
 namespace Gui
 {
@@ -21,7 +21,7 @@ public:
 
 	enum Alignment { LEFT, RIGHT, TOP, BOTTOM, CENTER };
 
-	ViewportRenderer(Viewport const* viewport = NULL);
+	ViewportRenderer(Renderqueue2d* rqueue = NULL);
 	virtual ~ViewportRenderer(void);
 
 	// Font size setting
@@ -110,7 +110,7 @@ public:
 	// missing there too, then third is tried and so on.
 	void loadFont(Path const& path);
 
-	inline void setViewport(Viewport const* viewport) { this->viewport = viewport; sizeChanged(); }
+	inline void setRenderqueue(Renderqueue2d* rqueue) { this->rqueue = rqueue; sizeChanged(); }
 
 	// Fixed sprite rendering functions. These use coordinate
 	// system from topleft, rather than from bottomleft.
@@ -125,7 +125,7 @@ public:
 
 private:
 
-	Viewport const* viewport;
+	Renderqueue2d* rqueue;
 
 	// Textures
 	Texture tex_menubar_bg;

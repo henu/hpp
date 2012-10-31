@@ -163,6 +163,7 @@ private:
 	inline virtual void onMouseMove(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
 	inline virtual void onKeyDown(Key::Keycode keycode, UChr uchr) { (void)keycode; (void)uchr; }
 	inline virtual void onChildSizeChange(void) { }
+	inline virtual void onChildRemoved(Widget* child) { (void)child; }
 	inline virtual void onPositionChange(void) { }
 	inline virtual void onSizeChange(void) { }
 	inline virtual void onEnvironmentUpdated(void) { }
@@ -405,6 +406,7 @@ inline void Widget::unregisterChild(Widget* child)
 	Children::iterator children_find = std::find(children.begin(), children.end(), child);
 	HppAssert(children_find != children.end(), "Child of Widget not found!");
 	children.erase(children_find);
+	onChildRemoved(child);
 }
 
 inline void Widget::setRenderarealimit(int32_t x, int32_t y, uint32_t width, uint32_t height)

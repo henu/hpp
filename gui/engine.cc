@@ -276,6 +276,7 @@ void Engine::updateSizes(void)
 	if (content) {
 		content->setSize(rend->getWidth(), rend->getHeight());
 		content->setPosition(0, 0);
+// TODO: Why envirnoment is updated? Should it be updated only when engine is set? Btw calling setSize() calls onSizeChange()...
 		content->updateEnvironment();
 	}
 }

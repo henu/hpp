@@ -1,7 +1,7 @@
 #ifndef HPP_FONT_H
 #define HPP_FONT_H
 
-#include "viewport.h"
+#include "renderqueue2d.h"
 #include "unicodestring.h"
 #include "texture.h"
 #include "color.h"
@@ -54,7 +54,7 @@ public:
 	inline void renderString(UnicodeString const& str,
 	                         Real font_size,
 	                         Color const& color,
-	                         Viewport const* viewport,
+	                         Renderqueue2d* rqueue,
 	                         Vector2 const& pos);
 
 private:
@@ -222,7 +222,7 @@ inline Real Font::getStringWidth(UnicodeString const& str, Real font_size) const
 inline void Font::renderString(UnicodeString const& str,
                                Real font_size,
                                Color const& color,
-                               Viewport const* viewport,
+                               Renderqueue2d* rqueue,
                                Vector2 const& pos)
 {
 	// Ensure all characters exist
@@ -245,7 +245,7 @@ inline void Font::renderString(UnicodeString const& str,
 		Character& chr = chrs[chr_code];
 		// Render
 		HppCheckGlErrors();
-		viewport->renderSprite(*chr.tex, rendpos + chr.tex_offset * mult, chr.tex_size * mult, chr.tex_pos / texture_width, chr.tex_size / texture_width, color);
+		rqueue->renderSprite(chr.tex, rendpos + chr.tex_offset * mult, chr.tex_size * mult, chr.tex_pos / texture_width, chr.tex_size / texture_width, color);
 		HppCheckGlErrors();
 		rendpos.x += chr.adv * mult;
 	}

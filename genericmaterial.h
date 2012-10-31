@@ -85,8 +85,6 @@ private:
 	bool needs_uvs;
 
 	// Class-wide shaders
-	static Shader* shader_vrt;
-	static Shader* shader_frg;
 	static Shaderprogram* program;
 
 	// Virtual functions, needed by Material

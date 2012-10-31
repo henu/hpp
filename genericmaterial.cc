@@ -208,16 +208,14 @@ float const GenericMaterial::AMBIENT_LIGHT_ON_THRESHOLD = 0.005;
 float const GenericMaterial::NEEDS_LIGHT_THRESHOLD = 0.005;
 float const GenericMaterial::TRANSLUCENT_THRESHOLD = 0.995;
 
-Shader* GenericMaterial::shader_vrt;
-Shader* GenericMaterial::shader_frg;
 Shaderprogram* GenericMaterial::program;
 
 void GenericMaterial::initShaders(void)
 {
-	shader_vrt = new Shader();
-	shader_vrt->load(SHADER_VRT, Shader::VERTEX_SHADER);
-	shader_frg = new Shader();
-	shader_frg->load(SHADER_FRG, Shader::FRAGMENT_SHADER);
+	Shader shader_vrt;
+	shader_vrt.load(SHADER_VRT, Shader::VERTEX_SHADER);
+	Shader shader_frg;
+	shader_frg.load(SHADER_FRG, Shader::FRAGMENT_SHADER);
 	program = new Shaderprogram();
 	program->attachShader(shader_vrt);
 	program->attachShader(shader_frg);
@@ -226,8 +224,6 @@ void GenericMaterial::initShaders(void)
 void GenericMaterial::deinitShaders(void)
 {
 	delete program;
-	delete shader_vrt;
-	delete shader_frg;
 }
 
 }
