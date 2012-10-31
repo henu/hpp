@@ -29,6 +29,7 @@ public:
 
 protected:
 
+	inline Camera(void);
 	inline Camera(Real nearplane, Real farplane,
 	              size_t viewport_x, size_t viewport_y,
 	              size_t viewport_width, size_t viewport_height);
@@ -74,6 +75,17 @@ inline Matrix4 Camera::getProjectionmatrix(void) const
 inline Matrix4 Camera::getProjectionviewmatrix(void) const
 {
 	return projviewmat;
+}
+
+inline Camera::Camera(void) :
+nearplane(0),
+farplane(0),
+viewport_x(0),
+viewport_y(0),
+viewport_width(0),
+viewport_height(0),
+aspectratio(1)
+{
 }
 
 inline Camera::Camera(Real nearplane, Real farplane,

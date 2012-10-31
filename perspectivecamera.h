@@ -5,6 +5,7 @@
 #include "angle.h"
 #include "viewfrustum.h"
 #include "3dutils.h"
+#include "display.h"
 
 namespace Hpp
 {
@@ -15,10 +16,11 @@ class Perspectivecamera : public Camera
 public:
 
 	// Constructor. FOV means angle between opposite viewfrustum planes.
+	inline Perspectivecamera(void);
 	inline Perspectivecamera(Angle const& fov_y,
-	                          Real nearplane, Real farplane,
-	                          size_t viewport_x, size_t viewport_y,
-	                          size_t viewport_width, size_t viewport_height);
+	                         Real nearplane, Real farplane,
+	                         size_t viewport_x = 0, size_t viewport_y = 0,
+	                         size_t viewport_width = 0, size_t viewport_height = 0);
 
 	// Updates precalculated stuff after transform,
 	// fov, nearplane, farplane or viewport is changed.
@@ -32,13 +34,24 @@ private:
 
 };
 
+inline Perspectivecamera::Perspectivecamera(void) :
+fov_y(Angle::fromDegrees(0))
+{
+}
+
 inline Perspectivecamera::Perspectivecamera(Angle const& fov_y,
-                                             Real nearplane, Real farplane,
-                                             size_t viewport_x, size_t viewport_y,
-                                             size_t viewport_width, size_t viewport_height) :
+                                            Real nearplane, Real farplane,
+                                            size_t viewport_x, size_t viewport_y,
+                                            size_t viewport_width, size_t viewport_height) :
 Camera(nearplane, farplane, viewport_x, viewport_y, viewport_width, viewport_height),
 fov_y(fov_y)
 {
+	if (viewport_width == 0 && Display::getWidth() > viewport_x) {
+		viewport_width = Display::getWidth() - viewport_x;
+	}
+	if (viewport_height == 0 && Display::getHeight() > viewport_y) {
+		viewport_height = Display::getHeight() - viewport_y;
+	}
 	update();
 }
 
