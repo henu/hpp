@@ -39,7 +39,7 @@ public:
 	inline Texture* getSpecularmap(void) const { return specularmap; }
 	inline bool getShadeless(void) const { return shadeless; }
 
-	inline virtual void beginRendering(Matrix4 const& viewmatrix, Color const& ambient_light = Color(0, 0, 0), Light* light = NULL, bool additive_rendering = false) const;
+	inline virtual void beginRendering(Matrix4 const& viewmatrix, Color const& ambient_light = Color(0, 0, 0), Light const* light = NULL, bool additive_rendering = false) const;
 	inline virtual void endRendering(void) const;
 
 	// Virtual functions, needed by Material
@@ -195,7 +195,7 @@ inline void GenericMaterial::setShadeless(bool shadeless)
 	updateNeedsLight();
 }
 
-inline void GenericMaterial::beginRendering(Matrix4 const& viewmatrix, Color const& ambient_light, Light* light, bool additive_rendering) const
+inline void GenericMaterial::beginRendering(Matrix4 const& viewmatrix, Color const& ambient_light, Light const* light, bool additive_rendering) const
 {
 // TODO: Implement using of normalmap_weight!
 HppAssert(!additive_rendering, "Additive rendering not implemented yet!");

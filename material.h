@@ -45,7 +45,7 @@ public:
 	inline virtual ~Material(void);
 
 	// Begins/ends manual rendering
-	virtual void beginRendering(Matrix4 const& viewmatrix, Color const& ambient_light = Color(0, 0, 0), Light* light = NULL, bool additive_rendering = false) const = 0;
+	virtual void beginRendering(Matrix4 const& viewmatrix, Color const& ambient_light = Color(0, 0, 0), Light const* light = NULL, bool additive_rendering = false) const = 0;
 	virtual void endRendering(void) const = 0;
 
 	virtual bool needsLight(Renderable const* renderable) const { (void)renderable; return true; }
