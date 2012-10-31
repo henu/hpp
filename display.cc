@@ -150,6 +150,10 @@ void Display::open(uint32_t width,
 	// Initialize some shaders
 	GenericMaterial::initShaders();
 
+	// Set desired defaults
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
 }
 
 void Display::close(void)
