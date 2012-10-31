@@ -176,7 +176,6 @@
 				"vertexgroupinfluences.h",
 				"videorecorder.h",
 				"viewfrustum.h",
-				"viewport.h",
 				"visibles.h"
 			],
 			"sources": [
