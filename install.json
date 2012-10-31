@@ -160,7 +160,6 @@
 				"rendbuf.h",
 				"renderable.h",
 				"renderindex.h",
-				"renderingenvironment.h",
 				"renderqueue2d.h",
 				"sdlhandler.h",
 				"shader.h",
