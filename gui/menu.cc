@@ -20,13 +20,17 @@ Menu::~Menu(void)
 
 uint32_t Menu::getMinWidth(void) const
 {
-	return getRenderer()->getMenuLabelWidth(label);
+	Hpp::Gui::Renderer const* rend = getRenderer();
+	if (!rend) return 0;
+	return rend->getMenuLabelWidth(label);
 }
 
 uint32_t Menu::getMinHeight(uint32_t width) const
 {
 	(void)width;
-	return getRenderer()->getMenubarHeight();
+	Hpp::Gui::Renderer const* rend = getRenderer();
+	if (!rend) return 0;
+	return rend->getMenubarHeight();
 }
 
 void Menu::close(void)
