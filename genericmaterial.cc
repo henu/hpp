@@ -161,7 +161,7 @@ std::string const SHADER_FRG =
 "		#ifdef AMBIENT_LIGHT\n"
 "			vec3 light = ambient_light.xyz;\n"
 "		#else\n"
-"			vec3 light = vec4(0.0, 0.0, 0.0);\n"
+"			vec3 light = vec3(0.0, 0.0, 0.0);\n"
 "		#endif\n"
 "\n"
 "		// Apply possible lightsource\n"
