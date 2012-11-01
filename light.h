@@ -72,25 +72,25 @@ inline Vector3 Light::getDirection(void) const
 
 inline Vector3 Light::getPosition(void) const
 {
-	HppAssert(type == SUN, "Unable to get position, because light is not point!");
+	HppAssert(type == POINT, "Unable to get position, because light is not point!");
 	return v1;
 }
 
 inline Real Light::getConstantAttenuation(void) const
 {
-	HppAssert(type == SUN, "Unable to get attenuation, because light is not point!");
+	HppAssert(type == POINT, "Unable to get attenuation, because light is not point!");
 	return v2.x;
 }
 
 inline Real Light::getLinearAttenuation(void) const
 {
-	HppAssert(type == SUN, "Unable to get attenuation, because light is not point!");
+	HppAssert(type == POINT, "Unable to get attenuation, because light is not point!");
 	return v2.y;
 }
 
 inline Real Light::getQuadraticAttenuation(void) const
 {
-	HppAssert(type == SUN, "Unable to get attenuation, because light is not point!");
+	HppAssert(type == POINT, "Unable to get attenuation, because light is not point!");
 	return v2.z;
 }
 
