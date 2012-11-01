@@ -50,6 +50,10 @@ public:
 	inline Vector3 operator*=(Real r);
 	inline Vector3 operator/=(Real r);
 
+	// Comparison operators
+	inline bool operator==(Vector3 const& v) const;
+	inline bool operator!=(Vector3 const& v) const;
+
 	// Comparison operator for sorting
 	inline bool operator<(Vector3 const& v) const;
 
@@ -202,6 +206,16 @@ inline Vector3 Vector3::operator/=(Real r)
 	y /= r;
 	z /= r;
 	return *this;
+}
+
+inline bool Vector3::operator==(Vector3 const& v) const
+{
+	return x == v.x && y == v.y && z == v.z;
+}
+
+inline bool Vector3::operator!=(Vector3 const& v) const
+{
+	return x != v.x || y != v.y || z != v.z;
 }
 
 inline bool Vector3::operator<(Vector3 const& v) const

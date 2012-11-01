@@ -49,6 +49,10 @@ public:
 	inline Vector2 operator*=(Real r);
 	inline Vector2 operator/=(Real r);
 
+	// Comparison operators
+	inline bool operator==(Vector2 const& v) const;
+	inline bool operator!=(Vector2 const& v) const;
+
 	// Comparison operator for sorting
 	inline bool operator<(Vector2 const& v) const;
 
@@ -193,10 +197,14 @@ inline Vector2 Vector2::operator/=(Real r)
 	return *this;
 }
 
-inline std::ostream& operator<<(std::ostream& strm, Vector2 const& v)
+inline bool Vector2::operator==(Vector2 const& v) const
 {
-	strm << '(' << v.x << ", " << v.y << ')';
-	return strm;
+	return x == v.x && y == v.y;
+}
+
+inline bool Vector2::operator!=(Vector2 const& v) const
+{
+	return x != v.x || y != v.y;
 }
 
 inline bool Vector2::operator<(Vector2 const& v) const
@@ -210,6 +218,12 @@ inline bool Vector2::operator<(Vector2 const& v) const
 inline Vector2 Vector2::perp(void) const
 {
 	return Vector2(-y, x);
+}
+
+inline std::ostream& operator<<(std::ostream& strm, Vector2 const& v)
+{
+	strm << '(' << v.x << ", " << v.y << ')';
+	return strm;
 }
 
 inline Vector2 operator*(Real f, Vector2 const& v)
