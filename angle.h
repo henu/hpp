@@ -16,6 +16,8 @@ class Angle
 
 public:
 
+	static Angle const ZERO;
+
 	inline Angle(void);
 
 	// Getters

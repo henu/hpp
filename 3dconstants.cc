@@ -3,6 +3,7 @@
 #include "matrix3.h"
 #include "matrix4.h"
 #include "quaternion.h"
+#include "angle.h"
 
 namespace Hpp
 
@@ -37,5 +38,7 @@ Matrix4 const Matrix4::ZERO(0, 0, 0, 0,
 
 Quaternion const Quaternion::IDENTITY(0.0, 0.0, 0.0, 1.0);
 Quaternion const Quaternion::ZERO(0.0, 0.0, 0.0, 0.0);
+
+Angle const Angle::ZERO(Hpp::Angle::fromDegrees(0));
 
 }
