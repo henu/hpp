@@ -25,7 +25,7 @@ public:
 	inline void setUpViewport(void) const;
 
 	// Updates precalculated stuff after transform or viewport is changed.
-	inline virtual void update(void) = 0;
+	virtual void update(void) = 0;
 
 protected:
 
