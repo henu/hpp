@@ -5,6 +5,8 @@
 #include "mesh.h"
 #include "exception.h"
 #include "cast.h"
+#include "vector2.h"
+#include "vector3.h"
 
 #include <GL/gl.h>
 #include <vector>
@@ -22,6 +24,14 @@ public:
 	inline Meshloader(void) { }
 
 	inline Mesh* createMesh(bool calculate_tangent_and_binormal = false);
+
+	inline size_t getNumOfTriangles(void) const { return indices.size() / 3; }
+
+	inline GLuint getTriangleCorner(GLuint triangle, uint8_t corner) const;
+
+	inline Hpp::Vector3 getVertexPosition(GLuint vertex) const;
+	inline Hpp::Vector3 getVertexNormal(GLuint vertex) const;
+	inline Hpp::Vector2 getVertexUV(GLuint vertex) const;
 
 protected:
 
@@ -132,6 +142,29 @@ inline Mesh* Meshloader::createMesh(bool calculate_tangent_and_binormal)
 	}
 
 	return result;
+}
+
+inline GLuint Meshloader::getTriangleCorner(GLuint triangle, uint8_t corner) const
+{
+	return indices[triangle*3 + corner];
+}
+
+inline Hpp::Vector3 Meshloader::getVertexPosition(GLuint vertex) const
+{
+	GLuint vrt_ofs = vertex * 3;
+	return Hpp::Vector3(poss[vrt_ofs + 0], poss[vrt_ofs + 1], poss[vrt_ofs + 2]);
+}
+
+inline Hpp::Vector3 Meshloader::getVertexNormal(GLuint vertex) const
+{
+	GLuint vrt_ofs = vertex * 3;
+	return Hpp::Vector3(nrms[vrt_ofs + 0], nrms[vrt_ofs + 1], nrms[vrt_ofs + 2]);
+}
+
+inline Hpp::Vector2 Meshloader::getVertexUV(GLuint vertex) const
+{
+	GLuint vrt_ofs = vertex * 2;
+	return Hpp::Vector2(uvs[vrt_ofs + 0], uvs[vrt_ofs + 1]);
 }
 
 inline void Meshloader::readArrays(std::vector< GLfloat > const& poss,
