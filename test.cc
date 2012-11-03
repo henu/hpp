@@ -42,6 +42,7 @@
 #include "cast.h"
 #include "charset.h"
 #include "collisions.h"
+#include "collisiontests.h"
 #include "color.h"
 #include "commandexec.h"
 #include "compressor.h"

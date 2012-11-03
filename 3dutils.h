@@ -122,7 +122,7 @@ inline bool triangleHitsRay(Vector3 const& begin,
                             Vector3* hit_pos = NULL,
                             Vector3 const* normal = NULL);
 
-// Length of collision will be 1.
+// Length of collision normal will be 1.
 // TODO: Make it possible to not want collision information!
 inline bool triangleHitsSphere(Vector3 const& pos, Real radius,
                                Vector3 const& tp0, Vector3 const& tp1, Vector3 const& tp2,

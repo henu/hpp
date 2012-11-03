@@ -49,6 +49,7 @@
 				"cast.h",
 				"charset.h",
 				"collisions.h",
+				"collisiontests.h",
 				"color.h",
 				"commandexec.h",
 				"compressor.h",

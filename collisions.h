@@ -8,7 +8,6 @@
 
 #include <vector>
 
-
 namespace Hpp
 {
 
@@ -62,6 +61,10 @@ inline void removeExtraRadius(Collisions2D& colls, Real extra_radius)
 
 inline Vector3 moveOut(Collisions& colls)
 {
+	if (colls.empty()) {
+		return Vector3::ZERO;
+	}
+
 	Vector3 result;
 	Collisions real_colls;
 
@@ -117,38 +120,41 @@ inline Vector3 moveOut(Collisions& colls)
 		if (colls_id == deepest) {
 			continue;
 		}
-		Collision& coll = colls[colls_id];
-
-		Real dp_n_n = dotProduct(coll.normal, coll.normal);
-		HppAssert(dp_n_n != 0.0, "Division by zero!");
-		Real dp_cdn_n = dotProduct(coll_d.normal*coll_d.depth, coll.normal);
+		Collision coll = colls[colls_id];
 
 		// Since object is already moved, depth of other collisions
 		// have changed. Recalculate depth now.
-		Real depthmod = dp_cdn_n / dp_n_n;
-		coll.depth -= depthmod;
+		Real dp_nn_nn = dotProduct(coll.normal, coll.normal);
+		HppAssert(dp_nn_nn != 0.0, "Division by zero!");
+		Real dp_r_n = dotProduct(result, coll.normal);
+		coll.depth -= dp_r_n / dp_nn_nn;
 
 		// Skip collisions that are not touching
-		if (coll.depth <= 0.005) {
+		if (coll.depth <= 0.0005) {
 			continue;
 		}
 
-		// Skip collisions that would result to division by zero later.
-		if (crossProduct(coll_d.normal, coll.normal).length() == 0) {
+		// Project normal to the plane of deepest collision. This must
+		// be done in two steps. First direction at plane is
+		// calculated, and then normal is projected to plane using it.
+		Real dp_cdnn_cdnn = dotProduct(coll_d.normal, coll_d.normal);
+		Real dp_cdnn_nn = dotProduct(coll_d.normal, coll.normal);
+		HppAssert(dp_cdnn_cdnn != 0, "Division by zero!");
+		Vector3 dir_at_plane = coll.normal - coll_d.normal * (dp_cdnn_nn / dp_cdnn_cdnn);
+		dir_at_plane.normalize();
+		// Second step
+		Real dp_n_n = dotProduct(coll.normal, coll.normal) * coll.depth * coll.depth;
+		Real dp_n_d = dotProduct(coll.normal, dir_at_plane) * coll.depth;
+		if (fabs(dp_n_d) < 0.0005) {
 			continue;
 		}
+		Vector3 move_at_plane = dir_at_plane * (dp_n_n / dp_n_d);
 
-		// Project normal to the plane of deepest collision
-		Real dir_m = dp_cdn_n / dp_cdn_cdn;
-		Vector3 dir = coll.normal + dir_m * coll_d.normal;
-		Real nrm_p_m = dotProduct(coll.normal, dir) / dp_n_n;
-		Vector3 nrm_p = dir*nrm_p_m;
-
-		Real depth = nrm_p.length()*coll.depth;
+		Real depth = move_at_plane.length();
 		if (depth > deepest2_depth) {
 			deepest2_depth = depth;
 			deepest2 = colls_id;
-			deepest2_nrm_p = nrm_p*coll.depth;
+			deepest2_nrm_p = move_at_plane;
 		}
 	}
 
@@ -163,6 +169,7 @@ inline Vector3 moveOut(Collisions& colls)
 	real_colls.push_back(coll_d2);
 
 	// Again, modify position using the second deepest collision
+	HppAssert(fabs(dotProduct(deepest2_nrm_p, result)) < 0.005, "Second out moving is not done at the plane of the first one!");
 	result += deepest2_nrm_p;
 
 	// Go rest of collisions through and check how much they should be
@@ -184,19 +191,17 @@ inline Vector3 moveOut(Collisions& colls)
 		    colls_id == deepest2) {
 			continue;
 		}
-		Collision& coll = colls[colls_id];
-
-		Real dp_n_n = dotProduct(coll.normal, coll.normal);
-		HppAssert(dp_n_n != 0.0, "Division by zero!");
-		Real dp_cd2n_n = dotProduct(coll_d2.normal*coll_d2.depth, coll.normal);
+		Collision coll = colls[colls_id];
 
 		// Since object is moved again, depth of other collisions
 		// have changed. Recalculate depth now.
-		Real depthmod = dp_cd2n_n / dp_n_n;
-		coll.depth -= depthmod;
+		Real dp_nn_nn = dotProduct(coll.normal, coll.normal);
+		HppAssert(dp_nn_nn != 0.0, "Division by zero!");
+		Real dp_r_n = dotProduct(result, coll.normal);
+		coll.depth -= dp_r_n / dp_nn_nn;
 
 		// Skip collisions that are not touching
-		if (coll.depth <= 0.005) {
+		if (coll.depth <= 0.0005) {
 			continue;
 		}
 		real_colls.push_back(coll);
@@ -206,9 +211,9 @@ inline Vector3 moveOut(Collisions& colls)
 		// because we could never move along move_v to undo this
 		// collision.
 		Real dp_n_mv = dotProduct(coll.normal, move_v);
-		if (dp_n_mv != 0.0) {
+		if (fabs(dp_n_mv) > 0.0005) {
 			HppAssert(dp_n_mv != 0.0, "Division by zero!");
-			Real m = dp_n_n / dp_n_mv;
+			Real m = dp_nn_nn / dp_n_mv;
 			Real m_abs = ::fabs(m);
 
 			if (m_abs > deepest3_depth) {
@@ -291,7 +296,7 @@ inline Vector2 moveOut(Collisions2D& colls)
 		// If this collision has negative depth, ie is not touching the
 		// other object, then remove it from container.
 // TODO: What is good value here?
-		if (coll.depth <= 0.005) {
+		if (coll.depth <= 0.0005) {
 			coll = colls.back();
 			colls.pop_back();
 			continue;
