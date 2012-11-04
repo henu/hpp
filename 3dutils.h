@@ -85,7 +85,8 @@ inline void nearestPointToRay(Vector3 const& point,
                               Vector3* nearest_point, Real* m, Real* dst_to_point);
 
 inline Real distanceBetweenLines(Vector3 const& begin1, Vector3 const& dir1,
-                                 Vector3 const& begin2, Vector3 const& dir2);
+                                 Vector3 const& begin2, Vector3 const& dir2,
+                                 Vector3* nearest_point1 = NULL, Vector3* nearest_point2 = NULL);
 
 inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
                                 Vector3 const& begin2, Vector3 const& dir2);
@@ -434,17 +435,36 @@ inline void nearestPointToRay(Vector3 const& point,
 }
 
 inline Real distanceBetweenLines(Vector3 const& begin1, Vector3 const& dir1,
-                                 Vector3 const& begin2, Vector3 const& dir2)
+                                 Vector3 const& begin2, Vector3 const& dir2,
+                                 Vector3* nearest_point1, Vector3* nearest_point2)
 {
 	Vector3 cp_d1_d2 = crossProduct(dir1, dir2);
 	Real cp_d1_d2_len_to_2 = cp_d1_d2.lengthTo2();
 	if (cp_d1_d2_len_to_2 < 0.000001) {
 		Vector3 helper = posToPlane(begin2, begin1, dir1);
+		if (nearest_point1) {
+			*nearest_point1 = begin1;
+		}
+		if (nearest_point2) {
+			*nearest_point2 = helper;
+		}
 		return (begin1 - helper).length();
 	}
+	Vector3 begin_diff = begin1 - begin2;
+	Vector3 cp = crossProduct(begin_diff, cp_d1_d2 / cp_d1_d2_len_to_2);
+
+	// Calculate nearest points, if needed
+	if (nearest_point1) {
+		*nearest_point1 = begin1 + dotProduct(cp, dir2) * dir1;
+	}
+	if (nearest_point2) {
+		*nearest_point2 = begin2 + dotProduct(cp, dir1) * dir2;
+	}
+
+	// Calculate distance
 	Real cp_d1_d2_len = ::sqrt(cp_d1_d2_len_to_2);
 	Vector3 n = cp_d1_d2 / cp_d1_d2_len;
-	return ::fabs(dotProduct(n, begin1 - begin2));
+	return ::fabs(dotProduct(n, begin_diff));
 }
 
 inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
