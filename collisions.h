@@ -14,6 +14,12 @@ namespace Hpp
 // Type and container for collisions. Length of normal is always 1.
 struct Collision
 {
+	inline Collision(void) { }
+	inline Collision(Vector3 const& normal, Real depth) :
+	normal(normal),
+	depth(depth)
+	{
+	}
 	Vector3 normal;
 	Real depth;
 };
@@ -120,9 +126,9 @@ inline Vector3 moveOut(Collisions& colls)
 		if (colls_id == deepest) {
 			continue;
 		}
-		Collision coll = colls[colls_id];
+		Collision& coll = colls[colls_id];
 
-		// Since object is already moved, depth of other collisions
+		// Since object has already moved, depth of other collisions
 		// have changed. Recalculate depth now.
 		Real dp_nn_nn = dotProduct(coll.normal, coll.normal);
 		HppAssert(dp_nn_nn != 0.0, "Division by zero!");
@@ -176,12 +182,13 @@ inline Vector3 moveOut(Collisions& colls)
 	// moved so object would come out of wall. Note, that since two
 	// collisions are already fixed, all other movings must be done at the
 	// planes of these collisions! This means one line in space.
-	Vector3 const move_v = crossProduct(coll_d.normal, coll_d2.normal);
+	Vector3 move_v = crossProduct(coll_d.normal, coll_d2.normal);
 	HppAssert(move_v.lengthTo2() != 0.0, "Too small cross product!");
+	move_v.normalize();
 	Real deepest3_depth = -99999;
-	Real deepest3_move;
+	Vector3 deepest3_move;
 	#ifndef NDEBUG
-	deepest3_move = 0;
+	deepest3_move = Hpp::Vector3::ZERO;
 	#endif
 	for (size_t colls_id = 0;
 	     colls_id < colls.size();
@@ -191,14 +198,15 @@ inline Vector3 moveOut(Collisions& colls)
 		    colls_id == deepest2) {
 			continue;
 		}
-		Collision coll = colls[colls_id];
+		Collision& coll = colls[colls_id];
 
-		// Since object is moved again, depth of other collisions
+		// Since object has moved again, depth of other collisions
 		// have changed. Recalculate depth now.
 		Real dp_nn_nn = dotProduct(coll.normal, coll.normal);
 		HppAssert(dp_nn_nn != 0.0, "Division by zero!");
-		Real dp_r_n = dotProduct(result, coll.normal);
-		coll.depth -= dp_r_n / dp_nn_nn;
+		Real dp_cd2n_n = dotProduct(coll_d2.normal*coll_d2.depth, coll.normal);
+		Real depthmod = dp_cd2n_n / dp_nn_nn;
+		coll.depth -= depthmod;
 
 		// Skip collisions that are not touching
 		if (coll.depth <= 0.0005) {
@@ -210,22 +218,21 @@ inline Vector3 moveOut(Collisions& colls)
 		// against each others, then this collision must be abandon,
 		// because we could never move along move_v to undo this
 		// collision.
-		Real dp_n_mv = dotProduct(coll.normal, move_v);
-		if (fabs(dp_n_mv) > 0.0005) {
-			HppAssert(dp_n_mv != 0.0, "Division by zero!");
-			Real m = dp_nn_nn / dp_n_mv;
-			Real m_abs = ::fabs(m);
-
-			if (m_abs > deepest3_depth) {
-				deepest3_depth = m_abs;
-				deepest3_move = m;
+		Vector3 coll_real = coll.normal * coll.depth;
+		Real dp_c_mv = dotProduct(coll_real, move_v);
+		if (fabs(dp_c_mv) > 0.0005) {
+			Real dp_c_c = dotProduct(coll_real, coll_real);
+			Vector3 projected = move_v * (dp_c_c / dp_c_mv);
+			if (projected.length() > deepest3_depth) {
+				deepest3_depth = projected.length();
+				deepest3_move = projected;
 			}
 		}
 	}
 
 	// Now move position for final time
 	if (deepest3_depth > 0.0) {
-		result += move_v * deepest3_move;
+		result += deepest3_move;
 	}
 
 	colls.swap(real_colls);

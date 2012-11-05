@@ -6,6 +6,7 @@
 #include "assert.h"
 #include "cast.h"
 #include "path.h"
+#include "collisions.h"
 
 namespace Hpp
 {
@@ -83,6 +84,16 @@ inline void testMisc(void)
 			std::sort(paths.begin(), paths.end());
 			HppAssert(paths == paths_sorted, "Unable to sort paths!");
 		}
+	}
+
+	// Test collision detection
+	{
+		Collisions colls;
+		colls.push_back(Collision(Vector3(0.751959, -0.65921, 8.46226e-07), 0.0534745));
+		colls.push_back(Collision(Vector3(-0.852809, -0.522223, 1.98682e-07), -2.98023e-08));
+		colls.push_back(Collision(Vector3(-0, -0, 1), 0.00270716));
+		Vector3 move_out_vec = moveOut(colls);
+		HppAssert(move_out_vec.length() < 0.2, "Too long move out -vector!");
 	}
 
 }
