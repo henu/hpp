@@ -1,6 +1,7 @@
 #ifndef HPP_MATRIX3_H
 #define HPP_MATRIX3_H
 
+#include "bytev.h"
 #include "json.h"
 #include "angle.h"
 #include "vector2.h"
@@ -36,6 +37,7 @@ public:
 
 	// Conversion functions
 	inline Json toJson(void) const;
+	inline ByteV toBytes(bool bigendian = true) const;
 
 	// Comparison operators
 	inline bool operator==(Matrix3 const& m) const;
@@ -167,6 +169,16 @@ inline Json Matrix3::toJson(void) const
 	Json result = Json::newArray();
 	for (uint8_t cell_id = 0; cell_id < 9; ++ cell_id) {
 		result.addItem(Json::newNumber(cells[cell_id]));
+	}
+	return result;
+}
+
+inline ByteV Matrix3::toBytes(bool bigendian) const
+{
+	ByteV result;
+	result.reserve(4*9);
+	for (uint8_t cell_id = 0; cell_id < 9; cell_id ++) {
+		result += floatToByteV(cells[cell_id], bigendian);
 	}
 	return result;
 }

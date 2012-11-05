@@ -1,12 +1,14 @@
 #ifndef HPP_VECTOR3_H
 #define HPP_VECTOR3_H
 
+#include "cast.h"
 #include "json.h"
 #include "real.h"
 #include "assert.h"
 
 #include <cmath>
 #include <ostream>
+#include <string>
 
 namespace Hpp
 {
@@ -24,6 +26,7 @@ public:
 
 	inline Vector3(void);
 	inline Vector3(Real x, Real y, Real z);
+	inline Vector3(std::string const& str);
 	inline Vector3(Json const& json);
 
 	// Miscellaneous functions
@@ -33,6 +36,7 @@ public:
 	inline Vector3 normalized(void) const;
 
 	// Conversion functions
+	inline std::string toString(void) const;
 	inline Json toJson(void) const;
 
 	// Operators between Vector3s
@@ -84,6 +88,32 @@ x(x), y(y), z(z)
 {
 }
 
+inline Vector3::Vector3(std::string const& str)
+{
+	// Strip possible parenthesis around numeric values
+	std::string::size_type v_begin = str.find_first_not_of("([{ \t\n");
+	if (v_begin == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector3 because it does not contain any numerals!");
+	}
+	std::string::size_type v_end = str.find_last_not_of(")]} \t\n");
+	if (v_end == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector3 because it does not contain any numerals!");
+	}
+	v_end ++;
+	// Find commas and do conversion
+	std::string::size_type first_comma = str.find(',', v_begin);
+	if (first_comma == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector3 because first comma is not found!");
+	}
+	std::string::size_type second_comma = str.find(',', first_comma + 1);
+	if (second_comma == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector3 because second comma is not found!");
+	}
+	x = strToFloat(str.substr(v_begin, first_comma));
+	y = strToFloat(str.substr(first_comma+1, second_comma-first_comma-1));
+	z = strToFloat(str.substr(second_comma+1, v_end-second_comma-1));
+}
+
 inline Vector3::Vector3(Json const& json)
 {
 	// Check JSON validity
@@ -125,6 +155,11 @@ inline Vector3 Vector3::normalized(void) const
 	result.y = y / len;
 	result.z = z / len;
 	return result;
+}
+
+inline std::string Vector3::toString(void) const
+{
+	return "(" + floatToStr(x) + ", " + floatToStr(y) + ", " + floatToStr(z) + ")";
 }
 
 inline Json Vector3::toJson(void) const
@@ -239,7 +274,7 @@ inline Vector3 Vector3::perp(void) const
 
 inline std::ostream& operator<<(std::ostream& strm, Vector3 const& v)
 {
-	strm << '(' << v.x << ", " << v.y << ", " << v.z << ')';
+	strm << v.toString();
 	return strm;
 }
 

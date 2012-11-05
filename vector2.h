@@ -1,12 +1,14 @@
 #ifndef HPP_VECTOR2_H
 #define HPP_VECTOR2_H
 
+#include "cast.h"
 #include "json.h"
 #include "real.h"
 #include "assert.h"
 
 #include <cmath>
 #include <ostream>
+#include <string>
 
 namespace Hpp
 {
@@ -23,6 +25,7 @@ public:
 
 	inline Vector2(void);
 	inline Vector2(Real x, Real y);
+	inline Vector2(std::string const& str);
 	inline Vector2(Json const& json);
 
 	// Miscellaneous functions
@@ -32,6 +35,7 @@ public:
 	inline Vector2 normalized(void) const;
 
 	// Conversion functions
+	inline std::string toString(void) const;
 	inline Json toJson(void) const;
 
 	// Operators between Vector2s
@@ -83,6 +87,27 @@ x(x), y(y)
 {
 }
 
+inline Vector2::Vector2(std::string const& str)
+{
+	// Strip possible parenthesis around numeric values
+	std::string::size_type v_begin = str.find_first_not_of("([{ \t\n");
+	if (v_begin == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector2 because it does not contain any numerals!");
+	}
+	std::string::size_type v_end = str.find_last_not_of(")]} \t\n");
+	if (v_end == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector2 because it does not contain any numerals!");
+	}
+	v_end ++;
+	// Find commas and do conversion
+	std::string::size_type comma = str.find(',', v_begin);
+	if (comma == std::string::npos) {
+		throw Exception("Unable to convert string \"" + str + "\" to Vector2 because comma is not found!");
+	}
+	x = strToFloat(str.substr(v_begin, comma));
+	y = strToFloat(str.substr(comma+1, v_end-comma-1));
+}
+
 inline Vector2::Vector2(Json const& json)
 {
 	// Check JSON validity
@@ -120,6 +145,11 @@ inline Vector2 Vector2::normalized(void) const
 	result.x = x / len;
 	result.y = y / len;
 	return result;
+}
+
+inline std::string Vector2::toString(void) const
+{
+	return "(" + floatToStr(x) + ", " + floatToStr(y) + ")";
 }
 
 inline Json Vector2::toJson(void) const
@@ -222,7 +252,7 @@ inline Vector2 Vector2::perp(void) const
 
 inline std::ostream& operator<<(std::ostream& strm, Vector2 const& v)
 {
-	strm << '(' << v.x << ", " << v.y << ')';
+	strm << v.toString();
 	return strm;
 }
 
