@@ -99,16 +99,16 @@ inline MeshloaderObj::MeshloaderObj(Hpp::Path const& path)
 			for (uint8_t word_id = 1; word_id <= 3; ++ word_id) {
 				std::vector< std::string > parts = splitString(words[word_id], '/');
 				if (parts.size() == 1) {
-					indices_poss.push_back(strToSize(parts[0]));
+					indices_poss.push_back(strToSize(parts[0]) - 1);
 				} else if (parts.size() == 2) {
-					indices_poss.push_back(strToSize(parts[0]));
-					indices_uvs.push_back(strToSize(parts[1]));
+					indices_poss.push_back(strToSize(parts[0]) - 1);
+					indices_uvs.push_back(strToSize(parts[1]) - 1);
 				} else if (parts.size() == 3) {
-					indices_poss.push_back(strToSize(parts[0]));
+					indices_poss.push_back(strToSize(parts[0]) - 1);
 					if (!parts[1].empty()) {
-						indices_uvs.push_back(strToSize(parts[1]));
+						indices_uvs.push_back(strToSize(parts[1]) - 1);
 					}
-					indices_nrms.push_back(strToSize(parts[2]));
+					indices_nrms.push_back(strToSize(parts[2]) - 1);
 				} else {
 					throw Exception("Invalid index \"" + words[word_id] + "\" at line " + sizeToStr(line_num) + " in .obj-file \"" + path.toString() + "\"!");
 				}

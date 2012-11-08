@@ -54,15 +54,15 @@ private:
 inline Mesh* Meshloader::createMesh(bool calculate_tangent_and_binormal)
 {
 	Mesh* result = new Mesh;
-	result->setBuffer("pos", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &poss[0], sizeof(GLfloat) * poss.size());
+	result->setBuffer("pos", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &poss[0], poss.size());
 	if (!nrms.empty()) {
-		result->setBuffer("normal", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &nrms[0], sizeof(GLfloat) * nrms.size());
+		result->setBuffer("normal", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &nrms[0], nrms.size());
 	}
 	if (!uvs.empty()) {
-		result->setBuffer("uv", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], sizeof(GLfloat) * uvs.size());
+		result->setBuffer("uv", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], uvs.size());
 	}
 // TODO: In future, convert to GLushort ot GLubyte if there is only small number of vertices!
-	result->setBuffer("index", GL_ELEMENT_ARRAY_BUFFER, GL_UNSIGNED_INT, GL_STATIC_DRAW, 3, &indices[0], sizeof(GLfloat) * indices.size());
+	result->setBuffer("index", GL_ELEMENT_ARRAY_BUFFER, GL_UNSIGNED_INT, GL_STATIC_DRAW, 3, &indices[0], indices.size());
 
 	// Calculate tangent and binormal if they are requested
 	if (!nrms.empty() && !uvs.empty() && calculate_tangent_and_binormal) {
@@ -137,8 +137,8 @@ inline Mesh* Meshloader::createMesh(bool calculate_tangent_and_binormal)
 			binormals[v_id*3 + 2] = binormal.z;
 		}
 
-		result->setBuffer("tangent", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &tangents[0], sizeof(GLfloat) * tangents.size());
-		result->setBuffer("binormal", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &binormals[0], sizeof(GLfloat) * binormals.size());
+		result->setBuffer("tangent", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &tangents[0], tangents.size());
+		result->setBuffer("binormal", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &binormals[0], binormals.size());
 	}
 
 	return result;
@@ -223,12 +223,12 @@ inline void Meshloader::readArrays(std::vector< GLfloat > const& poss,
 		GLuint vertex_index = this->poss.size() / 3;
 
 		GLuint pos_idx = indices_poss[index_id];
-		this->poss.push_back(poss[(pos_idx-1)*3 + 0]);
-		this->poss.push_back(poss[(pos_idx-1)*3 + 1]);
-		this->poss.push_back(poss[(pos_idx-1)*3 + 2]);
+		this->poss.push_back(poss[pos_idx*3 + 0]);
+		this->poss.push_back(poss[pos_idx*3 + 1]);
+		this->poss.push_back(poss[pos_idx*3 + 2]);
 		if (!indices_nrms.empty()) {
 			GLuint nrm_idx = indices_nrms[index_id];
-			Hpp::Vector3 normal(nrms[(nrm_idx-1)*3 + 0], nrms[(nrm_idx-1)*3 + 1], nrms[(nrm_idx-1)*3 + 2]);
+			Hpp::Vector3 normal(nrms[nrm_idx*3 + 0], nrms[nrm_idx*3 + 1], nrms[nrm_idx*3 + 2]);
 			normal.normalize();
 			this->nrms.push_back(normal.x);
 			this->nrms.push_back(normal.y);
@@ -236,8 +236,8 @@ inline void Meshloader::readArrays(std::vector< GLfloat > const& poss,
 		}
 		if (!indices_uvs.empty()) {
 			GLuint uv_idx = indices_uvs[index_id];
-			this->uvs.push_back(uvs[(uv_idx-1)*2 + 0]);
-			this->uvs.push_back(uvs[(uv_idx-1)*2 + 1]);
+			this->uvs.push_back(uvs[uv_idx*2 + 0]);
+			this->uvs.push_back(uvs[uv_idx*2 + 1]);
 		}
 
 		indexmapping[index_combined] = vertex_index;

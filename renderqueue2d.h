@@ -217,8 +217,8 @@ inline void Renderqueue2d::flush(void)
 	}
 
 	// Make bufferobjects
-	Bufferobject poss_bo(GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &poss[0], sizeof(GLfloat) * poss.size());
-	Bufferobject uvs_bo(GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], sizeof(GLfloat) * uvs.size());
+	Bufferobject poss_bo(GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &poss[0], poss.size());
+	Bufferobject uvs_bo(GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], uvs.size());
 
 	program.setBufferobject("pos", &poss_bo);
 	program.setBufferobject("uv", &uvs_bo);

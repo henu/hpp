@@ -18,6 +18,7 @@ public:
 	inline Mesh(void);
 	inline ~Mesh(void);
 
+	// The size is not given in bytes, but in elemenst
 	inline void setBuffer(std::string const& name, GLenum target, GLenum type, GLenum usage, GLint components, GLvoid const* data, size_t size);
 
 	inline Bufferobject const* getBuffer(std::string const& name) const;
