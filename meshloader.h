@@ -26,6 +26,7 @@ public:
 	inline Mesh* createMesh(bool calculate_tangent_and_binormal = false);
 
 	inline size_t getNumOfTriangles(void) const { return indices.size() / 3; }
+	inline size_t getNumOfVertices(void) const { return poss.size() / 3; }
 
 	inline GLuint getTriangleCorner(GLuint triangle, uint8_t corner) const;
 
