@@ -109,6 +109,9 @@ root(min_corner, max_corner, this, NULL, 8)
 
 inline void Octree::setSize(Vector3 const& min_corner, Vector3 const& max_corner)
 {
+	HppAssert(min_corner.x <= max_corner.x, "Minimum X component is bigger than maximum!");
+	HppAssert(min_corner.y <= max_corner.y, "Minimum Y component is bigger than maximum!");
+	HppAssert(min_corner.z <= max_corner.z, "Minimum Z component is bigger than maximum!");
 	cmin = min_corner;
 	cmax = max_corner;
 	root.setSize(min_corner, max_corner);
