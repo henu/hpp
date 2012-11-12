@@ -2,6 +2,7 @@
 #define HPP_BOUNDINGBOX_H
 
 #include "vector3.h"
+#include "assert.h"
 
 #include <algorithm>
 
@@ -30,6 +31,8 @@ public:
 
 	inline Vector3 getCenter(void) const;
 
+	inline bool hitsBoundingbox(Boundingbox const& bb) const;
+
 private:
 
 	Vector3 cmin, cmax;
@@ -46,6 +49,9 @@ inline Boundingbox::Boundingbox(Vector3 const& cmin, Vector3 const& cmax) :
 cmin(cmin),
 cmax(cmax)
 {
+	HppAssert(cmin.x <= cmax.x, "Minimum X component is bigger than maximum!");
+	HppAssert(cmin.y <= cmax.y, "Minimum Y component is bigger than maximum!");
+	HppAssert(cmin.z <= cmax.z, "Minimum Z component is bigger than maximum!");
 }
 
 inline Boundingbox Boundingbox::fromTriangle(Vector3 const& v0, Vector3 const& v1, Vector3 const& v2)
@@ -70,7 +76,7 @@ inline Boundingbox Boundingbox::fromCapsule(Vector3 const& pos0, Vector3 const& 
 	cmax.y = std::max(pos0.y, pos1.y);
 	cmax.z = std::max(pos0.z, pos1.z);
 	cmin -= Vector3::ONE * radius;
-	cmin += Vector3::ONE * radius;
+	cmax += Vector3::ONE * radius;
 	return Boundingbox(cmin, cmax);
 }
 
@@ -78,11 +84,23 @@ inline void Boundingbox::setSize(Vector3 const& cmin, Vector3 const& cmax)
 {
 	this->cmin = cmin;
 	this->cmax = cmax;
+	HppAssert(cmin.x <= cmax.x, "Minimum X component is bigger than maximum!");
+	HppAssert(cmin.y <= cmax.y, "Minimum Y component is bigger than maximum!");
+	HppAssert(cmin.z <= cmax.z, "Minimum Z component is bigger than maximum!");
 }
 
 inline Vector3 Boundingbox::getCenter(void) const
 {
 	return (cmin + cmax) / 2;
+}
+
+inline bool Boundingbox::hitsBoundingbox(Boundingbox const& bb) const
+{
+	// If there is no hit at certain axis, then there cannot be hit at all
+	if (cmax.x < bb.cmin.x || cmin.x > bb.cmax.x) return false;
+	if (cmax.y < bb.cmin.y || cmin.y > bb.cmax.y) return false;
+	if (cmax.z < bb.cmin.z || cmin.z > bb.cmax.z) return false;
+	return true;
 }
 
 }
