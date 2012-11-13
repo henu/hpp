@@ -20,6 +20,10 @@ inline bool sphereToSphere(Collision& result,
                            Vector3 pos0, Real radius0,
                            Vector3 pos1, Real radius1,
                            Real extra_radius = -1);
+inline bool sphereToCapsule(Collision& result,
+                            Vector3 pos, Real radius0,
+                            Vector3 pos0, Vector3 pos1, Real radius1,
+                            Real extra_radius = -1);
 inline bool sphereToTriangle(Collision& result,
                              Vector3 const& pos, Real radius,
                              Vector3 const& corner0, Vector3 const& corner1, Vector3 const& corner2,
@@ -50,6 +54,66 @@ inline bool sphereToSphere(Collision& result,
 	return false;
 }
 
+inline bool sphereToCapsule(Collision& result,
+                            Vector3 pos, Real radius0,
+                            Vector3 pos0, Vector3 pos1, Real radius1,
+                            Real extra_radius)
+{
+	if (extra_radius < 0) {
+		extra_radius = std::max(radius0, radius1);
+	}
+
+	// This is kind of hard shape, so go different kind of
+	// collision types through and pick all collisions to
+	// container. Finally deepest one of these is selected.
+	Collisions ccolls;
+	ccolls.reserve(3);
+
+	// Spheres at both ends
+	if (sphereToSphere(result, pos, radius0, pos0, radius1, extra_radius)) {
+		ccolls.push_back(result);
+	}
+	if (sphereToSphere(result, pos, radius0, pos1, radius1, extra_radius)) {
+		ccolls.push_back(result);
+	}
+
+	// Cylinder
+	Vector3 nearest_point;
+	Real dst_to_point;
+	nearestPointToLine(pos, pos0, pos1, &nearest_point, NULL, &dst_to_point);
+	result.depth = radius0 + radius1 - dst_to_point;
+	if (result.depth + extra_radius > 0) {
+		Vector3 diff = pos1 - pos0;
+		if (dotProduct(diff, nearest_point - pos0) > 0 &&
+		    dotProduct(-diff, nearest_point - pos1) > 0) {
+			result.normal = pos - nearest_point;
+			result.normal.normalize();
+			ccolls.push_back(result);
+		}
+	}
+
+	if (!ccolls.empty()) {
+		// Search the deepest collision
+		Real deepest_depth = ccolls[0].depth;
+		size_t deepest = 0;
+		for (size_t ccoll_id = 1;
+		     ccoll_id < ccolls.size();
+		     ++ ccoll_id) {
+			Collision const& ccoll = ccolls[ccoll_id];
+			if (ccoll.depth > deepest_depth) {
+				deepest_depth = ccoll.depth;
+				deepest = ccoll_id;
+			}
+		}
+		// Return result
+		result = ccolls[deepest];
+
+		return true;
+	}
+
+	return false;
+}
+
 inline bool sphereToTriangle(Collision& result,
                              Vector3 const& pos, Real radius,
                              Vector3 const& corner0, Vector3 const& corner1, Vector3 const& corner2,
@@ -77,7 +141,6 @@ inline bool capsuleToTriangle(Collision& result,
                               Vector3 const& corner0, Vector3 const& corner1, Vector3 const& corner2,
                               Real extra_radius)
 {
-// TODO: Use boundingsphere!
 	if (extra_radius < 0) {
 		extra_radius = radius;
 	}
@@ -88,6 +151,7 @@ inline bool capsuleToTriangle(Collision& result,
 	// collision types through and pick all collisions to
 	// container. Finally deepest one of these is selected.
 	Collisions ccolls;
+	ccolls.reserve(14);
 
 	// Test first capsule cap
 	if (sphereToTriangle(result, pos0, radius,
@@ -203,7 +267,7 @@ inline bool capsuleToTriangle(Collision& result,
 			ccolls.push_back(new_ccoll);
 		}
 
-		// Get collisions where cylinder hits triangle plane
+		// Get collisions where cylinder hits triangle plane! Are these situations even possible?
 // TODO: Code this!
 
 	}
