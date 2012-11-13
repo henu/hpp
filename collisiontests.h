@@ -12,15 +12,43 @@ namespace Hpp
 namespace Collisiontests
 {
 
+// Collisions are returned so that normal points towards first object.
+// If extra_radius is not given, then it is set to same as the biggest
+// radius. Returns true if collision occurs. Note, that every function
+// may modify result, even when collision does not happen!
+inline bool sphereToSphere(Collision& result,
+                           Vector3 pos0, Real radius0,
+                           Vector3 pos1, Real radius1,
+                           Real extra_radius = -1);
 inline bool sphereToTriangle(Collision& result,
                              Vector3 const& pos, Real radius,
                              Vector3 const& corner0, Vector3 const& corner1, Vector3 const& corner2,
                              Real extra_radius = -1);
-
 inline bool capsuleToTriangle(Collision& result,
                               Vector3 const& pos0, Vector3 const& pos1, Real radius,
                               Vector3 const& corner0, Vector3 const& corner1, Vector3 const& corner2,
                               Real extra_radius = -1);
+
+inline bool sphereToSphere(Collision& result,
+                           Vector3 pos0, Real radius0,
+                           Vector3 pos1, Real radius1,
+                           Real extra_radius)
+{
+	if (extra_radius < 0) {
+		extra_radius = std::max(radius0, radius1);
+	}
+	result.normal = pos0 - pos1;
+	Real diff_len_to_2 = result.normal.lengthTo2();
+	Real coll_distance = radius0 + radius1 + extra_radius;
+	if (diff_len_to_2 < coll_distance*coll_distance) {
+		Real diff_len = ::sqrt(diff_len_to_2);
+		HppAssert(diff_len != 0, "Division by zero!");
+		result.normal /= diff_len;
+		result.depth = radius0 + radius1 - diff_len;
+		return true;
+	}
+	return false;
+}
 
 inline bool sphereToTriangle(Collision& result,
                              Vector3 const& pos, Real radius,

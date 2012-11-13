@@ -1,12 +1,13 @@
 #ifndef HPP_TESTMISC_H
 #define HPP_TESTMISC_H
 
+#include "collisiontests.h"
+#include "collisions.h"
 #include "sha256hasher.h"
 #include "misc.h"
 #include "assert.h"
 #include "cast.h"
 #include "path.h"
-#include "collisions.h"
 
 namespace Hpp
 {
@@ -94,6 +95,13 @@ inline void testMisc(void)
 		colls.push_back(Collision(Vector3(-0, -0, 1), 0.00270716));
 		Vector3 move_out_vec = moveOut(colls);
 		HppAssert(move_out_vec.length() < 0.2, "Too long move out -vector!");
+
+		Collision coll;
+		Vector3 pos0 = Vector3(1, 2, 3);
+		Vector3 pos1 = Vector3(-4, 1, -2);
+		HppAssert(Collisiontests::sphereToSphere(coll, pos0, 2, pos1, 5, -1), "No collision detected!");
+		HppAssert(fabs(coll.depth + 0.141428429) < 0.0001, "Got invalid collision depth!");
+		HppAssert(angleBetweenVectors(coll.normal, pos0 - pos1) < Hpp::Angle::fromDegrees(0.001), "Invalid collision normal!");
 	}
 
 }
