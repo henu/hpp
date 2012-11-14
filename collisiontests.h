@@ -32,6 +32,10 @@ inline bool capsuleToTriangle(Collision& result,
                               Vector3 const& pos0, Vector3 const& pos1, Real radius,
                               Vector3 const& corner0, Vector3 const& corner1, Vector3 const& corner2,
                               Real extra_radius = -1);
+inline bool capsuleToCapsule(Collision& result,
+                             Vector3 const& pos0a, Vector3 const& pos0b, Real radius0,
+                             Vector3 const& pos1a, Vector3 const& pos1b, Real radius1,
+                             Real extra_radius = -1);
 
 inline bool sphereToSphere(Collision& result,
                            Vector3 pos0, Real radius0,
@@ -271,6 +275,61 @@ inline bool capsuleToTriangle(Collision& result,
 // TODO: Code this!
 
 	}
+
+	if (!ccolls.empty()) {
+		// Search the deepest collision
+		Real deepest_depth = ccolls[0].depth;
+		size_t deepest = 0;
+		for (size_t ccoll_id = 1;
+		     ccoll_id < ccolls.size();
+		     ++ ccoll_id) {
+			Collision const& ccoll = ccolls[ccoll_id];
+			if (ccoll.depth > deepest_depth) {
+				deepest_depth = ccoll.depth;
+				deepest = ccoll_id;
+			}
+		}
+		// Return result
+		result = ccolls[deepest];
+
+		return true;
+	}
+
+	return false;
+}
+
+inline bool capsuleToCapsule(Collision& result,
+                             Vector3 const& pos0a, Vector3 const& pos0b, Real radius0,
+                             Vector3 const& pos1a, Vector3 const& pos1b, Real radius1,
+                             Real extra_radius)
+{
+	if (extra_radius < 0) {
+		extra_radius = std::max(radius0, radius1);
+	}
+
+	// This is kind of hard shape, so go different kind of
+	// collision types through and pick all collisions to
+	// container. Finally deepest one of these is selected.
+	Collisions ccolls;
+	ccolls.reserve(4);
+
+	// Test spheres to capsules first
+	if (sphereToCapsule(result, pos0a, radius0, pos1a, pos1b, radius1, extra_radius)) {
+		ccolls.push_back(result);
+	}
+	if (sphereToCapsule(result, pos0b, radius0, pos1a, pos1b, radius1, extra_radius)) {
+		ccolls.push_back(result);
+	}
+	if (sphereToCapsule(result, pos1a, radius1, pos0a, pos0b, radius0, extra_radius)) {
+		result.normal = -result.normal;
+		ccolls.push_back(result);
+	}
+	if (sphereToCapsule(result, pos1b, radius1, pos0a, pos0b, radius0, extra_radius)) {
+		result.normal = -result.normal;
+		ccolls.push_back(result);
+	}
+
+// TODO: Test cylinders against each others!
 
 	if (!ccolls.empty()) {
 		// Search the deepest collision
