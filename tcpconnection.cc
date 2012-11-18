@@ -1,6 +1,5 @@
 #include "tcpconnection.h"
 
-#include "connectionmanager.h"
 #include "exception.h"
 #include "lock.h"
 
@@ -13,14 +12,60 @@
 namespace Hpp
 {
 
-TCPConnection::TCPConnection(std::string const& host_or_ip, uint16_t port) :
-destroyable(false),
+TCPConnection::TCPConnection(void) :
 receiver(NULL),
 receiver_data(NULL),
 outbuffer_pending_lock(NULL),
-host_or_ip(host_or_ip),
-port(port)
+connected(false),
+host_or_ip(""),
+port(0)
 {
+}
+
+TCPConnection::TCPConnection(std::string const& host_or_ip, uint16_t port) :
+receiver(NULL),
+receiver_data(NULL),
+outbuffer_pending_lock(NULL),
+connected(false),
+host_or_ip(""),
+port(0)
+{
+	connect(host_or_ip, port);
+}
+
+TCPConnection::~TCPConnection(void)
+{
+	// Just in case, ask close.
+	close();
+
+	// Ensure destroying is not done from threads of this object.
+	#ifndef NDEBUG
+	HppAssert(getThisThreadID() != reader_thread_id, "TCPConnection destroyed in wrong thread!");
+	HppAssert(getThisThreadID() != writer_thread_id, "TCPConnection destroyed in wrong thread!");
+	HppAssert(getThisThreadID() != notifier_thread_id, "TCPConnection destroyed in wrong thread!");
+	#endif
+
+	// Wait until all threads are closed.
+	reader_thread.wait();
+	writer_thread.wait();
+	notifier_thread.wait();
+
+	// Mark mutexes destroyable
+	receiver_mutex.destroy();
+	reader_mutex.destroy();
+	inbuffer_rcv_mutex.destroy();
+	writer_mutex.destroy();
+	outbuffer_pending_mutex.destroy();
+	connected_mutex.destroy();
+
+}
+
+void TCPConnection::connect(std::string const& host_or_ip, uint16_t port)
+{
+	Lock connected_lock(connected_mutex);
+	if (connected) {
+		throw Exception("Already connected!");
+	}
 
 	#ifndef HPP_USE_SDL_NET
 
@@ -54,7 +99,7 @@ port(port)
 		throw Exception("Unable to create socket for host \"" + host_or_ip + "\"!");
 	}
 
-	if (connect(soc, reinterpret_cast< struct sockaddr* >(&soc_addr), sizeof(struct sockaddr)) == -1) {
+	if (::connect(soc, reinterpret_cast< struct sockaddr* >(&soc_addr), sizeof(struct sockaddr)) == -1) {
 		shutdown(soc, SHUT_RDWR);
 		::close(soc);
 		throw HostUnavailable("Connection failed to \"" + host_or_ip + "\"!");
@@ -68,12 +113,14 @@ port(port)
 	}
 
 	sdlsoc = SDLNet_TCP_Open(&sdl_ip);
-	if(!sdlsoc) {
+	if (!sdlsoc) {
 		throw Exception(std::string("Unable to connect to host! Reason: ") + SDLNet_GetError());
 	}
 	#endif
 
 	connected = true;
+	this->host_or_ip = host_or_ip;
+	this->port = port;
 
 	// Start reading, writing and notifier threads
 	reader_thread = Thread(readerThread, reinterpret_cast< void* >(this));
@@ -85,17 +132,6 @@ port(port)
 	notifier_thread_id = notifier_thread.getId();
 	#endif
 
-	Connectionmanager::registerTCPConnection(this);
-
-}
-
-void TCPConnection::destroy(void)
-{
-	Lock destroyable_lock(destroyable_mutex);
-	if (!destroyable) {
-		destroyable = true;
-		Connectionmanager::destroyTCPConnection(this);
-	}
 }
 
 void TCPConnection::setDataReceiver(DataReceiver receiver, void* data)
@@ -117,6 +153,13 @@ std::string TCPConnection::getHost(void) const
 {
 // TODO: Protect with mutex!
 	return host_or_ip;
+}
+
+size_t TCPConnection::getAmountOfWaitingData(void)
+{
+	Lock inbuffer_rcv_lock(inbuffer_rcv_mutex);
+	size_t result = inbuffer_rcv.size();
+	return result;
 }
 
 bool TCPConnection::waitForReading(size_t bytes)
@@ -229,6 +272,10 @@ void TCPConnection::readerThread(void* conn_raw)
 		if (recv_bytes == 0) {
 			conn.closeByRemoteHost();
 			return;
+		}
+		// If receiving was interrupted by a signal, then try again
+		else if (recv_bytes < 0 && errno == EINTR) {
+// TODO: Is it safe to just ignore signal?
 		}
 		// Check if no data was pending
 		else if (recv_bytes < 0 && errno == EAGAIN) {
@@ -459,7 +506,6 @@ TCPConnection::TCPConnection(int32_t soc, uint16_t port) :
 #else
 TCPConnection::TCPConnection(TCPsocket sdlsoc, uint16_t port) :
 #endif
-destroyable(false),
 receiver(NULL),
 outbuffer_pending_lock(NULL),
 #ifndef HPP_USE_SDL_NET
@@ -481,36 +527,6 @@ port(port)
 	writer_thread_id = writer_thread.getId();
 	notifier_thread_id = notifier_thread.getId();
 	#endif
-
-	Connectionmanager::registerTCPConnection(this);
-}
-
-TCPConnection::~TCPConnection(void)
-{
-	// Just in case, ask close.
-	close();
-
-	// Ensure destroying is not done from threads of this object.
-	#ifndef NDEBUG
-	HppAssert(getThisThreadID() != reader_thread_id, "TCPConnection destroyed in wrong thread!");
-	HppAssert(getThisThreadID() != writer_thread_id, "TCPConnection destroyed in wrong thread!");
-	HppAssert(getThisThreadID() != notifier_thread_id, "TCPConnection destroyed in wrong thread!");
-	#endif
-
-	// Wait until all threads are closed.
-	reader_thread.wait();
-	writer_thread.wait();
-	notifier_thread.wait();
-
-	// Mark mutexes destroyable
-	destroyable_mutex.destroy();
-	receiver_mutex.destroy();
-	reader_mutex.destroy();
-	inbuffer_rcv_mutex.destroy();
-	writer_mutex.destroy();
-	outbuffer_pending_mutex.destroy();
-	connected_mutex.destroy();
-
 }
 
 void TCPConnection::close(bool closed_by_remote_server)
@@ -549,14 +565,10 @@ void TCPConnection::close(bool closed_by_remote_server)
 
 	// Inform possible data receiver about closed connection.
 	// Do this only when connection is closed by remote host.
-	Lock destroyable_lock(destroyable_mutex);
-	if (!destroyable) {
-		destroyable_lock.unlock();
-		if (closed_by_remote_server) {
-			Lock receiver_lock(receiver_mutex);
-			if (receiver) {
-				receiver(this, receiver_data);
-			}
+	if (closed_by_remote_server) {
+		Lock receiver_lock(receiver_mutex);
+		if (receiver) {
+			receiver(this, receiver_data);
 		}
 	}
 }

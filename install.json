@@ -253,12 +253,10 @@
 			"libs": "",
 			"deb_deps": [ ],
 			"headers": [
-				"connectionmanager.h",
 				"tcpconnection.h",
 				"tcpserver.h"
 			],
 			"sources": [
-				"connectionmanager.cc",
 				"tcpconnection.cc",
 				"tcpserver.cc"
 			],

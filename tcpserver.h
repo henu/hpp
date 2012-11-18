@@ -29,6 +29,8 @@ public:
 
 	~TCPServer(void);
 
+	// Starts/stop listening for new connections. New
+	// TCPConnections must be destroyed by the user.
 	void startListening(uint16_t port, ConnHandlerFunc connhandler, void* data);
 	void stopListening(uint16_t port);
 

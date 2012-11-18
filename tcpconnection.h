@@ -14,6 +14,7 @@
 #include "byteq.h"
 #include "assert.h"
 #include "cast.h"
+#include "noncopyable.h"
 #ifdef HPP_USE_SDL_NET
 #include <SDL/SDL_net.h>
 #endif
@@ -24,9 +25,8 @@ namespace Hpp
 {
 
 class TCPReceiver;
-class Connectionmanager;
 
-class TCPConnection
+class TCPConnection : public NonCopyable
 {
 
 	// Friends
@@ -38,15 +38,16 @@ public:
 	typedef void (*DataReceiver)(TCPConnection* conn, void*);
 
 	// Constructor
+	TCPConnection(void);
 	TCPConnection(std::string const& host_or_ip, uint16_t port);
+	~TCPConnection(void);
 
-	// Marks connection as destroyable. After this, connection object
-	// should not be used.
-// TODO: Make to work without this system!
-	void destroy(void);
+	void connect(std::string const& host_or_ip, uint16_t port);
 
 	// Closes connection (by local host).
 	inline void close(void);
+
+	inline bool isConnected(void);
 
 	// Sets data receiver. Data receiver is a special object that will be
 	// notified when data arrives through TCPConnection.
@@ -55,6 +56,9 @@ public:
 	// Gets information about remote host
 	uint16_t getPort(void) const;
 	std::string getHost(void) const;
+
+	// Checks if there is data available.
+	size_t getAmountOfWaitingData(void);
 
 	// Methods for reading specific type of data from socket. Note that
 	// reading should NOT be done from separate threads at the same time!
@@ -108,18 +112,11 @@ private:
 	TCPConnection(TCPsocket sdlsoc, uint16_t port);
 	#endif
 
-	// Destructor in private to allow destroying only through connection
-	// cleaner.
-	~TCPConnection(void);
-
 private:
 
 	// ----------------------------------------
 	// Data
 	// ----------------------------------------
-
-	bool destroyable;
-	Mutex destroyable_mutex;
 
 	// Current data receiver and mutex to protect it's changes
 	DataReceiver receiver;
@@ -143,7 +140,7 @@ private:
 	// Another queue of data to be read. This is for DataReceiver to move
 	// all data quickly away from normal inbuffer. This gives way for real
 	// tcp receiver to get data quickly.
-// TODO: In future, it might be a good idea to force reading to be done only through data receiver. Then we could get rid of this stupid Mutex here.
+// TODO: In future, it might be a good idea to force reading to be done only through data receiver. Then we could get rid of this stupid Mutex here. It is VERY bad idea to force user to use some stupid data receiver!
 	ByteQ inbuffer_rcv;
 	Mutex inbuffer_rcv_mutex;
 
@@ -188,12 +185,6 @@ private:
 	// Private functions
 	// ----------------------------------------
 
-	// Default constructor, copy constructor and assignment operator in
-	// private to prevent invalid creatinon and copying.
-	TCPConnection(void);
-	TCPConnection(TCPConnection const&);
-	TCPConnection operator=(TCPConnection const&);
-
 	// Closes connection
 	void close(bool closed_by_remote_server);
 
@@ -214,6 +205,13 @@ private:
 inline void TCPConnection::close(void)
 {
 	close(false);
+}
+
+inline bool TCPConnection::isConnected(void)
+{
+	Lock connected_loc(connected_mutex);
+	bool result = connected;
+	return result;
 }
 
 inline uint8_t TCPConnection::readUInt8(void)
