@@ -120,6 +120,7 @@
 				"json.cc",
 				"memwatch.cc",
 				"profilermanager.cc",
+				"runnable.cc",
 				"thread.cc"
 			]
 		},

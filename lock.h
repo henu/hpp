@@ -2,10 +2,7 @@
 #define HPP_LOCK_H
 
 #include "mutex.h"
-
 #include "assert.h"
-
-
 
 namespace Hpp
 {
