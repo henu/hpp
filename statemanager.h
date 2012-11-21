@@ -46,10 +46,9 @@ public:
 	// Starts the manager (and states)
 	static void start(void);
 
-	// Sets/gets desired lps aka loops per second. 0 means there is
-	// no desired lps.
-	inline static void setLps(unsigned short lps) { instance.lps = lps; }
-	inline static unsigned short getLps(void) { return instance.lps; }
+	// Sets/gets desired fps. 0 means there is no desired fps.
+	inline static void setDesiredFps(size_t desired_fps) { instance.desired_fps = desired_fps; }
+	inline static size_t getDesiredFps(void) { return instance.desired_fps; }
 
 	// Sets/gets maximum FPS. 0 for no limit
 	inline static void setMaxFps(unsigned short max_fps) { instance.max_fps = max_fps; }
@@ -118,8 +117,8 @@ private:
 	JoysticksById joys;
 	SDLJoysticks sdljoys;
 
-	// LPS aka Loops Per Second aka desired FPS
-	unsigned short lps;
+	// Desired FPS
+	size_t desired_fps;
 
 	// Maximum FPS and framedrop
 	unsigned short max_fps;

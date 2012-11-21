@@ -73,8 +73,8 @@ void Statemanager::start(void)
 
 	do {
 
-		if (instance.lps != 0) {
-			dtime_max = Delay::secs(1) / instance.lps;
+		if (instance.desired_fps != 0) {
+			dtime_max = Delay::secs(1) / instance.desired_fps;
 		}
 		#ifndef NDEBUG
 		else dtime_max = Delay::days(999999);
@@ -106,13 +106,11 @@ void Statemanager::start(void)
 		// Check if program is running too fast
 		if (instance.max_fps > 0 && dtime < dtime_min) {
 			(dtime_min - dtime).sleep();
-// TODO: Is this really needed twice? Why?
-			(dtime_min - dtime).sleep();
 			dtime = dtime_min;
 		}
 		// If seconds multiplier exceeds the maximum value then store
 		// the remainings
-		if (instance.lps != 0 && dtime > dtime_max) {
+		if (instance.desired_fps != 0 && dtime > dtime_max) {
 			dtime_remains = dtime - dtime_max;
 			dtime = dtime_max;
 		}
@@ -120,10 +118,19 @@ void Statemanager::start(void)
 		// Read events and deliver them to the state at the top of
 		// stack.
 		Event event;
+		bool events_occured = false;
 		while (!instance.states.empty() &&
 		       (event = instance.eventmanager.getEvent()).type != Event::NOTHING) {
 // TODO: Code some own event type! -- What? There is already own event type, right?
 			instance.states.back()->pushEvent(event);
+			events_occured = true;
+		}
+		// If events occured, then finally inform that
+		// no more events are coming during this frame
+		if (events_occured && !instance.states.empty()) {
+			Event end_of_events;
+			end_of_events.type = Event::END_OF_EVENTS;
+			instance.states.back()->pushEvent(end_of_events);
 		}
 
 		// Before running states, go all of them through and check if
@@ -219,7 +226,7 @@ Statemanager::Statemanager(void) :
 #ifndef NDEBUG
 thread_id(getThisThreadID()),
 #endif
-lps(0),
+desired_fps(0),
 max_fps(0),
 max_framedrop(0)
 {

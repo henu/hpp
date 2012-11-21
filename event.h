@@ -22,7 +22,8 @@ struct Event
 	            KEY_UP,
 	            MOUSE_MOVE,
 	            MOUSE_KEY_DOWN,
-	            MOUSE_KEY_UP };
+	            MOUSE_KEY_UP,
+	            END_OF_EVENTS };
 
 	// The type of event
 	Type type;
