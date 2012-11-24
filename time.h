@@ -5,6 +5,7 @@
 #include "exception.h"
 
 #include <stdint.h>
+#include <cmath>
 #include <ctime>
 #include <cerrno>
 #include <ostream>
@@ -33,6 +34,7 @@ public:
 	inline static Delay usecs(ssize_t usecs) { return Delay(usecs / (1000 * 1000), (usecs % (1000 * 1000)) * 1000); }
 	inline static Delay nsecs(ssize_t nsecs) { return Delay(nsecs / (1000 * 1000 * 1000), nsecs % (1000 * 1000 * 1000)); }
 	inline static Delay inf(void) { return Delay(true); }
+	inline static Delay fromSecondsAsDouble(double secs);
 
 	inline ssize_t getSeconds(void) const { HppAssert(!inf_, "Unable to return seconds of infinite delay!"); return secs_; }
 	inline uint32_t getNanoseconds(void) const { HppAssert(!inf_, "Unable to return nanoseconds of infinite delay!"); HppAssert(nsecs_ < MLRD, "Too many nanoseconds!"); return nsecs_; }
@@ -143,6 +145,21 @@ inline Time now(void)
 	uint32_t nsecs = time_now_64 % MLRD;
 	return Time(secs, nsecs);
 	#endif
+}
+
+inline Delay Delay::fromSecondsAsDouble(double secs)
+{
+	ssize_t secs2 = floor(secs);
+	ssize_t nsecs = round((secs - secs2) * (1000 * 1000 * 1000));
+	if (nsecs >= 1000 * 1000 * 1000) {
+		nsecs -= 1000 * 1000 * 1000;
+		secs2 += 1;
+	}
+	if (nsecs < 0) {
+		nsecs += 1000 * 1000 * 1000;
+		secs2 -= 1;
+	}
+	return Delay(secs2, nsecs);
 }
 
 inline void Delay::sleep(void) const
