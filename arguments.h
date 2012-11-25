@@ -4,7 +4,7 @@
 #include "cast.h"
 #include "misc.h"
 
-#include <vector>
+#include <list>
 #include <string>
 #include <stdexcept>
 
@@ -35,14 +35,20 @@ public:
 
 	// Extracts one argument. Does conversion from alias to correct
 	// argument. Returns empty string if there is no more arguments left.
+	// If unknown argument is met, then it is moved to extra arguments.
 	inline std::string parse(void);
 
-	// Pops next argumenet from queue without checking if it's alias. If
-	// there is no arguments left, then exception is thrown.
+	// Pops next raw argumenet from queue. If there are
+	// no arguments left, then exception is thrown.
 	inline std::string popArgument(void);
 	inline ssize_t popArgumentAsSSize(void);
-
 	inline size_t argsLeft(void) const;
+
+	// Handling of extra arguments. These should be called only after all
+	// other arguments are read ie. after parse() returns empty string!
+	inline std::string popExtraargument(void);
+	inline ssize_t popExtraargumentAsSSize(void);
+	inline size_t extraargsLeft(void) const;
 
 	// Forms help string of all allowed arguments,
 	// or just from onle argument, if given.
@@ -59,10 +65,11 @@ private:
 
 	typedef std::map< std::string, std::string > Aliases;
 
-	typedef std::vector< std::string > Args;
+	typedef std::list< std::string > Args;
 
 	Args args;
-	Args::const_iterator args_it;
+
+	Args eargs;
 
 	AllowedArgs aas;
 	Aliases aliases;
@@ -70,14 +77,12 @@ private:
 };
 
 inline Arguments::Arguments(int argc, char const** argv) :
-args(argv + 1, argv + argc),
-args_it(args.begin())
+args(argv + 1, argv + argc)
 {
 }
 
 inline Arguments::Arguments(int argc, char** argv) :
-args(argv + 1, argv + argc),
-args_it(args.begin())
+args(argv + 1, argv + argc)
 {
 }
 
@@ -98,24 +103,38 @@ inline void Arguments::addAlias(std::string const& alias, std::string const& arg
 
 inline std::string Arguments::parse(void)
 {
-	if (args_it == args.end()) {
-		return "";
+	while (!args.empty()) {
+
+		std::string result = args.front();
+		args.pop_front();
+
+		// Check if this is argument
+		AllowedArgs::const_iterator aas_find = aas.find(result);
+		if (aas_find != aas.end()) {
+			return result;
+		}
+
+		// Check if this is alias
+		Aliases::const_iterator aliases_find = aliases.find(result);
+		if (aliases_find != aliases.end()) {
+			return aliases_find->second;
+		}
+
+		// This is not argument nor alias, so move it to extra arguments
+		eargs.push_back(result);
 	}
-	std::string result = *args_it;
-	Aliases::const_iterator aliases_find = aliases.find(result);
-	if (aliases_find != aliases.end()) {
-		result = aliases_find->second;
-	}
-	args_it ++;
-	return result;
+
+	return "";
 }
 
 inline std::string Arguments::popArgument(void)
 {
-	if (args_it == args.end()) {
+	if (args.empty()) {
 		throw Exception("No arguments to pop!");
 	}
-	return *(args_it ++);
+	std::string result = args.front();
+	args.pop_front();
+	return result;
 }
 
 inline ssize_t Arguments::popArgumentAsSSize(void)
@@ -126,7 +145,34 @@ inline ssize_t Arguments::popArgumentAsSSize(void)
 
 inline size_t Arguments::argsLeft(void) const
 {
-	return args.end() - args_it;
+	return args.size();
+}
+
+inline std::string Arguments::popExtraargument(void)
+{
+	if (!args.empty()) {
+		throw Exception("You should access extra arguments only after normal arguments are read!");
+	}
+	if (eargs.empty()) {
+		throw Exception("No extra arguments to pop!");
+	}
+	std::string result = eargs.front();
+	eargs.pop_front();
+	return result;
+}
+
+inline ssize_t Arguments::popExtraargumentAsSSize(void)
+{
+	std::string result_str = popExtraargument();
+	return strToSSize(result_str);
+}
+
+inline size_t Arguments::extraargsLeft(void) const
+{
+	if (!args.empty()) {
+		throw Exception("You should access extra arguments only after normal arguments are read!");
+	}
+	return eargs.size();
 }
 
 inline std::string Arguments::getHelp(uint8_t inc_what, std::string const& arg, std::string const& prefix) const
