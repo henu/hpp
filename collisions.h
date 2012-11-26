@@ -147,7 +147,11 @@ inline Vector3 moveOut(Collisions& colls)
 		Real dp_cdnn_nn = dotProduct(coll_d.normal, coll.normal);
 		HppAssert(dp_cdnn_cdnn != 0, "Division by zero!");
 		Vector3 dir_at_plane = coll.normal - coll_d.normal * (dp_cdnn_nn / dp_cdnn_cdnn);
-		dir_at_plane.normalize();
+		Real dir_at_plane_len = dir_at_plane.length();
+		if (dir_at_plane_len < 0.0005) {
+			continue;
+		}
+		dir_at_plane /= dir_at_plane_len;
 		// Second step
 		Real dp_n_n = dotProduct(coll.normal, coll.normal) * coll.depth * coll.depth;
 		Real dp_n_d = dotProduct(coll.normal, dir_at_plane) * coll.depth;
