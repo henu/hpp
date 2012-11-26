@@ -18,7 +18,8 @@ receiver_data(NULL),
 outbuffer_pending_lock(NULL),
 connected(false),
 host_or_ip(""),
-port(0)
+port(0),
+lag_emulation(false)
 {
 }
 
@@ -28,7 +29,8 @@ receiver_data(NULL),
 outbuffer_pending_lock(NULL),
 connected(false),
 host_or_ip(""),
-port(0)
+port(0),
+lag_emulation(false)
 {
 	connect(host_or_ip, port);
 }
@@ -189,12 +191,30 @@ bool TCPConnection::waitForReading(size_t bytes)
 			connected_lock.unlock();
 		}
 
+		// If lag emulation is enabled, then wait
+		// here until enough time has passed.
+		size_t amount_to_copy = inbuffer.size();
+		if (lag_emulation && !inbuffer.empty()) {
+			ssize_t bytes_to_check = bytes;
+			HppAssert(!lag_emulation_queue.empty(), "Lag emulation queue out of sync!");
+
+			Delay sleeping_left = lag_emulation_queue.front().time - now();
+			if (sleeping_left > Delay::secs(0)) {
+				reader_lock.unlock();
+				sleeping_left.sleep();
+				reader_lock.relock();
+			}
+			amount_to_copy = lag_emulation_queue.front().amount;
+			lag_emulation_queue.pop_front();
+		}
+
 		// Copy everything from inbuffer to inbuffer_rcv so we can let
 		// receiver thread work as long as possible without blocks. In
 		// some situations, there are not really stuff in inbuffer, but
 		// it does not matter.
+		HppAssert(inbuffer.size() >= amount_to_copy, "Too much to copy! There is not that much in the buffer!");
 		inbuffer_rcv_lock.relock();
-		while (!inbuffer.empty()) {
+		for (size_t copy_ofs = 0; copy_ofs < amount_to_copy; ++ copy_ofs) {
 			inbuffer_rcv.push(inbuffer.front());
 			inbuffer.pop();
 		}
@@ -236,6 +256,13 @@ void TCPConnection::waitUntilAllDataIsSent(void)
 	}
 }
 
+void TCPConnection::enableLagEmulation(Delay const& lag)
+{
+	Lock reader_lock(reader_mutex);
+	lag_emulation = true;
+	lag_emulation_amount = lag;
+}
+
 void TCPConnection::readerThread(void* conn_raw)
 {
 
@@ -249,6 +276,9 @@ void TCPConnection::readerThread(void* conn_raw)
 	#else
 	TCPsocket sdlsoc = conn.sdlsoc;
 	#endif
+	bool& lag_emulation = conn.lag_emulation;
+	Delay& lag_emulation_amount = conn.lag_emulation_amount;
+	TimesAndAmounts& lag_emulation_queue = conn.lag_emulation_queue;
 
 	// Buffer where bytes are received into
 	size_t const BUFFER_SIZE = 512;
@@ -290,17 +320,25 @@ void TCPConnection::readerThread(void* conn_raw)
 			}
 			throw Exception(std::string("Unable to receive data! Reason: ") + strerror(errno));
 		}
-		// Bytes were received. Add them to queue and notify possible
-		// waiting thread.
+		// Bytes were received. Add them to queue and notify
+		// possible waiting thread. If lag emulation is enabled,
+		// then also tell time when these bytes can be accessed.
 		else {
 
 			Lock reader_lock(reader_mutex);
+
+			if (lag_emulation) {
+				Time access_time = now() + lag_emulation_amount;
+				lag_emulation_queue.push_back(TimeAndAmount(access_time, recv_bytes));
+			}
+
 			uint8_t* buffer_end = buffer + recv_bytes;
 			for (uint8_t* buffer_it = buffer;
 			     buffer_it != buffer_end;
 			     buffer_it ++) {
 				inbuffer.push(*buffer_it);
 			}
+
 			reader_lock.unlock();
 
 			// Inform possible waiting thread
@@ -513,7 +551,8 @@ soc(soc),
 #else
 sdlsoc(sdlsoc),
 #endif
-port(port)
+port(port),
+lag_emulation(false)
 {
 
 	connected = true;

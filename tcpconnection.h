@@ -7,6 +7,7 @@
 #endif
 #endif
 
+#include "time.h"
 #include "condition.h"
 #include "mutex.h"
 #include "thread.h"
@@ -20,6 +21,7 @@
 #endif
 #include <string>
 #include <vector>
+#include <list>
 
 namespace Hpp
 {
@@ -98,6 +100,9 @@ public:
 	// closing is wanted immediately after some write operations.
 	void waitUntilAllDataIsSent(void);
 
+	// Enables lag emulation of received data
+	void enableLagEmulation(Delay const& lag);
+
 private:
 
 	// ----------------------------------------
@@ -113,6 +118,20 @@ private:
 	#endif
 
 private:
+
+	// ----------------------------------------
+	// Types
+	// ----------------------------------------
+
+	// These are used in lag emulation
+	struct TimeAndAmount {
+		inline TimeAndAmount(Time const& time, size_t amount) :
+		time(time), amount(amount) { }
+		Time time;
+		size_t amount;
+	};
+	typedef std::list< TimeAndAmount > TimesAndAmounts;
+
 
 	// ----------------------------------------
 	// Data
@@ -179,6 +198,11 @@ private:
 	// Host and port of this connection
 	std::string host_or_ip;
 	uint16_t port;
+
+	// Lag emulation. These are protected by reader_mutex.
+	bool lag_emulation;
+	Delay lag_emulation_amount;
+	TimesAndAmounts lag_emulation_queue;
 
 
 	// ----------------------------------------
