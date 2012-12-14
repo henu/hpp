@@ -179,16 +179,11 @@ inline std::string deserializeString(ByteV::const_iterator& data_it, ByteV::cons
 	if (data_end - data_it < bytes) {
 		throw Exception("Unexpected end of data!");
 	}
-	uint32_t result_size;
-	if (bytes == 1) {
-		result_size = *data_it;
-	} else if (bytes == 2) {
-		result_size = cStrToUInt16(&*data_it, bigendian);
-	} else {
-		HppAssert(bytes == 4, "Unsupported byte count!");
-		result_size = cStrToUInt32(&*data_it, bigendian);
-	}
+	uint32_t result_size = cStrToUInt(&*data_it, bytes, bigendian);
 	data_it += bytes;
+	if (data_end - data_it < result_size) {
+		throw Exception("Unexpected end of data!");
+	}
 	std::string result = std::string((char const*)&*data_it, result_size);
 	data_it += result_size;
 	return result;
@@ -290,25 +285,19 @@ inline float deserializeFloat(std::istream& strm, bool bigendian)
 
 inline std::string deserializeString(std::istream& strm, uint8_t bytes, bool bigendian)
 {
-	uint32_t result_size;
-	if (bytes == 1) {
-		result_size = strm.get();
-	} else if (bytes == 2) {
-		char buf[2];
-		strm.read(buf, 2);
-		result_size = cStrToUInt16(buf, bigendian);
-	} else {
-		HppAssert(bytes == 4, "Unsupported byte count!");
-		char buf[4];
-		strm.read(buf, 4);
-		result_size = cStrToUInt32(buf, bigendian);
+	uint8_t buf[8];
+	if (bytes > 8) {
+		throw Exception("Unsupported byte count!");
 	}
+	strm.read((char*)buf, bytes);
 	if (strm.eof()) {
 		throw Exception("Unexpected end of data!");
 	}
+	uint32_t result_size = cStrToUInt(buf, bytes, bigendian);
 	std::string result;
 	result.reserve(result_size);
 	while (result.size() < result_size) {
+// TODO: Read to buffer!
 		result += (char)strm.get();
 	}
 	if (strm.eof()) {
