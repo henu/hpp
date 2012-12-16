@@ -13,7 +13,10 @@ class Light
 public:
 
 // TODO: Support spotlight!
-	enum Type { SUN, POINT };
+	enum Type { NOTHING, SUN, POINT };
+
+	// Default light. This cannot be used!
+	inline Light(void);
 
 	// Creator functions
 	inline static Light sun(Vector3 const& dir, Color const& color = Color(1, 1, 1));
@@ -46,6 +49,11 @@ private:
 	// For point: Attenuations
 	Vector3 v2;
 };
+
+inline Light::Light(void) :
+type(NOTHING)
+{
+}
 
 inline Light Light::sun(Vector3 const& dir, Color const& color)
 {
