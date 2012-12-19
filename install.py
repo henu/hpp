@@ -14,6 +14,7 @@ def main(pname, args):
 	# Read arguments
 	user_parts = [ 'main' ]
 	user_command = ''
+	user_debug = False
 	arg_id = 0
 	while arg_id < len(args):
 		arg = args[arg_id]
@@ -24,6 +25,8 @@ def main(pname, args):
 			parts_str = args[arg_id]
 			arg_id += 1
 			user_parts = parts_str.split(',')
+		elif arg == '-d' or arg == '--debug':
+			user_debug = True
 		elif len(user_command) == 0:
 			user_command = arg
 		else:
@@ -60,7 +63,10 @@ def main(pname, args):
 			sources += part['sources']
 
 	# Form compiler flags and libs
-	cflags = '-O3 -DNDEBUG'
+	if not user_debug:
+		cflags = '-O3 -DNDEBUG'
+	else:
+		cflags = '-O2 -g'
 	libs = ''
 	for part_name in parts:
 		part = data['parts'][part_name]
