@@ -12,6 +12,8 @@
 // This assertion will be disabled/enabled at compile time
 #define HppAssertCC(check, error) Hpp::doAssertionCC(__FILE__, __LINE__, __FUNCTION__, (check), #check, error);
 
+#define HppAssertAlways(check, error) Hpp::doAssertion(__FILE__, __LINE__, __FUNCTION__, (check), #check, error);
+
 namespace Hpp
 {
 
