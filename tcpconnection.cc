@@ -1,5 +1,6 @@
 #include "tcpconnection.h"
 
+#include "connectionmanager.h"
 #include "exception.h"
 #include "lock.h"
 
@@ -12,60 +13,49 @@
 namespace Hpp
 {
 
-TCPConnection::TCPConnection(void) :
-receiver(NULL),
-receiver_data(NULL),
-outbuffer_pending_lock(NULL),
-connected(false),
-host_or_ip(""),
-port(0),
-lag_emulation(false)
+TCPConnection::TCPConnection(void)
 {
+	rconn = new RealConnection;
+	rconn->receiver = NULL;
+	rconn->receiver_data = NULL;
+	rconn->outbuffer_pending_lock = NULL;
+	rconn->connected_state = CLOSED;
+	rconn->host_or_ip = "";
+	rconn->port = 0;
+	rconn->lag_emulation = false;
 }
 
-TCPConnection::TCPConnection(std::string const& host_or_ip, uint16_t port) :
-receiver(NULL),
-receiver_data(NULL),
-outbuffer_pending_lock(NULL),
-connected(false),
-host_or_ip(""),
-port(0),
-lag_emulation(false)
+TCPConnection::TCPConnection(std::string const& host_or_ip, uint16_t port)
 {
+	rconn = new RealConnection;
+	rconn->receiver = NULL;
+	rconn->receiver_data = NULL;
+	rconn->outbuffer_pending_lock = NULL;
+	rconn->connected_state = CLOSED;
+	rconn->host_or_ip = "";
+	rconn->port = 0;
+	rconn->lag_emulation = false;
+
 	connect(host_or_ip, port);
 }
 
 TCPConnection::~TCPConnection(void)
 {
+	HppAssert(rconn, "No RealConnect object!");
+
 	// Just in case, ask close.
 	close();
 
-	// Ensure destroying is not done from threads of this object.
-	#ifndef NDEBUG
-	HppAssert(getThisThreadID() != reader_thread_id, "TCPConnection destroyed in wrong thread!");
-	HppAssert(getThisThreadID() != writer_thread_id, "TCPConnection destroyed in wrong thread!");
-	HppAssert(getThisThreadID() != notifier_thread_id, "TCPConnection destroyed in wrong thread!");
-	#endif
-
-	// Wait until all threads are closed.
-	reader_thread.wait();
-	writer_thread.wait();
-	notifier_thread.wait();
-
-	// Mark mutexes destroyable
-	receiver_mutex.destroy();
-	reader_mutex.destroy();
-	inbuffer_rcv_mutex.destroy();
-	writer_mutex.destroy();
-	outbuffer_pending_mutex.destroy();
-	connected_mutex.destroy();
-
+	Connectionmanager::addDestroyableTCPConnection(rconn);
+	rconn = NULL;
 }
 
 void TCPConnection::connect(std::string const& host_or_ip, uint16_t port)
 {
-	Lock connected_lock(connected_mutex);
-	if (connected) {
+	HppAssert(rconn, "No RealConnect object!");
+
+	Lock connected_lock(rconn->connected_mutex);
+	if (rconn->connected_state != CLOSED) {
 		throw Exception("Already connected!");
 	}
 
@@ -96,14 +86,14 @@ void TCPConnection::connect(std::string const& host_or_ip, uint16_t port)
 	memset(&soc_addr.sin_zero, 0, 8);
 
 	// Create new socket
-	soc = socket(address->h_addrtype, SOCK_STREAM, 0);
-	if (soc == -1) {
+	rconn->soc = socket(address->h_addrtype, SOCK_STREAM, 0);
+	if (rconn->soc == -1) {
 		throw Exception("Unable to create socket for host \"" + host_or_ip + "\"!");
 	}
 
-	if (::connect(soc, reinterpret_cast< struct sockaddr* >(&soc_addr), sizeof(struct sockaddr)) == -1) {
-		shutdown(soc, SHUT_RDWR);
-		::close(soc);
+	if (::connect(rconn->soc, reinterpret_cast< struct sockaddr* >(&soc_addr), sizeof(struct sockaddr)) == -1) {
+		shutdown(rconn->soc, SHUT_RDWR);
+		::close(rconn->soc);
 		throw HostUnavailable("Connection failed to \"" + host_or_ip + "\"!");
 	}
 
@@ -114,78 +104,91 @@ void TCPConnection::connect(std::string const& host_or_ip, uint16_t port)
 		throw Exception(std::string("Unable to resolve host when trying to connect to host! Reason: ") + SDLNet_GetError());
 	}
 
-	sdlsoc = SDLNet_TCP_Open(&sdl_ip);
-	if (!sdlsoc) {
+	rconn->sdlsoc = SDLNet_TCP_Open(&sdl_ip);
+	if (!rconn->sdlsoc) {
 		throw Exception(std::string("Unable to connect to host! Reason: ") + SDLNet_GetError());
 	}
 	#endif
 
-	connected = true;
-	this->host_or_ip = host_or_ip;
-	this->port = port;
+	rconn->connected_state = CONNECTED;
+	rconn->host_or_ip = host_or_ip;
+	rconn->port = port;
 
 	// Start reading, writing and notifier threads
-	reader_thread = Thread(readerThread, reinterpret_cast< void* >(this));
-	writer_thread = Thread(writerThread, reinterpret_cast< void* >(this));
-	notifier_thread = Thread(notifierThread, reinterpret_cast< void* >(this));
+	rconn->reader_thread = Thread(readerThread, reinterpret_cast< void* >(this));
+	rconn->writer_thread = Thread(writerThread, reinterpret_cast< void* >(this));
+	rconn->notifier_thread = Thread(notifierThread, reinterpret_cast< void* >(this));
 	#ifndef NDEBUG
-	reader_thread_id = reader_thread.getId();
-	writer_thread_id = writer_thread.getId();
-	notifier_thread_id = notifier_thread.getId();
+	rconn->reader_thread_id = rconn->reader_thread.getId();
+	rconn->writer_thread_id = rconn->writer_thread.getId();
+	rconn->notifier_thread_id = rconn->notifier_thread.getId();
 	#endif
 
 }
 
 void TCPConnection::setDataReceiver(DataReceiver receiver, void* data)
 {
-	Lock receiver_lock(receiver_mutex);
-	this->receiver = receiver;
-	receiver_data = data;
+	HppAssert(rconn, "No RealConnect object!");
+
+	Lock receiver_lock(rconn->receiver_mutex);
+	rconn->receiver = receiver;
+	rconn->receiver_data = data;
 	receiver_lock.unlock();
-	reader_cond.broadcast();
+	rconn->reader_cond.broadcast();
 }
 
 uint16_t TCPConnection::getPort(void) const
 {
+	HppAssert(rconn, "No RealConnect object!");
+
 // TODO: Protect with mutex!
-	return port;
+	return rconn->port;
 }
 
 std::string TCPConnection::getHost(void) const
 {
+	HppAssert(rconn, "No RealConnect object!");
+
 // TODO: Protect with mutex!
-	return host_or_ip;
+	return rconn->host_or_ip;
 }
 
 size_t TCPConnection::getAmountOfWaitingData(void)
 {
-	Lock inbuffer_rcv_lock(inbuffer_rcv_mutex);
-	size_t result = inbuffer_rcv.size();
+	HppAssert(rconn, "No RealConnect object!");
+
+	Lock inbuffer_rcv_lock(rconn->inbuffer_rcv_mutex);
+	size_t result = rconn->inbuffer_rcv.size();
 	return result;
 }
 
 bool TCPConnection::waitForReading(size_t bytes)
 {
-	Lock inbuffer_rcv_lock(inbuffer_rcv_mutex);
-	while (inbuffer_rcv.size() < bytes) {
+	HppAssert(rconn, "No RealConnect object!");
+	RealConnection* rconn2 = rconn;
+
+	Lock inbuffer_rcv_lock(rconn2->inbuffer_rcv_mutex);
+	while (rconn2->inbuffer_rcv.size() < bytes) {
 
 		inbuffer_rcv_lock.unlock();
 
 		// Check if there is no data to be copied to inbuffer_rcv.
-		Lock reader_lock(reader_mutex);
+		Lock reader_lock(rconn2->reader_mutex);
 
 		// Ensure connection is not closed
-		Lock connected_lock(connected_mutex);
-		if (!connected) {
+		Lock connected_lock(rconn2->connected_mutex);
+		if (rconn2->connected_state != CONNECTED) {
+			waitUntilConnectionIsClosed(rconn2);
 			return false;
 		}
 		connected_lock.unlock();
 
-		if (inbuffer.empty()) {
-			reader_cond.wait(reader_mutex);
+		if (rconn2->inbuffer.empty()) {
+			rconn2->reader_cond.wait(rconn2->reader_mutex);
 			// Ensure connection is not closed
 			connected_lock.relock();
-			if (!connected) {
+			if (rconn2->connected_state != CONNECTED) {
+				waitUntilConnectionIsClosed(rconn2);
 				return false;
 			}
 			connected_lock.unlock();
@@ -193,30 +196,30 @@ bool TCPConnection::waitForReading(size_t bytes)
 
 		// If lag emulation is enabled, then wait
 		// here until enough time has passed.
-		size_t amount_to_copy = inbuffer.size();
-		if (lag_emulation && !inbuffer.empty()) {
+		size_t amount_to_copy = rconn2->inbuffer.size();
+		if (rconn2->lag_emulation && !rconn2->inbuffer.empty()) {
 			ssize_t bytes_to_check = bytes;
-			HppAssert(!lag_emulation_queue.empty(), "Lag emulation queue out of sync!");
+			HppAssert(!rconn2->lag_emulation_queue.empty(), "Lag emulation queue out of sync!");
 
-			Delay sleeping_left = lag_emulation_queue.front().time - now();
+			Delay sleeping_left = rconn2->lag_emulation_queue.front().time - now();
 			if (sleeping_left > Delay::secs(0)) {
 				reader_lock.unlock();
 				sleeping_left.sleep();
 				reader_lock.relock();
 			}
-			amount_to_copy = lag_emulation_queue.front().amount;
-			lag_emulation_queue.pop_front();
+			amount_to_copy = rconn2->lag_emulation_queue.front().amount;
+			rconn2->lag_emulation_queue.pop_front();
 		}
 
 		// Copy everything from inbuffer to inbuffer_rcv so we can let
 		// receiver thread work as long as possible without blocks. In
 		// some situations, there are not really stuff in inbuffer, but
 		// it does not matter.
-		HppAssert(inbuffer.size() >= amount_to_copy, "Too much to copy! There is not that much in the buffer!");
+		HppAssert(rconn2->inbuffer.size() >= amount_to_copy, "Too much to copy! There is not that much in the buffer!");
 		inbuffer_rcv_lock.relock();
 		for (size_t copy_ofs = 0; copy_ofs < amount_to_copy; ++ copy_ofs) {
-			inbuffer_rcv.push(inbuffer.front());
-			inbuffer.pop();
+			rconn2->inbuffer_rcv.push(rconn2->inbuffer.front());
+			rconn2->inbuffer.pop();
 		}
 
 	}
@@ -225,60 +228,58 @@ bool TCPConnection::waitForReading(size_t bytes)
 
 void TCPConnection::initWrite(void)
 {
-	Lock* lock = new Lock(outbuffer_pending_mutex);
-	HppAssert(!outbuffer_pending_lock, "Lock already exists!");
-	outbuffer_pending_lock = lock;
+	HppAssert(rconn, "No RealConnect object!");
+
+	Lock* lock = new Lock(rconn->outbuffer_pending_mutex);
+	HppAssert(!rconn->outbuffer_pending_lock, "Lock already exists!");
+	rconn->outbuffer_pending_lock = lock;
 }
 
 void TCPConnection::deinitWrite(void)
 {
-	Lock writer_lock(writer_mutex);
-	for (ByteV::iterator outbuffer_pending_it = outbuffer_pending.begin();
-	     outbuffer_pending_it != outbuffer_pending.end();
+	HppAssert(rconn, "No RealConnect object!");
+
+	Lock writer_lock(rconn->writer_mutex);
+	for (ByteV::iterator outbuffer_pending_it = rconn->outbuffer_pending.begin();
+	     outbuffer_pending_it != rconn->outbuffer_pending.end();
 	     outbuffer_pending_it ++) {
-		outbuffer.push(*outbuffer_pending_it);
+		rconn->outbuffer.push(*outbuffer_pending_it);
 	}
-	outbuffer_pending.clear();
+	rconn->outbuffer_pending.clear();
 	writer_lock.unlock();
-	writer_cond.signal();
+	rconn->writer_cond.signal();
 
-	HppAssert(outbuffer_pending_lock, "Lock does not exist!");
-	Lock* lock = outbuffer_pending_lock;
-	outbuffer_pending_lock = NULL;
+	HppAssert(rconn->outbuffer_pending_lock, "Lock does not exist!");
+	Lock* lock = rconn->outbuffer_pending_lock;
+	rconn->outbuffer_pending_lock = NULL;
 	delete lock;
-}
-
-void TCPConnection::waitUntilAllDataIsSent(void)
-{
-	Lock writer_lock(writer_mutex);
-	while (!outbuffer.empty()) {
-		writecheck_cond.wait(writer_mutex);
-	}
 }
 
 void TCPConnection::enableLagEmulation(Delay const& lag)
 {
-	Lock reader_lock(reader_mutex);
-	lag_emulation = true;
-	lag_emulation_amount = lag;
+	HppAssert(rconn, "No RealConnect object!");
+
+	Lock reader_lock(rconn->reader_mutex);
+	rconn->lag_emulation = true;
+	rconn->lag_emulation_amount = lag;
 }
 
 void TCPConnection::readerThread(void* conn_raw)
 {
-
 	// Initialize thread
 	TCPConnection& conn = *reinterpret_cast< TCPConnection* >(conn_raw);
-	Mutex& reader_mutex = conn.reader_mutex;
-	Condition& reader_cond = conn.reader_cond;
-	ByteQ& inbuffer = conn.inbuffer;
+	RealConnection* rconn = conn.rconn;
+	Mutex& reader_mutex = rconn->reader_mutex;
+	Condition& reader_cond = rconn->reader_cond;
+	ByteQ& inbuffer = rconn->inbuffer;
 	#ifndef HPP_USE_SDL_NET
-	int32_t soc = conn.soc;
+	int32_t soc = rconn->soc;
 	#else
-	TCPsocket sdlsoc = conn.sdlsoc;
+	TCPsocket sdlsoc = rconn->sdlsoc;
 	#endif
-	bool& lag_emulation = conn.lag_emulation;
-	Delay& lag_emulation_amount = conn.lag_emulation_amount;
-	TimesAndAmounts& lag_emulation_queue = conn.lag_emulation_queue;
+	bool& lag_emulation = rconn->lag_emulation;
+	Delay& lag_emulation_amount = rconn->lag_emulation_amount;
+	TimesAndAmounts& lag_emulation_queue = rconn->lag_emulation_queue;
 
 	// Buffer where bytes are received into
 	size_t const BUFFER_SIZE = 512;
@@ -300,7 +301,7 @@ void TCPConnection::readerThread(void* conn_raw)
 		// Check if connection was closed
 // TODO: This isn't closed by remote host, right?
 		if (recv_bytes == 0) {
-			conn.closeByRemoteHost();
+			closeByRemoteHost(rconn);
 			return;
 		}
 		// If receiving was interrupted by a signal, then try again
@@ -315,7 +316,7 @@ void TCPConnection::readerThread(void* conn_raw)
 		else if (recv_bytes < 0) {
 			// Check if connection was just closed
 			if (errno == ECONNRESET || errno == ENOTCONN) {
-				conn.closeByRemoteHost();
+				closeByRemoteHost(rconn);
 				return;
 			}
 			throw Exception(std::string("Unable to receive data! Reason: ") + strerror(errno));
@@ -353,7 +354,7 @@ void TCPConnection::readerThread(void* conn_raw)
 	do {
 		ssize_t recv_bytes = SDLNet_TCP_Recv(sdlsoc, (void*)buffer, BUFFER_SIZE);
 		if (recv_bytes == 0) {
-			conn.closeByRemoteHost();
+			closeByRemoteHost(rconn);
 			return;
 		}
 		// Check if an error has occured
@@ -386,19 +387,19 @@ void TCPConnection::readerThread(void* conn_raw)
 
 void TCPConnection::writerThread(void* conn_raw)
 {
-
 	// Initialize thread
 	TCPConnection& conn = *reinterpret_cast< TCPConnection* >(conn_raw);
-	Mutex& writer_mutex = conn.writer_mutex;
-	Condition& writer_cond = conn.writer_cond;
-	Condition& writecheck_cond = conn.writecheck_cond;
-	ByteQ& outbuffer = conn.outbuffer;
-	bool& connected = conn.connected;
-	Mutex& connected_mutex = conn.connected_mutex;
+	RealConnection* rconn = conn.rconn;
+	Mutex& writer_mutex = rconn->writer_mutex;
+	Condition& writer_cond = rconn->writer_cond;
+	Condition& writecheck_cond = rconn->writecheck_cond;
+	ByteQ& outbuffer = rconn->outbuffer;
+	State& connected_state = rconn->connected_state;
+	Mutex& connected_mutex = rconn->connected_mutex;
 	#ifndef HPP_USE_SDL_NET
-	int32_t soc = conn.soc;
+	int32_t soc = rconn->soc;
 	#else
-	TCPsocket sdlsoc = conn.sdlsoc;
+	TCPsocket sdlsoc = rconn->sdlsoc;
 	#endif
 
 	// Run thread
@@ -409,7 +410,9 @@ void TCPConnection::writerThread(void* conn_raw)
 
 		// Ensure connection is not closed
 		Lock connected_lock(connected_mutex);
-		if (!connected) {
+		if (connected_state != CONNECTED) {
+			writer_lock.unlock();
+			waitUntilConnectionIsClosed(rconn);
 			writecheck_cond.broadcast();
 			return;
 		}
@@ -423,7 +426,9 @@ void TCPConnection::writerThread(void* conn_raw)
 			// Thread is being ran again. Check if connection is
 			// closed.
 			connected_lock.relock();
-			if (!connected) {
+			if (connected_state != CONNECTED) {
+				writer_lock.unlock();
+				waitUntilConnectionIsClosed(rconn);
 				writecheck_cond.broadcast();
 				return;
 			}
@@ -450,7 +455,7 @@ void TCPConnection::writerThread(void* conn_raw)
 			if (errno == EPIPE ||
 			    errno == ECONNRESET ||
 			    errno == ENOTCONN) {
-				conn.closeByRemoteHost();
+				closeByRemoteHost(rconn);
 				writecheck_cond.broadcast();
 				return;
 			} else {
@@ -464,7 +469,7 @@ void TCPConnection::writerThread(void* conn_raw)
 		ssize_t sent_bytes = SDLNet_TCP_Send(sdlsoc, reinterpret_cast< const void* >(&outbuffer_v[0]), outbuffer_v.size());
 		if (sent_bytes < static_cast< ssize_t >(outbuffer_v.size())) {
 // TODO: Errors are not checked! Is this bad?
-			conn.closeByRemoteHost();
+			closeByRemoteHost(rconn);
 			writecheck_cond.broadcast();
 			return EXIT_SUCCESS;
 		}
@@ -479,16 +484,17 @@ void TCPConnection::notifierThread(void* conn_raw)
 
 	// Initialize thread
 	TCPConnection& conn = *reinterpret_cast< TCPConnection* >(conn_raw);
-	Mutex& reader_mutex = conn.reader_mutex;
-	Condition& reader_cond = conn.reader_cond;
-	ByteQ& inbuffer = conn.inbuffer;
-	ByteQ& inbuffer_rcv = conn.inbuffer_rcv;
-	Mutex& inbuffer_rcv_mutex = conn.inbuffer_rcv_mutex;
-	bool& connected = conn.connected;
-	Mutex& connected_mutex = conn.connected_mutex;
-	DataReceiver& receiver = conn.receiver;
-	void*& receiver_data = conn.receiver_data;
-	Mutex& receiver_mutex = conn.receiver_mutex;
+	RealConnection* rconn = conn.rconn;
+	Mutex& reader_mutex = rconn->reader_mutex;
+	Condition& reader_cond = rconn->reader_cond;
+	ByteQ& inbuffer = rconn->inbuffer;
+	ByteQ& inbuffer_rcv = rconn->inbuffer_rcv;
+	Mutex& inbuffer_rcv_mutex = rconn->inbuffer_rcv_mutex;
+	State& connected_state = rconn->connected_state;
+	Mutex& connected_mutex = rconn->connected_mutex;
+	DataReceiver& receiver = rconn->receiver;
+	void*& receiver_data = rconn->receiver_data;
+	Mutex& receiver_mutex = rconn->receiver_mutex;
 
 	// Run thread
 	do {
@@ -497,7 +503,8 @@ void TCPConnection::notifierThread(void* conn_raw)
 
 		// Ensure connection is not closed
 		Lock connected_lock(connected_mutex);
-		if (!connected) {
+		if (connected_state != CONNECTED) {
+			waitUntilConnectionIsClosed(rconn);
 			return;
 		}
 		connected_lock.unlock();
@@ -509,7 +516,7 @@ void TCPConnection::notifierThread(void* conn_raw)
 			reader_cond.wait(reader_mutex);
 			// Check if connection was closed
 			connected_lock.relock();
-			if (!connected) {
+			if (connected_state != CONNECTED) {
 				return;
 			}
 			connected_lock.unlock();
@@ -522,14 +529,15 @@ void TCPConnection::notifierThread(void* conn_raw)
 		// Notify datareceiver
 		Lock receiver_lock(receiver_mutex);
 		if (receiver) {
-			receiver(&conn, receiver_data);
+			receiver(receiver_data);
 		}
 		// If there was no receiver set, then wait for it to appear set
 		else {
 			reader_cond.wait(receiver_mutex);
 			// Check if connection was closed
 			connected_lock.relock();
-			if (!connected) {
+			if (connected_state != CONNECTED) {
+				waitUntilConnectionIsClosed(rconn);
 				return;
 			}
 			connected_lock.unlock();
@@ -540,76 +548,130 @@ void TCPConnection::notifierThread(void* conn_raw)
 }
 
 #ifndef HPP_USE_SDL_NET
-TCPConnection::TCPConnection(int32_t soc, uint16_t port) :
+TCPConnection::TCPConnection(int32_t soc, uint16_t port)
 #else
-TCPConnection::TCPConnection(TCPsocket sdlsoc, uint16_t port) :
+TCPConnection::TCPConnection(TCPsocket sdlsoc, uint16_t port)
 #endif
-receiver(NULL),
-outbuffer_pending_lock(NULL),
-#ifndef HPP_USE_SDL_NET
-soc(soc),
-#else
-sdlsoc(sdlsoc),
-#endif
-port(port),
-lag_emulation(false)
 {
+	rconn = new RealConnection;
 
-	connected = true;
+	rconn->receiver = NULL;
+	rconn->outbuffer_pending_lock = NULL;
+	#ifndef HPP_USE_SDL_NET
+	rconn->soc = soc;
+	#else
+	rconn->sdlsoc = sdlsoc;
+	#endif
+	rconn->port = port;
+	rconn->lag_emulation = false;
+
+	rconn->connected_state = CONNECTED;
 
 	// Start reading, writing and notifier threads
-	reader_thread = Thread(readerThread, reinterpret_cast< void* >(this));
-	writer_thread = Thread(writerThread, reinterpret_cast< void* >(this));
-	notifier_thread = Thread(notifierThread, reinterpret_cast< void* >(this));
+	rconn->reader_thread = Thread(readerThread, reinterpret_cast< void* >(this));
+	rconn->writer_thread = Thread(writerThread, reinterpret_cast< void* >(this));
+	rconn->notifier_thread = Thread(notifierThread, reinterpret_cast< void* >(this));
 	#ifndef NDEBUG
-	reader_thread_id = reader_thread.getId();
-	writer_thread_id = writer_thread.getId();
-	notifier_thread_id = notifier_thread.getId();
+	rconn->reader_thread_id = rconn->reader_thread.getId();
+	rconn->writer_thread_id = rconn->writer_thread.getId();
+	rconn->notifier_thread_id = rconn->notifier_thread.getId();
 	#endif
 }
 
-void TCPConnection::close(bool closed_by_remote_server)
+void TCPConnection::cleanRealConnection(RealConnection* rconn)
 {
+	HppAssert(rconn, "No RealConnect object!");
 
-	// If connection is already closed, do nothing. Mark connection closed
-	// if it is still open
-	Lock connected_lock(connected_mutex);
-	if (!connected) {
+	// Wait until all threads are closed.
+	rconn->reader_thread.wait();
+	rconn->writer_thread.wait();
+	rconn->notifier_thread.wait();
+
+	HppAssert(!rconn->outbuffer_pending_lock, "Lock is not opened!");
+
+	// Mark mutexes destroyable
+	rconn->receiver_mutex.destroy();
+	rconn->reader_mutex.destroy();
+	rconn->inbuffer_rcv_mutex.destroy();
+	rconn->writer_mutex.destroy();
+	rconn->outbuffer_pending_mutex.destroy();
+	rconn->connected_mutex.destroy();
+
+	delete rconn;
+}
+
+void TCPConnection::close(RealConnection* rconn, bool closed_by_remote_server)
+{
+	HppAssert(rconn, "No RealConnect object!");
+
+	Lock connected_lock(rconn->connected_mutex);
+	if (rconn->connected_state == CLOSED) {
 		return;
 	}
+	if (rconn->connected_state == CLOSING) {
+		waitUntilConnectionIsClosed(rconn);
+		return;
+	}
+	rconn->connected_state = CLOSING;
 	connected_lock.unlock();
 
-	// Lock reader and writer threads so we can ensure that they are in
-	// proper state when connection is marked as closed.
-	Lock reader_lock(reader_mutex);
-	Lock writer_lock(writer_mutex);
-	connected_lock.relock();
-	connected = false;
-	reader_lock.unlock();
-	writer_lock.unlock();
-	connected_lock.unlock();
-
-	// Signal possible waiting reader threads so they knows to stop.
+	// Signal possible waiting threads so they know to stop.
 // TODO: Why this needs broadcast?
-	reader_cond.broadcast();
-	writer_cond.signal();
+	rconn->reader_cond.broadcast();
+	rconn->writer_cond.signal();
+
+	waitUntilAllDataIsSent(rconn);
 
 	// Clean connection. Allow writing of data.
 	#ifndef HPP_USE_SDL_NET
-	::shutdown(soc, SHUT_RD);
-	::close(soc);
+	::shutdown(rconn->soc, SHUT_RD);
+	::close(rconn->soc);
 	#else
-	SDLNet_TCP_Close(sdlsoc);
+	SDLNet_TCP_Close(rconn->sdlsoc);
 	#endif
+
+	// Connection is now closed
+	connected_lock.relock();
+	rconn->connected_state = CLOSED;
+	connected_lock.unlock();
+	rconn->connected_cond.broadcast();
 
 	// Inform possible data receiver about closed connection.
 	// Do this only when connection is closed by remote host.
+	// Note, receiver may destroy this object!
 	if (closed_by_remote_server) {
-		Lock receiver_lock(receiver_mutex);
-		if (receiver) {
-			receiver(this, receiver_data);
+		Lock receiver_lock(rconn->receiver_mutex);
+		if (rconn->receiver) {
+			rconn->receiver(rconn->receiver_data);
 		}
 	}
+}
+
+void TCPConnection::waitUntilAllDataIsSent(RealConnection* rconn)
+{
+	HppAssert(rconn, "No RealConnect object!");
+
+	Lock writer_lock(rconn->writer_mutex);
+	while (!rconn->outbuffer.empty()) {
+		rconn->writecheck_cond.wait(rconn->writer_mutex);
+	}
+}
+
+void TCPConnection::waitUntilConnectionIsClosed(RealConnection* rconn)
+{
+	HppAssert(rconn, "No RealConnect object!");
+
+	if (rconn->connected_state == CLOSED) {
+		return;
+	}
+	if (rconn->connected_state == CONNECTED) {
+		throw Hpp::Exception("Logical error! State of connection should be closed or closing!");
+	}
+	rconn->connected_cond.wait(rconn->connected_mutex);
+	if (rconn->connected_state != CLOSED) {
+		throw Hpp::Exception("Logical error! State of connection should be closed now!");
+	}
+	return;
 }
 
 }
