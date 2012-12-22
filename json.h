@@ -4,6 +4,7 @@
 #include "bytev.h"
 #include "exception.h"
 #include "misc.h"
+#include "cast.h"
 
 #include <map>
 #include <vector>
@@ -39,6 +40,8 @@ public:
 	inline static Json newArray(Array const& arr = Array());
 	inline static Json newString(std::string const& str = "");
 	inline static Json newNumber(double num = 0);
+	inline static Json newNumber(signed long num = 0);
+	inline static Json newNumber(unsigned long num = 0);
 	inline static Json newBoolean(bool value = false);
 	inline static Json newNull(void);
 
@@ -48,6 +51,7 @@ public:
 
 	// Getters
 	inline double getNumber(void) const;
+	inline ssize_t getInteger(void) const;
 	inline std::string getString(void) const;
 	inline Object getObject(void) const;
 	inline bool keyExists(std::string const& key) const;
@@ -62,6 +66,8 @@ private:
 	Type type;
 
 	double num;
+	ssize_t num_i;
+	bool num_is_integer;
 	std::string str;
 	Object obj;
 	Array arr;
@@ -94,8 +100,10 @@ type(json.type)
 {
 	switch (type) {
 	case NUMBER:
-	case BOOLEAN:
 		num = json.num;
+		num_i = json.num_i;
+	case BOOLEAN:
+		num_is_integer = json.num_is_integer;
 		break;
 	case STRING:
 		str = json.str;
@@ -117,8 +125,10 @@ inline Json const& Json::operator=(Json const& json)
 	type = json.type;
 	switch (type) {
 	case NUMBER:
-	case BOOLEAN:
 		num = json.num;
+		num_i = json.num_i;
+	case BOOLEAN:
+		num_is_integer = json.num_is_integer;
 		break;
 	case STRING:
 		str = json.str;
@@ -185,6 +195,28 @@ inline Json Json::newNumber(double num)
 	Json result;
 	result.type = NUMBER;
 	result.num = num;
+	result.num_i = num + 0.5;
+	result.num_is_integer = false;
+	return result;
+}
+
+inline Json Json::newNumber(signed long num)
+{
+	Json result;
+	result.type = NUMBER;
+	result.num = num;
+	result.num_i = num;
+	result.num_is_integer = true;
+	return result;
+}
+
+inline Json Json::newNumber(unsigned long num)
+{
+	Json result;
+	result.type = NUMBER;
+	result.num = num;
+	result.num_i = num;
+	result.num_is_integer = true;
 	return result;
 }
 
@@ -192,8 +224,7 @@ inline Json Json::newBoolean(bool value)
 {
 	Json result;
 	result.type = BOOLEAN;
-	if (value) result.num = 1;
-	else result.num = -1;
+	result.num_is_integer = value;
 	return result;
 }
 
@@ -225,6 +256,14 @@ inline double Json::getNumber(void) const
 		throw Exception("Unable to get number, because this JSON is not a number!");
 	}
 	return num;
+}
+
+inline ssize_t Json::getInteger(void) const
+{
+	if (type != NUMBER) {
+		throw Exception("Unable to get integer, because this JSON is not a number!");
+	}
+	return num_i;
 }
 
 inline std::string Json::getString(void) const
@@ -284,7 +323,7 @@ inline bool Json::getBoolean(void) const
 	if (type != BOOLEAN) {
 		throw Exception("Unable to get boolean, because this JSON is not a boolean!");
 	}
-	return num > 0;
+	return num_is_integer;
 }
 
 inline void Json::clear(void)
@@ -414,7 +453,7 @@ inline void Json::loadRecursively(std::string::const_iterator& it, std::string::
 		}
 		it += 3;
 		type = BOOLEAN;
-		num = 1;
+		num_is_integer = 1;
 	}
 	// Boolean false
 	else if (*it == 'f') {
@@ -427,7 +466,7 @@ inline void Json::loadRecursively(std::string::const_iterator& it, std::string::
 		}
 		it += 4;
 		type = BOOLEAN;
-		num = -1;
+		num_is_integer = 0;
 	}
 	// Null
 	else if (*it == 'n') {
@@ -458,6 +497,13 @@ inline void Json::loadRecursively(std::string::const_iterator& it, std::string::
 			throw Exception("Unexpected \"" + num_str + "\"!");
 		}
 		num = atof(num_str.c_str());
+		if (num_str.find('.') == std::string::npos) {
+			num_i = strToSSize(num_str);
+			num_is_integer = true;
+		} else {
+			num_i = num + 0.5;
+			num_is_integer = false;
+		}
 	}
 	// Unknown
 	else {

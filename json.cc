@@ -21,11 +21,15 @@ std::string Json::doEncode(size_t indent, bool nice) const
 	switch (type)
 	{
 	case NUMBER:
-		return floatToStr(num);
+		if (num_is_integer) {
+			return ssizeToStr(num_i);
+		} else {
+			return floatToStr(num);
+		}
 	case STRING:
 		return "\"" + slashEncode(str, "\"") + "\"";
 	case BOOLEAN:
-		if (num > 0) return "true";
+		if (num_is_integer) return "true";
 		else return "false";
 	case OBJECT:
 		{
