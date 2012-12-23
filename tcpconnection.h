@@ -26,8 +26,6 @@
 namespace Hpp
 {
 
-class TCPReceiver;
-
 class TCPConnection : public NonCopyable
 {
 
@@ -37,7 +35,7 @@ class TCPConnection : public NonCopyable
 
 public:
 
-	typedef void (*DataReceiver)(void*);
+	typedef void (*DataReceiver)(void*, bool);
 
 	// Constructor
 	TCPConnection(void);

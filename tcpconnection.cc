@@ -529,7 +529,7 @@ void TCPConnection::notifierThread(void* conn_raw)
 		// Notify datareceiver
 		Lock receiver_lock(receiver_mutex);
 		if (receiver) {
-			receiver(receiver_data);
+			receiver(receiver_data, false);
 		}
 		// If there was no receiver set, then wait for it to appear set
 		else {
@@ -642,7 +642,7 @@ void TCPConnection::close(RealConnection* rconn, bool closed_by_remote_server)
 	if (closed_by_remote_server) {
 		Lock receiver_lock(rconn->receiver_mutex);
 		if (rconn->receiver) {
-			rconn->receiver(rconn->receiver_data);
+			rconn->receiver(rconn->receiver_data, true);
 		}
 	}
 }
