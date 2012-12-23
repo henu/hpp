@@ -40,8 +40,14 @@ public:
 	inline static Json newArray(Array const& arr = Array());
 	inline static Json newString(std::string const& str = "");
 	inline static Json newNumber(double num = 0);
-	inline static Json newNumber(signed long num = 0);
-	inline static Json newNumber(unsigned long num = 0);
+	inline static Json newNumber(int64_t num = 0);
+	inline static Json newNumber(uint64_t num = 0) { return newNumber(int64_t(num)); }
+	inline static Json newNumber(int32_t num = 0) { return newNumber(int64_t(num)); }
+	inline static Json newNumber(uint32_t num = 0) { return newNumber(int64_t(num)); }
+	inline static Json newNumber(int16_t num = 0) { return newNumber(int64_t(num)); }
+	inline static Json newNumber(uint16_t num = 0) { return newNumber(int64_t(num)); }
+	inline static Json newNumber(int8_t num = 0) { return newNumber(int64_t(num)); }
+	inline static Json newNumber(uint8_t num = 0) { return newNumber(int64_t(num)); }
 	inline static Json newBoolean(bool value = false);
 	inline static Json newNull(void);
 
@@ -200,17 +206,7 @@ inline Json Json::newNumber(double num)
 	return result;
 }
 
-inline Json Json::newNumber(signed long num)
-{
-	Json result;
-	result.type = NUMBER;
-	result.num = num;
-	result.num_i = num;
-	result.num_is_integer = true;
-	return result;
-}
-
-inline Json Json::newNumber(unsigned long num)
+inline Json Json::newNumber(int64_t num)
 {
 	Json result;
 	result.type = NUMBER;
