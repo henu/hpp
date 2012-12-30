@@ -35,8 +35,6 @@ class TCPConnection : public NonCopyable
 
 public:
 
-	typedef void (*DataReceiver)(void*, bool);
-
 	// Constructor
 	TCPConnection(void);
 	TCPConnection(std::string const& host_or_ip, uint16_t port);
@@ -48,10 +46,6 @@ public:
 	inline void close(void);
 
 	inline bool isConnected(void);
-
-	// Sets data receiver. Data receiver is a special object that will be
-	// notified when data arrives through TCPConnection.
-	void setDataReceiver(DataReceiver receiver, void* data);
 
 	// Gets information about remote host
 	uint16_t getPort(void) const;
@@ -116,17 +110,11 @@ private:
 
 	struct RealConnection
 	{
-		// Current data receiver and mutex to protect it's changes
-		DataReceiver receiver;
-		void* receiver_data;
-		Mutex receiver_mutex;
-
 		// ID numbers of threads of this object. These are used only for
 		// debugging purposes.
 		Thread::Id reader_thread_id;
 		Thread::Id writer_thread_id;
-		Thread::Id notifier_thread_id;
-
+		
 		// Reader thread and mutex to protect it. The mutex will protect queue
 		// of read data. Condition to signal when new data is got is also
 		// provided.
@@ -135,10 +123,9 @@ private:
 		Condition reader_cond;
 		// Queue of read data
 		ByteQ inbuffer;
-		// Another queue of data to be read. This is for DataReceiver to move
-		// all data quickly away from normal inbuffer. This gives way for real
-		// tcp receiver to get data quickly.
-	// TODO: In future, it might be a good idea to force reading to be done only through data receiver. Then we could get rid of this stupid Mutex here. It is VERY bad idea to force user to use some stupid data receiver!
+		// Another queue of data to be read. This is for reader to move
+		// all data quickly away from normal inbuffer. This gives way
+		// for real tcp receiver to get data quickly.
 		ByteQ inbuffer_rcv;
 		Mutex inbuffer_rcv_mutex;
 
@@ -157,10 +144,6 @@ private:
 		// This condition is for waiting that all data is really sent. It uses
 		// mutex writer_mutex.
 		Condition writecheck_cond;
-
-		// Notifier thread. This is used to notify TCPReceiver when new data
-		// arrives from remote host.
-		Thread notifier_thread;
 
 		// Are we connected, closing or closed? Protected by Mutex. Condition
 		// is also needed, if two threads try to close at same time. In this
@@ -234,9 +217,6 @@ private:
 
 	// Writer thread
 	static void writerThread(void* tcpconnection_raw);
-
-	// Notifier thread
-	static void notifierThread(void* tcpconnection_raw);
 
 };
 
