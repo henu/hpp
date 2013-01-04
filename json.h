@@ -34,6 +34,7 @@ public:
 	inline std::string encode(bool nice = false) const;
 
 	inline Type getType(void) const;
+	inline bool isNumberInteger(void) const;
 
 	// Constructors for new JSON variables
 	inline static Json newObject(Object const& obj = Object());
@@ -170,6 +171,14 @@ inline std::string Json::encode(bool nice) const
 inline Json::Type Json::getType(void) const
 {
 	return type;
+}
+
+inline bool Json::isNumberInteger(void) const
+{
+	if (type != NUMBER) {
+		throw Exception("isNumberInteger() can be only called when type is number!");
+	}
+	return num_is_integer;
 }
 
 inline Json Json::newObject(Object const& obj)
