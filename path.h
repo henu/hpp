@@ -90,6 +90,9 @@ public:
 	// cannot be done atomically, then Exception is thrown.
 	inline void rename(Path const& new_path) const;
 
+	// Resizes file
+	inline void resizeFile(size_t new_size);
+
 	// Lists directory contents. If you want "." and
 	// ".." entries, set show_dotdots to true.
 	inline void listDir(DirChildren& result, bool show_dotdots = false) const;
@@ -473,6 +476,19 @@ inline void Path::rename(Path const& new_path) const
 			throw Exception("Unable to rename atomically!");
 		}
 		throw Exception("Unable to rename!");
+	}
+}
+
+inline void Path::resizeFile(size_t new_size)
+{
+	if (!exists()) {
+		throw Exception("Unable to resize file \"" + toString() + "\" because it does not exist!");
+	}
+	if (!isFile()) {
+		throw Exception("Unable to resize file \"" + toString() + "\" because it not a file!");
+	}
+	if (truncate(toString().c_str(), new_size) != 0) {
+		throw Exception("Resizing of file \"" + toString() + "\" has failed!");
 	}
 }
 
