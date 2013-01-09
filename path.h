@@ -6,6 +6,7 @@
 #include "exception.h"
 #include "misc.h"
 #include "time.h"
+#include "cast.h"
 
 #include <string>
 #include <vector>
@@ -89,6 +90,8 @@ public:
 	// pointing of this Path will be modified. Also, if this
 	// cannot be done atomically, then Exception is thrown.
 	inline void rename(Path const& new_path) const;
+
+	inline size_t getFileSize(void) const;
 
 	// Resizes file
 	inline void resizeFile(size_t new_size);
@@ -479,16 +482,37 @@ inline void Path::rename(Path const& new_path) const
 	}
 }
 
+inline size_t Path::getFileSize(void) const
+{
+	if (!exists()) {
+		throw Exception("Unable to get size of file \"" + toString() + "\" because it does not exist!");
+	}
+	if (!isFile()) {
+		throw Exception("Unable to get size of file \"" + toString() + "\" because it is not a file!");
+	}
+	std::ifstream file(toString().c_str(), std::ios_base::binary);
+	if (!file.is_open()) {
+		throw Exception("Unable to get size of file \"" + toString() + "\" because file could not be opened!");
+	}
+	file.seekg(0, std::ios_base::end);
+	size_t result = file.tellg();
+	file.close();
+	return result;
+}
+
 inline void Path::resizeFile(size_t new_size)
 {
 	if (!exists()) {
 		throw Exception("Unable to resize file \"" + toString() + "\" because it does not exist!");
 	}
 	if (!isFile()) {
-		throw Exception("Unable to resize file \"" + toString() + "\" because it not a file!");
+		throw Exception("Unable to resize file \"" + toString() + "\" because it is not a file!");
 	}
 	if (truncate(toString().c_str(), new_size) != 0) {
 		throw Exception("Resizing of file \"" + toString() + "\" has failed!");
+	}
+	if (getFileSize() != new_size) {
+		throw Exception("Resizing of file \"" + toString() + "\" has failed! The size is now " + sizeToStr(getFileSize()) + " instead of " + sizeToStr(new_size) + "!");
 	}
 }
 
