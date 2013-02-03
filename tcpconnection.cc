@@ -181,7 +181,6 @@ bool TCPConnection::waitForReading(size_t bytes)
 		// here until enough time has passed.
 		size_t amount_to_copy = rconn2->inbuffer.size();
 		if (rconn2->lag_emulation && !rconn2->inbuffer.empty()) {
-			ssize_t bytes_to_check = bytes;
 			HppAssert(!rconn2->lag_emulation_queue.empty(), "Lag emulation queue out of sync!");
 
 			Delay sleeping_left = rconn2->lag_emulation_queue.front().time - now();
