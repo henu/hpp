@@ -22,6 +22,9 @@ public:
 	                         size_t viewport_x = 0, size_t viewport_y = 0,
 	                         size_t viewport_width = 0, size_t viewport_height = 0);
 
+	// FOV means angle between opposite viewfrustum planes.
+	inline void setFovY(Angle const& fov_y);
+
 	// Updates precalculated stuff after transform,
 	// fov, nearplane, farplane or viewport is changed.
 	inline virtual void update(void);
@@ -53,6 +56,11 @@ fov_y(fov_y)
 		viewport_height = Display::getHeight() - viewport_y;
 	}
 	update();
+}
+
+inline void Perspectivecamera::setFovY(Angle const& fov_y)
+{
+	this->fov_y = fov_y;
 }
 
 inline void Perspectivecamera::update(void)

@@ -17,6 +17,10 @@ public:
 
 	inline void setTransform(Transform const& transf);
 
+	inline void setNearAndFarPlanes(Real nearplane, Real farplane);
+	inline void setViewport(size_t viewport_x, size_t viewport_y,
+	                        size_t viewport_width, size_t viewport_height);
+
 	inline Matrix4 getViewmatrix(void) const;
 	inline Matrix4 getProjectionmatrix(void) const;
 	inline Matrix4 getProjectionviewmatrix(void) const;
@@ -55,6 +59,21 @@ private:
 inline void Camera::setTransform(Transform const& transf)
 {
 	this->transf = transf;
+}
+
+inline void Camera::setNearAndFarPlanes(Real nearplane, Real farplane)
+{
+	this->nearplane = nearplane;
+	this->farplane = farplane;
+}
+
+inline void Camera::setViewport(size_t viewport_x, size_t viewport_y,
+                                size_t viewport_width, size_t viewport_height)
+{
+	this->viewport_x = viewport_x;
+	this->viewport_y = viewport_y;
+	this->viewport_width = viewport_width;
+	this->viewport_height = viewport_height;
 }
 
 inline void Camera::setUpViewport(void) const
