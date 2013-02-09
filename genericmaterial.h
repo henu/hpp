@@ -53,9 +53,6 @@ public:
 	inline virtual void endRendering(void) const;
 	inline virtual bool needsLight(Renderable const* renderable) const;
 
-// TODO: Remove this temporary solution!
-inline Shaderprogram* getProgram(void) { return program; }
-
 private:
 
 	// Functions for friends
@@ -251,7 +248,7 @@ inline void GenericMaterial::setViewmatrix(Matrix4 const& viewmatrix)
 
 inline void GenericMaterial::setProjectionmatrix(Matrix4 const& projectionmatrix)
 {
-	getProgram()->setUniform("pmat", projectionmatrix, true);
+	program->setUniform("pmat", projectionmatrix, true);
 }
 
 inline void GenericMaterial::renderMesh(Mesh const* mesh, Transform const& transf)
@@ -260,19 +257,19 @@ inline void GenericMaterial::renderMesh(Mesh const* mesh, Transform const& trans
 	Matrix4 mvmat = rendering_viewmatrix * transf.getMatrix();
 
 	// Bind all needed buffers
-	getProgram()->setBufferobject("pos", mesh->getBuffer("pos"));
+	program->setBufferobject("pos", mesh->getBuffer("pos"));
 	if (rendering_light && needsNormalBuffer()) {
-		getProgram()->setBufferobject("normal", mesh->getBuffer("normal"));
+		program->setBufferobject("normal", mesh->getBuffer("normal"));
 	}
 	if (needsUvBuffer()) {
-		getProgram()->setBufferobject("uv", mesh->getBuffer("uv"));
+		program->setBufferobject("uv", mesh->getBuffer("uv"));
 	}
 	if (needsTangentAndBinormalBuffer()) {
-		getProgram()->setBufferobject("tangent", mesh->getBuffer("tangent"));
-		getProgram()->setBufferobject("binormal", mesh->getBuffer("binormal"));
+		program->setBufferobject("tangent", mesh->getBuffer("tangent"));
+		program->setBufferobject("binormal", mesh->getBuffer("binormal"));
 	}
 
-	getProgram()->setUniform("mvmat", mvmat, true);
+	program->setUniform("mvmat", mvmat, true);
 
 	mesh->getBuffer("index")->drawElements(GL_TRIANGLES);
 
