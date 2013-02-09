@@ -45,17 +45,12 @@ public:
 	inline bool needsUvBuffer(void) const;
 	inline bool needsTangentAndBinormalBuffer(void) const;
 
+	// Virtual functions, needed by Material
+	inline virtual void setViewmatrix(Matrix4 const& viewmatrix);
+	inline virtual void setProjectionmatrix(Matrix4 const& projectionmatrix);
+	inline virtual void renderMesh(Mesh const* mesh, Transform const& transf);
 	inline virtual void beginRendering(Color const& ambient_light = Color(0, 0, 0), Light const* light = NULL, bool additive_rendering = false) const;
 	inline virtual void endRendering(void) const;
-
-	// Functions to set view and projection matrices
-	inline void setViewmatrix(Matrix4 const& viewmatrix);
-	inline void setProjectionmatrix(Matrix4 const& projectionmatrix);
-	inline void setViewAndProjectionmatricesFromCamera(Camera const* camera);
-
-	inline void renderMesh(Mesh const* mesh, Transform const& transf);
-
-	// Virtual functions, needed by Material
 	inline virtual bool needsLight(Renderable const* renderable) const;
 
 // TODO: Remove this temporary solution!
@@ -242,6 +237,47 @@ inline bool GenericMaterial::needsTangentAndBinormalBuffer(void) const
 	return false;
 }
 
+inline void GenericMaterial::setViewmatrix(Matrix4 const& viewmatrix)
+{
+	if (rendering_light) {
+		if (rendering_light->getType() == Light::POINT) {
+			program->setUniform("light_pos_viewspace", viewmatrix * rendering_light->getPosition(), 1);
+		} else {
+			program->setUniform("light_pos_viewspace", matrix4ToMatrix3(viewmatrix) * -rendering_light->getDirection(), 0);
+		}
+	}
+	rendering_viewmatrix = viewmatrix;
+}
+
+inline void GenericMaterial::setProjectionmatrix(Matrix4 const& projectionmatrix)
+{
+	getProgram()->setUniform("pmat", projectionmatrix, true);
+}
+
+inline void GenericMaterial::renderMesh(Mesh const* mesh, Transform const& transf)
+{
+	// Calculate ModelViewMatrix
+	Matrix4 mvmat = rendering_viewmatrix * transf.getMatrix();
+
+	// Bind all needed buffers
+	getProgram()->setBufferobject("pos", mesh->getBuffer("pos"));
+	if (rendering_light && needsNormalBuffer()) {
+		getProgram()->setBufferobject("normal", mesh->getBuffer("normal"));
+	}
+	if (needsUvBuffer()) {
+		getProgram()->setBufferobject("uv", mesh->getBuffer("uv"));
+	}
+	if (needsTangentAndBinormalBuffer()) {
+		getProgram()->setBufferobject("tangent", mesh->getBuffer("tangent"));
+		getProgram()->setBufferobject("binormal", mesh->getBuffer("binormal"));
+	}
+
+	getProgram()->setUniform("mvmat", mvmat, true);
+
+	mesh->getBuffer("index")->drawElements(GL_TRIANGLES);
+
+}
+
 inline void GenericMaterial::beginRendering(Color const& ambient_light, Light const* light, bool additive_rendering) const
 {
 // TODO: Implement using of normalmap_weight!
@@ -408,53 +444,6 @@ inline void GenericMaterial::endRendering(void) const
 		glEnable(GL_CULL_FACE);
 	}
 	HppCheckGlErrors();
-}
-
-inline void GenericMaterial::setViewmatrix(Matrix4 const& viewmatrix)
-{
-	if (rendering_light) {
-		if (rendering_light->getType() == Light::POINT) {
-			program->setUniform("light_pos_viewspace", viewmatrix * rendering_light->getPosition(), 1);
-		} else {
-			program->setUniform("light_pos_viewspace", matrix4ToMatrix3(viewmatrix) * -rendering_light->getDirection(), 0);
-		}
-	}
-	rendering_viewmatrix = viewmatrix;
-}
-
-inline void GenericMaterial::setProjectionmatrix(Matrix4 const& projectionmatrix)
-{
-	getProgram()->setUniform("pmat", projectionmatrix, true);
-}
-
-inline void GenericMaterial::setViewAndProjectionmatricesFromCamera(Camera const* camera)
-{
-	setViewmatrix(camera->getViewmatrix());
-	setProjectionmatrix(camera->getProjectionmatrix());
-}
-
-inline void GenericMaterial::renderMesh(Mesh const* mesh, Transform const& transf)
-{
-	// Calculate ModelViewMatrix
-	Hpp::Matrix4 mvmat = rendering_viewmatrix * transf.getMatrix();
-
-	// Bind all needed buffers
-	getProgram()->setBufferobject("pos", mesh->getBuffer("pos"));
-	if (rendering_light && needsNormalBuffer()) {
-		getProgram()->setBufferobject("normal", mesh->getBuffer("normal"));
-	}
-	if (needsUvBuffer()) {
-		getProgram()->setBufferobject("uv", mesh->getBuffer("uv"));
-	}
-	if (needsTangentAndBinormalBuffer()) {
-		getProgram()->setBufferobject("tangent", mesh->getBuffer("tangent"));
-		getProgram()->setBufferobject("binormal", mesh->getBuffer("binormal"));
-	}
-
-	getProgram()->setUniform("mvmat", mvmat, true);
-
-	mesh->getBuffer("index")->drawElements(GL_TRIANGLES);
-
 }
 
 inline bool GenericMaterial::needsLight(Renderable const* renderable) const
