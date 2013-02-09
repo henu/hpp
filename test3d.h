@@ -41,9 +41,21 @@ inline void test3D(void)
 		transf2.rotateZ(Angle::fromDegrees(10));
 		Transform transf = transf1.addAnotherTransform(transf2);
 		Vector3 diff = transf.getPosition() - Vector3(2.348, -0.130, 10.487);
-		HppAssert(diff.length() < 0.01, "Testing of basic transformations has failed!");
+		HppAssert(diff.length() < 0.01, "Testing of Translate::addAnotherTransform() has failed!");
 		diff = transf.getPosition() - transf.applyToPosition(Vector3::ZERO);
-		HppAssert(diff.length() < 0.01, "Testing of basic transformations has failed!");
+		HppAssert(diff.length() < 0.01, "Testing of Translate::addAnotherTransform() has failed!");
+	}
+
+	// Translate::getRelativePositionTo()
+	{
+		Transform transf(Vector3(5, 7, 9));
+		transf.rotateX(Angle::fromDegrees(20));
+		transf.rotateY(Angle::fromDegrees(70));
+		Vector3 rel_pos(-10, -21, -32);
+		Vector3 abs_pos = transf.applyToPosition(rel_pos);
+		Vector3 rel_pos_check = transf.getRelativePositionTo(abs_pos);
+		Vector3 diff = rel_pos - rel_pos_check;
+		HppAssert(diff.length() < 0.01, "Testing of Translate::getRelativePositionTo() has failed!");
 	}
 
 	// Simple viewfrustum test

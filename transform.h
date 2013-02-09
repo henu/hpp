@@ -58,6 +58,9 @@ public:
 	inline Vector3 applyToPosition(Vector3 const& pos) const;
 	inline Real getMaximumScaling(void) const;
 
+	// Get how Transform sees the given absolute position
+	inline Vector3 getRelativePositionTo(Vector3 const& pos) const;
+
 private:
 
 	Matrix4 transf;
@@ -173,6 +176,11 @@ inline Real Transform::getMaximumScaling(void) const
 		return sqrt(len_y_to2);
 	}
 	return sqrt(len_z_to2);
+}
+
+inline Vector3 Transform::getRelativePositionTo(Vector3 const& pos) const
+{
+	return transf.inverse() * pos;
 }
 
 }
