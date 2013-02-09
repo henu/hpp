@@ -21,6 +21,9 @@ public:
 	inline void setViewport(size_t viewport_x, size_t viewport_y,
 	                        size_t viewport_width, size_t viewport_height);
 
+	inline Real getNear(void) const { return nearplane; }
+	inline Real getFar(void) const { return farplane; }
+
 	inline Matrix4 getViewmatrix(void) const;
 	inline Matrix4 getProjectionmatrix(void) const;
 	inline Matrix4 getProjectionviewmatrix(void) const;
