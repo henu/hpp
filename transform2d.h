@@ -2,9 +2,6 @@
 #define HPP_TRANSFORM2D_H
 
 #include "matrix3.h"
-/*
-#include "3dutils.h"
-*/
 #include "vector2.h"
 #include "angle.h"
 
@@ -34,9 +31,9 @@ public:
 	inline Transform2D getRotScale(void) const;
 
 	// Modifiers. Rotation is counterclockwise when X is right and Y up.
-	inline void translate(Vector2 const& v) { transf = transf * Matrix3::translMatrix(v); }
-	inline void rotate(Angle const& angle) { transf = transf * Matrix3::rotMatrix2d(angle); }
-	inline void scale(Vector2 const& v) { transf = transf * Matrix3::scaleMatrix(v); }
+	inline void translate(Vector2 const& v) { transf = Matrix3::translMatrix(v) * transf; }
+	inline void rotate(Angle const& angle) { transf = Matrix3::rotMatrix2d(angle) * transf; }
+	inline void scale(Vector2 const& v) { transf = Matrix3::scaleMatrix(v) * transf; }
 
 	// Combines this and another so that first this current transform is
 	// done and then another one.
@@ -110,7 +107,7 @@ inline Transform2D Transform2D::getRotScale(void) const
 
 inline Transform2D Transform2D::addAnotherTransform(Transform2D const& transf2) const
 {
-	return Transform2D(transf * transf2.transf);
+	return Transform2D(transf2.transf * transf);
 }
 
 inline Vector2 Transform2D::applyToPosition(Vector2 const& pos) const
