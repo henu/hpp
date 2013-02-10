@@ -68,7 +68,7 @@ inline void Perspectivecamera::update(void)
 	aspectratio = viewport_width / Real(viewport_height);
 
 	viewmat = transf.getMatrix().inverse();
-	projmat = Matrix4::projectionMatrix(fov_y, aspectratio, nearplane, farplane);
+	projmat = Matrix4::perspectiveProjectionMatrix(fov_y, aspectratio, nearplane, farplane);
 	projviewmat = projmat * viewmat;
 }
 

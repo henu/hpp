@@ -87,14 +87,18 @@ public:
 	static inline Matrix4 yawMatrix(Angle const& angle) { return rotMatrixZ(angle); }
 	#endif
 
-	// Static function for generating various special matrices.
-	// In projectionMatrix FOV means angle between opposite
-	// viewfrustum planes.
-	static inline Matrix4 translMatrix(Vector3 const& v);
-	static inline Matrix4 scaleMatrix(Vector3 const& v);
-	static inline Matrix4 projectionMatrix(Angle const& fov_y,
-	                                       Real aspectratio,
-	                                       Real nearplane, Real farplane);
+	// Static function for generating various special matrices. In
+	// perspectiveProjectionMatrix FOV means angle and in
+	// orthographicProjectionMatrix size means distance between top
+	// and bottom viewfrustum planes. Aspectratio means width/height.
+	inline static Matrix4 translMatrix(Vector3 const& v);
+	inline static Matrix4 scaleMatrix(Vector3 const& v);
+	inline static Matrix4 perspectiveProjectionMatrix(Angle const& fov_y,
+	                                                  Real aspectratio,
+	                                                  Real nearplane, Real farplane);
+	inline static Matrix4 orthographicProjectionMatrix(Real size_y,
+	                                                   Real aspectratio,
+	                                                   Real nearplane, Real farplane);
 
 private:
 
@@ -624,15 +628,39 @@ inline Matrix4 Matrix4::scaleMatrix(Vector3 const& v)
 	               0,   0,   0,   1);
 }
 
-inline Matrix4 Matrix4::projectionMatrix(Angle const& fov_y,
-                                         Real aspectratio,
-                                         Real nearplane, Real farplane)
+inline Matrix4 Matrix4::perspectiveProjectionMatrix(Angle const& fov_y,
+                                                    Real aspectratio,
+                                                    Real nearplane, Real farplane)
 {
+	if (aspectratio < 0.0001) {
+		throw Exception("Invalid aspectration(" + floatToStr(aspectratio) + ")!");
+	}
+	if (farplane - nearplane < 0.0001) {
+		throw Exception("Invalid near(" + floatToStr(nearplane) + ") and far(" + floatToStr(farplane) + ") planes!");
+	}
 	Real f = 1 / (fov_y / 2).tan();
 	return Matrix4(f / aspectratio, 0, 0,                                           0,
 	               0,               f, 0,                                           0,
 	               0,               0, (farplane+nearplane) / (nearplane-farplane), 2*farplane*nearplane / (nearplane-farplane),
 	               0,               0, -1,                                          0);
+}
+
+inline Matrix4 Matrix4::orthographicProjectionMatrix(Real size_y,
+                                                     Real aspectratio,
+                                                     Real nearplane, Real farplane)
+{
+	if (aspectratio < 0.0001) {
+		throw Exception("Invalid aspectration(" + floatToStr(aspectratio) + ")!");
+	}
+	if (farplane - nearplane < 0.0001) {
+		throw Exception("Invalid near(" + floatToStr(nearplane) + ") and far(" + floatToStr(farplane) + ") planes!");
+	}
+	Real size_x = size_y / aspectratio;
+	Real size_z = farplane - nearplane;
+	return Matrix4(2 / size_x, 0,          0,           0,
+	               0,          2 / size_y, 0,           0,
+	               0,          0,          -2 / size_z, (farplane + nearplane) / -size_z,
+	               0,          0,          0,           1);
 }
 
 inline Real Matrix4::complement(uint8_t cell_id) const
