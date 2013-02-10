@@ -157,6 +157,7 @@
 				"movable.h",
 				"oldcamera.h",
 				"oldmesh.h",
+				"orthographiccamera.h",
 				"perspectivecamera.h",
 				"rawmaterial.h",
 				"rawmesh.h",
