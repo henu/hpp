@@ -1,6 +1,7 @@
 #ifndef HPP_RENDERQUEUE2D
 #define HPP_RENDERQUEUE2D
 
+#include "transform2d.h"
 #include "shaderprogram.h"
 #include "noncopyable.h"
 #include "vector2.h"
@@ -163,47 +164,55 @@ inline void Renderqueue2d::renderSprite(Texture const* tex,
 		HppCheckGlErrors();
 	}
 
-// TODO: Use rotation!
-(void)rotation;
-(void)rot_pos;
 	HppCheckForCorrectThread();
 
-	//Vector2 real_pos = pos + Vector2(x, y);
-	Vector2 real_pos = pos;
+	Transform2D transf;
+	transf.scale(size);
+	if (rotation != Angle::fromDegrees(0)) {
+		transf.translate(-rot_pos);
+		transf.rotate(rotation);
+		transf.translate(rot_pos);
+	}
+	transf.translate(pos);
+
+	Vector2 v0 = transf.applyToPosition(Vector2(0, 0));
+	Vector2 v1 = transf.applyToPosition(Vector2(1, 0));
+	Vector2 v2 = transf.applyToPosition(Vector2(1, 1));
+	Vector2 v3 = transf.applyToPosition(Vector2(0, 1));
 
 	// Vertex #0
-	poss.push_back(real_pos.x);
-	poss.push_back(real_pos.y);
+	poss.push_back(v0.x);
+	poss.push_back(v0.y);
 	uvs.push_back(tex_pos.x);
 	uvs.push_back(tex_pos.y);
 
 	// Vertex #1
-	poss.push_back(real_pos.x + size.x);
-	poss.push_back(real_pos.y);
+	poss.push_back(v1.x);
+	poss.push_back(v1.y);
 	uvs.push_back(tex_pos.x + tex_size.x);
 	uvs.push_back(tex_pos.y);
 
 	// Vertex #3
-	poss.push_back(real_pos.x);
-	poss.push_back(real_pos.y + size.y);
+	poss.push_back(v3.x);
+	poss.push_back(v3.y);
 	uvs.push_back(tex_pos.x);
 	uvs.push_back(tex_pos.y + tex_size.y);
 
 	// Vertex #1
-	poss.push_back(real_pos.x + size.x);
-	poss.push_back(real_pos.y);
+	poss.push_back(v1.x);
+	poss.push_back(v1.y);
 	uvs.push_back(tex_pos.x + tex_size.x);
 	uvs.push_back(tex_pos.y);
 
 	// Vertex #2
-	poss.push_back(real_pos.x + size.x);
-	poss.push_back(real_pos.y + size.y);
+	poss.push_back(v2.x);
+	poss.push_back(v2.y);
 	uvs.push_back(tex_pos.x + tex_size.x);
 	uvs.push_back(tex_pos.y + tex_size.y);
 
 	// Vertex #3
-	poss.push_back(real_pos.x);
-	poss.push_back(real_pos.y + size.y);
+	poss.push_back(v3.x);
+	poss.push_back(v3.y);
 	uvs.push_back(tex_pos.x);
 	uvs.push_back(tex_pos.y + tex_size.y);
 
