@@ -23,6 +23,7 @@ class Texture
 public:
 
 	// Flags
+// TODO: Support clamping to edges!
 	static uint32_t const REMOVE_ALPHA           = 0x00000001;
 	static uint32_t const FORCE_ALPHA            = 0x00000002;
 	static uint32_t const NEAREST                = 0x00000004;
@@ -91,6 +92,7 @@ private:
 		size_t width, height;
 		uint8_t bytes_per_pixel;
 		bool alpha;
+		bool depth;
 		GLint min_filter;
 	};
 
@@ -136,6 +138,8 @@ private:
 
 	// Releases gl texture thread safely
 	void releaseGlTexture(void);
+
+	inline static Pixelformat getFormat(size_t bytes_per_pixel, bool alpha, bool depth);
 
 };
 
@@ -185,32 +189,9 @@ inline void Texture::loadFromData(ByteV const& data, Pixelformat format, uint32_
 
 inline void Texture::createNew(uint16_t width, uint16_t height, Pixelformat format, uint32_t flags)
 {
-	uint8_t bytes_per_pixel = 0;
-	bool alpha = false;
-	switch (format) {
-	case RGB:
-		bytes_per_pixel = 3;
-		alpha = false;
-		break;
-	case RGBA:
-		bytes_per_pixel = 4;
-		alpha = true;
-		break;
-	case GRAYSCALE:
-		bytes_per_pixel = 1;
-		alpha = false;
-		break;
-	case GRAYSCALE_ALPHA:
-		bytes_per_pixel = 2;
-		alpha = true;
-		break;
-	case ALPHA:
-		bytes_per_pixel = 1;
-		alpha = true;
-		break;
-	case DEFAULT:
-		throw Exception("Cannot set format \"DEFAULT\" when creating new empty image!");
-	}
+	uint8_t bytes_per_pixel = getBppOfPixelformat(format);
+	bool alpha = pixelformatHasAlpha(format);
+	bool depth = pixelformatHasDepth(format);
 
 	// Read flags
 	if (flags & REMOVE_ALPHA) {
@@ -249,6 +230,7 @@ inline void Texture::createNew(uint16_t width, uint16_t height, Pixelformat form
 	pdata.height = height;
 	pdata.bytes_per_pixel = bytes_per_pixel;
 	pdata.alpha = alpha;
+	pdata.depth = depth;
 	pdata.min_filter = min_filter;
 
 	tryToUsePixeldata(pdata);
@@ -283,40 +265,17 @@ ByteV Texture::getData(void) const
 	HppCheckGlErrors();
 
 	// Get BPP and format
-	GLenum gl_format;
-	uint8_t bytes_per_pixel;
-	#ifndef NDEBUG
-	gl_format = rand();
-	bytes_per_pixel = rand();
-	#endif
-	switch (format) {
-	case RGB:
-		bytes_per_pixel = 3;
-		gl_format = GL_RGB;
-		break;
-	case RGBA:
-		bytes_per_pixel = 4;
-		gl_format = GL_RGBA;
-		break;
-	case GRAYSCALE:
-		bytes_per_pixel = 1;
-		gl_format = GL_LUMINANCE;
-		break;
-	case GRAYSCALE_ALPHA:
-		bytes_per_pixel = 2;
-		gl_format = GL_LUMINANCE_ALPHA;
-		break;
-	case ALPHA:
-		bytes_per_pixel = 1;
-		gl_format = GL_ALPHA;
-		break;
-	default:
-		HppAssert(false, "Invalid format");
+	GLenum gl_format = pixelformatToGlFormat(format);
+	uint8_t bytes_per_pixel = getBppOfPixelformat(format);
+
+	GLenum type = GL_UNSIGNED_BYTE;
+	if (pixelformatHasDepth(format)) {
+		type = GL_FLOAT;
 	}
 
 	// Get image data
 	uint8_t* tex_data = new uint8_t[tex_width * tex_height * bytes_per_pixel];
-	glGetTexImage(GL_TEXTURE_2D, 0, gl_format, GL_UNSIGNED_BYTE, tex_data);
+	glGetTexImage(GL_TEXTURE_2D, 0, gl_format, type, tex_data);
 	HppCheckGlErrors();
 
 	ByteV result(tex_data, tex_data + tex_width * tex_height * bytes_per_pixel);
@@ -352,40 +311,17 @@ HppAssert(!tempdata, "Adding pixeldata with tempdata not implemented yet!");
 	HppAssert(y_offset + height <= tex_height, "Overflow over image borders is not allowed (for now)!");
 
 	// Get BPP and format
-	GLenum gl_format;
-	uint8_t bytes_per_pixel;
-	#ifndef NDEBUG
-	gl_format = 0;
-	bytes_per_pixel = 0;
-	#endif
-	switch (format) {
-	case RGB:
-		bytes_per_pixel = 3;
-		gl_format = GL_RGB;
-		break;
-	case RGBA:
-		bytes_per_pixel = 4;
-		gl_format = GL_RGBA;
-		break;
-	case GRAYSCALE:
-		bytes_per_pixel = 1;
-		gl_format = GL_LUMINANCE;
-		break;
-	case GRAYSCALE_ALPHA:
-		bytes_per_pixel = 2;
-		gl_format = GL_LUMINANCE_ALPHA;
-		break;
-	case ALPHA:
-		bytes_per_pixel = 1;
-		gl_format = GL_ALPHA;
-		break;
-	default:
-		HppAssert(false, "Invalid format");
+	GLenum gl_format = pixelformatToGlFormat(format);
+	uint8_t bytes_per_pixel = getBppOfPixelformat(format);
+
+	GLenum type = GL_UNSIGNED_BYTE;
+	if (pixelformatHasDepth(format)) {
+		type = GL_FLOAT;
 	}
 
 	// Get image data
 	uint8_t* tex_data = new uint8_t[tex_width * tex_height * bytes_per_pixel];
-	glGetTexImage(GL_TEXTURE_2D, 0, gl_format, GL_UNSIGNED_BYTE, tex_data);
+	glGetTexImage(GL_TEXTURE_2D, 0, gl_format, type, tex_data);
 	HppCheckGlErrors();
 
 	// Add pixel data
@@ -417,7 +353,8 @@ HppAssert(!tempdata, "Adding pixeldata with tempdata not implemented yet!");
 	pdata.width = tex_width;
 	pdata.height = tex_height;
 	pdata.bytes_per_pixel = bytes_per_pixel;
-	pdata.alpha = (gl_format == GL_ALPHA) || (gl_format == GL_RGBA) || (gl_format == GL_LUMINANCE_ALPHA);
+	pdata.alpha = pixelformatHasAlpha(format);
+	pdata.depth = pixelformatHasDepth(format);
 	pdata.min_filter = min_filter;
 	tryToUsePixeldata(pdata);
 
@@ -510,6 +447,7 @@ inline Texture::Pixeldata Texture::load(Path const& path, ByteV const& data, boo
 	result.height = image.getHeight();
 	result.bytes_per_pixel = image.getBytesPerPixel();
 	result.alpha = image.hasAlpha() || (format == ALPHA);
+	result.depth = pixelformatHasDepth(format);
 	result.min_filter = min_filter;
 
 	// Do possible resize
@@ -534,27 +472,7 @@ inline void Texture::tryToUsePixeldata(Pixeldata const& pdata)
 		is_loaded = false;
 		width = pdata.width;
 		height = pdata.height;
-		Pixelformat final_format;
-		#ifndef NDEBUG
-		final_format = ALPHA;
-		#endif
-		if (pdata.bytes_per_pixel == 4) {
-			HppAssert(pdata.alpha, "Fail!");
-			final_format = RGBA;
-		} else if (pdata.bytes_per_pixel == 3) {
-			HppAssert(!pdata.alpha, "Fail!");
-			final_format = RGB;
-		} else if (pdata.bytes_per_pixel == 2) {
-			HppAssert(pdata.alpha, "Fail!");
-			final_format = GRAYSCALE_ALPHA;
-		} else if (pdata.bytes_per_pixel == 1 && !pdata.alpha) {
-			final_format = GRAYSCALE;
-		} else if (pdata.bytes_per_pixel == 1 && pdata.alpha) {
-			final_format = ALPHA;
-		} else {
-			throw Exception("Invalid format!");
-		}
-		format = final_format;
+		format = getFormat(pdata.bytes_per_pixel, pdata.alpha, pdata.depth);
 	}
 }
 
@@ -574,34 +492,17 @@ inline void Texture::usePixeldata(Pixeldata pdata) const
 	// Generate a new GL texture
 	GLuint new_texture;
 	glGenTextures(1, &new_texture);
+	HppCheckGlErrors();
 	glBindTexture(GL_TEXTURE_2D, new_texture);
+	HppCheckGlErrors();
 
-	GLenum gl_format;
-	Pixelformat final_format;
-	#ifndef NDEBUG
-	gl_format = 0;
-	final_format = ALPHA;
-	#endif
-	if (pdata.bytes_per_pixel == 4) {
-		HppAssert(pdata.alpha, "Fail!");
-		gl_format = GL_RGBA;
-		final_format = RGBA;
-	} else if (pdata.bytes_per_pixel == 3) {
-		HppAssert(!pdata.alpha, "Fail!");
-		gl_format = GL_RGB;
-		final_format = RGB;
-	} else if (pdata.bytes_per_pixel == 2) {
-		HppAssert(pdata.alpha, "Fail!");
-		gl_format = GL_LUMINANCE_ALPHA;
-		final_format = GRAYSCALE_ALPHA;
-	} else if (pdata.bytes_per_pixel == 1 && !pdata.alpha) {
-		gl_format = GL_LUMINANCE;
-		final_format = GRAYSCALE;
-	} else if (pdata.bytes_per_pixel == 1 && pdata.alpha) {
-		gl_format = GL_ALPHA;
-		final_format = ALPHA;
-	} else {
-		throw Exception("Invalid format!");
+	Pixelformat final_format = getFormat(pdata.bytes_per_pixel, pdata.alpha, pdata.depth);
+	GLenum gl_format = pixelformatToGlFormat(final_format);
+	GLint gl_internalformat = pixelformatToGlInternalFormat(final_format);
+
+	GLenum type = GL_UNSIGNED_BYTE;
+	if (pixelformatHasDepth(final_format)) {
+		type = GL_FLOAT;
 	}
 
 	int valid_tex = 1;
@@ -611,10 +512,13 @@ inline void Texture::usePixeldata(Pixeldata pdata) const
 		if (!valid_tex) {
 			if (pdata.width == pdata.height) {
 				resizePixeldata(pdata, pdata.width / 2, pdata.height / 2);
+				HppCheckGlErrors();
 			} else if (pdata.width > pdata.height) {
 				resizePixeldata(pdata, pdata.width / 2, pdata.height);
+				HppCheckGlErrors();
 			} else {
 				resizePixeldata(pdata, pdata.width, pdata.height / 2);
+				HppCheckGlErrors();
 			}
 		}
 
@@ -631,9 +535,9 @@ inline void Texture::usePixeldata(Pixeldata pdata) const
 		// Check if texture can be created
 // TODO: On intel GPU, this enables GL_TEXTURE_2D. Is it normal?
 		bool tex2d_enabled = glIsEnabled(GL_TEXTURE_2D);
-		glTexImage2D(GL_PROXY_TEXTURE_2D, 0, gl_format,
+		glTexImage2D(GL_PROXY_TEXTURE_2D, 0, gl_internalformat,
 			     pdata.width, pdata.height,
-			     0, gl_format, GL_UNSIGNED_BYTE,
+			     0, gl_format, type,
 			     &pdata.buf[0]);
 		if (!tex2d_enabled && glIsEnabled(GL_TEXTURE_2D)) {
 			std::cerr << "WARNING: Unexpected enable of GL_TEXTURE_2D after calling glTexImage2D()!" << std::endl;
@@ -655,9 +559,9 @@ inline void Texture::usePixeldata(Pixeldata pdata) const
 
 // TODO: On intel GPU, this enables GL_TEXTURE_2D. Is it normal?
 	bool tex2d_enabled = glIsEnabled(GL_TEXTURE_2D);
-	glTexImage2D(GL_TEXTURE_2D, 0, gl_format,
+	glTexImage2D(GL_TEXTURE_2D, 0, gl_internalformat,
 		     pdata.width, pdata.height,
-		     0, gl_format, GL_UNSIGNED_BYTE,
+		     0, gl_format, type,
 		     &pdata.buf[0]);
 	if (!tex2d_enabled && glIsEnabled(GL_TEXTURE_2D)) {
 		std::cerr << "WARNING: Unexpected enable of GL_TEXTURE_2D after calling glTexImage2D()!" << std::endl;
@@ -683,6 +587,40 @@ inline void Texture::releaseGlTexture(void)
 		glDeleteTextures(1, &texture);
 	} else {
 		Texturemanager::addReleasableTexture(texture);
+	}
+}
+
+inline Pixelformat Texture::getFormat(size_t bytes_per_pixel, bool alpha, bool depth)
+{
+	if (bytes_per_pixel == 4) {
+		if (!depth) {
+			HppAssert(alpha, "Alpha expected!");
+			return RGBA;
+		} else {
+			return DEPTH32;
+		}
+	} else if (bytes_per_pixel == 3) {
+		if (!depth) {
+			HppAssert(!alpha, "Unexpected alpha!");
+			return RGB;
+		} else {
+			return DEPTH24;
+		}
+	} else if (bytes_per_pixel == 2) {
+		if (!depth) {
+			HppAssert(alpha, "Alpha expected!");
+			return GRAYSCALE_ALPHA;
+		} else {
+			return DEPTH16;
+		}
+	} else if (bytes_per_pixel == 1) {
+		if (alpha) {
+			return ALPHA;
+		} else {
+			return GRAYSCALE;
+		}
+	} else {
+		throw Exception("Invalid format!");
 	}
 }
 
