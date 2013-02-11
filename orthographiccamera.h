@@ -75,6 +75,7 @@ inline Viewfrustum Orthographiccamera::getViewfrustum(void) const
 {
 // TODO: Code this!
 HppAssert(false, "Not implemented yet!");
+return Viewfrustum();
 }
 
 }

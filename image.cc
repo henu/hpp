@@ -263,6 +263,9 @@ static void loadFromSDLSurface(SDL_Surface* surf,
 			case ALPHA:
 				data.push_back(alpha);
 				break;
+			case DEPTH16:
+			case DEPTH24:
+			case DEPTH32:
 			case DEFAULT:
 				HppAssert(false, "Fail!");
 			}
@@ -414,6 +417,9 @@ SDL_Surface* Image::convertToSDLSurface(void) const
 				blue = 255;
 				alpha = *pdata_it; pdata_it ++;
 				break;
+			case DEPTH16:
+			case DEPTH24:
+			case DEPTH32:
 			case DEFAULT:
 				HppAssert(false, "Fail!");
 			}

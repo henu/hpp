@@ -138,8 +138,6 @@ std::string const SHADER_FRG =
 "\n"
 "	#ifdef COLOR\n"
 "	vec3 color = material_color.xyz;\n"
-"	#else\n"
-"	vec3 color = vec3(1.0, 1.0, 1.0);\n"
 "	#endif\n"
 "\n"
 "	#ifdef NMAP\n"
