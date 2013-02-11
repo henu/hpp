@@ -24,6 +24,7 @@ public:
 	inline static void AttachShader(GLuint program, GLuint shader);
 	inline static void BindAttribLocation(GLuint program, GLuint index, GLchar const* name);
 	inline static void BindBuffer(GLenum target, GLuint id);
+	inline static void BindFramebuffer(GLenum target, GLuint framebuffer);
 	inline static void BindVertexArray(GLuint array);
 	inline static void BufferData(GLenum target, GLsizei size, const void* data, GLenum usage);
 	inline static void ClientActiveTexture(GLenum texture);
@@ -31,11 +32,17 @@ public:
 	inline static GLuint CreateShader(GLenum type);
 	inline static void CompileShader(GLuint shader);
 	inline static void DeleteBuffers(GLsizei n, GLuint const* buffers);
+	inline static void DeleteFramebuffers(GLsizei n, GLuint const* framebuffers);
 	inline static void DeleteProgram(GLuint program);
 	inline static void DeleteShader(GLuint shader);
 	inline static void DisableVertexAttribArray(GLuint index);
 	inline static void EnableVertexAttribArray(GLuint index);
+	inline static void FramebufferTexture(GLenum target, GLenum attachment, GLuint texture, GLint level);
+	inline static void FramebufferTexture1D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+	inline static void FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+	inline static void FramebufferTexture3D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint layer);
 	inline static void GenBuffers(GLsizei n, GLuint* ids);
+	inline static void GenFramebuffers(GLsizei n, GLuint* ids);
 	inline static void GenVertexArrays(GLsizei n, GLuint* arrays);
 	inline static void GetProgramInfoLog(GLuint program, GLsizei max_len, GLsizei* len, GLchar* log);
 	inline static void GetShaderInfoLog(GLuint shader, GLsizei max_len, GLsizei* len, GLchar* log);
@@ -101,6 +108,7 @@ private:
 	static PFNGLATTACHSHADERPROC systemAttachShader;
 	static PFNGLBINDATTRIBLOCATIONPROC systemBindAttribLocation;
 	static PFNGLBINDBUFFERPROC systemBindBuffer;
+	static PFNGLBINDFRAMEBUFFERPROC systemBindFramebuffer;
 	static PFNGLBINDVERTEXARRAYPROC systemBindVertexArray;
 	static PFNGLBUFFERDATAPROC systemBufferData;
 	static PFNGLCLIENTACTIVETEXTUREPROC systemClientActiveTexture; //DEPRECATED
@@ -108,11 +116,17 @@ private:
 	static PFNGLCREATEPROGRAMPROC systemCreateProgram;
 	static PFNGLCREATESHADERPROC systemCreateShader;
 	static PFNGLDELETEBUFFERSPROC systemDeleteBuffers;
+	static PFNGLDELETEFRAMEBUFFERSPROC systemDeleteFramebuffers;
 	static PFNGLDELETEPROGRAMPROC systemDeleteProgram;
 	static PFNGLDELETESHADERPROC systemDeleteShader;
 	static PFNGLDISABLEVERTEXATTRIBARRAYPROC systemDisableVertexAttribArray;
 	static PFNGLENABLEVERTEXATTRIBARRAYPROC systemEnableVertexAttribArray;
+	static PFNGLFRAMEBUFFERTEXTUREPROC systemFramebufferTexture;
+	static PFNGLFRAMEBUFFERTEXTURE1DPROC systemFramebufferTexture1D;
+	static PFNGLFRAMEBUFFERTEXTURE2DPROC systemFramebufferTexture2D;
+	static PFNGLFRAMEBUFFERTEXTURE3DPROC systemFramebufferTexture3D;
 	static PFNGLGENBUFFERSPROC systemGenBuffers;
+	static PFNGLGENFRAMEBUFFERSPROC systemGenFramebuffers;
 	static PFNGLGENVERTEXARRAYSPROC systemGenVertexArrays;
 	static PFNGLGETPROGRAMINFOLOGPROC systemGetProgramInfoLog;
 	static PFNGLGETSHADERINFOLOGPROC systemGetShaderInfoLog;
@@ -184,6 +198,12 @@ inline void GlSystem::BindBuffer(GLenum target, GLuint id)
 	systemBindBuffer(target, id);
 }
 
+inline void GlSystem::BindFramebuffer(GLenum target, GLuint framebuffer)
+{
+	HppAssert(systemBindFramebuffer, "Function does not exist!");
+	systemBindFramebuffer(target, framebuffer);
+}
+
 inline void GlSystem::BindVertexArray(GLuint array)
 {
 	HppAssert(systemBindVertexArray, "Function does not exist!");
@@ -232,6 +252,12 @@ inline void GlSystem::DeleteBuffers(GLsizei n, GLuint const* buffers)
 	systemDeleteBuffers(n, buffers);
 }
 
+inline void GlSystem::DeleteFramebuffers(GLsizei n, GLuint const* framebuffers)
+{
+	HppAssert(systemDeleteFramebuffers, "Function does not exist!");
+	systemDeleteFramebuffers(n, framebuffers);
+}
+
 inline void GlSystem::DeleteProgram(GLuint program)
 {
 	HppAssert(systemDeleteProgram, "Function does not exist!");
@@ -256,10 +282,40 @@ inline void GlSystem::EnableVertexAttribArray(GLuint index)
 	systemEnableVertexAttribArray(index);
 }
 
+inline void GlSystem::FramebufferTexture(GLenum target, GLenum attachment, GLuint texture, GLint level)
+{
+	HppAssert(systemFramebufferTexture, "Function does not exist!");
+	systemFramebufferTexture(target, attachment, texture, level);
+}
+
+inline void GlSystem::FramebufferTexture1D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level)
+{
+	HppAssert(systemFramebufferTexture1D, "Function does not exist!");
+	systemFramebufferTexture1D(target, attachment, textarget, texture, level);
+}
+
+inline void GlSystem::FramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level)
+{
+	HppAssert(systemFramebufferTexture2D, "Function does not exist!");
+	systemFramebufferTexture2D(target, attachment, textarget, texture, level);
+}
+
+inline void GlSystem::FramebufferTexture3D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint layer)
+{
+	HppAssert(systemFramebufferTexture3D, "Function does not exist!");
+	systemFramebufferTexture3D(target, attachment, textarget, texture, level, layer);
+}
+
 inline void GlSystem::GenBuffers(GLsizei n, GLuint* ids)
 {
 	HppAssert(systemGenBuffers, "Function does not exist!");
 	systemGenBuffers(n, ids);
+}
+
+inline void GlSystem::GenFramebuffers(GLsizei n, GLuint* ids)
+{
+	HppAssert(systemGenFramebuffers, "Function does not exist!");
+	systemGenFramebuffers(n, ids);
 }
 
 inline void GlSystem::GenVertexArrays(GLsizei n, GLuint* arrays)
