@@ -13,6 +13,11 @@
 #include "assert.h"
 #include "texture.h"
 #include "texturemanager.h"
+#include "json.h"
+#include "exception.h"
+
+#include <string>
+#include <map>
 
 namespace Hpp
 {
@@ -25,6 +30,7 @@ class GenericMaterial : public Material
 public:
 
 	// Constructor and destructor
+	inline GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures);
 	inline GenericMaterial(Rawmaterial const& rawmat, bool twosided = false);
 	inline GenericMaterial(void);
 	inline virtual ~GenericMaterial(void);
@@ -127,7 +133,86 @@ private:
 	inline void updateNeedsLight(void);
 	inline void updateIsTranslucent(void);
 
+	inline static Color jsonToColor(Json const& json);
+
 };
+
+inline GenericMaterial::GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures) :
+color(Color(1, 1, 1)),
+specular(Color(0, 0, 0)),
+shininess(0),
+ambient_multiplier(1),
+emittance(0),
+colormap(NULL),
+normalmap(NULL),
+specularmap(NULL),
+twosided(false),
+shadeless(false),
+no_repeat(false),
+normalmap_weight(1),
+custom_program(NULL),
+shadow_test_enabled(false),
+needs_uvs(false)
+{
+	Json json(path.readString());
+
+	if (json.keyExists("color")) {
+		color = jsonToColor(json.getMember("color"));
+	}
+	if (json.keyExists("specular")) {
+		specular = jsonToColor(json.getMember("specular"));
+	}
+	if (json.keyExists("shininess")) {
+		shininess = json.getMember("shininess").getNumber();
+	}
+	if (json.keyExists("ambient_multiplier")) {
+		ambient_multiplier = json.getMember("ambient_multiplier").getNumber();
+	}
+	if (json.keyExists("emittance")) {
+		emittance = json.getMember("emittance").getNumber();
+	}
+
+	if (json.keyExists("colormap")) {
+		std::string colormap_name = json.getMember("colormap").getString();
+		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(colormap_name);
+		if (textures_find == textures.end()) {
+			throw Exception("Colormap \"" + colormap_name + "\" not found!");
+		}
+		colormap = textures_find->second;
+	}
+	if (json.keyExists("normalmap")) {
+		std::string normalmap_name = json.getMember("normalmap").getString();
+		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(normalmap_name);
+		if (textures_find == textures.end()) {
+			throw Exception("Normalmap \"" + normalmap_name + "\" not found!");
+		}
+		normalmap = textures_find->second;
+	}
+	if (json.keyExists("specularmap")) {
+		std::string specularmap_name = json.getMember("specularmap").getString();
+		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(specularmap_name);
+		if (textures_find == textures.end()) {
+			throw Exception("Specularmap \"" + specularmap_name + "\" not found!");
+		}
+		specularmap = textures_find->second;
+	}
+
+	if (json.keyExists("twosided")) {
+		twosided = json.getMember("twosided").getBoolean();
+	}
+	if (json.keyExists("shadeless")) {
+		shadeless = json.getMember("shadeless").getBoolean();
+	}
+	if (json.keyExists("no_repeat")) {
+		no_repeat = json.getMember("no_repeat").getBoolean();
+	}
+	if (json.keyExists("normalmap_weight")) {
+		emittance = json.getMember("normalmap_weight").getNumber();
+	}
+	
+	updateNeedsLight();
+	updateIsTranslucent();
+}
 
 inline GenericMaterial::GenericMaterial(Rawmaterial const& rawmat, bool twosided) :
 color(rawmat.color),
@@ -567,6 +652,24 @@ inline void GenericMaterial::updateIsTranslucent(void)
 	} else {
 		is_translucent = false;
 	}
+}
+
+inline Color GenericMaterial::jsonToColor(Json const& json)
+{
+	if (json.getArraySize() == 3) {
+		float red = json.getItem(0).getNumber();
+		float green = json.getItem(1).getNumber();
+		float blue = json.getItem(2).getNumber();
+		return Color(red, green, blue);
+	}
+	if (json.getArraySize() == 4) {
+		float red = json.getItem(0).getNumber();
+		float green = json.getItem(1).getNumber();
+		float blue = json.getItem(2).getNumber();
+		float alpha = json.getItem(3).getNumber();
+		return Color(red, green, blue, alpha);
+	}
+	throw Exception("Invalid number of components in color!");
 }
 
 }
