@@ -45,6 +45,11 @@ public:
 	inline bool needsUvBuffer(void) const;
 	inline bool needsTangentAndBinormalBuffer(void) const;
 
+	// These functions make it possible to add custom code
+	inline void addCustomShader(Shader const& shader);
+	inline void setCustomShaderFlag(std::string const& flag, bool enabled);
+	inline void setShadowTestEnabled(bool shadow_test_enabled);
+
 	// Virtual functions, needed by Material
 	inline virtual void setViewmatrix(Matrix4 const& viewmatrix);
 	inline virtual void setProjectionmatrix(Matrix4 const& projectionmatrix);
@@ -52,6 +57,13 @@ public:
 	inline virtual void beginRendering(Color const& ambient_light = Color(0, 0, 0), Light const* light = NULL, bool additive_rendering = false) const;
 	inline virtual void endRendering(void) const;
 	inline virtual bool needsLight(Renderable const* renderable) const;
+
+	// Returns current shader program. If custom shaders are attached,
+	// then this returns the custom program instead of class-wide.
+	// This function exists so that uniforms and buffers could be
+	// given to custom shaders. Use this only to that purpose and only
+	// after rendering has been started!
+	inline Shaderprogram* getProgram(void) const;
 
 private:
 
@@ -84,6 +96,12 @@ private:
 	bool no_repeat;
 	float normalmap_weight;
 
+	// Custom shader program for only this instance. The booleans
+	// tell which extra function calls should be made.
+	Shaderprogram* custom_program;
+	Shaderprogram::Flags custom_program_flags;
+	bool shadow_test_enabled;
+
 	// State
 	bool needs_light;
 	bool is_translucent;
@@ -95,6 +113,8 @@ private:
 
 	// Class-wide shaders
 	static Shaderprogram* program;
+	static Shader shader_vrt;
+	static Shader shader_frg;
 
 	// Virtual functions, needed by Material
 	inline virtual void doRendering(Renderable const* renderable,
@@ -118,7 +138,9 @@ emittance(rawmat.emittance),
 twosided(twosided),
 shadeless(false),
 no_repeat(false),
-normalmap_weight(rawmat.normalmap_weight)
+normalmap_weight(rawmat.normalmap_weight),
+custom_program(NULL),
+shadow_test_enabled(false)
 {
 	needs_uvs = false;
 	if (rawmat.colormap_tex) {
@@ -166,6 +188,8 @@ twosided(false),
 shadeless(false),
 no_repeat(false),
 normalmap_weight(1),
+custom_program(NULL),
+shadow_test_enabled(false),
 needs_uvs(false)
 {
 	updateNeedsLight();
@@ -174,6 +198,7 @@ needs_uvs(false)
 
 inline GenericMaterial::~GenericMaterial(void)
 {
+	delete custom_program;
 }
 
 inline void GenericMaterial::setColor(Color const& color)
@@ -234,13 +259,38 @@ inline bool GenericMaterial::needsTangentAndBinormalBuffer(void) const
 	return false;
 }
 
+inline void GenericMaterial::addCustomShader(Shader const& shader)
+{
+	// If custom shader is not yet loaded
+	if (!custom_program) {
+		custom_program = new Shaderprogram();
+		custom_program->attachShader(shader_vrt);
+		custom_program->attachShader(shader_frg);
+	}
+	custom_program->attachShader(shader);
+}
+
+inline void GenericMaterial::setCustomShaderFlag(std::string const& flag, bool enabled)
+{
+	if (enabled) {
+		custom_program_flags.insert(flag);
+	} else {
+		custom_program_flags.erase(flag);
+	}
+}
+
+inline void GenericMaterial::setShadowTestEnabled(bool shadow_test_enabled)
+{
+	this->shadow_test_enabled = shadow_test_enabled;
+}
+
 inline void GenericMaterial::setViewmatrix(Matrix4 const& viewmatrix)
 {
 	if (rendering_light) {
 		if (rendering_light->getType() == Light::POINT) {
-			program->setUniform("light_pos_viewspace", viewmatrix * rendering_light->getPosition(), 1);
+			getProgram()->setUniform("light_pos_viewspace", viewmatrix * rendering_light->getPosition(), 1);
 		} else {
-			program->setUniform("light_pos_viewspace", matrix4ToMatrix3(viewmatrix) * -rendering_light->getDirection(), 0);
+			getProgram()->setUniform("light_pos_viewspace", matrix4ToMatrix3(viewmatrix) * -rendering_light->getDirection(), 0);
 		}
 	}
 	rendering_viewmatrix = viewmatrix;
@@ -248,7 +298,7 @@ inline void GenericMaterial::setViewmatrix(Matrix4 const& viewmatrix)
 
 inline void GenericMaterial::setProjectionmatrix(Matrix4 const& projectionmatrix)
 {
-	program->setUniform("pmat", projectionmatrix, true);
+	getProgram()->setUniform("pmat", projectionmatrix, true);
 }
 
 inline void GenericMaterial::renderMesh(Mesh const* mesh, Transform const& transf)
@@ -257,19 +307,22 @@ inline void GenericMaterial::renderMesh(Mesh const* mesh, Transform const& trans
 	Matrix4 mvmat = rendering_viewmatrix * transf.getMatrix();
 
 	// Bind all needed buffers
-	program->setBufferobject("pos", mesh->getBuffer("pos"));
+	getProgram()->setBufferobject("pos", mesh->getBuffer("pos"));
 	if (rendering_light && needsNormalBuffer()) {
-		program->setBufferobject("normal", mesh->getBuffer("normal"));
+		getProgram()->setBufferobject("normal", mesh->getBuffer("normal"));
 	}
 	if (needsUvBuffer()) {
-		program->setBufferobject("uv", mesh->getBuffer("uv"));
+		getProgram()->setBufferobject("uv", mesh->getBuffer("uv"));
 	}
 	if (needsTangentAndBinormalBuffer()) {
-		program->setBufferobject("tangent", mesh->getBuffer("tangent"));
-		program->setBufferobject("binormal", mesh->getBuffer("binormal"));
+		getProgram()->setBufferobject("tangent", mesh->getBuffer("tangent"));
+		getProgram()->setBufferobject("binormal", mesh->getBuffer("binormal"));
 	}
 
-	program->setUniform("mvmat", mvmat, true);
+	getProgram()->setUniform("mvmat", mvmat, true);
+	if (shadow_test_enabled) {
+		getProgram()->setUniform("mmat", transf.getMatrix(), true);
+	}
 
 	mesh->getBuffer("index")->drawElements(GL_TRIANGLES);
 
@@ -295,7 +348,7 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 		glDisable(GL_CULL_FACE);
 	}
 
-	Shaderprogram::Flags sflags;
+	Shaderprogram::Flags sflags = custom_program_flags;
 
 	if (colormap) {
 		GlSystem::ActiveTexture(GL_TEXTURE0);
@@ -364,35 +417,39 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 	}
 // TODO: Set specular and other values!
 
-	program->enable(sflags);
+	if (shadow_test_enabled) {
+		sflags.insert("SHADOW_FUNC");
+	}
+
+	getProgram()->enable(sflags);
 
 	if (!shadeless) {
 		if (ambient_light_enabled) {
-			program->setUniform("ambient_light", ambient_light);
+			getProgram()->setUniform("ambient_light", ambient_light);
 		}
 		if (light) {
 			if (light->getType() == Light::POINT) {
 				float attenu_c = light->getConstantAttenuation();
 				float attenu_l = light->getLinearAttenuation();
 				float attenu_q = light->getQuadraticAttenuation();
-				if (attenu_c > 0) program->setUniform1f("light_constant_attenuation", attenu_c);
-				if (attenu_l > 0) program->setUniform1f("light_linear_attenuation", attenu_c);
-				if (attenu_q > 0) program->setUniform1f("light_quadratic_attenuation", attenu_c);
+				if (attenu_c > 0) getProgram()->setUniform1f("light_constant_attenuation", attenu_c);
+				if (attenu_l > 0) getProgram()->setUniform1f("light_linear_attenuation", attenu_c);
+				if (attenu_q > 0) getProgram()->setUniform1f("light_quadratic_attenuation", attenu_c);
 			}
-			program->setUniform("light_color", light->getColor(), RGB);
+			getProgram()->setUniform("light_color", light->getColor(), RGB);
 		}
 	}
 	if (color.getRed() > NEEDS_LIGHT_THRESHOLD || color.getGreen() > NEEDS_LIGHT_THRESHOLD || color.getBlue() > NEEDS_LIGHT_THRESHOLD) {
-		program->setUniform("material_color", color);
+		getProgram()->setUniform("material_color", color);
 	}
 	if (colormap) {
-		program->setUniform1i("cmap", 0);
+		getProgram()->setUniform1i("cmap", 0);
 	}
 	if (normalmap) {
-		program->setUniform1i("nmap", 1);
+		getProgram()->setUniform1i("nmap", 1);
 	}
 	if (specularmap) {
-		program->setUniform1i("smap", 2);
+		getProgram()->setUniform1i("smap", 2);
 	}
 
 	rendering_light = light;
@@ -400,7 +457,7 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 
 inline void GenericMaterial::endRendering(void) const
 {
-	program->disable();
+	getProgram()->disable();
 
 	if (normalmap) {
 		GlSystem::ActiveTexture(GL_TEXTURE1);
@@ -447,6 +504,14 @@ inline bool GenericMaterial::needsLight(Renderable const* renderable) const
 {
 	(void)renderable;
 	return needs_light;
+}
+
+inline Shaderprogram* GenericMaterial::getProgram(void) const
+{
+	if (custom_program) {
+		return custom_program;
+	}
+	return program;
 }
 
 inline void GenericMaterial::doRendering(Renderable const* renderable,

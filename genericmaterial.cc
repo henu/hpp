@@ -39,10 +39,19 @@ std::string const SHADER_VRT =
 "uniform mat4 mvmat;\n"
 "uniform mat4 pmat;\n"
 "\n"
+"#ifdef SHADOW_FUNC\n"
+"uniform mat4 mmat;\n"
+"out vec4 frag_pos;\n"
+"#endif\n"
+"\n"
 "void main()\n"
 "{\n"
 "\n"
 "	gl_Position = (pmat * mvmat) * pos;\n"
+"\n"
+"#ifdef SHADOW_FUNC\n"
+"	frag_pos = mmat * pos;\n"
+"#endif\n"
 "\n"
 "	#ifdef CMAP\n"
 "	frag_uv = uv;\n"
@@ -130,6 +139,10 @@ std::string const SHADER_FRG =
 "#endif\n"
 "#endif\n"
 "#endif\n"
+"#ifdef SHADOW_FUNC\n"
+"in vec4 frag_pos;\n"
+"float getShadow(vec4 pos);\n"
+"#endif\n"
 "\n"
 "out vec4 final_color;\n"
 "\n"
@@ -189,6 +202,11 @@ std::string const SHADER_FRG =
 "				if (attenuation_m_inv > 0.0) light_diffuse /= attenuation_m_inv;\n"
 "			}\n"
 "\n"
+"			#ifdef SHADOW_FUNC\n"
+"			float shadow_amount = getShadow(frag_pos);\n"
+"			light_diffuse *= (1 - shadow_amount);\n"
+"			#endif\n"
+"\n"
 "			light += light_diffuse;\n"
 "		#endif\n"
 "\n"
@@ -206,13 +224,13 @@ float const GenericMaterial::AMBIENT_LIGHT_ON_THRESHOLD = 0.005;
 float const GenericMaterial::NEEDS_LIGHT_THRESHOLD = 0.005;
 float const GenericMaterial::TRANSLUCENT_THRESHOLD = 0.995;
 
-Shaderprogram* GenericMaterial::program;
+Shaderprogram* GenericMaterial::program = NULL;
+Shader GenericMaterial::shader_vrt;
+Shader GenericMaterial::shader_frg;
 
 void GenericMaterial::initShaders(void)
 {
-	Shader shader_vrt;
 	shader_vrt.load(SHADER_VRT, Shader::VERTEX_SHADER);
-	Shader shader_frg;
 	shader_frg.load(SHADER_FRG, Shader::FRAGMENT_SHADER);
 	program = new Shaderprogram();
 	program->attachShader(shader_vrt);
