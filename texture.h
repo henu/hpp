@@ -60,6 +60,13 @@ public:
 	inline uint16_t getWidth(void) const { HppAssert(loaded(), "Texture is not loaded!"); return width; }
 	inline uint16_t getHeight(void) const { HppAssert(loaded(), "Texture is not loaded!"); return height; }
 
+	// Function to bind/unbind texture. bind() can be
+	// called multiple times. Every call of bind()
+	// and unbind() leaves its texture unit active.
+	inline void bind(void) const;
+	inline void unbind(void) const;
+	inline GLenum getBoundTextureunit(void) const;
+
 	// Function to get GL texture
 	inline GLuint getGlTexture(void) const;
 
@@ -107,6 +114,10 @@ private:
 	mutable Pixelformat format;
 	mutable Pixeldata* tempdata;
 
+	// Binding stuff
+	mutable bool bound;
+	mutable GLenum bound_texture_unit;
+
 
 	// ----------------------------------------
 	// Private functions
@@ -145,13 +156,17 @@ private:
 
 inline Texture::Texture(void) :
 is_loaded(false),
-tempdata(NULL)
+tempdata(NULL),
+bound(false),
+bound_texture_unit(0)
 {
 }
 
 inline Texture::Texture(Path const& path, Pixelformat format, uint32_t flags) :
 is_loaded(false),
-tempdata(NULL)
+tempdata(NULL),
+bound(false),
+bound_texture_unit(0)
 {
 	HppCheckGlErrorsIfCorrectThread();
 	loadFromFile(path, format, flags);
@@ -160,7 +175,9 @@ tempdata(NULL)
 
 inline Texture::Texture(ByteV const& data, Pixelformat format, uint32_t flags) :
 is_loaded(false),
-tempdata(NULL)
+tempdata(NULL),
+bound(false),
+bound_texture_unit(0)
 {
 	HppCheckGlErrorsIfCorrectThread();
 	loadFromData(data, format, flags);
@@ -169,6 +186,11 @@ tempdata(NULL)
 
 inline Texture::~Texture(void)
 {
+	if (bound) {
+		GlSystem::ActiveTexture(GL_TEXTURE0 + bound_texture_unit);
+		glDisable(GL_TEXTURE_2D);
+		HppCheckGlErrors();
+	}
 	if (is_loaded) {
 		releaseGlTexture();
 	}
@@ -235,6 +257,50 @@ inline void Texture::createNew(uint16_t width, uint16_t height, Pixelformat form
 
 	tryToUsePixeldata(pdata);
 
+}
+
+inline void Texture::bind(void) const
+{
+	// If not yet bound, then find empty texture unit
+	if (!bound) {
+		bound_texture_unit = 0;
+		while (true) {
+			HppCheckGlErrors();
+			GlSystem::ActiveTexture(GL_TEXTURE0 + bound_texture_unit);
+			if (glGetError() != GL_NO_ERROR) {
+				throw Exception("No free texture units!");
+			}
+			if (!glIsEnabled(GL_TEXTURE_2D)) {
+				break;
+			}
+			++ bound_texture_unit;
+		}
+		bound = true;
+		// Enable texture, etc.
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, getGlTexture());
+		HppCheckGlErrors();
+	} else {
+		GlSystem::ActiveTexture(GL_TEXTURE0 + bound_texture_unit);
+	}
+}
+
+inline void Texture::unbind(void) const
+{
+	if (!bound) {
+		throw Exception("Unable to unbind texture, because it is not bound!");
+	}
+	GlSystem::ActiveTexture(GL_TEXTURE0 + bound_texture_unit);
+	glDisable(GL_TEXTURE_2D);
+	bound = false;
+}
+
+inline GLenum Texture::getBoundTextureunit(void) const
+{
+	if (!bound) {
+		throw Exception("Unable get texture unit, because texture is not bound!");
+	}
+	return bound_texture_unit;
 }
 
 inline GLuint Texture::getGlTexture(void) const

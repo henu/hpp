@@ -351,11 +351,7 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 	Shaderprogram::Flags sflags = custom_program_flags;
 
 	if (colormap) {
-		GlSystem::ActiveTexture(GL_TEXTURE0);
-		HppCheckGlErrors();
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, colormap->getGlTexture());
-		HppCheckGlErrors();
+		colormap->bind();
 		if (no_repeat) {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -364,11 +360,7 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 		sflags.insert("CMAP");
 	}
 	if (normalmap) {
-		GlSystem::ActiveTexture(GL_TEXTURE1);
-		HppCheckGlErrors();
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, normalmap->getGlTexture());
-		HppCheckGlErrors();
+		normalmap->bind();
 		if (no_repeat) {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -377,11 +369,7 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 		sflags.insert("NMAP");
 	}
 	if (specularmap) {
-		GlSystem::ActiveTexture(GL_TEXTURE2);
-		HppCheckGlErrors();
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, specularmap->getGlTexture());
-		HppCheckGlErrors();
+		specularmap->bind();
 		if (no_repeat) {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -443,13 +431,13 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 		getProgram()->setUniform("material_color", color);
 	}
 	if (colormap) {
-		getProgram()->setUniform1i("cmap", 0);
+		getProgram()->setUniform1i("cmap", colormap->getBoundTextureunit());
 	}
 	if (normalmap) {
-		getProgram()->setUniform1i("nmap", 1);
+		getProgram()->setUniform1i("nmap", normalmap->getBoundTextureunit());
 	}
 	if (specularmap) {
-		getProgram()->setUniform1i("smap", 2);
+		getProgram()->setUniform1i("smap", specularmap->getBoundTextureunit());
 	}
 
 	rendering_light = light;
@@ -460,8 +448,7 @@ inline void GenericMaterial::endRendering(void) const
 	getProgram()->disable();
 
 	if (normalmap) {
-		GlSystem::ActiveTexture(GL_TEXTURE1);
-		glDisable(GL_TEXTURE_2D);
+		normalmap->unbind();
 		HppCheckGlErrors();
 		if (no_repeat) {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -470,8 +457,7 @@ inline void GenericMaterial::endRendering(void) const
 		}
 	}
 	if (specularmap) {
-		GlSystem::ActiveTexture(GL_TEXTURE2);
-		glDisable(GL_TEXTURE_2D);
+		specularmap->unbind();
 		HppCheckGlErrors();
 		if (no_repeat) {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -479,9 +465,8 @@ inline void GenericMaterial::endRendering(void) const
 			HppCheckGlErrors();
 		}
 	}
-	GlSystem::ActiveTexture(GL_TEXTURE0);
 	if (colormap) {
-		glDisable(GL_TEXTURE_2D);
+		colormap->unbind();
 		HppCheckGlErrors();
 		if (no_repeat) {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

@@ -102,14 +102,12 @@ inline void Renderqueue2d::begin(void)
 	// Set some GL things
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
-	glEnable(GL_TEXTURE_2D);
 
 	// Tune blending
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	program.enable();
-	program.setUniform1i("tex", 0);
 
 	// Prepare projection
 	HppCheckGlErrors();
@@ -134,12 +132,14 @@ inline void Renderqueue2d::end()
 		throw Exception("Rendering has not been started!");
 	}
 	flush();
+	if (active_texture) {
+		active_texture->unbind();
+	}
 	rendering_started = false;
 	// Restore Opengl stuff
 	program.disable();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_BLEND);
 	glViewport(0, 0, Display::getWidth(), Display::getHeight());
 
@@ -157,10 +157,14 @@ inline void Renderqueue2d::renderSprite(Texture const* tex,
 {
 	if (tex != active_texture) {
 		flush();
+		if (active_texture) {
+			active_texture->unbind();
+		}
 		active_texture = tex;
 		// Bind texture to OpenGL
 		HppCheckGlErrors();
-		glBindTexture(GL_TEXTURE_2D, tex->getGlTexture());
+		tex->bind();
+		program.setUniform1i("tex", tex->getBoundTextureunit());
 		HppCheckGlErrors();
 	}
 
