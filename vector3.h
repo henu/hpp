@@ -116,15 +116,28 @@ inline Vector3::Vector3(std::string const& str)
 
 inline Vector3::Vector3(Json const& json)
 {
+	// Old method
+	if (json.getType() == Json::OBJECT) {
+		// Check JSON validity
+		if (!json.keyExists("x") || json.getMember("x").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"x\"!");
+		if (!json.keyExists("y") || json.getMember("y").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"y\"!");
+		if (!json.keyExists("z") || json.getMember("z").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"z\"!");
+		// Construct
+		x = json.getMember("x").getNumber();
+		y = json.getMember("y").getNumber();
+		z = json.getMember("z").getNumber();
+		return;
+	}
 	// Check JSON validity
-	if (json.getType() != Json::OBJECT) throw Exception("JSON for Vector3 must be object!");
-	if (!json.keyExists("x") || json.getMember("x").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"x\"!");
-	if (!json.keyExists("y") || json.getMember("y").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"y\"!");
-	if (!json.keyExists("z") || json.getMember("z").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"z\"!");
+	if (json.getType() != Json::ARRAY) throw Exception("JSON for Vector3 must be an array!");
+	if (json.getArraySize() != 3) throw Exception("JSON for Vector3 must contain exactly three numbers!");
+	for (size_t num_id = 0; num_id < 3; ++ num_id) {
+		if (json.getItem(num_id).getType() != Json::NUMBER) throw Exception("Unexpected non-number in JSON array for Vector3!");
+	}
 	// Construct
-	x = json.getMember("x").getNumber();
-	y = json.getMember("y").getNumber();
-	z = json.getMember("z").getNumber();
+	x = json.getItem(0).getNumber();
+	y = json.getItem(1).getNumber();
+	z = json.getItem(2).getNumber();
 }
 
 inline Real Vector3::length(void) const
@@ -164,10 +177,10 @@ inline std::string Vector3::toString(void) const
 
 inline Json Vector3::toJson(void) const
 {
-	Json result = Json::newObject();
-	result.setMember("x", Json::newNumber(x));
-	result.setMember("y", Json::newNumber(y));
-	result.setMember("z", Json::newNumber(z));
+	Json result = Json::newArray();
+	result.addItem(Json::newNumber(x));
+	result.addItem(Json::newNumber(y));
+	result.addItem(Json::newNumber(z));
 	return result;
 }
 

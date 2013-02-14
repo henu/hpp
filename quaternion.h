@@ -1,6 +1,8 @@
 #ifndef HPP_QUATERNION_H
 #define HPP_QUATERNION_H
 
+#include "cast.h"
+#include "json.h"
 #include "real.h"
 #include "vector3.h"
 #include "angle.h"
@@ -17,10 +19,11 @@ class Quaternion
 
 public:
 
-	// Constructors and destructor
+	// Constructors
 	inline Quaternion(void);
 	inline Quaternion(Real x, Real y, Real z, Real w);
 	inline Quaternion(Quaternion const& q);
+	inline Quaternion(Json const& json);
 
 	// Assigment operator
 	inline Quaternion operator=(Quaternion const& q);
@@ -42,6 +45,10 @@ public:
 	inline Vector3 getXYZ(void) const { return Vector3(x, y, z); }
 	inline Vector3 getAxis(void) const;
 	inline Angle getAngle(void) const;
+
+	// Conversion functions
+	inline std::string toString(void) const;
+	inline Json toJson(void) const;
 
 	// Some constant quaternions
 	static const Quaternion IDENTITY;
@@ -71,6 +78,21 @@ y(q.y),
 z(q.z),
 w(q.w)
 {
+}
+
+inline Quaternion::Quaternion(Json const& json)
+{
+	// Check JSON validity
+	if (json.getType() != Json::ARRAY) throw Exception("JSON for Quaternion must be an array!");
+	if (json.getArraySize() != 4) throw Exception("JSON for Quaternion must contain exactly four numbers!");
+	for (size_t num_id = 0; num_id < 4; ++ num_id) {
+		if (json.getItem(num_id).getType() != Json::NUMBER) throw Exception("Unexpected non-number in JSON array for Quaternion!");
+	}
+	// Construct
+	x = json.getItem(0).getNumber();
+	y = json.getItem(1).getNumber();
+	z = json.getItem(2).getNumber();
+	w = json.getItem(3).getNumber();
 }
 
 inline Quaternion Quaternion::operator=(Quaternion const& q)
@@ -166,10 +188,24 @@ inline Angle Quaternion::getAngle(void) const
 	return Angle::fromRadians(::acos(w) * 2);
 }
 
+inline std::string Quaternion::toString(void) const
+{
+	return "{" + floatToStr(x) + ", " + floatToStr(y) + ", " + floatToStr(z) + ", " + floatToStr(w) + "}";
+}
+
+inline Json Quaternion::toJson(void) const
+{
+	Json result = Json::newArray();
+	result.addItem(Json::newNumber(x));
+	result.addItem(Json::newNumber(y));
+	result.addItem(Json::newNumber(z));
+	result.addItem(Json::newNumber(w));
+	return result;
+}
+
 inline std::ostream& operator<<(std::ostream& strm, Quaternion const& q)
 {
-	strm << '{' << q.x << ", " << q.y << ", " << q.z << ", " << q.w << '}';
-	return strm;
+	return strm << q.toString();
 }
 
 }

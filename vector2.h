@@ -110,13 +110,25 @@ inline Vector2::Vector2(std::string const& str)
 
 inline Vector2::Vector2(Json const& json)
 {
+	// Old method
+	if (json.getType() == Json::OBJECT) {
+		// Check JSON validity
+		if (!json.keyExists("x") || json.getMember("x").getType() != Json::NUMBER) throw Exception("JSON for Vector2 must contain number named \"x\"!");
+		if (!json.keyExists("y") || json.getMember("y").getType() != Json::NUMBER) throw Exception("JSON for Vector2 must contain number named \"y\"!");
+		// Construct
+		x = json.getMember("x").getNumber();
+		y = json.getMember("y").getNumber();
+		return;
+	}
 	// Check JSON validity
-	if (json.getType() != Json::OBJECT) throw Exception("JSON for Vector2 must be object!");
-	if (!json.keyExists("x") || json.getMember("x").getType() != Json::NUMBER) throw Exception("JSON for Vector2 must contain number named \"x\"!");
-	if (!json.keyExists("y") || json.getMember("y").getType() != Json::NUMBER) throw Exception("JSON for Vector2 must contain number named \"y\"!");
+	if (json.getType() != Json::ARRAY) throw Exception("JSON for Vector2 must be an array!");
+	if (json.getArraySize() != 3) throw Exception("JSON for Vector2 must contain exactly two numbers!");
+	for (size_t num_id = 0; num_id < 3; ++ num_id) {
+		if (json.getItem(num_id).getType() != Json::NUMBER) throw Exception("Unexpected non-number in JSON array for Vector2!");
+	}
 	// Construct
-	x = json.getMember("x").getNumber();
-	y = json.getMember("y").getNumber();
+	x = json.getItem(0).getNumber();
+	y = json.getItem(1).getNumber();
 }
 
 inline Real Vector2::length(void) const
@@ -154,9 +166,9 @@ inline std::string Vector2::toString(void) const
 
 inline Json Vector2::toJson(void) const
 {
-	Json result = Json::newObject();
-	result.setMember("x", Json::newNumber(x));
-	result.setMember("y", Json::newNumber(y));
+	Json result = Json::newArray();
+	result.addItem(Json::newNumber(x));
+	result.addItem(Json::newNumber(y));
 	return result;
 }
 

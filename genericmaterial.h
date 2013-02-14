@@ -133,8 +133,6 @@ private:
 	inline void updateNeedsLight(void);
 	inline void updateIsTranslucent(void);
 
-	inline static Color jsonToColor(Json const& json);
-
 };
 
 inline GenericMaterial::GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures) :
@@ -157,10 +155,10 @@ needs_uvs(false)
 	Json json(path.readString());
 
 	if (json.keyExists("color")) {
-		color = jsonToColor(json.getMember("color"));
+		color = Color(json.getMember("color"));
 	}
 	if (json.keyExists("specular")) {
-		specular = jsonToColor(json.getMember("specular"));
+		specular = Color(json.getMember("specular"));
 	}
 	if (json.keyExists("shininess")) {
 		shininess = json.getMember("shininess").getNumber();
@@ -209,7 +207,7 @@ needs_uvs(false)
 	if (json.keyExists("normalmap_weight")) {
 		emittance = json.getMember("normalmap_weight").getNumber();
 	}
-	
+
 	updateNeedsLight();
 	updateIsTranslucent();
 }
@@ -652,24 +650,6 @@ inline void GenericMaterial::updateIsTranslucent(void)
 	} else {
 		is_translucent = false;
 	}
-}
-
-inline Color GenericMaterial::jsonToColor(Json const& json)
-{
-	if (json.getArraySize() == 3) {
-		float red = json.getItem(0).getNumber();
-		float green = json.getItem(1).getNumber();
-		float blue = json.getItem(2).getNumber();
-		return Color(red, green, blue);
-	}
-	if (json.getArraySize() == 4) {
-		float red = json.getItem(0).getNumber();
-		float green = json.getItem(1).getNumber();
-		float blue = json.getItem(2).getNumber();
-		float alpha = json.getItem(3).getNumber();
-		return Color(red, green, blue, alpha);
-	}
-	throw Exception("Invalid number of components in color!");
 }
 
 }

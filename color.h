@@ -1,6 +1,8 @@
 #ifndef HPP_COLOR_H
 #define HPP_COLOR_H
 
+#include "cast.h"
+#include "json.h"
 #include "assert.h"
 #include "misc.h"
 #include "pixelformat.h"
@@ -20,6 +22,7 @@ public:
 	inline Color(float red, float green, float blue);
 	inline Color(float value, float alpha);
 	inline Color(float value, Pixelformat format);
+	inline Color(Json const& json);
 
 	// Comparison operators
 	inline bool operator==(Color const& c) const;
@@ -35,6 +38,10 @@ public:
 	inline float getAlpha(void) const;
 
 	inline Pixelformat getFormat(void) const { return format; }
+
+	// Conversion functions
+	inline std::string toString(void) const;
+	inline Json toJson(void) const;
 
 private:
 
@@ -94,6 +101,36 @@ format(format)
 	} else {
 		HppAssert(format == ALPHA, "Invalid color format!");
 		alpha = value;
+	}
+}
+
+inline Color::Color(Json const& json)
+{
+	if (json.getType() == Json::NUMBER) {
+		red = json.getNumber();
+		format = GRAYSCALE;
+	} else if (json.getType() != Json::ARRAY) {
+		throw Exception("Color must be number or array!");
+	} else if (json.getArraySize() == 1) {
+		red = json.getItem(0).getNumber();
+		format = GRAYSCALE;
+	} else if (json.getArraySize() == 2) {
+		red = json.getItem(0).getNumber();
+		alpha = json.getItem(1).getNumber();
+		format = GRAYSCALE_ALPHA;
+	} else if (json.getArraySize() == 3) {
+		red = json.getItem(0).getNumber();
+		green = json.getItem(1).getNumber();
+		blue = json.getItem(2).getNumber();
+		format = RGB;
+	} else if (json.getArraySize() == 4) {
+		red = json.getItem(0).getNumber();
+		green = json.getItem(1).getNumber();
+		blue = json.getItem(2).getNumber();
+		alpha = json.getItem(3).getNumber();
+		format = RGBA;
+	} else {
+		throw Exception("Invalid number of components in color!");
 	}
 }
 
@@ -207,14 +244,31 @@ inline float Color::getAlpha(void) const
 	return 1.0;
 }
 
+inline std::string Color::toString(void) const
+{
+	std::string result = "[" + floatToStr(getRed()) + ", " + floatToStr(getGreen()) + ", " + floatToStr(getBlue());
+	if (getAlpha() < 1) {
+		result += ", " + floatToStr(getAlpha());
+	}
+	result += "]";
+	return result;
+}
+
+inline Json Color::toJson(void) const
+{
+	Json result = Json::newArray();
+	result.addItem(Json::newNumber(getRed()));
+	result.addItem(Json::newNumber(getGreen()));
+	result.addItem(Json::newNumber(getBlue()));
+	if (getAlpha() < 1) {
+		result.addItem(Json::newNumber(getAlpha()));
+	}
+	return result;
+}
+
 inline std::ostream& operator<<(std::ostream& strm, Color const& c)
 {
-	strm << '[' << c.getRed() << ", " << c.getGreen() << ", " << c.getBlue();
-	if (c.getAlpha() < 1) {
-		strm << ", " << c.getAlpha();
-	}
-	strm << "]";
-	return strm;
+	return strm << c.toString();
 }
 
 }
