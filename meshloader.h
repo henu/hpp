@@ -30,9 +30,9 @@ public:
 
 	inline GLuint getTriangleCorner(GLuint triangle, uint8_t corner) const;
 
-	inline Hpp::Vector3 getVertexPosition(GLuint vertex) const;
-	inline Hpp::Vector3 getVertexNormal(GLuint vertex) const;
-	inline Hpp::Vector2 getVertexUV(GLuint vertex) const;
+	inline Vector3 getVertexPosition(GLuint vertex) const;
+	inline Vector3 getVertexNormal(GLuint vertex) const;
+	inline Vector2 getVertexUV(GLuint vertex) const;
 
 protected:
 
@@ -150,22 +150,22 @@ inline GLuint Meshloader::getTriangleCorner(GLuint triangle, uint8_t corner) con
 	return indices[triangle*3 + corner];
 }
 
-inline Hpp::Vector3 Meshloader::getVertexPosition(GLuint vertex) const
+inline Vector3 Meshloader::getVertexPosition(GLuint vertex) const
 {
 	GLuint vrt_ofs = vertex * 3;
-	return Hpp::Vector3(poss[vrt_ofs + 0], poss[vrt_ofs + 1], poss[vrt_ofs + 2]);
+	return Vector3(poss[vrt_ofs + 0], poss[vrt_ofs + 1], poss[vrt_ofs + 2]);
 }
 
-inline Hpp::Vector3 Meshloader::getVertexNormal(GLuint vertex) const
+inline Vector3 Meshloader::getVertexNormal(GLuint vertex) const
 {
 	GLuint vrt_ofs = vertex * 3;
-	return Hpp::Vector3(nrms[vrt_ofs + 0], nrms[vrt_ofs + 1], nrms[vrt_ofs + 2]);
+	return Vector3(nrms[vrt_ofs + 0], nrms[vrt_ofs + 1], nrms[vrt_ofs + 2]);
 }
 
-inline Hpp::Vector2 Meshloader::getVertexUV(GLuint vertex) const
+inline Vector2 Meshloader::getVertexUV(GLuint vertex) const
 {
 	GLuint vrt_ofs = vertex * 2;
-	return Hpp::Vector2(uvs[vrt_ofs + 0], uvs[vrt_ofs + 1]);
+	return Vector2(uvs[vrt_ofs + 0], uvs[vrt_ofs + 1]);
 }
 
 inline void Meshloader::readArrays(std::vector< GLfloat > const& poss,
@@ -229,7 +229,7 @@ inline void Meshloader::readArrays(std::vector< GLfloat > const& poss,
 		this->poss.push_back(poss[pos_idx*3 + 2]);
 		if (!indices_nrms.empty()) {
 			GLuint nrm_idx = indices_nrms[index_id];
-			Hpp::Vector3 normal(nrms[nrm_idx*3 + 0], nrms[nrm_idx*3 + 1], nrms[nrm_idx*3 + 2]);
+			Vector3 normal(nrms[nrm_idx*3 + 0], nrms[nrm_idx*3 + 1], nrms[nrm_idx*3 + 2]);
 			normal.normalize();
 			this->nrms.push_back(normal.x);
 			this->nrms.push_back(normal.y);

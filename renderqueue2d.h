@@ -114,8 +114,8 @@ inline void Renderqueue2d::begin(void)
 
 	// Form viewmat
 	Matrix3 viewmat;
-	viewmat = Matrix3::translMatrix(Hpp::Vector2(-1, -1));
-	viewmat *= Matrix3::scaleMatrix(Hpp::Vector2(2.0 / width, 2.0 / height));
+	viewmat = Matrix3::translMatrix(Vector2(-1, -1));
+	viewmat *= Matrix3::scaleMatrix(Vector2(2.0 / width, 2.0 / height));
 	program.setUniform("viewmat", viewmat, true);
 
 	HppCheckGlErrors();

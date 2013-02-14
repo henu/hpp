@@ -19,13 +19,13 @@ class MeshloaderObj : public Meshloader
 
 public:
 
-	inline MeshloaderObj(Hpp::Path const& path);
+	inline MeshloaderObj(Path const& path);
 
 private:
 
 };
 
-inline MeshloaderObj::MeshloaderObj(Hpp::Path const& path)
+inline MeshloaderObj::MeshloaderObj(Path const& path)
 {
 	std::ifstream file(path.toString().c_str());
 	if (!file.is_open()) {

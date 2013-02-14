@@ -564,11 +564,11 @@ void TCPConnection::waitUntilConnectionIsClosed(RealConnection* rconn)
 		return;
 	}
 	if (rconn->connected_state == CONNECTED) {
-		throw Hpp::Exception("Logical error! State of connection should be closed or closing!");
+		throw Exception("Logical error! State of connection should be closed or closing!");
 	}
 	rconn->connected_cond.wait(rconn->connected_mutex);
 	if (rconn->connected_state != CLOSED) {
-		throw Hpp::Exception("Logical error! State of connection should be closed now!");
+		throw Exception("Logical error! State of connection should be closed now!");
 	}
 	return;
 }

@@ -38,7 +38,7 @@ Connectionmanager::~Connectionmanager(void)
 	try {
 		remover.wait();
 	}
-	catch (Hpp::Exception const& e) {
+	catch (Exception const& e) {
 		std::cerr << "ERROR: Connectionmanager has failed: " << e.what() << std::endl;
 	}
 	#ifdef HPP_USE_SDL_NET
@@ -69,8 +69,8 @@ void Connectionmanager::removerThread(void*)
 			try {
 				TCPConnection::cleanRealConnection(*tcpconns_to_destroy_it);
 			}
-			catch (Hpp::Exception const& e) {
-				throw Hpp::Exception("Unable to clean connection! Reason: " + std::string(e.what()));
+			catch (Exception const& e) {
+				throw Exception("Unable to clean connection! Reason: " + std::string(e.what()));
 			}
 		}
 		instance.tcpconns_to_destroy.clear();
