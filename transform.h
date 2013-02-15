@@ -51,6 +51,11 @@ public:
 	inline void rotate(Vector3 const& axis, Angle const& angle) { transf = Matrix4::rotMatrix(axis, angle) * transf; }
 	inline void scale(Vector3 const& v) { transf = Matrix4::scaleMatrix(v) * transf; }
 
+	// Operators for combining transforms. First this
+	// transform is done and then another one.
+	inline Transform operator+=(Transform const& transf2);
+	inline Transform operator+(Transform const& transf2) const;
+
 	// Combines this and another so that first this current transform is
 	// done and then another one.
 	inline Transform addAnotherTransform(Transform const& transf2) const;
@@ -151,6 +156,17 @@ inline Transform Transform::getRotScale(void) const
 	                         cells[4], cells[5], cells[6], 0,
 	                         cells[8], cells[9], cells[10], 0,
 	                         cells[12], cells[13], cells[14], 1));
+}
+
+inline Transform Transform::operator+=(Transform const& transf2)
+{
+	transf = transf2.transf * transf;
+	return *this;
+}
+
+inline Transform Transform::operator+(Transform const& transf2) const
+{
+	return Transform(transf2.transf * transf);
 }
 
 inline Transform Transform::addAnotherTransform(Transform const& transf2) const

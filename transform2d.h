@@ -35,6 +35,11 @@ public:
 	inline void rotate(Angle const& angle) { transf = Matrix3::rotMatrix2d(angle) * transf; }
 	inline void scale(Vector2 const& v) { transf = Matrix3::scaleMatrix(v) * transf; }
 
+	// Operators for combining transforms. First this
+	// transform is done and then another one.
+	inline Transform2D operator+=(Transform2D const& transf2);
+	inline Transform2D operator+(Transform2D const& transf2) const;
+
 	// Combines this and another so that first this current transform is
 	// done and then another one.
 	inline Transform2D addAnotherTransform(Transform2D const& transf2) const;
@@ -103,6 +108,17 @@ inline Transform2D Transform2D::getRotScale(void) const
 	return Transform2D(Matrix3(cells[0], cells[1], 0,
 	                           cells[3], cells[4], 0,
 	                           cells[6], cells[7], 1));
+}
+
+inline Transform2D Transform2D::operator+=(Transform2D const& transf2)
+{
+	transf = transf2.transf * transf;
+	return *this;
+}
+
+inline Transform2D Transform2D::operator+(Transform2D const& transf2) const
+{
+	return Transform2D(transf2.transf * transf);
 }
 
 inline Transform2D Transform2D::addAnotherTransform(Transform2D const& transf2) const

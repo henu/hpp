@@ -133,7 +133,7 @@ inline bool Renderable::needsLight(void) const
 
 inline void Renderable::updateAbsoluteTransform(Transform const& owner_transf)
 {
-	transf_abs = transf.addAnotherTransform(owner_transf);
+	transf_abs = transf + owner_transf;
 }
 
 inline void Renderable::render(Material const* mat)

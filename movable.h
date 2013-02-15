@@ -434,7 +434,7 @@ inline void Movable::updateAbsoluteTransform(Transform const& parent_transf_abs)
 
 	// Update absolute transform if it's really needed
 	if (transf_abs_uptodate == NO) {
-		transf_abs = transf.addAnotherTransform(parent_transf_abs);
+		transf_abs = transf + parent_transf_abs;
 	}
 
 	// Mark transform updated
