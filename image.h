@@ -1,7 +1,7 @@
 #ifndef HPP_IMAGE_H
 #define HPP_IMAGE_H
 
-#include "ivectors.h"
+#include "ivector2.h"
 #include "color.h"
 #include "path.h"
 #include "assert.h"

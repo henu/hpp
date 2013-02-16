@@ -122,8 +122,8 @@ inline Vector2::Vector2(Json const& json)
 	}
 	// Check JSON validity
 	if (json.getType() != Json::ARRAY) throw Exception("JSON for Vector2 must be an array!");
-	if (json.getArraySize() != 3) throw Exception("JSON for Vector2 must contain exactly two numbers!");
-	for (size_t num_id = 0; num_id < 3; ++ num_id) {
+	if (json.getArraySize() != 2) throw Exception("JSON for Vector2 must contain exactly two numbers!");
+	for (size_t num_id = 0; num_id < 2; ++ num_id) {
 		if (json.getItem(num_id).getType() != Json::NUMBER) throw Exception("Unexpected non-number in JSON array for Vector2!");
 	}
 	// Construct
