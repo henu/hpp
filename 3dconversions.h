@@ -116,7 +116,7 @@ inline Matrix3 quaternionToMatrix3(Quaternion const& q)
 	Real zw = q_unit.z * q_unit.w;
 	return Matrix3(1 - 2*yy - 2*zz,     2*xy - 2*zw,     2*xz + 2*yw,
 	                   2*xy + 2*zw, 1 - 2*xx - 2*zz,     2*yz - 2*xw,
-	                   2*xz + 2*yw,     2*yz + 2*xw, 1 - 2*xx - 2*yy);
+	                   2*xz - 2*yw,     2*yz + 2*xw, 1 - 2*xx - 2*yy);
 }
 
 inline Matrix4 quaternionToMatrix4(Quaternion const& q)
