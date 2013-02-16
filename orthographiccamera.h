@@ -25,6 +25,8 @@ public:
 	// Size means distance between top and bottom viewfrustum planes.
 	inline void setSize(Real size);
 
+	inline virtual void shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const;
+
 	// Updates precalculated stuff after transform,
 	// size, nearplane, farplane or viewport is changed.
 	inline virtual void update(void);
@@ -63,12 +65,27 @@ inline void Orthographiccamera::setSize(Real size)
 	this->size = size;
 }
 
+inline void Orthographiccamera::shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const
+{
+	Real size_x = (size / viewport_width) * viewport_height;
+	result_begin = transf.getPosition();
+	result_begin += getRight() * size_x / 2 * pos_rel.x;
+	result_begin += getUp() * size / 2 * pos_rel.y;
+	result_dir = getDir();
+}
+
 inline void Orthographiccamera::update(void)
 {
 	aspectratio = viewport_width / Real(viewport_height);
+
 	viewmat = transf.getMatrix().inverse();
 	projmat = Matrix4::orthographicProjectionMatrix(size, aspectratio, nearplane, farplane);
 	projviewmat = projmat * viewmat;
+
+	Transform transf_rotscale = transf.getRotScale();
+	right = transf_rotscale.applyToPosition(Hpp::Vector3(1, 0, 0));
+	up = transf_rotscale.applyToPosition(Hpp::Vector3(0, 1, 0));
+	dir = transf_rotscale.applyToPosition(Hpp::Vector3(0, 0, -1));
 }
 
 inline Viewfrustum Orthographiccamera::getViewfrustum(void) const

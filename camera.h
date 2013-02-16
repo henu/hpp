@@ -28,8 +28,14 @@ public:
 	inline Matrix4 getProjectionmatrix(void) const;
 	inline Matrix4 getProjectionviewmatrix(void) const;
 
+	inline Vector3 getRight(void) const { return right; }
+	inline Vector3 getUp(void) const { return up; }
+	inline Vector3 getDir(void) const { return dir; }
+
 	// Tells OpenGL to use viewport from this camera
 	inline void setUpViewport(void) const;
+
+	virtual void shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const = 0;
 
 	// Updates precalculated stuff after transform or viewport is changed.
 	virtual void update(void) = 0;
@@ -42,6 +48,7 @@ protected:
 	              size_t viewport_width, size_t viewport_height);
 
 	Transform transf;
+	Vector3 right, up, dir;
 
 	Real nearplane, farplane;
 
