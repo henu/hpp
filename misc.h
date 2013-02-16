@@ -65,10 +65,6 @@ inline ssize_t iDivCeil(ssize_t dividend, ssize_t divisor);
 // that is in range [0 - divisor). Note, that divisor must be positive!
 inline size_t iMod(ssize_t dividend, size_t divisor);
 
-// Converts camera fov angles between X and Y.
-inline Angle fovYToFovX(Angle const& fov_y, Real display_w, Real display_h);
-inline Angle fovXToFovY(Angle const& fov_x, Real display_w, Real display_h);
-
 // Converts tab, enter, \ and given characters to slashes
 inline std::string slashEncode(std::string str, std::string const& chars = "\"\'");
 
@@ -262,24 +258,6 @@ inline size_t iMod(ssize_t dividend, size_t divisor)
 		return dividend % divisor;
 	}
 	return (dividend % (ssize_t)divisor) + divisor;
-}
-
-inline Angle fovYToFovX(Angle const& fov_y, Real display_w, Real display_h)
-{
-	HppAssert(display_w > 0.0, "Display width must be greater than zero!");
-	HppAssert(display_h > 0.0, "Display height must be greater than zero!");
-	Real aspect_ratio = display_w / display_h;
-	Real plane_height = (fov_y / 2.0).tan() * 2.0;
-	Real plane_width = plane_height * aspect_ratio;
-	Angle fov_x = atan(plane_width / 2.0) * 2.0;
-	return fov_x;
-}
-
-inline Angle fovXToFovY(Angle const& fov_x, Real display_w, Real display_h)
-{
-	HppAssert(display_w > 0.0, "Display width must be greater than zero!");
-	HppAssert(display_h > 0.0, "Display height must be greater than zero!");
-	return fovYToFovX(fov_x, display_h, display_w);
 }
 
 inline std::string slashEncode(std::string str, std::string const& chars)

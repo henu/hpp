@@ -67,7 +67,7 @@ inline void Perspectivecamera::setFovY(Angle const& fov_y)
 
 inline void Perspectivecamera::shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const
 {
-	Hpp::Angle fov_x = calculateFovXFromAspectRatio(fov_y, aspectratio);
+	Hpp::Angle fov_x = fovYToFovX(fov_y, aspectratio);
 
 	result_begin = transf.getPosition();
 
@@ -96,7 +96,7 @@ inline Viewfrustum Perspectivecamera::getViewfrustum(void) const
 	return Viewfrustum::fromCamera(transf.getPosition(),
 	                                dir, up, right,
 	                                fov_y,
-	                                calculateFovXFromAspectRatio(fov_y, aspectratio),
+	                                fovYToFovX(fov_y, aspectratio),
 	                                nearplane);
 }
 
