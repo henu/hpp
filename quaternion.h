@@ -23,6 +23,7 @@ public:
 	inline Quaternion(void);
 	inline Quaternion(Real x, Real y, Real z, Real w);
 	inline Quaternion(Quaternion const& q);
+	inline Quaternion(Vector3 const& axis, Angle const& rotation);
 	inline Quaternion(Json const& json);
 
 	// Assigment operator
@@ -78,6 +79,18 @@ y(q.y),
 z(q.z),
 w(q.w)
 {
+}
+
+inline Quaternion::Quaternion(Vector3 const& axis, Angle const& rotation)
+{
+	Vector3 axis_nrm = axis.normalized();
+	Real s = (rotation / 2).sin();
+	Real c = (rotation / 2).cos();
+
+	x = axis_nrm.x * s;
+	y = axis_nrm.y * s;
+	z = axis_nrm.z * s;
+	w = c;
 }
 
 inline Quaternion::Quaternion(Json const& json)
