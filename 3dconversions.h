@@ -25,9 +25,9 @@ inline Quaternion matrix3ToQuaternion(Matrix3 const& m)
 		Real s = sqrt(m_trace) * 2;
 		HppAssert(s != 0.0, "Division by zero!");
 		result.w = 0.25 * s;
-		result.x = (m.cell(5) - m.cell(7)) / s;
-		result.y = (m.cell(6) - m.cell(2)) / s;
-		result.z = (m.cell(1) - m.cell(3)) / s;
+		result.x = (m.cell(7) - m.cell(5)) / s;
+		result.y = (m.cell(2) - m.cell(6)) / s;
+		result.z = (m.cell(3) - m.cell(1)) / s;
 	} else {
 		uint8_t greatest_diag = 0;
 		Real greatest_diag_value = m.cell(0);
@@ -45,25 +45,25 @@ inline Quaternion matrix3ToQuaternion(Matrix3 const& m)
 			s = sqrt(1.0 + m.cell(0) - m.cell(4) - m.cell(8)) * 2;
 			HppAssert(s != 0.0, "Division by zero!");
 			result.x = 0.25 * s;
-			result.y = (m.cell(3) + m.cell(1)) / s;
-			result.z = (m.cell(6) + m.cell(2)) / s;
-			result.w = (m.cell(5) - m.cell(7)) / s;
+			result.y = (m.cell(1) + m.cell(3)) / s;
+			result.z = (m.cell(2) + m.cell(6)) / s;
+			result.w = (m.cell(7) - m.cell(5)) / s;
 			break;
 		case 1:
 			s = sqrt(1.0 + m.cell(4) - m.cell(0) - m.cell(8)) * 2;
 			HppAssert(s != 0.0, "Division by zero!");
-			result.x = (m.cell(3) + m.cell(1)) / s;
+			result.x = (m.cell(1) + m.cell(3)) / s;
 			result.y = 0.25 * s;
-			result.z = (m.cell(7) + m.cell(5)) / s;
-			result.w = (m.cell(6) - m.cell(2)) / s;
+			result.z = (m.cell(5) + m.cell(7)) / s;
+			result.w = (m.cell(2) - m.cell(6)) / s;
 			break;
 		case 2:
 			s = sqrt(1.0 + m.cell(8) - m.cell(0) - m.cell(4)) * 2;
 			HppAssert(s != 0.0, "Division by zero!");
-			result.x = (m.cell(6) + m.cell(2)) / s;
-			result.y = (m.cell(7) + m.cell(5)) / s;
+			result.x = (m.cell(2) + m.cell(6)) / s;
+			result.y = (m.cell(5) + m.cell(7)) / s;
 			result.z = 0.25 * s;
-			result.w = (m.cell(1) - m.cell(3)) / s;
+			result.w = (m.cell(3) - m.cell(1)) / s;
 			break;
 		}
 	}
