@@ -56,6 +56,10 @@ public:
 	inline Transform operator+=(Transform const& transf2);
 	inline Transform operator+(Transform const& transf2) const;
 
+	// Operators to undo specific transform from this one.
+	inline Transform operator-=(Transform const& transf2);
+	inline Transform operator-(Transform const& transf2) const;
+
 	// Combines this and another so that first this current transform is
 	// done and then another one.
 	inline Transform addAnotherTransform(Transform const& transf2) const;
@@ -167,6 +171,17 @@ inline Transform Transform::operator+=(Transform const& transf2)
 inline Transform Transform::operator+(Transform const& transf2) const
 {
 	return Transform(transf2.transf * transf);
+}
+
+inline Transform Transform::operator-=(Transform const& transf2)
+{
+	transf = transf2.transf.inverse() * transf;
+	return *this;
+}
+
+inline Transform Transform::operator-(Transform const& transf2) const
+{
+	return Transform(transf2.transf.inverse() * transf);
 }
 
 inline Transform Transform::addAnotherTransform(Transform const& transf2) const

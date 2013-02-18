@@ -40,6 +40,10 @@ public:
 	inline Transform2D operator+=(Transform2D const& transf2);
 	inline Transform2D operator+(Transform2D const& transf2) const;
 
+	// Operators to undo specific transform from this one.
+	inline Transform2D operator-=(Transform2D const& transf2);
+	inline Transform2D operator-(Transform2D const& transf2) const;
+
 	// Combines this and another so that first this current transform is
 	// done and then another one.
 	inline Transform2D addAnotherTransform(Transform2D const& transf2) const;
@@ -119,6 +123,17 @@ inline Transform2D Transform2D::operator+=(Transform2D const& transf2)
 inline Transform2D Transform2D::operator+(Transform2D const& transf2) const
 {
 	return Transform2D(transf2.transf * transf);
+}
+
+inline Transform2D Transform2D::operator-=(Transform2D const& transf2)
+{
+	transf = transf2.transf.inverse() * transf;
+	return *this;
+}
+
+inline Transform2D Transform2D::operator-(Transform2D const& transf2) const
+{
+	return Transform2D(transf2.transf.inverse() * transf);
 }
 
 inline Transform2D Transform2D::addAnotherTransform(Transform2D const& transf2) const
