@@ -4,6 +4,7 @@
 #include "glsystem.h"
 #include "noncopyable.h"
 #include "gldebug.h"
+#include "assert.h"
 
 #include <GL/gl.h>
 
