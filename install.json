@@ -87,6 +87,7 @@
 				"rbuf.h",
 				"real.h",
 				"runnable.h",
+				"serializable.h",
 				"serialize.h",
 				"thread.h",
 				"time.h",

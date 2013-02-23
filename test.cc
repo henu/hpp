@@ -78,6 +78,7 @@
 #include "randomizer.h"
 #include "rbuf.h"
 #include "real.h"
+#include "serializable.h"
 #include "serialize.h"
 #include "thread.h"
 #include "time.h"
