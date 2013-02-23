@@ -248,12 +248,25 @@ void Json::loadRecursively(std::string::const_iterator& it, std::string::const_i
 			}
 			++ it;
 		}
-		std::string num_str(num_begin, it);
-		if (num_str[num_str.size() - 1] == '.') {
-			throw Exception("Unexpected \"" + num_str + "\"!");
+		// Read possible expontent
+		bool exponent_met = false;
+		if (it != end && (*it == 'e' || *it == 'E')) {
+			exponent_met = true;
+			++ it;
+			std::string::const_iterator exponent_begin = it;
+			while (it != end &&
+			        ((it == exponent_begin && (*it == '+' || *it == '-')) ||
+			         (it != exponent_begin && *it >= '0' && *it <= '9'))) {
+				++ it;
+			}
+			if (it <= exponent_begin + 1) {
+				throw Exception("Incomplete exponent representation of number: " + std::string(num_begin, it));
+			}
 		}
+		// Convert string to number
+		std::string num_str(num_begin, it);
 		num = atof(num_str.c_str());
-		if (num_str.find('.') == std::string::npos) {
+		if (!dot_met && !exponent_met) {
 			num_i = strToSSize(num_str);
 			num_is_integer = true;
 		} else {
