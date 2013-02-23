@@ -133,7 +133,7 @@ void Json::loadRecursively(std::string::const_iterator& it, std::string::const_i
 
 			// Ensure more stuff is expected
 			if (!expect_more && !obj.empty()) {
-				throw Exception(std::string("Expected \",\" but got \"") + *it + "\"!");
+				throw Exception(std::string("Expected \",\" but got \"") + *it + "\" when reading object!");
 			}
 
 			// Read key
@@ -181,7 +181,7 @@ void Json::loadRecursively(std::string::const_iterator& it, std::string::const_i
 
 			// Ensure more stuff is expected
 			if (!expect_more && !arr.empty()) {
-				throw Exception(std::string("Expected \",\" but got \"") + *it + "\"!");
+				throw Exception(std::string("Expected \",\" but got \"") + *it + "\" when reading array!");
 			}
 
 			// Read item

@@ -66,6 +66,10 @@ public:
 	Json getItem(size_t index) const;
 	inline bool getBoolean(void) const;
 
+	// Comparison operators
+	inline bool operator==(Json const& json) const;
+	inline bool operator!=(Json const& json) const;
+
 private:
 
 	Type type;
@@ -327,6 +331,40 @@ inline bool Json::getBoolean(void) const
 		throw Exception("Unable to get boolean, because this JSON is not a boolean!");
 	}
 	return num_is_integer;
+}
+
+inline bool Json::operator==(Json const& json) const
+{
+	if (type != json.type) {
+		return false;
+	}
+
+	switch (type) {
+	case NUMBER:
+		if (num_is_integer != json.num_is_integer) return false;
+		if (num_is_integer) {
+			return num_i == json.num_i;
+		} else {
+			return num == json.num;
+		}
+	case BOOLEAN:
+		return num_is_integer == json.num_is_integer;
+	case STRING:
+		return str == json.str;
+	case OBJECT:
+		return obj == json.obj;
+	case ARRAY:
+		return arr == json.arr;
+	default:
+		break;
+	}
+
+	return true;
+}
+
+inline bool Json::operator!=(Json const& json) const
+{
+	return !(*this == json);
 }
 
 inline void Json::clear(void)
