@@ -61,27 +61,6 @@ public:
 
 private:
 
-	// ----------------------------------------
-	// Functions for friends
-	// ----------------------------------------
-
-	inline void render(Renderable const* renderable,
-	                   Rendbuf< Real > const* poss,
-	                   Rendbuf< Real > const* nrms,
-	                   std::vector< Rendbuf< Real > const* > const& uvs,
-	                   Rendbuf< Real > const* clrs,
-	                   Rendbuf< RIdx > const* tris,
-	                   Transform const& transf) const;
-
-private:
-
-	virtual void doRendering(Renderable const* renderable,
-	                         Rendbuf< Real > const* poss,
-	                         Rendbuf< Real > const* nrms,
-	                         std::vector< Rendbuf< Real > const* > const& uvs,
-	                         Rendbuf< Real > const* clrs,
-	                         Rendbuf< RIdx > const* tris) const = 0;
-
 };
 
 
@@ -97,27 +76,6 @@ inline void Material::setViewAndProjectionmatricesFromCamera(Camera const* camer
 {
 	setViewmatrix(camera->getViewmatrix());
 	setProjectionmatrix(camera->getProjectionmatrix());
-}
-
-inline void Material::render(Renderable const* renderable,
-                             Rendbuf< Real > const* poss,
-                             Rendbuf< Real > const* nrms,
-                             std::vector< Rendbuf< Real > const* > const& uvs,
-                             Rendbuf< Real > const* clrs,
-                             Rendbuf< RIdx > const* tris,
-                             Transform const& transf) const
-{
-	// Apply transformation
-	glPushMatrix();
-// TODO: Check if we are using doubles instead of floats!
-	glMultMatrixf(transpose(transf.getMatrix()).getCells());
-	HppCheckGlErrors();
-
-	// Actual rendering
-	doRendering(renderable, poss, nrms, uvs, clrs, tris);
-
-	glPopMatrix();
-	HppCheckGlErrors();
 }
 
 }

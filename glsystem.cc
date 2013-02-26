@@ -19,7 +19,6 @@ PFNGLBINDBUFFERPROC GlSystem::systemBindBuffer = NULL;
 PFNGLBINDFRAMEBUFFERPROC GlSystem::systemBindFramebuffer = NULL;
 PFNGLBINDVERTEXARRAYPROC GlSystem::systemBindVertexArray = NULL;
 PFNGLBUFFERDATAPROC GlSystem::systemBufferData = NULL;
-PFNGLCLIENTACTIVETEXTUREPROC GlSystem::systemClientActiveTexture = NULL;
 PFNGLCOMPILESHADERPROC GlSystem::systemCompileShader = NULL;
 PFNGLCREATEPROGRAMPROC GlSystem::systemCreateProgram = NULL;
 PFNGLCREATESHADERPROC GlSystem::systemCreateShader = NULL;
@@ -91,7 +90,6 @@ void GlSystem::initialize(void)
 	systemBindFramebuffer = reinterpret_cast< PFNGLBINDFRAMEBUFFERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBindFramebuffer")));
 	systemBindVertexArray = reinterpret_cast< PFNGLBINDVERTEXARRAYPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBindVertexArray")));
 	systemBufferData = reinterpret_cast< PFNGLBUFFERDATAPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBufferData")));
-	systemClientActiveTexture = reinterpret_cast< PFNGLCLIENTACTIVETEXTUREPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glClientActiveTexture")));
 	systemCompileShader = reinterpret_cast< PFNGLCOMPILESHADERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCompileShader")));
 	systemCreateProgram = reinterpret_cast< PFNGLCREATEPROGRAMPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCreateProgram")));
 	systemCreateShader = reinterpret_cast< PFNGLCREATESHADERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCreateShader")));
@@ -150,7 +148,6 @@ void GlSystem::initialize(void)
 	systemBindFramebuffer = reinterpret_cast< PFNGLBINDFRAMEBUFFERPROC >(wglGetProcAddress("glBindFramebuffer"));
 	systemBindVertexArray = reinterpret_cast< PFNGLBINDVERTEXARRAYPROC >(wglGetProcAddress("glBindVertexBuffer"));
 	systemBufferData = reinterpret_cast< PFNGLBUFFERDATAPROC >(wglGetProcAddress("glBufferData"));
-	systemClientActiveTexture = reinterpret_cast< PFNGLCLIENTACTIVETEXTUREPROC >(wglGetProcAddress("glClientActiveTexture"));
 	systemCompileShader = reinterpret_cast< PFNGLCOMPILESHADERPROC >(wglGetProcAddress("glCompileShader"));
 	systemCreateProgram = reinterpret_cast< PFNGLCREATEPROGRAMPROC >(wglGetProcAddress("glCreateProgram"));
 	systemCreateShader = reinterpret_cast< PFNGLCREATESHADERPROC >(wglGetProcAddress("glCreateShader"));

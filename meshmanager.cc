@@ -1,6 +1,6 @@
 #include "meshmanager.h"
 
-#include "oldmesh.h"
+#include "mesh.h"
 #include "datamanagerbase.h"
 
 #include "exception.h"
@@ -9,23 +9,11 @@ namespace Hpp
 {
 
 // Real container of Meshes
-DatamanagerBase< OldMesh > meshes;
+DatamanagerBase< Mesh > meshes;
 
-void Meshmanager::addMesh(std::string const& name, OldMesh* mesh)
+void Meshmanager::addMesh(std::string const& name, Mesh* mesh)
 {
 	meshes.addItem(name, mesh);
-}
-
-void Meshmanager::addMeshFromRawmesh(Rawmesh const& rawmesh, std::string const& name, Rawmesh::Halvingstyle hstyle)
-{
-	std::string realname;
-	if (!name.empty()) {
-		realname = name;
-	} else {
-		realname = rawmesh.name;
-	}
-	OldMesh* new_mesh = new OldMesh(rawmesh, hstyle);
-	meshes.addItem(realname, new_mesh);
 }
 
 void Meshmanager::deleteMesh(std::string const& name)
@@ -43,7 +31,7 @@ bool Meshmanager::meshExists(std::string const& name)
 	return meshes.itemExists(name);
 }
 
-OldMesh* Meshmanager::getMesh(std::string const& name)
+Mesh* Meshmanager::getMesh(std::string const& name)
 {
 	return meshes.getItem(name);
 }

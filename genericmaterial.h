@@ -122,14 +122,6 @@ private:
 	static Shader shader_vrt;
 	static Shader shader_frg;
 
-	// Virtual functions, needed by Material
-	inline virtual void doRendering(Renderable const* renderable,
-	                                Rendbuf< Real > const* poss,
-	                                Rendbuf< Real > const* nrms,
-	                                std::vector< Rendbuf< Real > const* > const& uvs,
-	                                Rendbuf< Real > const* clrs,
-	                                Rendbuf< RIdx > const* tris) const;
-
 	inline void updateNeedsLight(void);
 	inline void updateIsTranslucent(void);
 
@@ -580,53 +572,6 @@ inline Shaderprogram* GenericMaterial::getProgram(void) const
 		return custom_program;
 	}
 	return program;
-}
-
-inline void GenericMaterial::doRendering(Renderable const* renderable,
-                                         Rendbuf< Real > const* poss,
-                                         Rendbuf< Real > const* nrms,
-                                         std::vector< Rendbuf< Real > const* > const& uvs,
-                                         Rendbuf< Real > const* clrs,
-                                         Rendbuf< RIdx > const* tris) const
-{
-	HppAssert(poss, "Null pointer to buffer!");
-	HppAssert(nrms, "Null pointer to buffer!");
-	HppAssert(uvs.size() < 1 || uvs[0], "Null pointer to buffer!");
-	HppAssert(uvs.size() < 2 || uvs[1], "Null pointer to buffer!");
-	HppAssert(uvs.size() < 3 || uvs[2], "Null pointer to buffer!");
-	HppAssert(tris, "Null pointer to buffer!");
-
-	// Parameters that are not used
-	(void)renderable;
-// TODO: Code support for colors!
-(void)clrs;
-
-	HppCheckGlErrors();
-
-	if (tris->empty()) {
-		return;
-	}
-
-	// Positions, normals and colors of vertices
-	poss->use(RendbufEnums::VERTEX);
-	nrms->use(RendbufEnums::NORMAL);
-	if (needs_uvs && uvs.size() >= 3) {
-		GlSystem::ActiveTexture(GL_TEXTURE2);
-		GlSystem::ClientActiveTexture(GL_TEXTURE2); //DEPRECATED
-		uvs[2]->use(RendbufEnums::TEXCOORD, 3);
-		GlSystem::ActiveTexture(GL_TEXTURE1);
-		GlSystem::ClientActiveTexture(GL_TEXTURE1); //DEPRECATED
-		uvs[1]->use(RendbufEnums::TEXCOORD, 3);
-		GlSystem::ActiveTexture(GL_TEXTURE0);
-		GlSystem::ClientActiveTexture(GL_TEXTURE0); //DEPRECATED
-		uvs[0]->use(RendbufEnums::TEXCOORD);
-	}
-	HppCheckGlErrors();
-
-	// Draw triangles
-	tris->draw(RendbufEnums::TRIANGLES);
-	HppCheckGlErrors();
-
 }
 
 inline void GenericMaterial::updateNeedsLight(void)

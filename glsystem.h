@@ -27,7 +27,6 @@ public:
 	inline static void BindFramebuffer(GLenum target, GLuint framebuffer);
 	inline static void BindVertexArray(GLuint array);
 	inline static void BufferData(GLenum target, GLsizei size, const void* data, GLenum usage);
-	inline static void ClientActiveTexture(GLenum texture);
 	inline static GLuint CreateProgram(void);
 	inline static GLuint CreateShader(GLenum type);
 	inline static void CompileShader(GLuint shader);
@@ -111,7 +110,6 @@ private:
 	static PFNGLBINDFRAMEBUFFERPROC systemBindFramebuffer;
 	static PFNGLBINDVERTEXARRAYPROC systemBindVertexArray;
 	static PFNGLBUFFERDATAPROC systemBufferData;
-	static PFNGLCLIENTACTIVETEXTUREPROC systemClientActiveTexture; //DEPRECATED
 	static PFNGLCOMPILESHADERPROC systemCompileShader;
 	static PFNGLCREATEPROGRAMPROC systemCreateProgram;
 	static PFNGLCREATESHADERPROC systemCreateShader;
@@ -214,12 +212,6 @@ inline void GlSystem::BufferData(GLenum target, GLsizei size, const void* data, 
 {
 	HppAssert(systemBufferData, "Function does not exist!");
 	systemBufferData(target, size, data, usage);
-}
-
-inline void GlSystem::ClientActiveTexture(GLenum texture)
-{
-	HppAssert(systemClientActiveTexture, "Function does not exist!");
-	systemClientActiveTexture(texture);
 }
 
 inline void GlSystem::AttachShader(GLuint program, GLuint shader)
