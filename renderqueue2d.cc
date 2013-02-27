@@ -5,7 +5,7 @@ namespace Hpp
 
 // Shader codes
 std::string const Renderqueue2d::SHADER_VRT =
-"#version 330 core\n"
+"#version 330\n"
 "\n"
 "in vec2 pos;\n"
 "in vec2 uv;\n"
@@ -22,7 +22,7 @@ std::string const Renderqueue2d::SHADER_VRT =
 "}\n";
 
 std::string const Renderqueue2d::SHADER_FRG =
-"#version 330 core\n"
+"#version 330\n"
 "\n"
 "in vec2 frag_uv;\n"
 "\n"

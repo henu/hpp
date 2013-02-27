@@ -5,7 +5,7 @@ namespace Hpp
 
 // Shader codes
 std::string const SHADER_VRT =
-"#version 330 core\n"
+"#version 330\n"
 "\n"
 "in vec4 pos;\n"
 "in vec4 normal;\n"
@@ -94,7 +94,7 @@ std::string const SHADER_VRT =
 "}\n";
 
 std::string const SHADER_FRG =
-"#version 330 core\n"
+"#version 330\n"
 "\n"
 "// Global color\n"
 "#ifdef COLOR\n"
