@@ -51,6 +51,8 @@ inline std::vector< std::string > splitString(std::string const& str, std::vecto
 template < class Type, class IterIt, class IterEnd, class Char >
 inline bool splitStringInParts(Type& result, IterIt& it, IterEnd const& end, Char delimiter);
 
+inline std::string joinStrings(std::vector< std::string > const& strs, std::string const& delimiter = "");
+
 // Removes whitespace from beginning and end of string
 inline std::string trim(std::string const& str, std::string ws = " \t\n");
 
@@ -191,6 +193,18 @@ inline bool splitStringInParts(Type& result, IterIt& it, IterEnd const& end, Cha
 	} while (it != end);
 
 	return true;
+}
+
+inline std::string joinStrings(std::vector< std::string > const& strs, std::string const& delimiter)
+{
+	std::string result;
+	for (size_t str_id = 0; str_id < strs.size(); ++ str_id) {
+		result += strs[str_id];
+		if (str_id + 1 < strs.size()) {
+			result += delimiter;
+		}
+	}
+	return result;
 }
 
 inline std::string trim(std::string const& str, std::string ws)
