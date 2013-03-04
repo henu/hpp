@@ -40,7 +40,7 @@ private:
 };
 
 inline Perspectivecamera::Perspectivecamera(void) :
-fov_y(Angle::fromDegrees(0))
+fov_y(Angle(0))
 {
 }
 

@@ -49,8 +49,8 @@ private:
 };
 
 inline OldCamera::OldCamera(void) :
-fov_x(Angle::fromDegrees(90)),
-fov_y(Angle::fromDegrees(90)),
+fov_x(Angle(90)),
+fov_y(Angle(90)),
 clip_near(CLIP_NEAR_DEFAULT),
 clip_far(CLIP_FAR_DEFAULT)
 {

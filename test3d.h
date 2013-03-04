@@ -22,10 +22,10 @@ inline void test3D(void)
 	{
 		Transform transf(Vector3(0, 0, 0));
 		transf.translate(Vector3(0, 1, 2));
-		transf.rotateX(Angle::fromDegrees(30));
-		transf.rotateY(Angle::fromDegrees(20));
+		transf.rotateX(Angle(30));
+		transf.rotateY(Angle(20));
 		transf.scale(Vector3(3, 4, 5));
-		transf.rotateZ(Angle::fromDegrees(10));
+		transf.rotateZ(Angle(10));
 		Vector3 diff = transf.getPosition() - Vector3(2.348, -0.130, 10.487);
 		HppAssert(diff.length() < 0.01, "Testing of basic transformations has failed!");
 		diff = transf.getPosition() - transf.applyToPosition(Vector3::ZERO);
@@ -35,10 +35,10 @@ inline void test3D(void)
 	// Translate::addAnotherTransform()
 	{
 		Transform transf1(Vector3(0, 1, 2));
-		transf1.rotateX(Angle::fromDegrees(30));
-		Transform transf2(Y, Angle::fromDegrees(20));
+		transf1.rotateX(Angle(30));
+		Transform transf2(Y, Angle(20));
 		transf2.scale(Vector3(3, 4, 5));
-		transf2.rotateZ(Angle::fromDegrees(10));
+		transf2.rotateZ(Angle(10));
 		Transform transf = transf1.addAnotherTransform(transf2);
 		Vector3 diff = transf.getPosition() - Vector3(2.348, -0.130, 10.487);
 		HppAssert(diff.length() < 0.01, "Testing of Translate::addAnotherTransform() has failed!");
@@ -49,8 +49,8 @@ inline void test3D(void)
 	// Translate::getRelativePositionTo()
 	{
 		Transform transf(Vector3(5, 7, 9));
-		transf.rotateX(Angle::fromDegrees(20));
-		transf.rotateY(Angle::fromDegrees(70));
+		transf.rotateX(Angle(20));
+		transf.rotateY(Angle(70));
 		Vector3 rel_pos(-10, -21, -32);
 		Vector3 abs_pos = transf.applyToPosition(rel_pos);
 		Vector3 rel_pos_check = transf.getRelativePositionTo(abs_pos);

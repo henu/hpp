@@ -77,7 +77,7 @@ inline size_t randomNBitInt(size_t n)
 
 inline Angle randomAngle(void)
 {
-	return Angle::fromDegrees(random(-180, 180));
+	return Angle(random(-180, 180));
 }
 
 inline Vector2 randomVector2(Real max_radius)

@@ -177,7 +177,7 @@ inline Angle angleBetweenVectors(Vector3 const& v1, Vector3 const& v2)
 		if ((v1_n + v2_n).length() > 1.0) {
 			return Angle::fromRadians(0);
 		} else {
-			return Angle::fromDegrees(180);
+			return Angle(180);
 		}
 	}
 	return Angle::fromRadians(radians);
@@ -199,7 +199,7 @@ inline Angle angleBetweenVectors(Vector2 const& v1, Vector2 const& v2)
 		if ((v1_n + v2_n).length() > 1.0) {
 			return Angle::fromRadians(0);
 		} else {
-			return Angle::fromDegrees(180);
+			return Angle(180);
 		}
 	}
 	return Angle::fromRadians(radians);

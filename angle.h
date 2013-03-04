@@ -19,6 +19,7 @@ public:
 	static Angle const ZERO;
 
 	inline Angle(void);
+	inline Angle(float degrees);
 
 	// Getters
 	inline float getRadians(void) const;
@@ -28,8 +29,7 @@ public:
 	std::string toRadiansStr(void) const;
 	std::string toDegreesStr(void) const;
 
-	// Constructing functions
-	inline static Angle fromDegrees(float degrees);
+	// Constructing function from radians
 	inline static Angle fromRadians(float radians);
 
 	// Copy constructor and assignment operators
@@ -71,12 +71,19 @@ private:
 
 };
 
+inline Angle operator*(float f, Angle const& a);
+
 
 // ----------------------------------------
 // Implementations of inline functions
 // ----------------------------------------
 
 inline Angle::Angle(void)
+{
+}
+
+inline Angle::Angle(float degrees) :
+rad(degrees / 180.0 * HPP_PI)
 {
 }
 
@@ -99,13 +106,6 @@ inline Angle Angle::operator=(Angle const& a)
 {
 	rad = a.rad;
 	return *this;
-}
-
-inline Angle Angle::fromDegrees(float degrees)
-{
-	Angle a;
-	a.rad = degrees / 180.0 * HPP_PI;
-	return a;
 }
 
 inline Angle Angle::fromRadians(float radians)
@@ -225,6 +225,11 @@ inline Real Angle::cos(void) const
 inline Real Angle::tan(void) const
 {
 	return ::tan(rad);
+}
+
+inline Angle operator*(float f, Angle const& a)
+{
+	return a * f;
 }
 
 }

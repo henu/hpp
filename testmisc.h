@@ -101,7 +101,7 @@ inline void testMisc(void)
 		Vector3 pos1 = Vector3(-4, 1, -2);
 		HppAssert(Collisiontests::sphereToSphere(coll, pos0, 2, pos1, 5, -1), "No collision detected!");
 		HppAssert(fabs(coll.depth + 0.141428429) < 0.0001, "Got invalid collision depth!");
-		HppAssert(angleBetweenVectors(coll.normal, pos0 - pos1) < Angle::fromDegrees(0.001), "Invalid collision normal!");
+		HppAssert(angleBetweenVectors(coll.normal, pos0 - pos1) < Angle(0.001), "Invalid collision normal!");
 	}
 
 }

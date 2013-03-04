@@ -172,7 +172,7 @@ inline void Renderqueue2d::renderSprite(Texture const* tex,
 
 	Transform2D transf;
 	transf.scale(size);
-	if (rotation != Angle::fromDegrees(0)) {
+	if (rotation != Angle(0)) {
 		transf.translate(-rot_pos);
 		transf.rotate(rotation);
 		transf.translate(rot_pos);
