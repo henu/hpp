@@ -34,6 +34,15 @@ public:
 	inline Vector3 getVertexNormal(GLuint vertex) const;
 	inline Vector2 getVertexUV(GLuint vertex) const;
 
+	inline void addTriangle(Vector3 const& pos0, Vector3 const& pos1, Vector3 const& pos2);
+	inline void addTriangle(Vector3 const& pos0, Vector3 const& pos1, Vector3 const& pos2,
+	                        Vector3 const& nrm0, Vector3 const& nrm1, Vector3 const& nrm2);
+	inline void addTriangleWithoutNormals(Vector3 const& pos0, Vector3 const& pos1, Vector3 const& pos2,
+	                                      Vector2 const& uv0, Vector2 const& uv1, Vector2 const& uv2);
+	inline void addTriangle(Vector3 const& pos0, Vector3 const& pos1, Vector3 const& pos2,
+	                        Vector3 const& nrm0, Vector3 const& nrm1, Vector3 const& nrm2,
+	                        Vector2 const& uv0, Vector2 const& uv1, Vector2 const& uv2);
+
 protected:
 
 	inline void readArrays(std::vector< GLfloat > const& poss,
@@ -49,6 +58,14 @@ private:
 	std::vector< GLfloat > nrms;
 	std::vector< GLfloat > uvs;
 	std::vector< GLuint > indices;
+
+	// Finds index of vertex that has required properties
+	// or creates new one, if nothing is found.
+	inline GLuint findIndex(Hpp::Vector3 const& pos,
+	                        Hpp::Vector3 const& nrm,
+	                        Hpp::Vector2 const& uv,
+	                        bool use_nrm,
+	                        bool use_uv);
 
 };
 
@@ -168,6 +185,66 @@ inline Vector2 Meshloader::getVertexUV(GLuint vertex) const
 	return Vector2(uvs[vrt_ofs + 0], uvs[vrt_ofs + 1]);
 }
 
+inline void Meshloader::addTriangle(Vector3 const& pos0, Vector3 const& pos1, Vector3 const& pos2)
+{
+	HppAssert(nrms.empty(), "Unable to add triangle without normals if already added triangles have them!");
+	HppAssert(uvs.empty(), "Unable to add triangle without UVs if already added triangles have them!");
+
+	GLuint idx0 = findIndex(pos0, Hpp::Vector3::ZERO, Hpp::Vector2::ZERO, false, false);
+	GLuint idx1 = findIndex(pos1, Hpp::Vector3::ZERO, Hpp::Vector2::ZERO, false, false);
+	GLuint idx2 = findIndex(pos2, Hpp::Vector3::ZERO, Hpp::Vector2::ZERO, false, false);
+
+	indices.push_back(idx0);
+	indices.push_back(idx1);
+	indices.push_back(idx2);
+}
+
+inline void Meshloader::addTriangle(Vector3 const& pos0, Vector3 const& pos1, Vector3 const& pos2,
+                                    Vector3 const& nrm0, Vector3 const& nrm1, Vector3 const& nrm2)
+{
+	HppAssert(poss.empty() || !nrms.empty(), "Unable to add triangle with normals if already added triangles do not have them!");
+	HppAssert(uvs.empty(), "Unable to add triangle without UVs if already added triangles have them!");
+
+	GLuint idx0 = findIndex(pos0, nrm0, Hpp::Vector2::ZERO, true, false);
+	GLuint idx1 = findIndex(pos1, nrm1, Hpp::Vector2::ZERO, true, false);
+	GLuint idx2 = findIndex(pos2, nrm2, Hpp::Vector2::ZERO, true, false);
+
+	indices.push_back(idx0);
+	indices.push_back(idx1);
+	indices.push_back(idx2);
+}
+
+inline void Meshloader::addTriangleWithoutNormals(Vector3 const& pos0, Vector3 const& pos1, Vector3 const& pos2,
+                                                  Vector2 const& uv0, Vector2 const& uv1, Vector2 const& uv2)
+{
+	HppAssert(nrms.empty(), "Unable to add triangle without normals if already added triangles have them!");
+	HppAssert(poss.empty() || !uvs.empty(), "Unable to add triangle with UVs if already added triangles do not have them!");
+
+	GLuint idx0 = findIndex(pos0, Hpp::Vector3::ZERO, uv0, false, true);
+	GLuint idx1 = findIndex(pos1, Hpp::Vector3::ZERO, uv1, false, true);
+	GLuint idx2 = findIndex(pos2, Hpp::Vector3::ZERO, uv2, false, true);
+
+	indices.push_back(idx0);
+	indices.push_back(idx1);
+	indices.push_back(idx2);
+}
+
+inline void Meshloader::addTriangle(Vector3 const& pos0, Vector3 const& pos1, Vector3 const& pos2,
+                                    Vector3 const& nrm0, Vector3 const& nrm1, Vector3 const& nrm2,
+                                    Vector2 const& uv0, Vector2 const& uv1, Vector2 const& uv2)
+{
+	HppAssert(poss.empty() || !nrms.empty(), "Unable to add triangle with normals if already added triangles do not have them!");
+	HppAssert(poss.empty() || !uvs.empty(), "Unable to add triangle with UVs if already added triangles do not have them!");
+
+	GLuint idx0 = findIndex(pos0, nrm0, uv0, true, true);
+	GLuint idx1 = findIndex(pos1, nrm1, uv1, true, true);
+	GLuint idx2 = findIndex(pos2, nrm2, uv2, true, true);
+
+	indices.push_back(idx0);
+	indices.push_back(idx1);
+	indices.push_back(idx2);
+}
+
 inline void Meshloader::readArrays(std::vector< GLfloat > const& poss,
                                    std::vector< GLfloat > const& nrms,
                                    std::vector< GLfloat > const& uvs,
@@ -253,6 +330,56 @@ inline void Meshloader::readArrays(std::vector< GLfloat > const& poss,
 		throw Exception("Invalid number of UVs in buffer!");
 	}
 
+}
+
+inline GLuint Meshloader::findIndex(Hpp::Vector3 const& pos,
+                                    Hpp::Vector3 const& nrm,
+                                    Hpp::Vector2 const& uv,
+                                    bool use_nrm,
+                                    bool use_uv)
+{
+	Real SAME_DIFF_THRESHOLD = 0.0001;
+	Real SAME_DIFF_THRESHOLD_TO_2 = SAME_DIFF_THRESHOLD * SAME_DIFF_THRESHOLD;
+
+	for (GLuint vrt_idx = 0; vrt_idx < poss.size() / 3; ++ vrt_idx) {
+		size_t ofs3 = vrt_idx * 3;
+		// Check position
+		Hpp::Vector3 vrt_pos(poss[ofs3 + 0], poss[ofs3 + 1], poss[ofs3 + 2]);
+		if ((vrt_pos - pos).lengthTo2() > SAME_DIFF_THRESHOLD_TO_2) {
+			continue;
+		}
+		// Check normal
+		if (use_nrm) {
+			Hpp::Vector3 vrt_nrm(nrms[ofs3 + 0], nrms[ofs3 + 1], nrms[ofs3 + 2]);
+			if ((vrt_nrm - nrm).lengthTo2() > SAME_DIFF_THRESHOLD_TO_2) {
+				continue;
+			}
+		}
+		// Check UV
+		if (use_uv) {
+			size_t ofs2 = vrt_idx * 2;
+			Hpp::Vector2 vrt_uv(nrms[ofs2 + 0], nrms[ofs2 + 1]);
+			if ((vrt_uv - uv).lengthTo2() > SAME_DIFF_THRESHOLD_TO_2) {
+				continue;
+			}
+		}
+		return vrt_idx;
+	}
+
+	// No vertex could be found, so create new one
+	poss.push_back(pos.x);
+	poss.push_back(pos.y);
+	poss.push_back(pos.z);
+	if (use_nrm) {
+		nrms.push_back(nrm.x);
+		nrms.push_back(nrm.y);
+		nrms.push_back(nrm.z);
+	}
+	if (use_uv) {
+		uvs.push_back(uv.x);
+		uvs.push_back(uv.y);
+	}
+	return poss.size() / 3 - 1;
 }
 
 }
