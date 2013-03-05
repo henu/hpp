@@ -1,7 +1,9 @@
 #ifndef HPP_PIXELFORMAT_H
 #define HPP_PIXELFORMAT_H
 
+#ifndef HPP_NO_3D
 #include "inc_gl.h"
+#endif
 #include "assert.h"
 
 #include <stdint.h>
@@ -56,6 +58,7 @@ inline bool pixelformatHasDepth(Pixelformat format)
 	return format == DEPTH16 || format == DEPTH24 || format == DEPTH32;
 }
 
+#ifndef HPP_NO_3D
 inline GLenum pixelformatToGlFormat(Pixelformat format)
 {
 	switch (format)
@@ -82,7 +85,9 @@ inline GLenum pixelformatToGlFormat(Pixelformat format)
 	}
 	return 0;
 }
+#endif
 
+#ifndef HPP_NO_3D
 inline GLint pixelformatToGlInternalFormat(Pixelformat format)
 {
 	switch (format)
@@ -109,6 +114,7 @@ inline GLint pixelformatToGlInternalFormat(Pixelformat format)
 	}
 	return 0;
 }
+#endif
 
 }
 
