@@ -1,5 +1,5 @@
-#ifndef ELIBDEBUG_MEMWATCH_H
-#define ELIBDEBUG_MEMWATCH_H
+#ifndef HPP_MEMWATCH_H
+#define HPP_MEMWATCH_H
 
 #include <string>
 #include <stdint.h>
