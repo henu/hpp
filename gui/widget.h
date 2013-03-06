@@ -28,6 +28,8 @@ class Widget
 
 public:
 
+	enum Alignment { LEFT, RIGHT, TOP, BOTTOM, CENTER };
+
 	inline Widget(void);
 	virtual ~Widget(void);
 
@@ -39,9 +41,21 @@ public:
 	inline uint32_t getHeight(void) const { return height; }
 
 	// Size getters
-// TODO: Move this to Containerwidget, and make it abstract!
+// TODO: Move this to Widget, and make it abstract!
 	inline virtual uint32_t getMinWidth(void) const { return 0; }
 	inline virtual uint32_t getMinHeight(uint32_t width) const { (void)width; return 0; }
+
+	// Alignment
+	inline Alignment getHorizontalAlignment(void) const { return align; }
+	inline Alignment getVerticalAlignment(void) const { return valign; }
+	inline void setHorizontalAlignment(Alignment align) { this->align = align; markSizeChanged(); }
+	inline void setVerticalAlignment(Alignment align) { valign = align; markSizeChanged(); }
+
+	// Expanding
+	inline uint8_t getHorizontalExpanding(void) const { return expanding_horiz; }
+	inline uint8_t getVerticalExpanding(void) const { return expanding_vert; }
+	inline void setHorizontalExpanding(uint8_t expanding) { expanding_horiz = expanding; markSizeChanged(); }
+	inline void setVerticalExpanding(uint8_t expanding) { expanding_vert = expanding; markSizeChanged(); }
 
 private:
 
@@ -133,6 +147,9 @@ private:
 	uint32_t width, height;
 	bool mouse_over;
 
+	Alignment align, valign;
+	uint8_t expanding_horiz, expanding_vert;
+
 	// Renderarea limitation. This is measured in parent's coordinates.
 	bool renderarealimit;
 	int32_t renderarealimit_x;
@@ -178,6 +195,10 @@ state(ENABLED),
 x(0), y(0),
 width(0), height(0),
 mouse_over(false),
+align(CENTER),
+valign(CENTER),
+expanding_horiz(0),
+expanding_vert(0),
 renderarealimit(false)
 {
 }

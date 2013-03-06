@@ -26,7 +26,7 @@ public:
 
 	void addMenu(Menu* menu);
 
-	void setContent(Containerwidget* widget);
+	void setContent(Widget* widget);
 
 	virtual uint32_t getMinWidth(void) const;
 	virtual uint32_t getMinHeight(uint32_t width) const;
@@ -37,7 +37,7 @@ private:
 
 	Menus menus;
 
-	Containerwidget* content;
+	Widget* content;
 
 	// Virtual functions for Widget
 	virtual void doRendering(int32_t x_origin, int32_t y_origin);

@@ -21,14 +21,14 @@ public:
 	inline Autogridcontainer(void);
 	inline virtual ~Autogridcontainer(void);
 
-	inline void addWidget(Containerwidget* widget);
+	inline void addWidget(Widget* widget);
 
 	inline virtual uint32_t getMinWidth(void) const;
 	inline virtual uint32_t getMinHeight(uint32_t width) const;
 
 private:
 
-	typedef std::vector< Containerwidget* > Widgets;
+	typedef std::vector< Widget* > Widgets;
 	typedef std::vector< uint32_t > Sizes;
 
 	Widgets widgets;
@@ -51,7 +51,7 @@ inline Autogridcontainer::Autogridcontainer(void)
 inline Autogridcontainer::~Autogridcontainer(void)
 {
 }
-inline void Autogridcontainer::addWidget(Containerwidget* widget)
+inline void Autogridcontainer::addWidget(Widget* widget)
 {
 	widgets.push_back(widget);
 	addChild(widget);
@@ -65,7 +65,7 @@ inline uint32_t Autogridcontainer::getMinWidth(void) const
 	for (Widgets::const_iterator widgets_it = widgets.begin();
 	     widgets_it != widgets.end();
 	     widgets_it ++) {
-		Containerwidget const* widget = *widgets_it;
+		Widget const* widget = *widgets_it;
 		min_width = std::max(min_width, widget->getMinWidth());
 	}
 	return min_width;
@@ -138,7 +138,7 @@ inline void Autogridcontainer::doRepositioning(void)
 	for (Widgets::iterator widgets_it = widgets.begin();
 	     widgets_it != widgets.end();
 	     widgets_it ++) {
-		Containerwidget* widget = *widgets_it;
+		Widget* widget = *widgets_it;
 
 		uint32_t cell_width = widths[column_id];
 		uint32_t cell_height = heights[row_id];
@@ -167,7 +167,7 @@ inline Autogridcontainer::Sizes Autogridcontainer::calculateWidthsOfColumns(uint
 	for (Widgets::const_iterator widgets_it = widgets.begin();
 	     widgets_it != widgets.end();
 	     widgets_it ++) {
-		Containerwidget const* widget = *widgets_it;
+		Widget const* widget = *widgets_it;
 		widgets_widths.push_back(widget->getMinWidth());
 	}
 	// Sort widths, so smallest thinnest can be got
@@ -195,7 +195,7 @@ inline Autogridcontainer::Sizes Autogridcontainer::calculateWidthsOfColumns(uint
 		for (size_t widget_id = 0;
 		     widget_id < widgets.size();
 		     widget_id ++) {
-			Containerwidget const* widget = widgets[widget_id];
+			Widget const* widget = widgets[widget_id];
 			size_t column_id = widget_id % columns_count;
 			widths_temp[column_id] = std::max(widths_temp[column_id], widget->getMinWidth());
 		}

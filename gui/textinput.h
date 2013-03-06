@@ -3,7 +3,7 @@
 
 #include "textinputcontents.h"
 #include "scrollbox.h"
-#include "containerwidget.h"
+#include "widget.h"
 #include "renderer.h"
 #include "callback.h"
 
@@ -13,7 +13,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Textinput : public Containerwidget
+class Textinput : public Widget
 {
 
 	friend class TextinputContents;

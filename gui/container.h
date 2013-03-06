@@ -1,7 +1,7 @@
 #ifndef HPP_GUI_CONTAINER_H
 #define HPP_GUI_CONTAINER_H
 
-#include "containerwidget.h"
+#include "widget.h"
 
 namespace Hpp
 {
@@ -9,7 +9,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Container : public Containerwidget
+class Container : public Widget
 {
 
 public:
@@ -21,7 +21,7 @@ protected:
 
 	// Takes care of alignments, and positions widget to given area.
 	// Also expands to full size, if expanding is wanted.
-	inline void positionWidget(Containerwidget* widget, int32_t pos_x, int32_t pos_y, uint32_t width, uint32_t height, bool force_expanding = false);
+	inline void positionWidget(Widget* widget, int32_t pos_x, int32_t pos_y, uint32_t width, uint32_t height, bool force_expanding = false);
 
 private:
 
@@ -35,7 +35,7 @@ inline Container::~Container(void)
 {
 }
 
-inline void Container::positionWidget(Containerwidget* widget, int32_t pos_x, int32_t pos_y, uint32_t width, uint32_t height, bool force_expanding)
+inline void Container::positionWidget(Widget* widget, int32_t pos_x, int32_t pos_y, uint32_t width, uint32_t height, bool force_expanding)
 {
 	// Calculate size
 	uint32_t widget_width = widget->getMinWidth();
@@ -46,16 +46,16 @@ inline void Container::positionWidget(Containerwidget* widget, int32_t pos_x, in
 	// Calculate position
 	int32_t pos_x_rel;
 	int32_t pos_y_rel;
-	if (widget->getHorizontalAlignment() == Containerwidget::CENTER) {
+	if (widget->getHorizontalAlignment() == Widget::CENTER) {
 		pos_x_rel = (width - widget_width) / 2;
-	} else if (widget->getHorizontalAlignment() == Containerwidget::RIGHT) {
+	} else if (widget->getHorizontalAlignment() == Widget::RIGHT) {
 		pos_x_rel = width - widget_width;
 	} else {
 		pos_x_rel = 0;
 	}
-	if (widget->getVerticalAlignment() == Containerwidget::CENTER) {
+	if (widget->getVerticalAlignment() == Widget::CENTER) {
 		pos_y_rel = (height - widget_height) / 2;
-	} else if (widget->getVerticalAlignment() == Containerwidget::BOTTOM) {
+	} else if (widget->getVerticalAlignment() == Widget::BOTTOM) {
 		pos_y_rel = height - widget_height;
 	} else {
 		pos_y_rel = 0;

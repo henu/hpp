@@ -10,7 +10,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Slider : public Containerwidget
+class Slider : public Widget
 {
 
 public:

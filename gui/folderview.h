@@ -2,7 +2,7 @@
 #define HPP_GUI_FOLDERVIEW_H
 
 #include "scrollbox.h"
-#include "containerwidget.h"
+#include "widget.h"
 #include "renderer.h"
 #include "folderviewcontents.h"
 #include "callback.h"
@@ -16,7 +16,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Folderview : public Containerwidget
+class Folderview : public Widget
 {
 
 	friend class FolderviewContents;

@@ -28,7 +28,7 @@ void AreaWithMenubar::addMenu(Menu* menu)
 	doRepositioning();
 }
 
-void AreaWithMenubar::setContent(Containerwidget* widget)
+void AreaWithMenubar::setContent(Widget* widget)
 {
 	if (content) {
 		removeChild(content);

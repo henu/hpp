@@ -1,7 +1,7 @@
 #ifndef HPP_GUI_BUTTON_H
 #define HPP_GUI_BUTTON_H
 
-#include "containerwidget.h"
+#include "widget.h"
 #include "renderer.h"
 #include "callback.h"
 
@@ -13,7 +13,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Button : public Containerwidget
+class Button : public Widget
 {
 
 public:

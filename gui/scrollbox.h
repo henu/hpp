@@ -3,7 +3,7 @@
 
 #include "scrollbar.h"
 #include "callback.h"
-#include "containerwidget.h"
+#include "widget.h"
 
 #include "../vector2.h"
 
@@ -13,7 +13,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Scrollbox : public Containerwidget
+class Scrollbox : public Widget
 {
 
 public:

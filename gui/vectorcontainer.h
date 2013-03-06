@@ -23,14 +23,14 @@ public:
 
 	inline void setDirection(Direction dir);
 
-	inline void addWidget(Containerwidget* widget);
+	inline void addWidget(Widget* widget);
 
 	inline virtual uint32_t getMinWidth(void) const;
 	inline virtual uint32_t getMinHeight(uint32_t width) const;
 
 private:
 
-	typedef std::vector< Containerwidget* > Widgets;
+	typedef std::vector< Widget* > Widgets;
 
 	Widgets widgets;
 
@@ -59,7 +59,7 @@ inline void Vectorcontainer::setDirection(Direction dir)
 	markSizeChanged();
 }
 
-inline void Vectorcontainer::addWidget(Containerwidget* widget)
+inline void Vectorcontainer::addWidget(Widget* widget)
 {
 	widgets.push_back(widget);
 	addChild(widget);
@@ -73,14 +73,14 @@ inline uint32_t Vectorcontainer::getMinWidth(void) const
 		for (Widgets::const_iterator widgets_it = widgets.begin();
 		     widgets_it != widgets.end();
 		     widgets_it ++) {
-			Containerwidget const* widget = *widgets_it;
+			Widget const* widget = *widgets_it;
 			min_width += widget->getMinWidth();
 		}
 	} else {
 		for (Widgets::const_iterator widgets_it = widgets.begin();
 		     widgets_it != widgets.end();
 		     widgets_it ++) {
-			Containerwidget const* widget = *widgets_it;
+			Widget const* widget = *widgets_it;
 			min_width = std::max(min_width, widget->getMinWidth());
 		}
 	}
@@ -94,14 +94,14 @@ inline uint32_t Vectorcontainer::getMinHeight(uint32_t width) const
 		for (Widgets::const_iterator widgets_it = widgets.begin();
 		     widgets_it != widgets.end();
 		     widgets_it ++) {
-			Containerwidget const* widget = *widgets_it;
+			Widget const* widget = *widgets_it;
 			min_height = std::max(min_height, widget->getMinHeight(width));
 		}
 	} else {
 		for (Widgets::const_iterator widgets_it = widgets.begin();
 		     widgets_it != widgets.end();
 		     widgets_it ++) {
-			Containerwidget const* widget = *widgets_it;
+			Widget const* widget = *widgets_it;
 			min_height += widget->getMinHeight(width);
 		}
 	}
@@ -132,7 +132,7 @@ inline void Vectorcontainer::doRepositioning(void)
 		for (Widgets::iterator widgets_it = widgets.begin();
 		     widgets_it != widgets.end();
 		     widgets_it ++) {
-			Containerwidget* widget = *widgets_it;
+			Widget* widget = *widgets_it;
 			total_expanding += widget->getHorizontalExpanding();
 		}
 		uint32_t pos_x = 0;
@@ -140,7 +140,7 @@ inline void Vectorcontainer::doRepositioning(void)
 		for (Widgets::iterator widgets_it = widgets.begin();
 		     widgets_it != widgets.end();
 		     widgets_it ++) {
-			Containerwidget* widget = *widgets_it;
+			Widget* widget = *widgets_it;
 			uint32_t child_width = widget->getMinWidth();
 			// If this is last widget, then give
 			// all of remaining space to it.
@@ -177,7 +177,7 @@ inline void Vectorcontainer::doRepositioning(void)
 		for (Widgets::iterator widgets_it = widgets.begin();
 		     widgets_it != widgets.end();
 		     widgets_it ++) {
-			Containerwidget* widget = *widgets_it;
+			Widget* widget = *widgets_it;
 			total_expanding += widget->getVerticalExpanding();
 		}
 		uint32_t pos_y = 0;
@@ -185,7 +185,7 @@ inline void Vectorcontainer::doRepositioning(void)
 		for (Widgets::iterator widgets_it = widgets.begin();
 		     widgets_it != widgets.end();
 		     widgets_it ++) {
-			Containerwidget* widget = *widgets_it;
+			Widget* widget = *widgets_it;
 			uint32_t child_height = widget->getMinHeight(getWidth());
 			// If this is last widget, then give
 			// all of remaining space to it.

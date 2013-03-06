@@ -1,7 +1,7 @@
 #ifndef HPP_GUI_LABEL_H
 #define HPP_GUI_LABEL_H
 
-#include "containerwidget.h"
+#include "widget.h"
 #include "renderer.h"
 
 #include "../unicodestring.h"
@@ -12,7 +12,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Label : public Containerwidget
+class Label : public Widget
 {
 
 public:

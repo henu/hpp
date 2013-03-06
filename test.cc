@@ -7,7 +7,6 @@
 #include "gui/button.h"
 #include "gui/callback.h"
 #include "gui/container.h"
-#include "gui/containerwidget.h"
 #include "gui/engine.h"
 #include "gui/filedialog.h"
 #include "gui/folderviewcontents.h"

@@ -21,7 +21,7 @@ public:
 	inline Tabs(void);
 	inline virtual ~Tabs(void);
 
-	inline void addTab(UnicodeString const& label, Containerwidget* widget);
+	inline void addTab(UnicodeString const& label, Widget* widget);
 
 	inline size_t getSelected(void) const { return selected; }
 	inline size_t getNumOfTabs(void) const { return tabs.size(); }
@@ -36,7 +36,7 @@ private:
 	struct Tab
 	{
 		UnicodeString label;
-		Containerwidget* contents;
+		Widget* contents;
 	};
 	typedef std::vector< Tab > TabV;
 
@@ -62,7 +62,7 @@ inline Tabs::~Tabs(void)
 {
 }
 
-inline void Tabs::addTab(UnicodeString const& label, Containerwidget* widget)
+inline void Tabs::addTab(UnicodeString const& label, Widget* widget)
 {
 	Tab new_tab;
 	new_tab.label = label;
@@ -175,7 +175,7 @@ inline void Tabs::doRepositioning(void)
 	}
 
 	HppAssert(selected < tabs.size(), "Tab selection overflow!");
-	Containerwidget* selected_widget = tabs[selected].contents;
+	Widget* selected_widget = tabs[selected].contents;
 
 	// Now calculate position and size of child
 	uint32_t child_width = getWidth() - rend->getTabsLeftEdgeWidth() - rend->getTabsRightEdgeWidth();
