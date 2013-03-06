@@ -24,19 +24,20 @@ class Texture : public NonCopyable
 public:
 
 	// Flags
-	static uint32_t const REMOVE_ALPHA               = 0x00000001;
-	static uint32_t const FORCE_ALPHA                = 0x00000002;
-	static uint32_t const NEAREST                    = 0x00000004;
-	static uint32_t const LINEAR                     = 0x00000008;
-	static uint32_t const NEAREST_MIPMAP_NEAREST     = 0x00000010;
-	static uint32_t const LINEAR_MIPMAP_NEAREST      = 0x00000020;
-	static uint32_t const NEAREST_MIPMAP_LINEAR      = 0x00000040;
-	static uint32_t const LINEAR_MIPMAP_LINEAR       = 0x00000080;
-	static uint32_t const FORCE_GRAYSCALE            = 0x00000100;
-	static uint32_t const MINIMIZE_TO_64             = 0x00000200;
-	static uint32_t const CLAMP_TO_EDGE_HORIZONTALLY = 0x00000400;
-	static uint32_t const CLAMP_TO_EDGE_VERTICALLY   = 0x00000800;
-	static uint32_t const CLAMP_TO_EDGE              = 0x00000C00;
+	typedef uint16_t Flags;
+	static Flags const REMOVE_ALPHA               = 0x0001;
+	static Flags const FORCE_ALPHA                = 0x0002;
+	static Flags const NEAREST                    = 0x0004;
+	static Flags const LINEAR                     = 0x0008;
+	static Flags const NEAREST_MIPMAP_NEAREST     = 0x0010;
+	static Flags const LINEAR_MIPMAP_NEAREST      = 0x0020;
+	static Flags const NEAREST_MIPMAP_LINEAR      = 0x0040;
+	static Flags const LINEAR_MIPMAP_LINEAR       = 0x0080;
+	static Flags const FORCE_GRAYSCALE            = 0x0100;
+	static Flags const MINIMIZE_TO_64             = 0x0200;
+	static Flags const CLAMP_TO_EDGE_HORIZONTALLY = 0x0400;
+	static Flags const CLAMP_TO_EDGE_VERTICALLY   = 0x0800;
+	static Flags const CLAMP_TO_EDGE              = 0x0C00;
 
 
 	// ----------------------------------------
@@ -45,19 +46,22 @@ public:
 
 	// Constructors and destructor
 	inline Texture(void);
-	inline Texture(Path const& path, Pixelformat format = DEFAULT, uint32_t flags = 0);
-	inline Texture(ByteV const& data, Pixelformat format = DEFAULT, uint32_t flags = 0);
+	inline Texture(Path const& path, Pixelformat format = DEFAULT, Flags flags = 0);
+	inline Texture(ByteV const& data, Pixelformat format = DEFAULT, Flags flags = 0);
 	inline ~Texture(void);
 
 	// Checks if Texture is loaded
 	inline bool loaded(void) const { return is_loaded || tempdata; }
 
 	// Functions to (re)load Texture
-	inline void loadFromFile(Path const& path, Pixelformat format = DEFAULT, uint32_t flags = 0);
-	inline void loadFromData(ByteV const& data, Pixelformat format = DEFAULT, uint32_t flags = 0);
+	inline void loadFromFile(Path const& path, Pixelformat format = DEFAULT, Flags flags = 0);
+	inline void loadFromData(ByteV const& data, Pixelformat format = DEFAULT, Flags flags = 0);
 
 	// Function to create a new empty Texture
-	inline void createNew(uint16_t width, uint16_t height, Pixelformat format, uint32_t flags = 0);
+	inline void createNew(uint16_t width, uint16_t height, Pixelformat format, Flags flags = 0);
+
+	inline void setClampToEdgeHorizontally(bool clamp);
+	inline void setClampToEdgeVertically(bool clamp);
 
 	// Gets width/height of texture
 	inline uint16_t getWidth(void) const { HppAssert(loaded(), "Texture is not loaded!"); return width; }
@@ -141,7 +145,7 @@ private:
 	                             ByteV const& data,
 	                             bool load_from_data,
 	                             Pixelformat format,
-	                             uint32_t flags);
+	                             Flags flags);
 
 	// Tries to apply pixel data. If this is not correct OpenGL thread,
 	// then pixel data is stored in temporary location. Note, that this
@@ -169,7 +173,7 @@ bound_texture_unit(0)
 {
 }
 
-inline Texture::Texture(Path const& path, Pixelformat format, uint32_t flags) :
+inline Texture::Texture(Path const& path, Pixelformat format, Flags flags) :
 is_loaded(false),
 tempdata(NULL),
 clamp_to_edge_horizontally(false),
@@ -182,7 +186,7 @@ bound_texture_unit(0)
 	HppCheckGlErrorsIfCorrectThread();
 }
 
-inline Texture::Texture(ByteV const& data, Pixelformat format, uint32_t flags) :
+inline Texture::Texture(ByteV const& data, Pixelformat format, Flags flags) :
 is_loaded(false),
 tempdata(NULL),
 clamp_to_edge_horizontally(false),
@@ -208,13 +212,13 @@ inline Texture::~Texture(void)
 	delete tempdata;
 }
 
-inline void Texture::loadFromFile(Path const& path, Pixelformat format, uint32_t flags)
+inline void Texture::loadFromFile(Path const& path, Pixelformat format, Flags flags)
 {
 	Pixeldata pdata = load(path, ByteV(), false, format, flags);
 	tryToUsePixeldata(pdata);
 }
 
-inline void Texture::loadFromData(ByteV const& data, Pixelformat format, uint32_t flags)
+inline void Texture::loadFromData(ByteV const& data, Pixelformat format, Flags flags)
 {
 	clamp_to_edge_horizontally = flags & CLAMP_TO_EDGE_HORIZONTALLY;
 	clamp_to_edge_vertically = flags & CLAMP_TO_EDGE_VERTICALLY;
@@ -223,7 +227,7 @@ inline void Texture::loadFromData(ByteV const& data, Pixelformat format, uint32_
 	tryToUsePixeldata(pdata);
 }
 
-inline void Texture::createNew(uint16_t width, uint16_t height, Pixelformat format, uint32_t flags)
+inline void Texture::createNew(uint16_t width, uint16_t height, Pixelformat format, Flags flags)
 {
 	clamp_to_edge_horizontally = flags & CLAMP_TO_EDGE_HORIZONTALLY;
 	clamp_to_edge_vertically = flags & CLAMP_TO_EDGE_VERTICALLY;
@@ -274,6 +278,18 @@ inline void Texture::createNew(uint16_t width, uint16_t height, Pixelformat form
 
 	tryToUsePixeldata(pdata);
 
+}
+
+inline void Texture::setClampToEdgeHorizontally(bool clamp)
+{
+	HppAssert(!bound, "This cannot be changed while Texture is bound!");
+	clamp_to_edge_horizontally = clamp;
+}
+
+inline void Texture::setClampToEdgeVertically(bool clamp)
+{
+	HppAssert(!bound, "This cannot be changed while Texture is bound!");
+	clamp_to_edge_vertically = clamp;
 }
 
 inline void Texture::bind(void) const
@@ -511,7 +527,7 @@ inline void Texture::resizePixeldata(Pixeldata& pdata, size_t new_width, size_t 
 	pdata.height = new_height;
 }
 
-inline Texture::Pixeldata Texture::load(Path const& path, ByteV const& data, bool load_from_data, Pixelformat format, uint32_t flags)
+inline Texture::Pixeldata Texture::load(Path const& path, ByteV const& data, bool load_from_data, Pixelformat format, Flags flags)
 {
 	GLint min_filter = GL_LINEAR_MIPMAP_LINEAR;
 	if (flags & NEAREST) {
