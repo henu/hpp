@@ -41,12 +41,12 @@ private:
 
 	// Virtual functions for Widget
 	virtual void doRendering(int32_t x_origin, int32_t y_origin);
-	inline virtual void onSizeChange(void) { updateWidgetSizesAndPositions(); }
-	inline virtual void onChildSizeChange(void) { updateWidgetSizesAndPositions(); }
+	inline virtual void onSizeChange(void) { doRepositioning(); }
+	inline virtual void onChildSizeChange(void) { doRepositioning(); }
 	virtual void onChildRemoved(Widget* child);
-	inline virtual void onEnvironmentUpdated(void) { updateWidgetSizesAndPositions(); }
+	inline virtual void onEnvironmentUpdated(void) { doRepositioning(); }
 
-	void updateWidgetSizesAndPositions(void);
+	void doRepositioning(void);
 
 };
 

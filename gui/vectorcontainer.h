@@ -37,10 +37,10 @@ private:
 	Direction dir;
 
 	// Virtual functions for Widget
-	inline virtual void onSizeChange(void);
+	inline virtual void onSizeChange(void) { doRepositioning(); }
 	inline virtual void onChildSizeChange(void);
 
-	inline void updateWidgetSizesAndPositions();
+	inline void doRepositioning();
 
 };
 
@@ -108,21 +108,16 @@ inline uint32_t Vectorcontainer::getMinHeight(uint32_t width) const
 	return min_height;
 }
 
-inline void Vectorcontainer::onSizeChange(void)
-{
-	updateWidgetSizesAndPositions();
-}
-
 inline void Vectorcontainer::onChildSizeChange(void)
 {
 	// Inform parent, and expect it to change my size
 	markSizeChanged();
 	// Now my size should be changed, so it is
 	// time to update the size of my children.
-	updateWidgetSizesAndPositions();
+	doRepositioning();
 }
 
-inline void Vectorcontainer::updateWidgetSizesAndPositions(void)
+inline void Vectorcontainer::doRepositioning(void)
 {
 	if (widgets.empty()) {
 		return;

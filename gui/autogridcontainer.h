@@ -34,10 +34,10 @@ private:
 	Widgets widgets;
 
 	// Virtual functions for Widget
-	inline virtual void onSizeChange(void);
+	inline virtual void onSizeChange(void) { doRepositioning(); }
 	inline virtual void onChildSizeChange(void);
 
-	inline void updateWidgetSizesAndPositions();
+	inline void doRepositioning();
 
 	inline Sizes calculateWidthsOfColumns(uint32_t width) const;
 	inline Sizes calculateHeightsOfRows(Sizes const& widths) const;
@@ -56,7 +56,7 @@ inline void Autogridcontainer::addWidget(Containerwidget* widget)
 	widgets.push_back(widget);
 	addChild(widget);
 	markSizeChanged();
-	updateWidgetSizesAndPositions();
+	doRepositioning();
 }
 
 inline uint32_t Autogridcontainer::getMinWidth(void) const
@@ -87,21 +87,16 @@ inline uint32_t Autogridcontainer::getMinHeight(uint32_t width) const
 	return min_height;
 }
 
-inline void Autogridcontainer::onSizeChange(void)
-{
-	updateWidgetSizesAndPositions();
-}
-
 inline void Autogridcontainer::onChildSizeChange(void)
 {
 	// Inform parent, and expect it to change my size
 	markSizeChanged();
 	// Now my size should be changed, so it is
 	// time to update the size of my children.
-	updateWidgetSizesAndPositions();
+	doRepositioning();
 }
 
-inline void Autogridcontainer::updateWidgetSizesAndPositions(void)
+inline void Autogridcontainer::doRepositioning(void)
 {
 	if (widgets.empty()) {
 		return;

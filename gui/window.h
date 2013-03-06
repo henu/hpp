@@ -81,10 +81,10 @@ private:
 	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	inline virtual void onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	inline virtual void onMouseMove(int32_t mouse_x, int32_t mouse_y);
-	inline virtual void onSizeChange(void);
-	inline virtual void onEnvironmentUpdated(void);
+	inline virtual void onSizeChange(void) { doRepositioning(); }
+	inline virtual void onEnvironmentUpdated(void) { doRepositioning(); }
 
-	inline void updateContentSizeAndPosition(void);
+	inline void doRepositioning(void);
 
 	inline Part getPartUnder(int32_t mouse_x, int32_t mouse_y) const;
 	inline void setDraggedSize(Renderer const* rend, int32_t& width, int32_t& height);
@@ -137,7 +137,7 @@ HppAssert(!content, "Removing of content is not implemented yet!");
 	content = widget;
 	if (widget) {
 		addChild(widget);
-		updateContentSizeAndPosition();
+		doRepositioning();
 	}
 }
 
@@ -261,17 +261,7 @@ inline void Window::onMouseMove(int32_t mouse_x, int32_t mouse_y)
 	}
 }
 
-inline void Window::onSizeChange(void)
-{
-	updateContentSizeAndPosition();
-}
-
-inline void Window::onEnvironmentUpdated(void)
-{
-	updateContentSizeAndPosition();
-}
-
-inline void Window::updateContentSizeAndPosition(void)
+inline void Window::doRepositioning(void)
 {
 	Renderer* rend = getRenderer();
 	if (rend && content) {

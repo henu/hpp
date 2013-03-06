@@ -46,10 +46,10 @@ private:
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
 	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
-	inline virtual void onSizeChange(void);
+	inline virtual void onSizeChange(void) { doRepositioning(); }
 	inline virtual void onChildSizeChange(void);
 
-	inline void updateWidgetSizesAndPositions();
+	inline void doRepositioning();
 
 };
 
@@ -135,7 +135,7 @@ inline bool Tabs::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Key
 					uint32_t label_width = rend->getTablabelWidth(tabs[tab_id].label);
 					if (mouse_x < (int32_t)label_width) {
 						selected = tab_id;
-						updateWidgetSizesAndPositions();
+						doRepositioning();
 						break;
 					}
 					mouse_x -= label_width;
@@ -146,21 +146,16 @@ inline bool Tabs::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Key
 	return true;
 }
 
-inline void Tabs::onSizeChange(void)
-{
-	updateWidgetSizesAndPositions();
-}
-
 inline void Tabs::onChildSizeChange(void)
 {
 	// Inform parent, and expect it to change my size
 	markSizeChanged();
 	// Now my size should be changed, so it is
 	// time to update the size of my children.
-	updateWidgetSizesAndPositions();
+	doRepositioning();
 }
 
-inline void Tabs::updateWidgetSizesAndPositions(void)
+inline void Tabs::doRepositioning(void)
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return;

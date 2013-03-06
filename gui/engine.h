@@ -116,8 +116,8 @@ private:
 
 	void checkForNewMouseOver(void);
 
-	// Update sizes of Widgets. This is called when area or
-	// renderer is changed or when menubar is added/removed
+	// Update sizes of Widgets. This is called
+	// when area or renderer is changed
 	void updateSizes(void);
 
 	void updateTotalRenderarelimit(void);

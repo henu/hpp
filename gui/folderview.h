@@ -62,10 +62,10 @@ private:
 
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
-	inline virtual void onSizeChange(void);
+	inline virtual void onSizeChange(void) { doRepositioning(); }
 	inline virtual void onEnvironmentUpdated(void);
 
-	inline void updateScrollboxSize(void);
+	inline void doRepositioning(void);
 
 };
 
@@ -133,11 +133,6 @@ inline void Folderview::doRendering(int32_t x_origin, int32_t y_origin)
 	rend->renderFolderview(x_origin, y_origin, this);
 }
 
-inline void Folderview::onSizeChange(void)
-{
-	updateScrollboxSize();
-}
-
 inline void Folderview::onEnvironmentUpdated(void)
 {
 	Renderer* rend = getRenderer();
@@ -149,7 +144,7 @@ inline void Folderview::onEnvironmentUpdated(void)
 	markSizeChanged();
 }
 
-inline void Folderview::updateScrollboxSize(void)
+inline void Folderview::doRepositioning(void)
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return;

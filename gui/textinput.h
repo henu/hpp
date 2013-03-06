@@ -53,10 +53,10 @@ private:
 
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
-	inline virtual void onSizeChange(void);
-	inline virtual void onEnvironmentUpdated(void);
+	inline virtual void onSizeChange(void) { doRepositioning(); }
+	inline virtual void onEnvironmentUpdated(void) { doRepositioning(); }
 
-	inline void updateScrollboxSize(void);
+	inline void doRepositioning(void);
 
 };
 
@@ -132,17 +132,7 @@ inline void Textinput::doRendering(int32_t x_origin, int32_t y_origin)
 	return rend->renderTextinput(x_origin, y_origin, this);
 }
 
-inline void Textinput::onSizeChange(void)
-{
-	updateScrollboxSize();
-}
-
-inline void Textinput::onEnvironmentUpdated(void)
-{
-	updateScrollboxSize();
-}
-
-inline void Textinput::updateScrollboxSize(void)
+inline void Textinput::doRepositioning(void)
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return;
