@@ -11,13 +11,14 @@
 #include "image.h"
 #include "exception.h"
 #include "assert.h"
+#include "noncopyable.h"
 
 #include <string>
 
 namespace Hpp
 {
 
-class Texture
+class Texture : public NonCopyable
 {
 
 public:
