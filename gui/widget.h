@@ -41,7 +41,7 @@ public:
 	inline uint32_t getHeight(void) const { return height; }
 
 	// Size getters
-// TODO: Move this to Widget, and make it abstract!
+// TODO: Make these abstract, or better, make them be used through doGetMinWidth, like in my java gui library!
 	inline virtual uint32_t getMinWidth(void) const { return 0; }
 	inline virtual uint32_t getMinHeight(uint32_t width) const { (void)width; return 0; }
 
@@ -66,6 +66,10 @@ private:
 	// Called by Engine when Engine or Renderer is changed
 	// and all dimensions must be recalculated.
 	inline void updateEnvironment(void);
+
+	// Repositions this Widget and all of its children, if needed. This may
+	// ONLY be called by Widget itself through repositionChild or by Engine!
+	void repositionIfNeeded(int32_t x, int32_t y, uint32_t w, uint32_t h);
 
 	// Called by Engine and parent Widgets. Origin means absolute position
 	// of parent, or topleft corner of the total area, if called by Engine.
@@ -107,6 +111,8 @@ protected:
 	// Functions to handle order of children in child stack
 	inline void moveWidgetBack(Widget* child);
 	inline void moveWidgetFront(Widget* child);
+
+	inline void repositionChild(Widget* child, int32_t x, int32_t y, uint32_t width, uint32_t height);
 
 	inline void setChildPosition(Widget* child, int32_t x, int32_t y);
 	inline void setChildSize(Widget* child, uint32_t width, uint32_t height);
@@ -297,6 +303,12 @@ inline void Widget::moveWidgetFront(Widget* child)
 		*children_it = next_child;
 	}
 	children.back() = child;
+}
+
+inline void Widget::repositionChild(Widget* child, int32_t x, int32_t y, uint32_t width, uint32_t height)
+{
+	HppAssert(std::find(children.begin(), children.end(), child) != children.end(), "This is not my child!");
+	child->repositionIfNeeded(x, y, width, height);
 }
 
 inline void Widget::setChildPosition(Widget* child, int32_t x, int32_t y)

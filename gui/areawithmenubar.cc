@@ -14,6 +14,9 @@ namespace Gui
 AreaWithMenubar::AreaWithMenubar(void) :
 content(NULL)
 {
+	// Enable expanding by default
+	setHorizontalExpanding(1);
+	setVerticalExpanding(1);
 }
 
 AreaWithMenubar::~AreaWithMenubar(void)

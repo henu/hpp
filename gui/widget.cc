@@ -92,6 +92,69 @@ void Widget::setEngine(Engine* engine)
 	updateEnvironment();
 }
 
+void Widget::repositionIfNeeded(int32_t x, int32_t y, uint32_t w, uint32_t h)
+{
+// TODO: Uncomment this, when Gui supports shrinking!
+/*
+	if (shrunken) {
+		size = IVector2(0, 0);
+		reposition_needed = false;
+		return;
+	}
+*/
+	// Apply padding
+// TODO: Uncomment this, when Gui supports padding!
+/*
+	x += padding;
+	y += padding;
+	w -= padding * 2;
+	h -= padding * 2;
+*/
+// TODO: Remove this when actual padding works!
+uint32_t padding = 0;
+
+	// Get real dimensions
+	uint32_t real_w, real_h;
+	if (expanding_horiz == 0) real_w = getMinWidth() - padding*2;
+	else real_w = w;
+	if (expanding_vert == 0) real_h = getMinHeight(real_w) - padding*2;
+	else real_h = h;
+
+	// Calculate real position
+	int32_t real_x, real_y;
+	if (expanding_horiz > 0 || align == LEFT) real_x = x;
+	else if (align == RIGHT) real_x = x + (w - real_w);
+	else real_x = x + (w - real_w) / 2;
+	if (expanding_vert > 0 || valign == TOP) real_y = y;
+	else if (valign == BOTTOM) real_y = y + (h - real_h);
+	else real_y = y + (h - real_h) / 2;
+
+	// If position or size differs, then reposition is needed
+	if (real_x != x || real_y != y || real_w != width || real_h != height) {
+// TODO: Uncomment this, when Widgets keep track whenever they need repositioning or not!
+//		reposition_needed = true;
+	}
+
+// TODO: Uncomment this, when Widgets keep track whenever they need repositioning or not!
+/*
+	// Reposition only if needed
+	if (!reposition_needed) {
+		return;
+	}
+*/
+
+	setSize(real_w, real_h);
+	setPosition(real_x, real_y);
+
+/*
+	// Do actual repositioning
+	reposition_needed = false;
+	doRepositioning();
+*/
+// TODO: Why envirnoment is updated? Should it be updated only when engine is set? Btw calling setSize() calls onSizeChange()... This is useless in future!
+	updateEnvironment();
+}
+
 void Widget::render(int32_t x_origin, int32_t y_origin)
 {
 	if (state == HIDDEN) {
