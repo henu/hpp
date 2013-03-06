@@ -24,17 +24,19 @@ class Texture : public NonCopyable
 public:
 
 	// Flags
-// TODO: Support clamping to edges!
-	static uint32_t const REMOVE_ALPHA           = 0x00000001;
-	static uint32_t const FORCE_ALPHA            = 0x00000002;
-	static uint32_t const NEAREST                = 0x00000004;
-	static uint32_t const LINEAR                 = 0x00000008;
-	static uint32_t const NEAREST_MIPMAP_NEAREST = 0x00000010;
-	static uint32_t const LINEAR_MIPMAP_NEAREST  = 0x00000020;
-	static uint32_t const NEAREST_MIPMAP_LINEAR  = 0x00000040;
-	static uint32_t const LINEAR_MIPMAP_LINEAR   = 0x00000080;
-	static uint32_t const FORCE_GRAYSCALE        = 0x00000100;
-	static uint32_t const MINIMIZE_TO_64         = 0x00000200;
+	static uint32_t const REMOVE_ALPHA               = 0x00000001;
+	static uint32_t const FORCE_ALPHA                = 0x00000002;
+	static uint32_t const NEAREST                    = 0x00000004;
+	static uint32_t const LINEAR                     = 0x00000008;
+	static uint32_t const NEAREST_MIPMAP_NEAREST     = 0x00000010;
+	static uint32_t const LINEAR_MIPMAP_NEAREST      = 0x00000020;
+	static uint32_t const NEAREST_MIPMAP_LINEAR      = 0x00000040;
+	static uint32_t const LINEAR_MIPMAP_LINEAR       = 0x00000080;
+	static uint32_t const FORCE_GRAYSCALE            = 0x00000100;
+	static uint32_t const MINIMIZE_TO_64             = 0x00000200;
+	static uint32_t const CLAMP_TO_EDGE_HORIZONTALLY = 0x00000400;
+	static uint32_t const CLAMP_TO_EDGE_VERTICALLY   = 0x00000800;
+	static uint32_t const CLAMP_TO_EDGE              = 0x00000C00;
 
 
 	// ----------------------------------------
@@ -114,6 +116,8 @@ private:
 	mutable uint16_t width, height;
 	mutable Pixelformat format;
 	mutable Pixeldata* tempdata;
+	bool clamp_to_edge_horizontally;
+	bool clamp_to_edge_vertically;
 
 	// Binding stuff
 	mutable bool bound;
@@ -158,6 +162,8 @@ private:
 inline Texture::Texture(void) :
 is_loaded(false),
 tempdata(NULL),
+clamp_to_edge_horizontally(false),
+clamp_to_edge_vertically(false),
 bound(false),
 bound_texture_unit(0)
 {
@@ -166,6 +172,8 @@ bound_texture_unit(0)
 inline Texture::Texture(Path const& path, Pixelformat format, uint32_t flags) :
 is_loaded(false),
 tempdata(NULL),
+clamp_to_edge_horizontally(false),
+clamp_to_edge_vertically(false),
 bound(false),
 bound_texture_unit(0)
 {
@@ -177,6 +185,8 @@ bound_texture_unit(0)
 inline Texture::Texture(ByteV const& data, Pixelformat format, uint32_t flags) :
 is_loaded(false),
 tempdata(NULL),
+clamp_to_edge_horizontally(false),
+clamp_to_edge_vertically(false),
 bound(false),
 bound_texture_unit(0)
 {
@@ -206,12 +216,18 @@ inline void Texture::loadFromFile(Path const& path, Pixelformat format, uint32_t
 
 inline void Texture::loadFromData(ByteV const& data, Pixelformat format, uint32_t flags)
 {
+	clamp_to_edge_horizontally = flags & CLAMP_TO_EDGE_HORIZONTALLY;
+	clamp_to_edge_vertically = flags & CLAMP_TO_EDGE_VERTICALLY;
+
 	Pixeldata pdata = load(Path::getUnknown(), data, true, format, flags);
 	tryToUsePixeldata(pdata);
 }
 
 inline void Texture::createNew(uint16_t width, uint16_t height, Pixelformat format, uint32_t flags)
 {
+	clamp_to_edge_horizontally = flags & CLAMP_TO_EDGE_HORIZONTALLY;
+	clamp_to_edge_vertically = flags & CLAMP_TO_EDGE_VERTICALLY;
+
 	uint8_t bytes_per_pixel = getBppOfPixelformat(format);
 	bool alpha = pixelformatHasAlpha(format);
 	bool depth = pixelformatHasDepth(format);
@@ -281,6 +297,14 @@ inline void Texture::bind(void) const
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, getGlTexture());
 		HppCheckGlErrors();
+		// Do possible edge clamping
+		if (clamp_to_edge_horizontally) {
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		}
+		if (clamp_to_edge_vertically) {
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		}
+		HppCheckGlErrors();
 	} else {
 		GlSystem::ActiveTexture(GL_TEXTURE0 + bound_texture_unit);
 	}
@@ -294,6 +318,15 @@ inline void Texture::unbind(void) const
 	GlSystem::ActiveTexture(GL_TEXTURE0 + bound_texture_unit);
 	glDisable(GL_TEXTURE_2D);
 	bound = false;
+	HppCheckGlErrors();
+	// Disable possible edge clamping
+	if (clamp_to_edge_horizontally) {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	}
+	if (clamp_to_edge_vertically) {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+	HppCheckGlErrors();
 }
 
 inline GLenum Texture::getBoundTextureunit(void) const

@@ -99,7 +99,6 @@ private:
 	// Options
 	bool twosided;
 	bool shadeless;
-	bool no_repeat;
 	float normalmap_weight;
 
 	// Custom shader program for only this instance. The booleans
@@ -138,7 +137,6 @@ normalmap(NULL),
 specularmap(NULL),
 twosided(false),
 shadeless(false),
-no_repeat(false),
 normalmap_weight(1),
 custom_program(NULL),
 shadow_test_enabled(false),
@@ -193,9 +191,6 @@ needs_uvs(false)
 	if (json.keyExists("shadeless")) {
 		shadeless = json.getMember("shadeless").getBoolean();
 	}
-	if (json.keyExists("no_repeat")) {
-		no_repeat = json.getMember("no_repeat").getBoolean();
-	}
 	if (json.keyExists("normalmap_weight")) {
 		emittance = json.getMember("normalmap_weight").getNumber();
 	}
@@ -212,7 +207,6 @@ ambient_multiplier(rawmat.ambient_multiplier),
 emittance(rawmat.emittance),
 twosided(twosided),
 shadeless(false),
-no_repeat(false),
 normalmap_weight(rawmat.normalmap_weight),
 custom_program(NULL),
 shadow_test_enabled(false)
@@ -261,7 +255,6 @@ normalmap(NULL),
 specularmap(NULL),
 twosided(false),
 shadeless(false),
-no_repeat(false),
 normalmap_weight(1),
 custom_program(NULL),
 shadow_test_enabled(false),
@@ -427,29 +420,14 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 
 	if (colormap) {
 		colormap->bind();
-		if (no_repeat) {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			HppCheckGlErrors();
-		}
 		sflags.insert("CMAP");
 	}
 	if (normalmap) {
 		normalmap->bind();
-		if (no_repeat) {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			HppCheckGlErrors();
-		}
 		sflags.insert("NMAP");
 	}
 	if (specularmap) {
 		specularmap->bind();
-		if (no_repeat) {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			HppCheckGlErrors();
-		}
 		sflags.insert("SMAP");
 	}
 	GlSystem::ActiveTexture(GL_TEXTURE0);
@@ -525,29 +503,14 @@ inline void GenericMaterial::endRendering(void) const
 	if (normalmap) {
 		normalmap->unbind();
 		HppCheckGlErrors();
-		if (no_repeat) {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			HppCheckGlErrors();
-		}
 	}
 	if (specularmap) {
 		specularmap->unbind();
 		HppCheckGlErrors();
-		if (no_repeat) {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			HppCheckGlErrors();
-		}
 	}
 	if (colormap) {
 		colormap->unbind();
 		HppCheckGlErrors();
-		if (no_repeat) {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			HppCheckGlErrors();
-		}
 	}
 	if (is_translucent) {
 		HppAssert(glIsEnabled(GL_BLEND), "Blend should be enabled now!");
