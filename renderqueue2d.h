@@ -55,6 +55,7 @@ private:
 
 	std::vector< GLfloat > poss;
 	std::vector< GLfloat > uvs;
+	std::vector< GLfloat > clrs;
 
 	static std::string const SHADER_VRT;
 	static std::string const SHADER_FRG;
@@ -107,6 +108,10 @@ inline void Renderqueue2d::begin(void)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	Display::pushScissor(x, y, width, height);
+
+	HppCheckGlErrors();
+
 	program.enable();
 
 	// Prepare projection
@@ -117,10 +122,6 @@ inline void Renderqueue2d::begin(void)
 	viewmat = Matrix3::translMatrix(Vector2(-1, -1));
 	viewmat *= Matrix3::scaleMatrix(Vector2(2.0 / width, 2.0 / height));
 	program.setUniform("viewmat", viewmat, true);
-
-	HppCheckGlErrors();
-
-	Display::pushScissor(x, y, width, height);
 
 	HppCheckGlErrors();
 
@@ -184,47 +185,77 @@ inline void Renderqueue2d::renderSprite(Texture const* tex,
 	Vector2 v2 = transf.applyToPosition(Vector2(1, 1));
 	Vector2 v3 = transf.applyToPosition(Vector2(0, 1));
 
+	GLfloat r = color.getRed();
+	GLfloat g = color.getGreen();
+	GLfloat b = color.getBlue();
+	GLfloat a = color.getAlpha();
+
 	// Vertex #0
 	poss.push_back(v0.x);
 	poss.push_back(v0.y);
 	uvs.push_back(tex_pos.x);
 	uvs.push_back(tex_pos.y);
+	clrs.push_back(r);
+	clrs.push_back(g);
+	clrs.push_back(b);
+	clrs.push_back(a);
 
 	// Vertex #1
 	poss.push_back(v1.x);
 	poss.push_back(v1.y);
 	uvs.push_back(tex_pos.x + tex_size.x);
 	uvs.push_back(tex_pos.y);
+	clrs.push_back(r);
+	clrs.push_back(g);
+	clrs.push_back(b);
+	clrs.push_back(a);
 
 	// Vertex #3
 	poss.push_back(v3.x);
 	poss.push_back(v3.y);
 	uvs.push_back(tex_pos.x);
 	uvs.push_back(tex_pos.y + tex_size.y);
+	clrs.push_back(r);
+	clrs.push_back(g);
+	clrs.push_back(b);
+	clrs.push_back(a);
 
 	// Vertex #1
 	poss.push_back(v1.x);
 	poss.push_back(v1.y);
 	uvs.push_back(tex_pos.x + tex_size.x);
 	uvs.push_back(tex_pos.y);
+	clrs.push_back(r);
+	clrs.push_back(g);
+	clrs.push_back(b);
+	clrs.push_back(a);
 
 	// Vertex #2
 	poss.push_back(v2.x);
 	poss.push_back(v2.y);
 	uvs.push_back(tex_pos.x + tex_size.x);
 	uvs.push_back(tex_pos.y + tex_size.y);
+	clrs.push_back(r);
+	clrs.push_back(g);
+	clrs.push_back(b);
+	clrs.push_back(a);
 
 	// Vertex #3
 	poss.push_back(v3.x);
 	poss.push_back(v3.y);
 	uvs.push_back(tex_pos.x);
 	uvs.push_back(tex_pos.y + tex_size.y);
+	clrs.push_back(r);
+	clrs.push_back(g);
+	clrs.push_back(b);
+	clrs.push_back(a);
 
 }
 
 inline void Renderqueue2d::flush(void)
 {
 	HppAssert(poss.size() == uvs.size(), "Buffers are not sync!");
+	HppAssert(poss.size() * 2 == clrs.size(), "Buffers are not sync!");
 	if (poss.empty()) {
 		return;
 	}
@@ -232,14 +263,17 @@ inline void Renderqueue2d::flush(void)
 	// Make bufferobjects
 	Bufferobject poss_bo(GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &poss[0], poss.size());
 	Bufferobject uvs_bo(GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], uvs.size());
+	Bufferobject clrs_bo(GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 4, &clrs[0], clrs.size());
 
 	program.setBufferobject("pos", &poss_bo);
 	program.setBufferobject("uv", &uvs_bo);
+	program.setBufferobject("clr", &clrs_bo);
 
 	glDrawArrays(GL_TRIANGLES, 0, poss.size() / 2);
 
 	poss.clear();
 	uvs.clear();
+	clrs.clear();
 }
 
 }
