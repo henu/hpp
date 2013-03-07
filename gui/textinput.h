@@ -5,7 +5,6 @@
 #include "scrollbox.h"
 #include "widget.h"
 #include "renderer.h"
-#include "callback.h"
 
 namespace Hpp
 {
@@ -29,8 +28,6 @@ public:
 	inline void setCols(size_t cols);
 	inline size_t getCols(void) const { return cols; }
 
-	inline void setCallbackFunc(CallbackFunc callback, void* data);
-
 	// Virtual functions for Widget
 	inline virtual uint32_t getMinWidth(void) const;
 	inline virtual uint32_t getMinHeight(uint32_t width) const;
@@ -48,9 +45,6 @@ private:
 
 	size_t cols;
 
-	CallbackFunc callback;
-	void* callback_data;
-
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
 	inline virtual void onSizeChange(void) { doRepositioning(); }
@@ -62,8 +56,7 @@ private:
 
 inline Textinput::Textinput(void) :
 contents(this),
-cols(12),
-callback(NULL)
+cols(12)
 {
 	addChild(&scrollbox);
 	scrollbox.setHorizontalScrollbar(Scrollbox::NEVER);
@@ -91,12 +84,6 @@ inline void Textinput::setCols(size_t cols)
 	markSizeChanged();
 }
 
-inline void Textinput::setCallbackFunc(CallbackFunc callback, void* data)
-{
-	this->callback = callback;
-	callback_data = data;
-}
-
 inline uint32_t Textinput::getMinWidth(void) const
 {
 	Renderer const* rend = getRenderer();
@@ -114,10 +101,7 @@ inline uint32_t Textinput::getMinHeight(uint32_t width) const
 
 inline void Textinput::submitted(void)
 {
-	// Do callback if it has been set
-	if (callback) {
-		callback(this, callback_data);
-	}
+	fireEvent();
 }
 
 inline void Textinput::scrollToCursor(uint32_t cursor_pos_x, uint32_t cursor_pos_y, uint32_t cursor_width, uint32_t cursor_height)

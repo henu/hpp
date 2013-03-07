@@ -3,7 +3,6 @@
 
 #include "widget.h"
 #include "renderer.h"
-#include "callback.h"
 
 #include "../unicodestring.h"
 #include "../color.h"
@@ -26,8 +25,6 @@ public:
 	inline void setLabel(UnicodeString const& label) { this->label = label; markSizeChanged(); }
 	inline void setLabelColor(Color const& color) { label_color = color; }
 
-	inline void setCallbackFunc(CallbackFunc callback, void* data);
-
 	inline Color getColor(void) const { return color; }
 	inline Color getLabelColor(void) const { return label_color; }
 
@@ -40,9 +37,6 @@ private:
 	UnicodeString label;
 	Color label_color;
 	Color color;
-
-	CallbackFunc callback;
-	void* callback_data;
 
 	bool pressed;
 
@@ -57,19 +51,12 @@ private:
 inline Button::Button(void) :
 label_color(0, 0, 0),
 color(1, 1, 1),
-callback(NULL),
 pressed(false)
 {
 }
 
 inline Button::~Button(void)
 {
-}
-
-inline void Button::setCallbackFunc(CallbackFunc callback, void* data)
-{
-	this->callback = callback;
-	callback_data = data;
 }
 
 inline uint32_t Button::getMinWidth(void) const
@@ -112,10 +99,7 @@ inline void Button::onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t m
 	HppAssert(mouse_key == Mousekey::LEFT, "Unexpected mouse release!");
 	pressed = false;
 	if (widget == this) {
-		// Do callback if it has been set
-		if (callback) {
-			callback(widget, callback_data);
-		}
+		fireEvent();
 	}
 }
 

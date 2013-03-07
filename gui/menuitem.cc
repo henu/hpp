@@ -9,9 +9,7 @@ namespace Hpp
 namespace Gui
 {
 
-Menuitem::Menuitem(void) :
-callback(NULL),
-callback_data(NULL)
+Menuitem::Menuitem(void)
 {
 }
 
@@ -49,10 +47,7 @@ void Menuitem::onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t mouse_
 	if (mouse_key == Mousekey::LEFT) {
 		listenMouseReleases(0);
 		if (widget == this) {
-			// Do callback if it has been set
-			if (callback) {
-				callback(widget, callback_data);
-			}
+			fireEvent();
 		}
 		// Ask container to close
 		Menucontent* menucontent = dynamic_cast< Menucontent* >(getParent());

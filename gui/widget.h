@@ -1,6 +1,8 @@
 #ifndef HPP_GUI_WIDGET_H
 #define HPP_GUI_WIDGET_H
 
+#include "eventlistener.h"
+#include "guievent.h"
 #include "../event.h"
 #include "../unicode.h"
 #include "../assert.h"
@@ -56,6 +58,8 @@ public:
 	inline uint8_t getVerticalExpanding(void) const { return expanding_vert; }
 	inline void setHorizontalExpanding(uint8_t expanding) { expanding_horiz = expanding; markSizeChanged(); }
 	inline void setVerticalExpanding(uint8_t expanding) { expanding_vert = expanding; markSizeChanged(); }
+
+	inline void setEventlistener(Eventlistener* eventlistener) { this->eventlistener = eventlistener; }
 
 private:
 
@@ -139,6 +143,9 @@ protected:
 	// Query functions for listenings
 	bool isListeningKeyboard(void) const;
 
+	inline void fireEvent(void);
+	inline void fireEvent(int action);
+
 private:
 
 	typedef std::vector< Widget* > Children;
@@ -155,6 +162,8 @@ private:
 
 	Alignment align, valign;
 	uint8_t expanding_horiz, expanding_vert;
+
+	Eventlistener* eventlistener;
 
 	// Renderarea limitation. This is measured in parent's coordinates.
 	bool renderarealimit;
@@ -205,6 +214,7 @@ align(CENTER),
 valign(CENTER),
 expanding_horiz(0),
 expanding_vert(0),
+eventlistener(NULL),
 renderarealimit(false)
 {
 }
@@ -366,6 +376,20 @@ inline void Widget::setState(State state)
 	if ((old_state != HIDDEN && state == HIDDEN) ||
 	    (old_state == HIDDEN && state != HIDDEN)) {
 		markSizeChanged();
+	}
+}
+
+inline void Widget::fireEvent(void)
+{
+	if (eventlistener) {
+		eventlistener->handleGuiEvent(GuiEvent::fromWidget(this, 0));
+	}
+}
+
+inline void Widget::fireEvent(int action)
+{
+	if (eventlistener) {
+		eventlistener->handleGuiEvent(GuiEvent::fromWidget(this, action));
 	}
 }
 

@@ -2,7 +2,6 @@
 #define HPP_GUI_SCROLLBOX_H
 
 #include "scrollbar.h"
-#include "callback.h"
 #include "widget.h"
 
 #include "../vector2.h"
@@ -13,7 +12,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Scrollbox : public Widget
+class Scrollbox : public Widget, public Eventlistener
 {
 
 public:
@@ -63,7 +62,7 @@ private:
 
 	inline void updateContentPosition(void);
 
-	inline static void scrollbarValuesChanged(Widget* widget, void* scrollbox_raw);
+	inline virtual bool handleGuiEvent(GuiEvent const& event);
 
 };
 
@@ -255,7 +254,7 @@ inline void Scrollbox::updateContent(void)
 	// Check if new scrollbars should be added or removed
 	if (!scrollbar_horiz && scrollbar_horiz_needed) {
 		scrollbar_horiz = new Scrollbar(Scrollbar::HORIZONTAL);
-		scrollbar_horiz->setCallbackFunc(scrollbarValuesChanged, this);
+		scrollbar_horiz->setEventlistener(this);
 		addChild(scrollbar_horiz);
 	} else if (scrollbar_horiz && !scrollbar_horiz_needed) {
 		delete scrollbar_horiz;
@@ -263,7 +262,7 @@ inline void Scrollbox::updateContent(void)
 	}
 	if (!scrollbar_vert && scrollbar_vert_needed) {
 		scrollbar_vert = new Scrollbar(Scrollbar::VERTICAL);
-		scrollbar_vert->setCallbackFunc(scrollbarValuesChanged, this);
+		scrollbar_vert->setEventlistener(this);
 		addChild(scrollbar_vert);
 	} else if (scrollbar_vert && !scrollbar_vert_needed) {
 		delete scrollbar_vert;
@@ -329,17 +328,16 @@ inline void Scrollbox::updateContentPosition(void)
 	setChildPosition(content, scroll_x, scroll_y);
 }
 
-inline void Scrollbox::scrollbarValuesChanged(Widget* widget, void* scrollbox_raw)
+inline bool Scrollbox::handleGuiEvent(GuiEvent const& event)
 {
-	(void)widget;
-	Scrollbox* scrollbox = reinterpret_cast< Scrollbox* >(scrollbox_raw);
-	if (scrollbox->scrollbar_horiz) {
-		scrollbox->content_scroll.x = scrollbox->scrollbar_horiz->getValue();
+	if (scrollbar_horiz) {
+		content_scroll.x = scrollbar_horiz->getValue();
 	}
-	if (scrollbox->scrollbar_vert) {
-		scrollbox->content_scroll.y = scrollbox->scrollbar_vert->getValue();
+	if (scrollbar_vert) {
+		content_scroll.y = scrollbar_vert->getValue();
 	}
-	scrollbox->updateContentPosition();
+	updateContentPosition();
+	return false;
 }
 
 }

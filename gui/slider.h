@@ -1,7 +1,6 @@
 #ifndef HPP_GUI_SLIDER_H
 #define HPP_GUI_SLIDER_H
 
-#include "callback.h"
 #include "widget.h"
 
 namespace Hpp
@@ -28,8 +27,6 @@ public:
 	inline void setOrientation(Orientation ori);
 	inline Orientation getOrientation(void) const { return ori; }
 
-	inline void setCallbackFunc(CallbackFunc callback, void* data);
-
 	inline virtual uint32_t getMinWidth(void) const;
 	inline virtual uint32_t getMinHeight(uint32_t width) const;
 
@@ -53,9 +50,6 @@ private:
 	Real mouse_over_slider;
 	Real mouse_over_bg;
 
-	CallbackFunc callback;
-	void* callback_data;
-
 	// Virtual functions for Widget
 	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	inline virtual bool onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
@@ -75,9 +69,7 @@ bg_move(0.2),
 drag(NOTHING),
 slider_pressed(false),
 mouse_over_slider(0.0),
-mouse_over_bg(0.0),
-callback(NULL),
-callback_data(NULL)
+mouse_over_bg(0.0)
 {
 }
 
@@ -89,12 +81,6 @@ inline void Slider::setOrientation(Orientation ori)
 {
 	this->ori = ori;
 	markSizeChanged();
-}
-
-inline void Slider::setCallbackFunc(CallbackFunc callback, void* data)
-{
-	this->callback = callback;
-	callback_data = data;
 }
 
 inline uint32_t Slider::getMinWidth(void) const
@@ -145,10 +131,9 @@ inline bool Slider::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::K
 		value = mouse_over_bg;
 		if (value < 0.0) value = 0.0;
 		else if (value > 1.0) value = 1.0;
-		// Do ack if it has been set
-		if (callback) {
-			callback(this, callback_data);
-		}
+
+		fireEvent();
+
 		drag = MIDDLE_BUTTON;
 		listenMouseReleases(Mousekey::FLAG_MIDDLE);
 		listenMouseMoves();
@@ -165,10 +150,8 @@ inline bool Slider::onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::Key
 			if (element_over == BG_BEFORE) {
 				value -= bg_move;
 				if (value < 0.0) value = 0.0;
-				// Do callback if it has been set
-				if (callback) {
-					callback(this, callback_data);
-				}
+
+				fireEvent();
 			}
 			drag = NOTHING;
 			listenMouseReleases(0);
@@ -176,10 +159,8 @@ inline bool Slider::onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::Key
 			if (element_over == BG_AFTER) {
 				value += bg_move;
 				if (value > 1.0) value = 1.0;
-				// Do callback if it has been set
-				if (callback) {
-					callback(this, callback_data);
-				}
+
+				fireEvent();
 			}
 			drag = NOTHING;
 			listenMouseReleases(0);
@@ -236,19 +217,15 @@ inline void Slider::onMouseMove(int32_t mouse_x, int32_t mouse_y)
 		value = (pos - pos_slider_begin) / bg_size;
 		if (value < 0.0) value = 0.0;
 		else if (value > 1.0) value = 1.0;
-		// Do callback if it has been set
-		if (callback) {
-			callback(this, callback_data);
-		}
+
+		fireEvent();
 
 	} else if (drag == MIDDLE_BUTTON) {
 		value = mouse_over_bg;
 		if (value < 0.0) value = 0.0;
 		else if (value > 1.0) value = 1.0;
-		// Do callback if it has been set
-		if (callback) {
-			callback(this, callback_data);
-		}
+
+		fireEvent();
 	}
 }
 

@@ -7,7 +7,7 @@
 #include "label.h"
 #include "textinput.h"
 #include "folderview.h"
-#include "callback.h"
+#include "eventlistener.h"
 
 #include <string>
 
@@ -17,15 +17,15 @@ namespace Hpp
 namespace Gui
 {
 
-class Filedialog : public Window
+class Filedialog : public Window, public Eventlistener
 {
 
 public:
 
 	enum Type { SAVE, OPEN };
 
-	static uint32_t const SUBMIT = 0;
-	static uint32_t const CANCEL = 1;
+	static int const SUBMIT = 0;
+	static int const CANCEL = 1;
 
 	inline Filedialog(void);
 	inline virtual ~Filedialog(void);
@@ -34,8 +34,6 @@ public:
 	inline void setFileextension(std::string const& fileext) { this->fileext = fileext; }
 	inline void setSelectMultiple(bool select_multiple = true) { folderview.setSelectMultiple(select_multiple); }
 
-	inline void setCallbackFunc(CallbackFuncWithType callback, void* data);
-
 	inline Path getPath(void) const;
 
 private:
@@ -43,9 +41,6 @@ private:
 	// Options
 	Type type;
 	std::string fileext;
-
-	CallbackFuncWithType callback;
-	void* callback_data;
 
 	// Widgets
 	Vectorcontainer maincontainer;
@@ -60,15 +55,12 @@ private:
 	Button cancelbutton;
 	Button saveloadbutton;
 
-	// Callback functions
-	inline static void guiCallback(Widget* widget, void* filedialog_raw);
-	inline static void guiCallbackWithType(Widget* widget, uint32_t type, void* filedialog_raw);
+	inline virtual bool handleGuiEvent(GuiEvent const& event);
 
 };
 
 inline Filedialog::Filedialog(void) :
-type(SAVE),
-callback(NULL)
+type(SAVE)
 {
 	Path maps_path = Path::getConfig() / "hme_mapeditor" / "levels";
 	maps_path.ensureDirExists();
@@ -113,12 +105,12 @@ callback(NULL)
 	buttonscontainer.addWidget(&saveloadbutton);
 
 	// Set callbacks
-	pathinput.setCallbackFunc(guiCallback, this);
-	filenameinput.setCallbackFunc(guiCallback, this);
-	newfolderbutton.setCallbackFunc(guiCallback, this);
-	cancelbutton.setCallbackFunc(guiCallback, this);
-	saveloadbutton.setCallbackFunc(guiCallback, this);
-	folderview.setCallbackFunc(guiCallbackWithType, this);
+	pathinput.setEventlistener(this);
+	filenameinput.setEventlistener(this);
+	newfolderbutton.setEventlistener(this);
+	cancelbutton.setEventlistener(this);
+	saveloadbutton.setEventlistener(this);
+	folderview.setEventlistener(this);
 
 }
 
@@ -136,59 +128,41 @@ inline void Filedialog::setType(Type type)
 	}
 }
 
-inline void Filedialog::setCallbackFunc(CallbackFuncWithType callback, void* data)
-{
-	this->callback = callback;
-	callback_data = data;
-}
-
 inline Path Filedialog::getPath(void) const
 {
 	return folderview.getFolder() / filenameinput.getValue().stl_string();
 }
 
-inline void Filedialog::guiCallback(Widget* widget, void* filedialog_raw)
+inline bool Filedialog::handleGuiEvent(GuiEvent const& event)
 {
-	Filedialog* filedialog = reinterpret_cast< Filedialog* >(filedialog_raw);
-	if (widget == &filedialog->cancelbutton) {
-		// Do callback if it has been set
-		if (filedialog->callback) {
-			filedialog->callback(filedialog, Filedialog::CANCEL, filedialog->callback_data);
-		}
-	} else if (widget == &filedialog->filenameinput || widget == &filedialog->saveloadbutton) {
-		// Do callback if it has been set
-		if (filedialog->callback) {
-			filedialog->callback(filedialog, Filedialog::SUBMIT, filedialog->callback_data);
-		}
-	} else if (widget == &filedialog->pathinput) {
-		UnicodeString old_value = filedialog->folderview.getFolder().toString(true);
+	if (event.getWidget() == &cancelbutton) {
+		fireEvent(Filedialog::CANCEL);
+	} else if (event.getWidget() == &filenameinput || event.getWidget() == &saveloadbutton) {
+		fireEvent(Filedialog::SUBMIT);
+	} else if (event.getWidget() == &pathinput) {
+		UnicodeString old_value = folderview.getFolder().toString(true);
 		try {
-			Path new_path(filedialog->pathinput.getValue().stl_string());
-			filedialog->folderview.setFolder(new_path);
+			Path new_path(pathinput.getValue().stl_string());
+			folderview.setFolder(new_path);
 		}
 		catch ( ... ) {
-			filedialog->pathinput.setValue(old_value);
+			pathinput.setValue(old_value);
 		}
-	}
-}
-
-inline void Filedialog::guiCallbackWithType(Widget* widget, uint32_t type, void* filedialog_raw)
-{
-	Filedialog* filedialog = reinterpret_cast< Filedialog* >(filedialog_raw);
-	if (widget == &filedialog->folderview) {
-		if (type == Folderview::SELECTION_CHANGED) {
-			Folderview::SelectedItems items_sel = filedialog->folderview.getSelectedItems();
+	} else if (event.getWidget() == &folderview) {
+		if (event.getAction() == Folderview::SELECTION_CHANGED) {
+			Folderview::SelectedItems items_sel = folderview.getSelectedItems();
 			if (!items_sel.empty()) {
 				size_t item_id = *items_sel.begin();
-				Path::DirChild item = filedialog->folderview.getItem(item_id);
+				Path::DirChild item = folderview.getItem(item_id);
 				if (item.type == Path::FILE) {
-					filedialog->filenameinput.setValue(item.name);
+					filenameinput.setValue(item.name);
 				}
 			}
-		} else if (type == Folderview::DOUBLE_CLICKED) {
+		} else if (event.getAction() == Folderview::DOUBLE_CLICKED) {
 HppAssert(false, "Not implemented yet!");
 		}
 	}
+	return false;
 }
 
 }

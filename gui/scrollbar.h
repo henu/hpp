@@ -1,7 +1,6 @@
 #ifndef HPP_GUI_SCROLLBAR_H
 #define HPP_GUI_SCROLLBAR_H
 
-#include "callback.h"
 #include "widget.h"
 #include "renderer.h"
 #include "../real.h"
@@ -29,8 +28,6 @@ public:
 	inline Real getSliderSize(void) const { return size; }
 	inline Real getButtonMove(void) const { return button_move; }
 
-	inline void setCallbackFunc(CallbackFunc callback, void* data);
-
 private:
 
 	enum Dragtype { NOTHING, BUTTON1, BUTTON2, MIDDLE_BUTTON, SLIDER, BG_BEFORE, BG_AFTER };
@@ -52,9 +49,6 @@ private:
 	// is called, so it is valid only immediately after the call.
 	Real mouse_over_slider;
 	Real mouse_over_bg;
-
-	CallbackFunc callback;
-	void* callback_data;
 
 	// Virtual functions for Widget
 	inline virtual void onMouseOver(int32_t mouse_x, int32_t mouse_y);
@@ -79,20 +73,12 @@ button1_pressed(false),
 button2_pressed(false),
 slider_pressed(false),
 mouse_over_slider(0.0),
-mouse_over_bg(0.0),
-callback(NULL),
-callback_data(NULL)
+mouse_over_bg(0.0)
 {
 }
 
 inline Scrollbar::~Scrollbar(void)
 {
-}
-
-inline void Scrollbar::setCallbackFunc(CallbackFunc callback, void* data)
-{
-	this->callback = callback;
-	callback_data = data;
 }
 
 inline void Scrollbar::onMouseOver(int32_t mouse_x, int32_t mouse_y)
@@ -146,10 +132,9 @@ inline bool Scrollbar::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey
 			value = mouse_over_bg;
 			if (value < 0.0) value = 0.0;
 			else if (value > 1.0) value = 1.0;
-			// Do ack if it has been set
-			if (callback) {
-				callback(this, callback_data);
-			}
+
+			fireEvent();
+
 			drag = MIDDLE_BUTTON;
 			listenMouseReleases(Mousekey::FLAG_MIDDLE);
 			listenMouseMoves();
@@ -167,10 +152,8 @@ inline bool Scrollbar::onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::
 			if (element_over == BUTTON1) {
 				value -= button_move;
 				if (value < 0.0) value = 0.0;
-				// Do callback if it has been set
-				if (callback) {
-					callback(this, callback_data);
-				}
+
+				fireEvent();
 			}
 			button1_pressed = false;
 			drag = NOTHING;
@@ -179,10 +162,8 @@ inline bool Scrollbar::onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::
 			if (element_over == BUTTON2) {
 				value += button_move;
 				if (value > 1.0) value = 1.0;
-				// Do callback if it has been set
-				if (callback) {
-					callback(this, callback_data);
-				}
+
+				fireEvent();
 			}
 			button2_pressed = false;
 			drag = NOTHING;
@@ -191,10 +172,8 @@ inline bool Scrollbar::onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::
 			if (element_over == BG_BEFORE) {
 				value -= size;
 				if (value < 0.0) value = 0.0;
-				// Do callback if it has been set
-				if (callback) {
-					callback(this, callback_data);
-				}
+
+				fireEvent();
 			}
 			drag = NOTHING;
 			listenMouseReleases(0);
@@ -202,10 +181,8 @@ inline bool Scrollbar::onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::
 			if (element_over == BG_AFTER) {
 				value += size;
 				if (value > 1.0) value = 1.0;
-				// Do callback if it has been set
-				if (callback) {
-					callback(this, callback_data);
-				}
+
+				fireEvent();
 			}
 			drag = NOTHING;
 			listenMouseReleases(0);
@@ -268,20 +245,16 @@ inline void Scrollbar::onMouseMove(int32_t mouse_x, int32_t mouse_y)
 		value = (pos - pos_slider_begin) / bg_size;
 		if (value < 0.0) value = 0.0;
 		else if (value > 1.0) value = 1.0;
-		// Do callback if it has been set
-		if (callback) {
-			callback(this, callback_data);
-		}
+
+		fireEvent();
 
 	} else if (drag == MIDDLE_BUTTON) {
 		if (element_over != BUTTON1 && element_over != BUTTON2) {
 			value = mouse_over_bg;
 			if (value < 0.0) value = 0.0;
 			else if (value > 1.0) value = 1.0;
-			// Do callback if it has been set
-			if (callback) {
-				callback(this, callback_data);
-			}
+
+			fireEvent();
 		}
 	}
 }

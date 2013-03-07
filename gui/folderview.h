@@ -5,7 +5,6 @@
 #include "widget.h"
 #include "renderer.h"
 #include "folderviewcontents.h"
-#include "callback.h"
 
 #include "../unicodestring.h"
 #include "../path.h"
@@ -25,8 +24,8 @@ public:
 
 	typedef std::set< size_t > SelectedItems;
 
-	static uint32_t const SELECTION_CHANGED = 0;
-	static uint32_t const DOUBLE_CLICKED = 1;
+	static int const SELECTION_CHANGED = 0;
+	static int const DOUBLE_CLICKED = 1;
 
 	inline Folderview(void);
 	inline virtual ~Folderview(void);
@@ -39,8 +38,6 @@ public:
 
 	inline SelectedItems getSelectedItems(void) const { return contents.getSelectedItems(); }
 	inline Path::DirChild getItem(size_t item_id) const { return contents.getItem(item_id); }
-
-	inline void setCallbackFunc(CallbackFuncWithType callback, void* data);
 
 	// Virtual functions for Widget
 	inline virtual uint32_t getMinWidth(void) const;
@@ -57,9 +54,6 @@ private:
 	Scrollbox scrollbox;
 	FolderviewContents contents;
 
-	CallbackFuncWithType callback;
-	void* callback_data;
-
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
 	inline virtual void onSizeChange(void) { doRepositioning(); }
@@ -70,8 +64,7 @@ private:
 };
 
 inline Folderview::Folderview(void) :
-contents(this),
-callback(NULL)
+contents(this)
 {
 	addChild(&scrollbox);
 	scrollbox.setHorizontalScrollbar(Scrollbox::ON_DEMAND);
@@ -91,12 +84,6 @@ inline void Folderview::setFolder(Path const& path)
 inline Path Folderview::getFolder(void) const
 {
 	return contents.getFolder();
-}
-
-inline void Folderview::setCallbackFunc(CallbackFuncWithType callback, void* data)
-{
-	this->callback = callback;
-	callback_data = data;
 }
 
 inline uint32_t Folderview::getMinWidth(void) const
@@ -121,9 +108,7 @@ inline void Folderview::scrollContents(Real amount)
 
 inline void Folderview::selectionChanged(void)
 {
-	if (callback) {
-		callback(this, SELECTION_CHANGED, callback_data);
-	}
+	fireEvent(SELECTION_CHANGED);
 }
 
 inline void Folderview::doRendering(int32_t x_origin, int32_t y_origin)
