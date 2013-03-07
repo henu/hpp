@@ -65,15 +65,15 @@ void ViewportRenderer::loadFont(Path const& path)
 	font.loadMore(path);
 }
 
-void ViewportRenderer::renderSprite(Texture* tex, Vector2 const& pos, Vector2 const& size)
+void ViewportRenderer::renderSprite(Texture* tex, Vector2 const& pos, Vector2 const& size, Color const& color)
 {
 	Vector2 size2;
-	if (size.x == 0) {
+	if (size.x < 0) {
 	 	size2.x = tex->getWidth();
 	} else {
 		size2.x = size.x;
 	}
-	if (size.y == 0) {
+	if (size.y < 0) {
 	 	size2.y = tex->getHeight();
 	} else {
 		size2.y = size.y;
@@ -82,7 +82,8 @@ void ViewportRenderer::renderSprite(Texture* tex, Vector2 const& pos, Vector2 co
 	                     Vector2(spr_x_origin + pos.x, rqueue->getHeight() - spr_y_origin - size2.y - pos.y),
 	                     size2,
 	                     Vector2(0.0, 0.0),
-	                     Vector2(size2.x / tex->getWidth(), size2.y / tex->getHeight()));
+	                     Vector2(size2.x / tex->getWidth(), size2.y / tex->getHeight()),
+	                     color);
 }
 
 void ViewportRenderer::renderString(UnicodeString const& str, Real fontsize, Vector2 const& pos, Vector2 const& size)
@@ -422,22 +423,32 @@ void ViewportRenderer::renderButton(int32_t x_origin, int32_t y_origin, Button c
 
 	if (!pressed) {
 		renderSprite(tex_button_left.tex,
-		             Vector2(0, 0));
+		             Vector2(0, 0),
+		             Vector2(-1, -1),
+		             button->getColor());
 		renderSprite(tex_button.tex,
 		             Vector2(button_left_width, 0),
-		             Vector2(button_width - button_left_width - button_right_width, 0));
+		             Vector2(button_width - button_left_width - button_right_width, -1),
+		             button->getColor());
 		renderSprite(tex_button_right.tex,
-		             Vector2(button_width - button_right_width, 0));
-		textSetColor(Color(0.15, 0.15, 0.15));
+		             Vector2(button_width - button_right_width, 0),
+		             Vector2(-1, -1),
+		             button->getColor());
+		textSetColor(button->getLabelColor());
 	} else {
 		renderSprite(tex_button_pressed_left.tex,
-		             Vector2(0, 0));
+		             Vector2(0, 0),
+		             Vector2(-1, -1),
+		             button->getColor());
 		renderSprite(tex_button_pressed.tex,
 		             Vector2(button_left_width, 0),
-		             Vector2(button_width - button_left_width - button_right_width, 0));
+		             Vector2(button_width - button_left_width - button_right_width, -1),
+		             button->getColor());
 		renderSprite(tex_button_pressed_right.tex,
-		             Vector2(button_width - button_right_width, 0));
-		textSetColor(Color(0.05, 0.05, 0.05));
+		             Vector2(button_width - button_right_width, 0),
+		             Vector2(-1, -1),
+		             button->getColor());
+		textSetColor(button->getLabelColor());
 	}
 	textSetHorizontalAlign(CENTER);
 	textSetVerticalAlign(CENTER);
@@ -567,7 +578,7 @@ void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrol
 		Real slider_pos = (slider_area - slider_size) * scrollbar->getValue();
 // TODO: What it slider is too small?
 		renderSprite(tex_left, Vector2(scrollbar_button_left_width + slider_pos, 0));
-		renderSprite(tex, Vector2(scrollbar_button_left_width + slider_pos + slider_leftend_width, 0), Vector2(slider_size - slider_leftend_width - slider_rightend_width, 0));
+		renderSprite(tex, Vector2(scrollbar_button_left_width + slider_pos + slider_leftend_width, 0), Vector2(slider_size - slider_leftend_width - slider_rightend_width, -1));
 		renderSprite(tex_right, Vector2(scrollbar_button_left_width + slider_pos + slider_size - slider_rightend_width, 0));
 	} else {
 		uint32_t scrollbar_topend_height = tex_scrollbar_bg_vert_top.tex->getHeight();
@@ -609,7 +620,7 @@ void ViewportRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrol
 		Real slider_pos = (slider_area - slider_size) * scrollbar->getValue();
 // TODO: What it slider is too small?
 		renderSprite(tex_top, Vector2(0, scrollbar_button_up_height + slider_pos));
-		renderSprite(tex, Vector2(0, scrollbar_button_up_height + slider_pos + slider_topend_height), Vector2(0, slider_size - slider_topend_height - slider_bottomend_height));
+		renderSprite(tex, Vector2(0, scrollbar_button_up_height + slider_pos + slider_topend_height), Vector2(-1, slider_size - slider_topend_height - slider_bottomend_height));
 		renderSprite(tex_bottom, Vector2(0, scrollbar_button_up_height + slider_pos + slider_size - slider_bottomend_height));
 	}
 
@@ -626,7 +637,7 @@ void ViewportRenderer::renderSlider(int32_t x_origin, int32_t y_origin, Slider c
 		// First end of background
 		renderSprite(tex_slider_bg_horiz_left.tex, Vector2(0, bg_extra));
 		// Center of background
-		renderSprite(tex_slider_bg_horiz.tex, Vector2(tex_slider_bg_horiz_left.tex->getWidth(), bg_extra), Vector2(slider_width - tex_slider_bg_horiz_left.tex->getWidth() - tex_slider_bg_horiz_right.tex->getWidth(), 0));
+		renderSprite(tex_slider_bg_horiz.tex, Vector2(tex_slider_bg_horiz_left.tex->getWidth(), bg_extra), Vector2(slider_width - tex_slider_bg_horiz_left.tex->getWidth() - tex_slider_bg_horiz_right.tex->getWidth(), -1));
 		// Second end of background
 		renderSprite(tex_slider_bg_horiz_right.tex, Vector2(slider_width - tex_slider_bg_horiz_right.tex->getWidth(), bg_extra));
 		// Slider
@@ -645,7 +656,7 @@ void ViewportRenderer::renderSlider(int32_t x_origin, int32_t y_origin, Slider c
 		// First end of background
 		renderSprite(tex_slider_bg_vert_top.tex, Vector2(bg_extra, 0));
 		// Center of background
-		renderSprite(tex_slider_bg_vert.tex, Vector2(bg_extra, tex_slider_bg_vert_top.tex->getHeight()), Vector2(0, slider_height - tex_slider_bg_vert_top.tex->getHeight() - tex_slider_bg_vert_bottom.tex->getHeight()));
+		renderSprite(tex_slider_bg_vert.tex, Vector2(bg_extra, tex_slider_bg_vert_top.tex->getHeight()), Vector2(-1, slider_height - tex_slider_bg_vert_top.tex->getHeight() - tex_slider_bg_vert_bottom.tex->getHeight()));
 		// Second end of background
 		renderSprite(tex_slider_bg_vert_bottom.tex, Vector2(bg_extra, slider_height - tex_slider_bg_vert_top.tex->getHeight()));
 		// Slider
@@ -683,7 +694,7 @@ void ViewportRenderer::renderTabs(int32_t x_origin, int32_t y_origin, Tabs const
 		renderSprite(tex_tab_left.tex, Vector2(x_offset, 0));
 		x_offset += tex_tab_left.tex->getWidth();
 		size_t label_pos_x = x_offset;
-		renderSprite(tex_tab.tex, Vector2(x_offset, 0), Vector2(label_width, 0));
+		renderSprite(tex_tab.tex, Vector2(x_offset, 0), Vector2(label_width, -1));
 		x_offset += label_width;
 		renderSprite(tex_tab_right.tex, Vector2(x_offset, 0));
 		x_offset += tex_tab_right.tex->getWidth();
@@ -702,20 +713,20 @@ void ViewportRenderer::renderTabs(int32_t x_origin, int32_t y_origin, Tabs const
 	// Render top edge
 	renderSprite(tex_field_edge_bottomright_concave.tex, Vector2(0, tabbar_height));
 	if (selected_tab_begin > tex_field_edge_right.tex->getWidth()) {
-		renderSprite(tex_field_edge_bottom.tex, Vector2(tex_field_edge_right.tex->getWidth(), tabbar_height), Vector2(selected_tab_begin - tex_field_edge_right.tex->getWidth(), 0));
+		renderSprite(tex_field_edge_bottom.tex, Vector2(tex_field_edge_right.tex->getWidth(), tabbar_height), Vector2(selected_tab_begin - tex_field_edge_right.tex->getWidth(), -1));
 	}
 	if (width > selected_tab_end + tex_field_edge_left.tex->getWidth()) {
-		renderSprite(tex_field_edge_bottom.tex, Vector2(selected_tab_end, tabbar_height), Vector2(width - selected_tab_end - tex_field_edge_left.tex->getWidth(), 0));
+		renderSprite(tex_field_edge_bottom.tex, Vector2(selected_tab_end, tabbar_height), Vector2(width - selected_tab_end - tex_field_edge_left.tex->getWidth(), -1));
 	}
 	renderSprite(tex_field_edge_bottomleft_concave.tex, Vector2(width - tex_field_edge_left.tex->getWidth(), tabbar_height));
 
 	// Render side edges
-	renderSprite(tex_field_edge_right.tex, Vector2(0, tex_tab.tex->getHeight()), Vector2(0, height - tex_tab.tex->getHeight() - tex_field_edge_top.tex->getHeight()));
-	renderSprite(tex_field_edge_left.tex, Vector2(width - tex_field_edge_left.tex->getWidth(), tex_tab.tex->getHeight()), Vector2(0, height - tex_tab.tex->getHeight() - tex_field_edge_top.tex->getHeight()));
+	renderSprite(tex_field_edge_right.tex, Vector2(0, tex_tab.tex->getHeight()), Vector2(-1, height - tex_tab.tex->getHeight() - tex_field_edge_top.tex->getHeight()));
+	renderSprite(tex_field_edge_left.tex, Vector2(width - tex_field_edge_left.tex->getWidth(), tex_tab.tex->getHeight()), Vector2(-1, height - tex_tab.tex->getHeight() - tex_field_edge_top.tex->getHeight()));
 
 	// Render bottom edge
 	renderSprite(tex_field_edge_topright_concave.tex, Vector2(0, height - tex_field_edge_top.tex->getHeight()));
-	renderSprite(tex_field_edge_top.tex, Vector2(tex_field_edge_right.tex->getWidth(), height - tex_field_edge_top.tex->getHeight()), Vector2(width - tex_field_edge_right.tex->getWidth() - tex_field_edge_left.tex->getWidth(), 0));
+	renderSprite(tex_field_edge_top.tex, Vector2(tex_field_edge_right.tex->getWidth(), height - tex_field_edge_top.tex->getHeight()), Vector2(width - tex_field_edge_right.tex->getWidth() - tex_field_edge_left.tex->getWidth(), -1));
 	renderSprite(tex_field_edge_topleft_concave.tex, Vector2(width - tex_field_edge_left.tex->getWidth(), height - tex_field_edge_top.tex->getHeight()));
 }
 

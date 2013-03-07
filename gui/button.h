@@ -6,6 +6,7 @@
 #include "callback.h"
 
 #include "../unicodestring.h"
+#include "../color.h"
 
 namespace Hpp
 {
@@ -21,9 +22,14 @@ public:
 	inline Button(void);
 	inline virtual ~Button(void);
 
+	inline void setColor(Color const& color) { this->color = color; }
 	inline void setLabel(UnicodeString const& label) { this->label = label; markSizeChanged(); }
+	inline void setLabelColor(Color const& color) { label_color = color; }
 
 	inline void setCallbackFunc(CallbackFunc callback, void* data);
+
+	inline Color getColor(void) const { return color; }
+	inline Color getLabelColor(void) const { return label_color; }
 
 	// Virtual functions for Widget
 	inline virtual uint32_t getMinWidth(void) const;
@@ -32,6 +38,8 @@ public:
 private:
 
 	UnicodeString label;
+	Color label_color;
+	Color color;
 
 	CallbackFunc callback;
 	void* callback_data;
@@ -47,6 +55,8 @@ private:
 };
 
 inline Button::Button(void) :
+label_color(0, 0, 0),
+color(1, 1, 1),
 callback(NULL),
 pressed(false)
 {

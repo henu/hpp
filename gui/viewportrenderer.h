@@ -195,7 +195,7 @@ public:
 	inline void textSetColor(Color const& color) { text_color = color; }
 	inline void textSetHorizontalAlign(Alignment align) { text_align = align; }
 	inline void textSetVerticalAlign(Alignment align) { text_valign = align; }
-	void renderSprite(Texture* tex, Vector2 const& pos, Vector2 const& size = Vector2::ZERO);
+	void renderSprite(Texture* tex, Vector2 const& pos, Vector2 const& size = Vector2(-1, -1), Color const& color = Color(1, 1, 1));
 	void renderString(UnicodeString const& str, Real fontsize, Vector2 const& pos, Vector2 const& size);
 
 	virtual void renderTextCursor(int32_t x_origin, int32_t y_origin);
