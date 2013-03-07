@@ -74,8 +74,9 @@ public:
 	inline void unbind(void) const;
 	inline GLenum getBoundTextureunit(void) const;
 
-	// Function to get GL texture
+	// Function to get GL texture and format
 	inline GLuint getGlTexture(void) const;
+	inline GLenum getGlFormat(void) const { HppAssert(loaded(), "Texture is not loaded!"); return pixelformatToGlFormat(format); }
 
 	// Checks if texture has alpha
 	inline bool hasAlpha(void) const { HppAssert(loaded(), "Texture is not loaded!"); return pixelformatHasAlpha(format); }

@@ -52,6 +52,7 @@ private:
 
 	bool rendering_started;
 	Texture const* active_texture;
+	bool rgb_forced_to_one;
 
 	std::vector< GLfloat > poss;
 	std::vector< GLfloat > uvs;
@@ -60,12 +61,16 @@ private:
 	static std::string const SHADER_VRT;
 	static std::string const SHADER_FRG;
 
+	// This enables program and sets appropriate flags, based on "rgb_forced_to_one".
+	inline void enableProgram(void);
+
 };
 
 inline Renderqueue2d::Renderqueue2d(uint32_t x, uint32_t y, uint32_t width, uint32_t height) :
 x(x), y(y),
 width(width), height(height),
-rendering_started(false)
+rendering_started(false),
+rgb_forced_to_one(false)
 {
 	// Initialize shaderprogram
 	Shader shader_vrt;
@@ -112,7 +117,7 @@ inline void Renderqueue2d::begin(void)
 
 	HppCheckGlErrors();
 
-	program.enable();
+	enableProgram();
 
 	// Prepare projection
 	HppCheckGlErrors();
@@ -167,6 +172,27 @@ inline void Renderqueue2d::renderSprite(Texture const* tex,
 		tex->bind();
 		program.setUniform1i("tex", tex->getBoundTextureunit());
 		HppCheckGlErrors();
+	}
+
+	// If this texture is in GL_ALPHA format, then
+	// ensure RGB values are forced to one
+	if (tex->getGlFormat() == GL_ALPHA) {
+		if (!rgb_forced_to_one) {
+			flush();
+			program.disable();
+			rgb_forced_to_one = true;
+			enableProgram();
+		}
+	}
+	// If this texture is not in GL_ALPHA format, then
+	// ensure RGB values are not forced to one
+	else {
+		if (rgb_forced_to_one) {
+			flush();
+			program.disable();
+			rgb_forced_to_one = false;
+			enableProgram();
+		}
 	}
 
 	HppCheckForCorrectThread();
@@ -274,6 +300,15 @@ inline void Renderqueue2d::flush(void)
 	poss.clear();
 	uvs.clear();
 	clrs.clear();
+}
+
+inline void Renderqueue2d::enableProgram(void)
+{
+	Hpp::Shaderprogram::Flags flags;
+	if (rgb_forced_to_one) {
+		flags.insert("FORCE_RGB_TO_ONE");
+	}
+	program.enable(flags);
 }
 
 }

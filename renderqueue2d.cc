@@ -36,7 +36,11 @@ std::string const Renderqueue2d::SHADER_FRG =
 "\n"
 "void main()\n"
 "{\n"
+"	#ifndef FORCE_RGB_TO_ONE\n"
 "	final_color = texture2D(tex, frag_uv) * frag_color;\n"
+"	#else\n"
+"	final_color = vec4(1, 1, 1, texture2D(tex, frag_uv).w) * frag_color;\n"
+"	#endif\n"
 "}\n";
 
 }
