@@ -7,6 +7,7 @@
 
 #include <string>
 #include <cmath>
+#include <vector>
 
 namespace Hpp
 {
@@ -15,6 +16,8 @@ class Angle
 {
 
 public:
+
+	typedef std::vector< Angle > Vec;
 
 	static Angle const ZERO;
 
@@ -64,6 +67,12 @@ public:
 	inline Real sin(void) const;
 	inline Real cos(void) const;
 	inline Real tan(void) const;
+
+	// Ensures this or returned Angle is between [-180 °, 180 °].
+	inline void fix(void);
+	inline Angle fixed(void) const;
+
+	inline Angle abs(void) const;
 
 private:
 
@@ -225,6 +234,30 @@ inline Real Angle::cos(void) const
 inline Real Angle::tan(void) const
 {
 	return ::tan(rad);
+}
+
+inline void Angle::fix(void)
+{
+	if (rad > HPP_PI) {
+		rad -= floor((rad + HPP_PI) / (HPP_PI*2)) * HPP_PI*2;
+	} else if (rad < -HPP_PI) {
+		rad += floor((HPP_PI - rad) / (HPP_PI*2)) * HPP_PI*2;
+	}
+	HppAssert(rad >= -HPP_PI && rad <= HPP_PI, "Fixing has failed!");
+}
+
+inline Angle Angle::fixed(void) const
+{
+	Angle result = *this;
+	result.fix();
+	return result;
+}
+
+inline Angle Angle::abs(void) const
+{
+	Angle result = *this;
+	if (rad < 0) result.rad = -rad;
+	return result;
 }
 
 inline Angle operator*(float f, Angle const& a)

@@ -8,6 +8,8 @@
 #include "assert.h"
 #include "constants.h"
 
+#include <algorithm>
+
 #include <iostream>
 namespace Hpp
 {
@@ -129,6 +131,11 @@ inline bool triangleHitsSphere(Vector3 const& pos, Real radius,
                                Vector3 const& tp0, Vector3 const& tp1, Vector3 const& tp2,
                                Vector3& coll_pos, Vector3& coll_nrm, Real& coll_depth,
                                Vector3 const& tri_bs_pos = Vector3::ZERO, Real tri_bs_r = -1.0);
+
+// Calculates average of angles and returns it in range [-180 °, 180 °].
+// If no average angle can be calculated, then returns value that is
+// bigger than 360 °.
+inline Angle calculateAverageAngle(Angle::Vec const& angles);
 
 
 
@@ -952,6 +959,53 @@ inline bool triangleHitsSphere(Vector3 const& pos, Real radius,
 		return true;
 	}
 	return false;
+}
+
+inline Angle calculateAverageAngle(Angle::Vec const& angles)
+{
+	if (angles.empty()) return Angle(9999);
+
+	// Find minimum and maximum angles
+	Angle min_angle = angles[0].fixed();
+	Angle max_angle = min_angle;
+	for (Angle::Vec::const_iterator angles_it = angles.begin() + 1;
+	     angles_it != angles.end();
+	     ++ angles_it) {
+		Angle angle = angles_it->fixed();
+		min_angle = std::min(min_angle, angle);
+		max_angle = std::max(max_angle, angle);
+	}
+
+	// Check if all values should be turned 180 °.
+	bool turn180 = (max_angle - min_angle > Angle(180));
+
+	// Now calculate average angle, and turn 180 ° if necessary. Also
+	// calculate new minimum and maximum. If again bigger than 180 °
+	// difference is got, then it is not possible to calculate result.
+	min_angle = angles[0];
+	if (turn180) min_angle += Angle(180);
+	min_angle.fix();
+	max_angle = min_angle;
+	Angle average_angle = min_angle;
+	for (Angle::Vec::const_iterator angles_it = angles.begin() + 1;
+	     angles_it != angles.end();
+	     ++ angles_it) {
+		Angle angle = *angles_it;
+		if (turn180) angle += Angle(180);
+		angle.fix();
+		min_angle = std::min(min_angle, angle);
+		max_angle = std::max(max_angle, angle);
+		average_angle += angle;
+	}
+	if (max_angle - min_angle > Angle(180)) {
+		return Angle(9999);
+	}
+
+	average_angle /= angles.size();
+
+	if (turn180) average_angle = (average_angle + Angle(180)).fixed();
+
+	return average_angle;
 }
 
 }
