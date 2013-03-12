@@ -76,6 +76,7 @@
 #include "quaternion.h"
 #include "random.h"
 #include "randomizer.h"
+#include "ray.h"
 #include "rbuf.h"
 #include "real.h"
 #include "serializable.h"

@@ -7,6 +7,7 @@
 #include "trigon.h"
 #include "assert.h"
 #include "constants.h"
+#include "ray.h"
 
 #include <algorithm>
 
@@ -72,6 +73,8 @@ inline Real distanceToPlane(Vector2 const& plane_pos, Vector2 const& plane_norma
 // ray_dir.
 inline Real distanceToRay(Vector2 const& point, Vector2 const& ray_begin, Vector2 const& ray_dir);
 
+inline Real distanceToRay(Hpp::Vector3 const& point, Hpp::Ray const& ray);
+
 // Calculates nearest point between line/ray and a point. It is possible to get
 // the nearest point in two ways and it is possible to get the distance between
 // nearest and given points. The nearest point is defined in these ways:
@@ -84,6 +87,8 @@ inline void nearestPointToLine(Vector3 const& point,
                                Vector3* nearest_point, Real* m, Real* dst_to_point);
 inline void nearestPointToRay(Vector3 const& point,
                               Vector3 const& ray_begin, Vector3 const& ray_dir,
+                              Vector3* nearest_point, Real* m, Real* dst_to_point);
+inline void nearestPointToRay(Vector3 const& point, Ray const& ray,
                               Vector3* nearest_point, Real* m, Real* dst_to_point);
 
 inline Real distanceBetweenLines(Vector3 const& begin1, Vector3 const& dir1,
@@ -383,6 +388,13 @@ inline Real distanceToRay(Vector2 const& point, Vector2 const& ray_begin, Vector
 	return dotProduct(ray_dir_n.perp(), ray_begin - point);
 }
 
+inline Real distanceToRay(Hpp::Vector3 const& point, Hpp::Ray const& ray)
+{
+	Hpp::Real result;
+	nearestPointToRay(point, ray, NULL, NULL, &result);
+	return result;
+}
+
 inline void nearestPointToLine(Vector3 const& point,
                                Vector3 const& line_pos1, Vector3 const& line_pos2,
                                Vector3* nearest_point, Real* m, Real* dst_to_point)
@@ -439,6 +451,12 @@ inline void nearestPointToRay(Vector3 const& point,
 	} else if (dst_to_point) {
 		*dst_to_point = ((ray_begin + ray_dir * m2) - point).length();
 	}
+}
+
+inline void nearestPointToRay(Vector3 const& point, Ray const& ray,
+                              Vector3* nearest_point, Real* m, Real* dst_to_point)
+{
+	nearestPointToRay(point, ray.begin, ray.dir, nearest_point, m, dst_to_point);
 }
 
 inline Real distanceBetweenLines(Vector3 const& begin1, Vector3 const& dir1,

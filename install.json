@@ -84,6 +84,7 @@
 				"quaternion.h",
 				"random.h",
 				"randomizer.h",
+				"ray.h",
 				"rbuf.h",
 				"real.h",
 				"runnable.h",
