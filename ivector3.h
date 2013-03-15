@@ -175,9 +175,9 @@ inline std::string IVector3::toString(void) const
 inline Json IVector3::toJson(void) const
 {
 	Json result = Json::newArray();
-	result.addItem(Json::newNumber(x));
-	result.addItem(Json::newNumber(y));
-	result.addItem(Json::newNumber(z));
+	result.addItem(Json::newNumber(int64_t(x)));
+	result.addItem(Json::newNumber(int64_t(y)));
+	result.addItem(Json::newNumber(int64_t(z)));
 	return result;
 }
 

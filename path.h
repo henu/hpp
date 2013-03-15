@@ -508,9 +508,14 @@ inline void Path::resizeFile(size_t new_size)
 	if (!isFile()) {
 		throw Exception("Unable to resize file \"" + toString() + "\" because it is not a file!");
 	}
+	#ifndef WIN32
 	if (truncate(toString().c_str(), new_size) != 0) {
 		throw Exception("Resizing of file \"" + toString() + "\" has failed!");
 	}
+	#else
+// TODO: Use SetEndOfFile on windows!
+throw Exception("Resizing files is not supported on windows!");
+	#endif
 	if (getFileSize() != new_size) {
 		throw Exception("Resizing of file \"" + toString() + "\" has failed! The size is now " + sizeToStr(getFileSize()) + " instead of " + sizeToStr(new_size) + "!");
 	}

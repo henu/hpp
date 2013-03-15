@@ -1,5 +1,7 @@
 #include "commandexec.h"
 
+#ifndef WIN32
+
 #include <cstdlib>
 #include <stdexcept>
 #include <sys/types.h>
@@ -196,3 +198,6 @@ void bufWriter(void* sfinfo_raw)
 }
 
 }
+
+#endif
+

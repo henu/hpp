@@ -453,7 +453,7 @@ void TCPConnection::writerThread(void* conn_raw)
 // TODO: Errors are not checked! Is this bad?
 			closeByRemoteHost(rconn);
 			writecheck_cond.broadcast();
-			return EXIT_SUCCESS;
+			return;
 		}
 		#endif
 

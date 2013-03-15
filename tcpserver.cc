@@ -88,7 +88,7 @@ void TCPServer::startListening(uint16_t port, ConnHandlerFunc connhandler, void*
 	li->sdlsoc = new_sdlsoc;
 	li->port = port;
 	Listener lst;
-	lst.thread = Thread(listener, reinterpret_cast< void* >(li));
+	lst.thread = Thread(listenerThread, reinterpret_cast< void* >(li));
 	lst.sdlsoc = new_sdlsoc;
 	#endif
 

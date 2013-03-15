@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <iostream>
 #ifdef HPP_USE_SDL_NET
-#include "SDL_net.h"
+#include <SDL/SDL_net.h>
 #endif
 
 

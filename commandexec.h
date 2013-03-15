@@ -1,6 +1,8 @@
 #ifndef HPP_COMMANDEXEC_H
 #define HPP_COMMANDEXEC_H
 
+#ifndef WIN32
+
 #include "ostreampipe.h"
 #include "istreampipe.h"
 #include "streambuf.h"
@@ -73,3 +75,6 @@ private:
 }
 
 #endif
+
+#endif
+
