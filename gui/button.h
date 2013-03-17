@@ -24,9 +24,11 @@ public:
 	inline void setColor(Color const& color) { this->color = color; }
 	inline void setLabel(UnicodeString const& label) { this->label = label; markSizeChanged(); }
 	inline void setLabelColor(Color const& color) { label_color = color; }
+	inline void setEnabled(bool enabled) { this->enabled = enabled; }
 
 	inline Color getColor(void) const { return color; }
 	inline Color getLabelColor(void) const { return label_color; }
+	inline bool isEnabled(void) const { return enabled; }
 
 	// Virtual functions for Widget
 	inline virtual uint32_t getMinWidth(void) const;
@@ -37,6 +39,7 @@ private:
 	UnicodeString label;
 	Color label_color;
 	Color color;
+	bool enabled;
 
 	bool pressed;
 
@@ -51,6 +54,7 @@ private:
 inline Button::Button(void) :
 label_color(0, 0, 0),
 color(1, 1, 1),
+enabled(true),
 pressed(false)
 {
 }
@@ -85,7 +89,7 @@ inline bool Button::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::K
 {
 	(void)mouse_x;
 	(void)mouse_y;
-	if (mouse_key == Mousekey::LEFT) {
+	if (enabled && mouse_key == Mousekey::LEFT) {
 		pressed = true;
 		listenMouseReleases(Mousekey::FLAG_LEFT);
 	}
@@ -98,7 +102,7 @@ inline void Button::onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t m
 	(void)mouse_y;
 	HppAssert(mouse_key == Mousekey::LEFT, "Unexpected mouse release!");
 	pressed = false;
-	if (widget == this) {
+	if (enabled && widget == this) {
 		fireEvent();
 	}
 }

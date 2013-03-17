@@ -43,6 +43,9 @@ public:
 	inline std::string toString(void) const;
 	inline Json toJson(void) const;
 
+	// Returns grey version of color
+	inline Color getGrey(void) const;
+
 private:
 
 	// Values. On grayscale colors, values is stored to red.
@@ -264,6 +267,12 @@ inline Json Color::toJson(void) const
 		result.addItem(Json::newNumber(getAlpha()));
 	}
 	return result;
+}
+
+inline Color Color::getGrey(void) const
+{
+	float g = (getRed() + getGreen() + getBlue()) / 3;
+	return Color(g, getAlpha());
 }
 
 inline std::ostream& operator<<(std::ostream& strm, Color const& c)

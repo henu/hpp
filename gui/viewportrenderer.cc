@@ -421,7 +421,21 @@ void ViewportRenderer::renderButton(int32_t x_origin, int32_t y_origin, Button c
 	Real button_left_width = tex_button_left.tex->getWidth();
 	Real button_right_width = tex_button_right.tex->getWidth();
 
-	if (!pressed) {
+	if (!button->isEnabled()) {
+		renderSprite(tex_button_left.tex,
+		             Vector2(0, 0),
+		             Vector2(-1, -1),
+		             button->getColor().getGrey());
+		renderSprite(tex_button.tex,
+		             Vector2(button_left_width, 0),
+		             Vector2(button_width - button_left_width - button_right_width, -1),
+		             button->getColor().getGrey());
+		renderSprite(tex_button_right.tex,
+		             Vector2(button_width - button_right_width, 0),
+		             Vector2(-1, -1),
+		             button->getColor().getGrey());
+		textSetColor(button->getLabelColor().getGrey());
+	} else if (!pressed) {
 		renderSprite(tex_button_left.tex,
 		             Vector2(0, 0),
 		             Vector2(-1, -1),
