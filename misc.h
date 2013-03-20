@@ -56,6 +56,10 @@ inline std::string joinStrings(std::vector< std::string > const& strs, std::stri
 // Removes whitespace from beginning and end of string
 inline std::string trim(std::string const& str, std::string ws = " \t\n");
 
+// Checks if string starts with/ends to specific substring
+inline bool startsWith(std::string const& str, std::string const& substr);
+inline bool endsTo(std::string const& str, std::string const& substr);
+
 // Power function for integers
 inline ssize_t ipow(ssize_t a, size_t n);
 
@@ -216,6 +220,18 @@ inline std::string trim(std::string const& str, std::string ws)
 	}
 	HppAssert(non_ws_end != std::string::npos, "Fail!");
 	return str.substr(non_ws_begin, non_ws_end + 1 - non_ws_begin);
+}
+
+inline bool startsWith(std::string const& str, std::string const& substr)
+{
+	if (str.size() < substr.size()) return false;
+	return str.substr(0, substr.size()) == substr;
+}
+
+inline bool endsTo(std::string const& str, std::string const& substr)
+{
+	if (str.size() < substr.size()) return false;
+	return str.substr(str.size() - substr.size()) == substr;
 }
 
 inline ssize_t ipow(ssize_t a, size_t n)
