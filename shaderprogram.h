@@ -65,6 +65,8 @@ private:
 
 	typedef std::vector< GLuint > CompiledShaders;
 
+	typedef std::vector< std::string > Lines;
+
 	// Index is same as vertex attribute index. If buf is NULL, then
 	// it means there is no buffer and vertex attribute is disabled.
 	struct BoundBufferobject
@@ -331,12 +333,13 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 {
 	GLuint new_lprog;
 
-	std::string flags_srcmod;
+	// Convert flags to lines of codes that make some defines
+	Lines lines_flags;
 	for (Flags::const_iterator flags_it = flags.begin();
 	     flags_it != flags.end();
 	     ++ flags_it) {
 	     	std::string const& flag = *flags_it;
-	     	flags_srcmod += "#define " + flag + "\n";
+	     	lines_flags.push_back("#define " + flag + "\n");
 	}
 
 	// Compile shaders
@@ -362,8 +365,36 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 		// Add it already, so it becomes released in case of error
 		compiled_shaders.push_back(shader_id);
 
-		// Get shader source and do modifications that are requested by flags
-		std::string shader_src = flags_srcmod + shader.getSource();
+		// Get shader source and convert it to lines of code
+		Lines lines_src = splitString(shader.getSource(), '\n');
+
+		// Merge code lines from flags and from shader sources.
+		// If there is version information in shader sources,
+		// then ensure it is at the first line. If there are no
+		// flags, then no modifications to the source is made.
+		Lines lines;
+		if (flags.empty()) {
+			lines = lines_src;
+		} else {
+			// Search for version information
+			for (Lines::iterator lines_find = lines_src.begin();
+			     lines_find != lines_src.end();
+			     ++ lines_find) {
+				std::string const& line = *lines_find;
+				if (startsWith(trim(line), "#version")) {
+					lines.push_back(line);
+					lines_src.erase(lines_find);
+					break;
+				}
+			}
+			// Add flags
+			lines.insert(lines.end(), lines_flags.begin(), lines_flags.end());
+			// Add sources
+			lines.insert(lines.end(), lines_src.begin(), lines_src.end());
+		}
+
+		// Convert lines to string
+		std::string shader_src = joinStrings(lines, "\n");
 
 		char const* src_c_str = shader_src.c_str();
 		GLint src_size = shader_src.size();
