@@ -40,6 +40,7 @@ inline Vector2 vectorOfAngle(Angle const& a);
 inline void forceVectorsPerpendicular(Vector3& v1, Vector3& v2);
 
 inline Vector3 posToPlane(Vector3 const& pos, Vector3 const& plane_pos, Vector3 const& plane_nrm);
+inline Vector3 posToPlane(Vector3 const& pos, Vector3 const& plane_pos, Vector3 const& plane_nrm, Vector3 const& projection_dir);
 
 // Get directions of camera. By default, the camera looks towards positive
 // Y-axis with it's up vector being positive Z-axis. Rotations are done by
@@ -290,6 +291,14 @@ inline Vector3 posToPlane(Vector3 const& pos, Vector3 const& plane_pos, Vector3 
 {
 	HppAssert(dotProduct(plane_nrm, plane_nrm) != 0, "Plane normal is too small!");
 	return pos + plane_nrm * ((dotProduct(plane_pos, plane_nrm) - dotProduct(pos, plane_nrm)) / dotProduct(plane_nrm, plane_nrm));
+}
+
+inline Vector3 posToPlane(Vector3 const& pos, Vector3 const& plane_pos, Vector3 const& plane_nrm, Vector3 const& projection_dir)
+{
+	Real dp_n_d = dotProduct(plane_nrm, projection_dir);
+	HppAssert(dp_n_d != 0, "Unable to project position to plane!");
+	Real m = (dotProduct(plane_pos, plane_nrm) - dotProduct(pos, plane_nrm)) / dp_n_d;
+	return pos + projection_dir * m;
 }
 
 inline void getCameraDirections(Angle const& yaw, Angle const& pitch, Angle const& roll,
