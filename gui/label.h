@@ -20,7 +20,7 @@ public:
 	inline Label(void);
 	inline virtual ~Label(void);
 
-	inline void setLabel(UnicodeString const& label) { this->label = label; markSizeChanged(); }
+	inline void setLabel(UnicodeString const& label) { this->label = label; markToNeedReposition(); }
 
 	// Virtual functions for Widget
 	inline virtual uint32_t getMinWidth(void) const;
@@ -68,7 +68,7 @@ inline void Label::doRendering(int32_t x_origin, int32_t y_origin)
 
 inline void Label::onEnvironmentUpdated(void)
 {
-	markSizeChanged();
+	markToNeedReposition();
 }
 
 }

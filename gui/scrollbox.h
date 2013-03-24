@@ -60,7 +60,7 @@ private:
 	// Updates size of content
 	inline void updateContent(void);
 
-	inline void updateContentPosition(void);
+	inline void updateContentPosition(uint32_t width, uint32_t height);
 
 	inline virtual bool handleGuiEvent(GuiEvent const& event);
 
@@ -131,7 +131,7 @@ inline void Scrollbox::scrollHorizontallyAsButtons(Real amount)
 	if (scrollbar_horiz) {
 		scrollbar_horiz->setValue(content_scroll.x);
 	}
-	updateContentPosition();
+	updateContentPosition(content->getWidth(), content->getHeight());
 }
 
 inline void Scrollbox::scrollVerticallyAsButtons(Real amount)
@@ -142,7 +142,7 @@ inline void Scrollbox::scrollVerticallyAsButtons(Real amount)
 	if (scrollbar_vert) {
 		scrollbar_vert->setValue(content_scroll.y);
 	}
-	updateContentPosition();
+	updateContentPosition(content->getWidth(), content->getHeight());
 }
 
 inline void Scrollbox::scrollTo(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
@@ -173,7 +173,7 @@ inline void Scrollbox::scrollTo(uint32_t x, uint32_t y, uint32_t width, uint32_t
 			content_scroll.y = (y + height - area_height) / (Real)(content_height - area_height);
 		}
 	}
-	updateContentPosition();
+	updateContentPosition(content->getWidth(), content->getHeight());
 }
 
 inline uint32_t Scrollbox::getMinWidth(void) const
@@ -271,10 +271,9 @@ inline void Scrollbox::updateContent(void)
 
 	// Set sizes of scrollbars
 	if (scrollbar_horiz) {
-		setChildPosition(scrollbar_horiz, 0, getHeight() - rend->getScrollbarHeight());
 		uint32_t scrollbar_width = getWidth();
 		if (two_scrollbars) scrollbar_width -= rend->getScrollbarWidth();
-		setChildSize(scrollbar_horiz, scrollbar_width, rend->getScrollbarHeight());
+		repositionChild(scrollbar_horiz, 0, getHeight() - rend->getScrollbarHeight(), scrollbar_width, rend->getScrollbarHeight());
 		// Slider
 		if (area_width > content_width) {
 			scrollbar_horiz->setSliderSize(1.0);
@@ -284,10 +283,9 @@ inline void Scrollbox::updateContent(void)
 		}
 	}
 	if (scrollbar_vert) {
-		setChildPosition(scrollbar_vert, getWidth() - rend->getScrollbarWidth(), 0);
 		uint32_t scrollbar_height = getHeight();
 		if (two_scrollbars) scrollbar_height -= rend->getScrollbarHeight();
-		setChildSize(scrollbar_vert, rend->getScrollbarWidth(), scrollbar_height);
+		repositionChild(scrollbar_vert, getWidth() - rend->getScrollbarWidth(), 0, rend->getScrollbarWidth(), scrollbar_height);
 		// Slider
 		if (area_height > content_height) {
 			scrollbar_vert->setSliderSize(1.0);
@@ -297,15 +295,14 @@ inline void Scrollbox::updateContent(void)
 		}
 	}
 
-	setChildSize(content, content_width, content_height);
-	updateContentPosition();
+	updateContentPosition(content_width, content_height);
 
 	// Limit renderarea
 	setChildRenderarealimit(content, 0, 0, area_width, area_height);
 
 }
 
-inline void Scrollbox::updateContentPosition(void)
+inline void Scrollbox::updateContentPosition(uint32_t width, uint32_t height)
 {
 	if (!content) {
 		return;
@@ -325,7 +322,7 @@ inline void Scrollbox::updateContentPosition(void)
 	} else {
 		scroll_y = 0;
 	}
-	setChildPosition(content, scroll_x, scroll_y);
+	repositionChild(content, scroll_x, scroll_y, width, height);
 }
 
 inline bool Scrollbox::handleGuiEvent(GuiEvent const& event)
@@ -336,7 +333,7 @@ inline bool Scrollbox::handleGuiEvent(GuiEvent const& event)
 	if (scrollbar_vert) {
 		content_scroll.y = scrollbar_vert->getValue();
 	}
-	updateContentPosition();
+	markToNeedReposition();
 	return false;
 }
 

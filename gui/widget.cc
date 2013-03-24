@@ -88,8 +88,8 @@ void Widget::setEngine(Engine* engine)
 		Widget* child = *children_it;
 		child->setEngine(engine);
 	}
-	// Update environment
-	updateEnvironment();
+// TODO: Is it necessary to call this to All Widgets?
+markToNeedReposition();
 }
 
 void Widget::repositionIfNeeded(int32_t x, int32_t y, uint32_t w, uint32_t h)
@@ -131,28 +131,23 @@ uint32_t padding = 0;
 
 	// If position or size differs, then reposition is needed
 	if (real_x != x || real_y != y || real_w != width || real_h != height) {
-// TODO: Uncomment this, when Widgets keep track whenever they need repositioning or not!
-//		reposition_needed = true;
+		reposition_needed = true;
 	}
 
-// TODO: Uncomment this, when Widgets keep track whenever they need repositioning or not!
-/*
 	// Reposition only if needed
 	if (!reposition_needed) {
 		return;
 	}
-*/
 
-	setSize(real_w, real_h);
-	setPosition(real_x, real_y);
+	// Do actual setting of size and position
+	width = real_w;
+	height = real_h;
+	this->x = real_x;
+	this->y = real_y;
 
-/*
 	// Do actual repositioning
 	reposition_needed = false;
 	doRepositioning();
-*/
-// TODO: Why envirnoment is updated? Should it be updated only when engine is set? Btw calling setSize() calls onSizeChange()... This is useless in future!
-	updateEnvironment();
 }
 
 void Widget::render(int32_t x_origin, int32_t y_origin)

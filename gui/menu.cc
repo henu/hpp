@@ -65,12 +65,11 @@ void Menu::onMouseKeyDownOther(Widget* widget, int32_t mouse_x, int32_t mouse_y,
 	listenMouseClicks(0);
 }
 
-void Menu::onChildSizeChange(void)
+void Menu::doRepositioning(void)
 {
-	setChildPosition(&content, 0, getHeight());
 	uint32_t content_width = content.getMinWidth();
 	uint32_t content_height = content.getMinHeight(content_width);
-	setChildSize(&content, content_width, content_height);
+	repositionChild(&content, 0, getHeight(), content_width, content_height);
 }
 
 void Menu::doRendering(int32_t x_origin, int32_t y_origin)

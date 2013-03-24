@@ -19,7 +19,7 @@ public:
 	Menuitem(void);
 	virtual ~Menuitem(void);
 
-	inline void setLabel(UnicodeString const& label) { this->label = label; markSizeChanged(); }
+	inline void setLabel(UnicodeString const& label) { this->label = label; markToNeedReposition(); }
 
 	// Virtual functions for Widget
 	virtual uint32_t getMinWidth(void) const;

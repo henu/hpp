@@ -61,7 +61,7 @@ inline TextinputContents::~TextinputContents(void)
 inline void TextinputContents::setValue(UnicodeString const& value)
 {
 	this->value = value;
-	markSizeChanged();
+	markToNeedReposition();
 }
 
 inline uint32_t TextinputContents::getMinWidth(void) const

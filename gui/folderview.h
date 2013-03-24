@@ -56,10 +56,9 @@ private:
 
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
-	inline virtual void onSizeChange(void) { doRepositioning(); }
 	inline virtual void onEnvironmentUpdated(void);
 
-	inline void doRepositioning(void);
+	inline virtual void doRepositioning(void);
 
 };
 
@@ -126,7 +125,7 @@ inline void Folderview::onEnvironmentUpdated(void)
 		scrollbox.setHorizontalScrollbarButtonmove(move_amount);
 		scrollbox.setVerticalScrollbarButtonmove(move_amount);
 	}
-	markSizeChanged();
+	markToNeedReposition();
 }
 
 inline void Folderview::doRepositioning(void)
@@ -136,8 +135,7 @@ inline void Folderview::doRepositioning(void)
 	// Get edge sizes
 	uint32_t edge_top, edge_left, edge_right, edge_bottom;
 	rend->getFolderviewEdgeSizes(edge_top, edge_left, edge_right, edge_bottom);
-	setChildPosition(&scrollbox, edge_left, edge_top);
-	setChildSize(&scrollbox, getWidth() - edge_left - edge_right, getHeight() - edge_top - edge_bottom);
+	repositionChild(&scrollbox, edge_left, edge_top, getWidth() - edge_left - edge_right, getHeight() - edge_top - edge_bottom);
 }
 
 }

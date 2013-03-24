@@ -1,7 +1,7 @@
 #ifndef HPP_GUI_VECTORCONTAINER_H
 #define HPP_GUI_VECTORCONTAINER_H
 
-#include "container.h"
+#include "widget.h"
 
 #include <vector>
 
@@ -11,7 +11,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Vectorcontainer : public Container
+class Vectorcontainer : public Widget
 {
 
 public:
@@ -37,10 +37,7 @@ private:
 	Direction dir;
 
 	// Virtual functions for Widget
-	inline virtual void onSizeChange(void) { doRepositioning(); }
-	inline virtual void onChildSizeChange(void);
-
-	inline void doRepositioning();
+	inline virtual void doRepositioning(void);
 
 };
 
@@ -56,14 +53,14 @@ inline Vectorcontainer::~Vectorcontainer(void)
 inline void Vectorcontainer::setDirection(Direction dir)
 {
 	this->dir = dir;
-	markSizeChanged();
+	markToNeedReposition();
 }
 
 inline void Vectorcontainer::addWidget(Widget* widget)
 {
 	widgets.push_back(widget);
 	addChild(widget);
-	markSizeChanged();
+	markToNeedReposition();
 }
 
 inline uint32_t Vectorcontainer::getMinWidth(void) const
@@ -106,15 +103,6 @@ inline uint32_t Vectorcontainer::getMinHeight(uint32_t width) const
 		}
 	}
 	return min_height;
-}
-
-inline void Vectorcontainer::onChildSizeChange(void)
-{
-	// Inform parent, and expect it to change my size
-	markSizeChanged();
-	// Now my size should be changed, so it is
-	// time to update the size of my children.
-	doRepositioning();
 }
 
 inline void Vectorcontainer::doRepositioning(void)
@@ -164,7 +152,7 @@ inline void Vectorcontainer::doRepositioning(void)
 				space_left -= space;
 				space_distributed += space;
 			}
-			positionWidget(widget, pos_x, 0, child_width, getHeight());
+			repositionChild(widget, pos_x, 0, child_width, getHeight());
 			pos_x += child_width;
 		}
 	} else {
@@ -209,7 +197,7 @@ inline void Vectorcontainer::doRepositioning(void)
 				space_left -= space;
 				space_distributed += space;
 			}
-			positionWidget(widget, 0, pos_y, getWidth(), child_height);
+			repositionChild(widget, 0, pos_y, getWidth(), child_height);
 			pos_y += child_height;
 		}
 	}

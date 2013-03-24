@@ -16,20 +16,12 @@ class Window;
 class Windowarea : public Widget
 {
 
-	friend class Window;
-
 public:
 
 	Windowarea(void);
 	virtual ~Windowarea(void);
 
 	void addWindow(Window* window);
-
-private:
-
-	// Called by friend class Window
-	void windowPositionChanged(Window* window, int32_t rel_x, int32_t rel_y);
-	void getSize(uint32_t& width, uint32_t& height) { width = getWidth(); height = getHeight(); }
 
 private:
 
@@ -40,6 +32,7 @@ private:
 	// Virtual functions for Widget
 	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	inline virtual bool onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
+	virtual void doRepositioning(void);
 
 };
 

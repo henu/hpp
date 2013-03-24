@@ -23,10 +23,9 @@ public:
 	inline Window(void);
 	inline virtual ~Window(void);
 
-// TODO: Inform position changed!
 	inline void setPosition(int32_t x, int32_t y);
 	inline void setPositionCenter(void);
-	inline void setSize(int32_t width, int32_t height) { Widget::setSize(width, height); }
+	inline void setSize(int32_t width, int32_t height);
 
 	inline void setTitle(std::string const& title) { this->title = title; }
 	inline void setMovable(bool movable = true) { this->movable = movable; }
@@ -41,6 +40,10 @@ private:
 
 	// Called by friend class Windowaread
 	inline void setWindowarea(Windowarea* windowarea) { this->windowarea = windowarea; }
+	inline int32_t getWindowX(void) const { return x_rel; }
+	inline int32_t getWindowY(void) const { return y_rel; }
+	inline uint32_t getWindowWidth(void) const { return window_width; }
+	inline uint32_t getWindowHeight(void) const { return window_height; }
 
 private:
 
@@ -59,9 +62,9 @@ private:
 
 	Widget* content;
 
-	// Position relative to parent
-// TODO: Are these x_rel and y_rel useless? Because now all positions of Widgets are relative, so getPositionX() and getPositionY() should be enough...
+	// Desired position and size of Window, relative to Windowarea
 	int32_t x_rel, y_rel;
+	uint32_t window_width, window_height;
 
 	// Options
 	std::string title;
@@ -81,10 +84,8 @@ private:
 	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	inline virtual void onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	inline virtual void onMouseMove(int32_t mouse_x, int32_t mouse_y);
-	inline virtual void onSizeChange(void) { doRepositioning(); }
-	inline virtual void onEnvironmentUpdated(void) { doRepositioning(); }
 
-	inline void doRepositioning(void);
+	inline virtual void doRepositioning(void);
 
 	inline Part getPartUnder(int32_t mouse_x, int32_t mouse_y) const;
 	inline void setDraggedSize(Renderer const* rend, int32_t& width, int32_t& height);
@@ -117,7 +118,7 @@ inline void Window::setPosition(int32_t x, int32_t y)
 	}
 	x_rel = x;
 	y_rel = y;
-	windowarea->windowPositionChanged(this, x_rel, y_rel);
+	markToNeedReposition();
 }
 
 inline void Window::setPositionCenter(void)
@@ -125,10 +126,18 @@ inline void Window::setPositionCenter(void)
 	if (!windowarea) {
 		throw Exception("Unable to position Window to center, because windowarea is not given yet!");
 	}
-	uint32_t windowarea_width;
-	uint32_t windowarea_height;
-	windowarea->getSize(windowarea_width, windowarea_height);
-	setPosition(((int32_t)windowarea_width - (int32_t)getWidth()) / 2, ((int32_t)windowarea_height - (int32_t)getHeight()) / 2);
+	uint32_t windowarea_width = windowarea->getWidth();
+	uint32_t windowarea_height = windowarea->getHeight();
+	x_rel = (windowarea_width - window_width) / 2;
+	y_rel = (windowarea_height - window_height) / 2;
+	markToNeedReposition();
+}
+
+inline void Window::setSize(int32_t width, int32_t height)
+{
+	window_width = width;
+	window_height = height;
+	markToNeedReposition();
 }
 
 inline void Window::setContent(Widget* widget)
@@ -137,7 +146,7 @@ HppAssert(!content, "Removing of content is not implemented yet!");
 	content = widget;
 	if (widget) {
 		addChild(widget);
-		doRepositioning();
+		markToNeedReposition();
 	}
 }
 
@@ -196,8 +205,8 @@ inline void Window::onMouseMove(int32_t mouse_x, int32_t mouse_y)
 	int32_t mouse_parent_y = mouse_y + getPositionY();
 
 	// Prevent mouse to move out of windowarea
-	uint32_t windowarea_width, windowarea_height;
-	windowarea->getSize(windowarea_width, windowarea_height);
+	uint32_t windowarea_width = windowarea->getWidth();
+	uint32_t windowarea_height = windowarea->getHeight();
 	if (mouse_parent_x < 0) mouse_parent_x = 0;
 	else if (mouse_parent_x >= (int32_t)windowarea_width) mouse_parent_x = windowarea_width - 1;
 	if (mouse_parent_y < 0) mouse_parent_y = 0;
@@ -269,10 +278,11 @@ inline void Window::doRepositioning(void)
 		uint32_t edge_left_width = rend->getWindowEdgeLeftWidth();
 		uint32_t edge_right_width = rend->getWindowEdgeRightWidth();
 		uint32_t edge_bottom_height = rend->getWindowEdgeBottomHeight();
-		setChildPosition(content, edge_left_width, titlebar_height);
 		if (getWidth() >= edge_left_width + edge_right_width &&
 		    getHeight() >= titlebar_height + edge_bottom_height) {
-			setChildSize(content, getWidth() - edge_left_width - edge_right_width, getHeight() - titlebar_height - edge_bottom_height);
+			repositionChild(content, edge_left_width, titlebar_height, getWidth() - edge_left_width - edge_right_width, getHeight() - titlebar_height - edge_bottom_height);
+		} else {
+			repositionChild(content, edge_left_width, titlebar_height, 0, 0);
 		}
 	}
 }
@@ -351,7 +361,7 @@ inline void Window::setDraggedPosition(int32_t x, int32_t y)
 	HppAssert(windowarea, "There should be Windowarea set!");
 	x_rel = x;
 	y_rel = y;
-	windowarea->windowPositionChanged(this, x, y);
+	markToNeedReposition();
 }
 
 }

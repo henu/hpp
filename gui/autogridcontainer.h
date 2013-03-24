@@ -1,7 +1,7 @@
 #ifndef HPP_GUI_AUTOGRIDCONTAINER_H
 #define HPP_GUI_AUTOGRIDCONTAINER_H
 
-#include "container.h"
+#include "widget.h"
 
 #include <vector>
 #include <algorithm>
@@ -13,7 +13,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Autogridcontainer : public Container
+class Autogridcontainer : public Widget
 {
 
 public:
@@ -34,10 +34,7 @@ private:
 	Widgets widgets;
 
 	// Virtual functions for Widget
-	inline virtual void onSizeChange(void) { doRepositioning(); }
-	inline virtual void onChildSizeChange(void);
-
-	inline void doRepositioning();
+	inline virtual void doRepositioning(void);
 
 	inline Sizes calculateWidthsOfColumns(uint32_t width) const;
 	inline Sizes calculateHeightsOfRows(Sizes const& widths) const;
@@ -55,8 +52,7 @@ inline void Autogridcontainer::addWidget(Widget* widget)
 {
 	widgets.push_back(widget);
 	addChild(widget);
-	markSizeChanged();
-	doRepositioning();
+	markToNeedReposition();
 }
 
 inline uint32_t Autogridcontainer::getMinWidth(void) const
@@ -85,15 +81,6 @@ inline uint32_t Autogridcontainer::getMinHeight(uint32_t width) const
 	}
 
 	return min_height;
-}
-
-inline void Autogridcontainer::onChildSizeChange(void)
-{
-	// Inform parent, and expect it to change my size
-	markSizeChanged();
-	// Now my size should be changed, so it is
-	// time to update the size of my children.
-	doRepositioning();
 }
 
 inline void Autogridcontainer::doRepositioning(void)
@@ -142,7 +129,7 @@ inline void Autogridcontainer::doRepositioning(void)
 
 		uint32_t cell_width = widths[column_id];
 		uint32_t cell_height = heights[row_id];
-		positionWidget(widget, pos_x, pos_y, cell_width, cell_height);
+		repositionChild(widget, pos_x, pos_y, cell_width, cell_height);
 
 		column_id ++;
 		pos_x += cell_width;

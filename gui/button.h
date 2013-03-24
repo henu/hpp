@@ -22,7 +22,7 @@ public:
 	inline virtual ~Button(void);
 
 	inline void setColor(Color const& color) { this->color = color; }
-	inline void setLabel(UnicodeString const& label) { this->label = label; markSizeChanged(); }
+	inline void setLabel(UnicodeString const& label) { this->label = label; markToNeedReposition(); }
 	inline void setLabelColor(Color const& color) { label_color = color; }
 	inline void setEnabled(bool enabled) { this->enabled = enabled; }
 
@@ -47,7 +47,6 @@ private:
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
 	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	inline virtual void onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
-	inline virtual void onEnvironmentUpdated(void);
 
 };
 
@@ -105,11 +104,6 @@ inline void Button::onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t m
 	if (enabled && widget == this) {
 		fireEvent();
 	}
-}
-
-inline void Button::onEnvironmentUpdated(void)
-{
-	markSizeChanged();
 }
 
 }

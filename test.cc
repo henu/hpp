@@ -5,7 +5,6 @@
 // Include most of headers so they get tested too
 #include "gui/autogridcontainer.h"
 #include "gui/button.h"
-#include "gui/container.h"
 #include "gui/engine.h"
 #include "gui/eventlistener.h"
 #include "gui/filedialog.h"
@@ -28,6 +27,7 @@
 #include "gui/textinputcontents.h"
 #include "gui/vectorcontainer.h"
 #include "gui/widget.h"
+#include "gui/widgetstack.h"
 #include "gui/windowarea.h"
 #include "gui/window.h"
 #include "3dconversions.h"

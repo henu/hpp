@@ -27,7 +27,7 @@ public:
 	Menu(void);
 	virtual ~Menu(void);
 
-	inline void setLabel(UnicodeString const& label) { this->label = label; markSizeChanged(); }
+	inline void setLabel(UnicodeString const& label) { this->label = label; markToNeedReposition(); }
 
 	inline void addItem(Menuitembase* item) { content.addItem(item); }
 
@@ -49,7 +49,7 @@ private:
 	// Virtual functions for Widget
 	virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
 	virtual void onMouseKeyDownOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
-	virtual void onChildSizeChange(void);
+	virtual void doRepositioning(void);
 	virtual void doRendering(int32_t x_origin, int32_t y_origin);
 
 };

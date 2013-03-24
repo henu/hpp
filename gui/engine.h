@@ -37,6 +37,9 @@ public:
 	inline Renderer const* getRenderer(void) const { return rend; }
 	inline Renderer* getRenderer(void) { return rend; }
 
+	// This must be called before rendering
+	void repositionWidgets(void);
+
 	void render(void);
 
 	void setContent(Widget* widget);

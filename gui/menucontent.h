@@ -30,7 +30,7 @@ private:
 	void reveal(void);
 
 	// Called by friend class Menu
-	inline void addItem(Menuitembase* item) { items.push_back(item); addChild(item); markSizeChanged(); }
+	inline void addItem(Menuitembase* item) { items.push_back(item); addChild(item); markToNeedReposition(); }
 
 	// Called by friend class Menuitem
 	void close(void);
@@ -44,7 +44,8 @@ private:
 	// Virtual functions for Widget
 	virtual uint32_t getMinWidth(void) const;
 	virtual uint32_t getMinHeight(uint32_t width) const;
-	virtual void onSizeChange(void);
+
+	virtual void doRepositioning(void);
 
 };
 

@@ -173,7 +173,7 @@ inline void FolderviewContents::reloadFolderContents(void)
 	Path::DirChildren new_items;
 	path.listDir(new_items, true);
 	items.swap(new_items);
-	markSizeChanged();
+	markToNeedReposition();
 }
 
 }

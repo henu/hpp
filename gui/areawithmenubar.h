@@ -1,7 +1,7 @@
 #ifndef HPP_GUI_AREAWITHMENUBAR_H
 #define HPP_GUI_AREAWITHMENUBAR_H
 
-#include "container.h"
+#include "widget.h"
 
 #include <vector>
 #include <stdint.h>
@@ -14,7 +14,7 @@ namespace Gui
 
 class Menu;
 
-class AreaWithMenubar : public Container
+class AreaWithMenubar : public Widget
 {
 
 	friend class Engine;
@@ -41,12 +41,9 @@ private:
 
 	// Virtual functions for Widget
 	virtual void doRendering(int32_t x_origin, int32_t y_origin);
-	inline virtual void onSizeChange(void) { doRepositioning(); }
-	inline virtual void onChildSizeChange(void) { doRepositioning(); }
 	virtual void onChildRemoved(Widget* child);
-	inline virtual void onEnvironmentUpdated(void) { doRepositioning(); }
 
-	void doRepositioning(void);
+	virtual void doRepositioning(void);
 
 };
 

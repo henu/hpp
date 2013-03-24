@@ -36,6 +36,16 @@ void Engine::setRenderer(Renderer* rend)
 	}
 }
 
+void Engine::repositionWidgets(void)
+{
+	if (!rend) {
+		return;
+	}
+	if (content) {
+		content->repositionIfNeeded(0, 0, rend->getWidth(), rend->getHeight());
+	}
+}
+
 void Engine::render(void)
 {
 	HppAssert(rend, "Render not set!");

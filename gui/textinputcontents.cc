@@ -29,12 +29,12 @@ void TextinputContents::onKeyDown(Key::Keycode keycode, UChr uchr)
 		if (cursor > 0) {
 			value = value.substr(0, cursor - 1) + value.substr(cursor);
 			cursor --;
-			markSizeChanged();
+			markToNeedReposition();
 			updateScrolling();
 		}
 	} else if (keycode == Key::DEL) {
 		value = value.substr(0, cursor) + value.substr(cursor + 1);
-		markSizeChanged();
+		markToNeedReposition();
 		updateScrolling();
 	} else if (keycode == Key::RETURN) {
 		cursor = -1;
@@ -43,7 +43,7 @@ void TextinputContents::onKeyDown(Key::Keycode keycode, UChr uchr)
 	} else if (uchr >= 32 && cursor >= 0) {
 		value = value.substr(0, cursor) + uchr + value.substr(cursor);
 		cursor ++;
-		markSizeChanged();
+		markToNeedReposition();
 		updateScrolling();
 	}
 }

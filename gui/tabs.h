@@ -1,8 +1,7 @@
 #ifndef HPP_GUI_TABS_H
 #define HPP_GUI_TABS_H
 
-#include "container.h"
-#include "renderer.h"
+#include "widget.h"
 
 #include "../unicodestring.h"
 #include "../exception.h"
@@ -13,7 +12,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Tabs : public Container
+class Tabs : public Widget
 {
 
 public:
@@ -46,10 +45,7 @@ private:
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
 	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key);
-	inline virtual void onSizeChange(void) { doRepositioning(); }
-	inline virtual void onChildSizeChange(void);
-
-	inline void doRepositioning();
+	inline virtual void doRepositioning(void);
 
 };
 
@@ -135,7 +131,7 @@ inline bool Tabs::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Key
 					uint32_t label_width = rend->getTablabelWidth(tabs[tab_id].label);
 					if (mouse_x < (int32_t)label_width) {
 						selected = tab_id;
-						doRepositioning();
+						markToNeedReposition();
 						break;
 					}
 					mouse_x -= label_width;
@@ -144,15 +140,6 @@ inline bool Tabs::onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Key
 		}
 	}
 	return true;
-}
-
-inline void Tabs::onChildSizeChange(void)
-{
-	// Inform parent, and expect it to change my size
-	markSizeChanged();
-	// Now my size should be changed, so it is
-	// time to update the size of my children.
-	doRepositioning();
 }
 
 inline void Tabs::doRepositioning(void)
@@ -184,7 +171,7 @@ inline void Tabs::doRepositioning(void)
 	int32_t child_pos_y = rend->getTabbarHeight();
 // TODO: What if tab contents wants to be disabled?
 	setChildState(selected_widget, ENABLED);
-	positionWidget(selected_widget, child_pos_x, child_pos_y, child_width, child_height, true);
+	repositionChild(selected_widget, child_pos_x, child_pos_y, child_width, child_height);
 }
 
 }

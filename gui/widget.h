@@ -50,14 +50,14 @@ public:
 	// Alignment
 	inline Alignment getHorizontalAlignment(void) const { return align; }
 	inline Alignment getVerticalAlignment(void) const { return valign; }
-	inline void setHorizontalAlignment(Alignment align) { this->align = align; markSizeChanged(); }
-	inline void setVerticalAlignment(Alignment align) { valign = align; markSizeChanged(); }
+	inline void setHorizontalAlignment(Alignment align) { this->align = align; markToNeedReposition(); }
+	inline void setVerticalAlignment(Alignment align) { valign = align; markToNeedReposition(); }
 
 	// Expanding
 	inline uint8_t getHorizontalExpanding(void) const { return expanding_horiz; }
 	inline uint8_t getVerticalExpanding(void) const { return expanding_vert; }
-	inline void setHorizontalExpanding(uint8_t expanding) { expanding_horiz = expanding; markSizeChanged(); }
-	inline void setVerticalExpanding(uint8_t expanding) { expanding_vert = expanding; markSizeChanged(); }
+	inline void setHorizontalExpanding(uint8_t expanding) { expanding_horiz = expanding; markToNeedReposition(); }
+	inline void setVerticalExpanding(uint8_t expanding) { expanding_vert = expanding; markToNeedReposition(); }
 
 	inline void setEventlistener(Eventlistener* eventlistener) { this->eventlistener = eventlistener; }
 
@@ -66,10 +66,6 @@ private:
 	// Called by Engine and other Widgets
 	void setEngine(Engine* engine);
 	inline void setParent(Widget* parent);
-
-	// Called by Engine when Engine or Renderer is changed
-	// and all dimensions must be recalculated.
-	inline void updateEnvironment(void);
 
 	// Repositions this Widget and all of its children, if needed. This may
 	// ONLY be called by Widget itself through repositionChild or by Engine!
@@ -98,12 +94,9 @@ protected:
 
 	enum State { ENABLED, DISABLED, HIDDEN };
 
-	inline void setPosition(int32_t x, int32_t y);
-	inline void setSize(uint32_t width, uint32_t height);
-
 	// This functions is called, when content of child changes,
 	// so that it also might change its size.
-	inline void markSizeChanged(void);
+	inline void markToNeedReposition(void);
 
 	inline Engine* getEngine(void) { return engine; }
 	inline Widget* getParent(void) { return parent; }
@@ -118,8 +111,6 @@ protected:
 
 	inline void repositionChild(Widget* child, int32_t x, int32_t y, uint32_t width, uint32_t height);
 
-	inline void setChildPosition(Widget* child, int32_t x, int32_t y);
-	inline void setChildSize(Widget* child, uint32_t width, uint32_t height);
 	inline void setChildState(Widget* child, State state);
 	inline void setChildRenderarealimit(Widget* child, int32_t x, int32_t y, uint32_t width, uint32_t height);
 	inline void removeChildRenderarealimit(Widget* child);
@@ -160,6 +151,8 @@ private:
 	uint32_t width, height;
 	bool mouse_over;
 
+	bool reposition_needed;
+
 	Alignment align, valign;
 	uint8_t expanding_horiz, expanding_vert;
 
@@ -183,13 +176,14 @@ private:
 	inline bool positionOutsideRenderarealimit(int32_t x_origin, int32_t y_origin, int32_t x_abs, int32_t y_abs) const;
 
 	// Real rendering function
+	inline virtual void doRepositioning(void) { }
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin) { (void)x_origin; (void)y_origin; }
 
 	// Real handler for events
 	inline virtual void onMouseOver(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
 	inline virtual void onMouseOut(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
-	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return true; }
-	inline virtual bool onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return true; }
+	inline virtual bool onMouseKeyDown(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return false; }
+	inline virtual bool onMouseKeyUp(int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)mouse_x; (void)mouse_y; (void)mouse_key; return false; }
 	inline virtual void onMouseKeyDownOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)widget; (void)mouse_x; (void)mouse_y; (void)mouse_key; }
 	inline virtual void onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)widget; (void)mouse_x; (void)mouse_y; (void)mouse_key; }
 	inline virtual void onMouseMove(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
@@ -197,8 +191,6 @@ private:
 	inline virtual void onChildSizeChange(void) { }
 	inline virtual void onChildRemoved(Widget* child) { (void)child; }
 	inline virtual void onPositionChange(void) { }
-	inline virtual void onSizeChange(void) { }
-	inline virtual void onEnvironmentUpdated(void) { }
 	inline virtual void onKeyboardListeningStop(void) { }
 
 };
@@ -210,6 +202,7 @@ state(ENABLED),
 x(0), y(0),
 width(0), height(0),
 mouse_over(false),
+reposition_needed(true),
 align(CENTER),
 valign(CENTER),
 expanding_horiz(0),
@@ -235,53 +228,20 @@ inline void Widget::setParent(Widget* parent)
 {
 	if (this->parent) {
 		this->parent->unregisterChild(this);
+		this->parent->markToNeedReposition();
 	}
 	this->parent = parent;
 	if (parent) {
 		this->parent->registerChild(this);
 	}
+	markToNeedReposition();
 }
 
-inline void Widget::updateEnvironment(void)
+inline void Widget::markToNeedReposition(void)
 {
-	if (state == HIDDEN) {
-		return;
-	}
-	// Fire event
-	onEnvironmentUpdated();
-	// Update children too
-	for (Children::iterator children_it = children.begin();
-	     children_it != children.end();
-	     children_it ++) {
-		Widget* child = *children_it;
-		child->updateEnvironment();
-	}
-}
-
-inline void Widget::setPosition(int32_t x, int32_t y)
-{
-	bool position_really_changed = (x != this->x || y != this->y);
-	this->x = x;
-	this->y = y;
-	if (position_really_changed) {
-		onPositionChange();
-	}
-}
-
-inline void Widget::setSize(uint32_t width, uint32_t height)
-{
-	bool size_really_changed = (width != this->width || height != this->height);
-	this->width = width;
-	this->height = height;
-	if (size_really_changed) {
-		onSizeChange();
-	}
-}
-
-inline void Widget::markSizeChanged(void)
-{
+	reposition_needed = true;
 	if (parent) {
-		parent->onChildSizeChange();
+		parent->markToNeedReposition();
 	}
 }
 
@@ -319,19 +279,6 @@ inline void Widget::repositionChild(Widget* child, int32_t x, int32_t y, uint32_
 {
 	HppAssert(std::find(children.begin(), children.end(), child) != children.end(), "This is not my child!");
 	child->repositionIfNeeded(x, y, width, height);
-}
-
-inline void Widget::setChildPosition(Widget* child, int32_t x, int32_t y)
-{
-	HppAssert(std::find(children.begin(), children.end(), child) != children.end(), "Unable to change child position, because it is really not our child!");
-	child->x = x;
-	child->y = y;
-}
-
-inline void Widget::setChildSize(Widget* child, uint32_t width, uint32_t height)
-{
-	HppAssert(std::find(children.begin(), children.end(), child) != children.end(), "Unable to change child size, because it is really not our child!");
-	child->setSize(width, height);
 }
 
 inline void Widget::setChildState(Widget* child, State state)
@@ -375,7 +322,7 @@ inline void Widget::setState(State state)
 	// If visibility will change, then inform parent about it
 	if ((old_state != HIDDEN && state == HIDDEN) ||
 	    (old_state == HIDDEN && state != HIDDEN)) {
-		markSizeChanged();
+		markToNeedReposition();
 	}
 }
 

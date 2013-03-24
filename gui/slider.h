@@ -80,7 +80,7 @@ inline Slider::~Slider(void)
 inline void Slider::setOrientation(Orientation ori)
 {
 	this->ori = ori;
-	markSizeChanged();
+	markToNeedReposition();
 }
 
 inline uint32_t Slider::getMinWidth(void) const

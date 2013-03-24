@@ -33,10 +33,14 @@ void Windowarea::addWindow(Window* window)
 	window->setWindowarea(this);
 }
 
-void Windowarea::windowPositionChanged(Window* window, int32_t rel_x, int32_t rel_y)
+void Windowarea::doRepositioning(void)
 {
-//	setChildPosition(window, getPositionX() + rel_x, getPositionY() + rel_y);
-setChildPosition(window, rel_x, rel_y);
+	for (Windows::iterator windows_it = windows.begin();
+	     windows_it != windows.end();
+	     windows_it ++) {
+		Window* window = *windows_it;
+		repositionChild(window, window->getWindowX(), window->getWindowY(), window->getWindowWidth(), window->getWindowHeight());
+	}
 }
 
 }

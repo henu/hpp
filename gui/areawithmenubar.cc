@@ -27,8 +27,7 @@ void AreaWithMenubar::addMenu(Menu* menu)
 {
 	addChild(menu);
 	menus.push_back(menu);
-	markSizeChanged();
-	doRepositioning();
+	markToNeedReposition();
 }
 
 void AreaWithMenubar::setContent(Widget* widget)
@@ -41,8 +40,7 @@ void AreaWithMenubar::setContent(Widget* widget)
 		addChild(content);
 		moveWidgetBack(content);
 	}
-	markSizeChanged();
-	doRepositioning();
+	markToNeedReposition();
 }
 
 uint32_t AreaWithMenubar::getMinWidth(void) const
@@ -78,7 +76,7 @@ void AreaWithMenubar::onChildRemoved(Widget* child)
 	Menus::iterator menus_find = std::find(menus.begin(), menus.end(), child);
 	if (menus_find != menus.end()) {
 		menus.erase(menus_find);
-		doRepositioning();
+		markToNeedReposition();
 		return;
 	}
 	if (child == content) {
@@ -93,16 +91,15 @@ void AreaWithMenubar::doRepositioning(void)
 	     menus_it != menus.end();
 	     menus_it ++) {
 		Menu* menu = *menus_it;
-		setChildPosition(menu, menu_x, 0);
 		uint32_t menu_width = menu->getMinWidth();
 		uint32_t menu_height = menu->getMinHeight(0);
-		setChildSize(menu, menu_width, menu_height);
+		repositionChild(menu, menu_x, 0, menu_width, menu_height);
 		menu_x += menu_width;
 	}
 	Renderer const* rend = getRenderer();
 	if (content && rend) {
 		uint32_t menu_height = rend->getMenubarHeight();
-		positionWidget(content, 0, menu_height, getWidth(), getHeight() - menu_height, true);
+		repositionChild(content, 0, menu_height, getWidth(), getHeight() - menu_height);
 	}
 }
 

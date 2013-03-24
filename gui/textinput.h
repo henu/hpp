@@ -47,10 +47,8 @@ private:
 
 	// Virtual functions for Widget
 	inline virtual void doRendering(int32_t x_origin, int32_t y_origin);
-	inline virtual void onSizeChange(void) { doRepositioning(); }
-	inline virtual void onEnvironmentUpdated(void) { doRepositioning(); }
 
-	inline void doRepositioning(void);
+	inline virtual void doRepositioning(void);
 
 };
 
@@ -81,7 +79,7 @@ inline UnicodeString Textinput::getValue(void) const
 inline void Textinput::setCols(size_t cols)
 {
 	this->cols = cols;
-	markSizeChanged();
+	markToNeedReposition();
 }
 
 inline uint32_t Textinput::getMinWidth(void) const
@@ -123,8 +121,7 @@ inline void Textinput::doRepositioning(void)
 	// Get edge sizes
 	uint32_t edge_top, edge_left, edge_right, edge_bottom;
 	rend->getTextinputEdgeSizes(edge_top, edge_left, edge_right, edge_bottom);
-	setChildPosition(&scrollbox, edge_left, edge_top);
-	setChildSize(&scrollbox, getWidth() - edge_left - edge_right, getHeight() - edge_top - edge_bottom);
+	repositionChild(&scrollbox, edge_left, edge_top, getWidth() - edge_left - edge_right, getHeight() - edge_top - edge_bottom);
 }
 
 }

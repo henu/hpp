@@ -56,7 +56,7 @@ uint32_t Menucontent::getMinHeight(uint32_t width) const
 	return min_height;
 }
 
-void Menucontent::onSizeChange(void)
+void Menucontent::doRepositioning(void)
 {
 	int32_t y = 0;
 	uint32_t width = getWidth();
@@ -65,8 +65,7 @@ void Menucontent::onSizeChange(void)
 	     items_it ++) {
 		Menuitembase* item = *items_it;
 		uint32_t item_height = item->getMinHeight(width);
-		setChildPosition(item, 0, y);
-		setChildSize(item, width, item_height);
+		repositionChild(item, 0, y, width, item_height);
 		y += item->getMinHeight(width);
 	}
 }

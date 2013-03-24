@@ -12,7 +12,6 @@
 			"headers": [
 				"gui/autogridcontainer.h",
 				"gui/button.h",
-				"gui/container.h",
 				"gui/engine.h",
 				"gui/eventlistener.h",
 				"gui/filedialog.h",
@@ -35,6 +34,7 @@
 				"gui/textinputcontents.h",
 				"gui/vectorcontainer.h",
 				"gui/widget.h",
+				"gui/widgetstack.h",
 				"gui/windowarea.h",
 				"gui/window.h",
 				"3dconversions.h",
