@@ -4,6 +4,7 @@
 #include "matrix3.h"
 #include "vector2.h"
 #include "angle.h"
+#include "json.h"
 
 namespace Hpp
 {
@@ -17,6 +18,7 @@ public:
 	inline Transform2D(Vector2 const& pos);
 	inline Transform2D(Angle const& angle);
 	inline Transform2D(Matrix3 const& m);
+	inline Transform2D(Json const& json);
 
 	inline void reset(void);
 
@@ -54,6 +56,8 @@ public:
 	// Get how Transform sees the given absolute position
 	inline Vector2 getRelativePositionTo(Vector2 const& pos) const;
 
+	inline Json toJson(void) const;
+
 private:
 
 	Matrix3 transf;
@@ -78,6 +82,27 @@ transf(Matrix3::rotMatrix2d(angle))
 inline Transform2D::Transform2D(Matrix3 const& m) :
 transf(m)
 {
+}
+
+inline Transform2D::Transform2D(Json const& json) :
+transf(Matrix3::IDENTITY)
+{
+	size_t arg_id = 0;
+	while (arg_id < json.getArraySize()) {
+		std::string arg = json.getItem(arg_id ++).getString();
+		if (arg == "matrix") {
+			transf = Matrix3(json.getItem(arg_id ++));
+		} else if (arg == "translate") {
+			translate(Vector2(json.getItem(arg_id ++)));
+		} else if (arg == "rotate") {
+			Angle rot_angle(json.getItem(arg_id ++).getNumber());
+			rotate(rot_angle);
+		} else if (arg == "scale") {
+			scale(Vector2(json.getItem(arg_id ++)));
+		} else {
+			throw Exception("Invalid transform command in JSON: " + arg);
+		}
+	}
 }
 
 inline void Transform2D::reset(void)
@@ -160,6 +185,14 @@ inline Real Transform2D::getMaximumScaling(void) const
 inline Vector2 Transform2D::getRelativePositionTo(Vector2 const& pos) const
 {
 	return transf.inverse() * pos;
+}
+
+inline Json Transform2D::toJson(void) const
+{
+	Json result = Json::newArray();
+	result.addItem(Json::newString("matrix"));
+	result.addItem(transf.toJson());
+	return result;
 }
 
 }

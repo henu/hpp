@@ -8,6 +8,7 @@
 #include "vector3.h"
 #include "angle.h"
 #include "axis.h"
+#include "json.h"
 
 namespace Hpp
 {
@@ -23,6 +24,7 @@ public:
 	inline Transform(Matrix3 const& m);
 	inline Transform(Matrix4 const& m);
 	inline Transform(Quaternion const& q);
+	inline Transform(Json const& json);
 
 	inline void reset(void);
 
@@ -70,6 +72,8 @@ public:
 	// Get how Transform sees the given absolute position
 	inline Vector3 getRelativePositionTo(Vector3 const& pos) const;
 
+	inline Json toJson(void) const;
+
 private:
 
 	Matrix4 transf;
@@ -104,6 +108,28 @@ transf(m)
 inline Transform::Transform(Quaternion const& q) :
 transf(Matrix4::rotMatrix(q))
 {
+}
+
+inline Transform::Transform(Json const& json) :
+transf(Matrix4::IDENTITY)
+{
+	size_t arg_id = 0;
+	while (arg_id < json.getArraySize()) {
+		std::string arg = json.getItem(arg_id ++).getString();
+		if (arg == "matrix") {
+			transf = Matrix4(json.getItem(arg_id ++));
+		} else if (arg == "translate") {
+			translate(Vector3(json.getItem(arg_id ++)));
+		} else if (arg == "rotate") {
+			Vector3 rot_axis = Vector3(json.getItem(arg_id ++));
+			Angle rot_angle(json.getItem(arg_id ++).getNumber());
+			rotate(rot_axis, rot_angle);
+		} else if (arg == "scale") {
+			scale(Vector3(json.getItem(arg_id ++)));
+		} else {
+			throw Exception("Invalid transform command in JSON: " + arg);
+		}
+	}
 }
 
 inline void Transform::reset(void)
@@ -212,6 +238,14 @@ inline Real Transform::getMaximumScaling(void) const
 inline Vector3 Transform::getRelativePositionTo(Vector3 const& pos) const
 {
 	return transf.inverse() * pos;
+}
+
+inline Json Transform::toJson(void) const
+{
+	Json result = Json::newArray();
+	result.addItem(Json::newString("matrix"));
+	result.addItem(transf.toJson());
+	return result;
 }
 
 }
