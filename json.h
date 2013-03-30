@@ -66,6 +66,11 @@ public:
 	Json getItem(size_t index) const;
 	inline bool getBoolean(void) const;
 
+	// For iterating Object. If there is no more keys,
+	// then key that is not found is returned.
+	inline std::string getFirstKey(void) const;
+	std::string getNextKey(std::string const& key) const;
+
 	// Comparison operators
 	inline bool operator==(Json const& json) const;
 	inline bool operator!=(Json const& json) const;
@@ -331,6 +336,17 @@ inline bool Json::getBoolean(void) const
 		throw Exception("Unable to get boolean, because this JSON is not a boolean!");
 	}
 	return num_is_integer;
+}
+
+inline std::string Json::getFirstKey(void) const
+{
+	if (type != OBJECT) {
+		throw Exception("Unable to get first key, because this JSON is not an object!");
+	}
+	if (obj.empty()) {
+		return "";
+	}
+	return obj.begin()->first;
 }
 
 inline bool Json::operator==(Json const& json) const

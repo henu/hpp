@@ -2,6 +2,7 @@
 
 #include "misc.h"
 #include "cast.h"
+#include "random.h"
 
 namespace Hpp
 {
@@ -15,6 +16,22 @@ Json Json::getItem(size_t index) const
 		throw Exception("Index " + sizeToStr(index) + " is out of range!");
 	}
 	return arr[index];
+}
+
+std::string Json::getNextKey(std::string const& key) const
+{
+	if (type != OBJECT) {
+		throw Exception("Unable to get next key, because this JSON is not an object!");
+	}
+	Object::const_iterator obj_find = obj.upper_bound(key);
+	if (obj_find == obj.end()) {
+		std::string result = "";
+		while (obj.find(result) != obj.end()) {
+			result += char(randomInt('a', 'z'));
+		}
+		return result;
+	}
+	return obj_find->first;
 }
 
 std::string Json::doEncode(size_t indent, bool nice) const
