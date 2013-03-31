@@ -25,13 +25,15 @@ public:
 	// FOV means angle between opposite viewfrustum planes.
 	inline void setFovY(Angle const& fov_y);
 
+	inline Angle getFovY(void) const;
+	inline Angle getFovX(void) const;
+
+	inline virtual Viewfrustum getViewfrustum(void) const;
 	inline virtual void shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const;
 
 	// Updates precalculated stuff after transform,
 	// fov, nearplane, farplane or viewport is changed.
 	inline virtual void update(void);
-
-	inline Viewfrustum getViewfrustum(void) const;
 
 private:
 
@@ -65,6 +67,24 @@ inline void Perspectivecamera::setFovY(Angle const& fov_y)
 	this->fov_y = fov_y;
 }
 
+inline Angle Perspectivecamera::getFovY(void) const
+{
+	return fov_y;
+}
+
+inline Angle Perspectivecamera::getFovX(void) const
+{
+	return fovYToFovX(fov_y, getAspectratio());
+}
+
+inline Viewfrustum Perspectivecamera::getViewfrustum(void) const
+{
+	return Viewfrustum::fromCamera(getPosition(),
+	                                getDir(), getUp(), getRight(),
+	                                getFovY(), getFovX(),
+	                                getNear());
+}
+
 inline void Perspectivecamera::shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const
 {
 	Hpp::Angle fov_x = fovYToFovX(fov_y, aspectratio);
@@ -89,15 +109,6 @@ inline void Perspectivecamera::update(void)
 	right = transf_rotscale.applyToPosition(Hpp::Vector3(1, 0, 0));
 	up = transf_rotscale.applyToPosition(Hpp::Vector3(0, 1, 0));
 	dir = transf_rotscale.applyToPosition(Hpp::Vector3(0, 0, -1));
-}
-
-inline Viewfrustum Perspectivecamera::getViewfrustum(void) const
-{
-	return Viewfrustum::fromCamera(transf.getPosition(),
-	                                dir, up, right,
-	                                fov_y,
-	                                fovYToFovX(fov_y, aspectratio),
-	                                nearplane);
 }
 
 }

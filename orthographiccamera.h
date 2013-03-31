@@ -25,13 +25,12 @@ public:
 	// Size means distance between top and bottom viewfrustum planes.
 	inline void setSize(Real size);
 
+	inline virtual Viewfrustum getViewfrustum(void) const;
 	inline virtual void shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const;
 
 	// Updates precalculated stuff after transform,
 	// size, nearplane, farplane or viewport is changed.
 	inline virtual void update(void);
-
-	inline Viewfrustum getViewfrustum(void) const;
 
 private:
 
@@ -65,6 +64,13 @@ inline void Orthographiccamera::setSize(Real size)
 	this->size = size;
 }
 
+inline Viewfrustum Orthographiccamera::getViewfrustum(void) const
+{
+// TODO: Code this!
+HppAssert(false, "Not implemented yet!");
+return Viewfrustum();
+}
+
 inline void Orthographiccamera::shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const
 {
 	Real size_x = (size / viewport_width) * viewport_height;
@@ -86,13 +92,6 @@ inline void Orthographiccamera::update(void)
 	right = transf_rotscale.applyToPosition(Hpp::Vector3(1, 0, 0));
 	up = transf_rotscale.applyToPosition(Hpp::Vector3(0, 1, 0));
 	dir = transf_rotscale.applyToPosition(Hpp::Vector3(0, 0, -1));
-}
-
-inline Viewfrustum Orthographiccamera::getViewfrustum(void) const
-{
-// TODO: Code this!
-HppAssert(false, "Not implemented yet!");
-return Viewfrustum();
 }
 
 }

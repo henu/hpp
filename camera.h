@@ -3,6 +3,7 @@
 
 #include "transform.h"
 #include "matrix4.h"
+#include "viewfrustum.h"
 #include "inc_gl.h"
 
 #include <cstdlib>
@@ -25,10 +26,13 @@ public:
 	inline Real getFar(void) const { return farplane; }
 
 	inline Vector3 getPosition(void) const { return transf.getPosition(); }
+	inline Hpp::Real getAspectratio(void) const { return aspectratio; }
 
-	inline Matrix4 getViewmatrix(void) const;
-	inline Matrix4 getProjectionmatrix(void) const;
-	inline Matrix4 getProjectionviewmatrix(void) const;
+	virtual Viewfrustum getViewfrustum(void) const = 0;
+
+	inline Matrix4 getViewmatrix(void) const { return viewmat; }
+	inline Matrix4 getProjectionmatrix(void) const { return projmat; }
+	inline Matrix4 getProjectionviewmatrix(void) const { return projviewmat; }
 
 	inline Vector3 getRight(void) const { return right; }
 	inline Vector3 getUp(void) const { return up; }
@@ -91,21 +95,6 @@ inline void Camera::setViewport(size_t viewport_x, size_t viewport_y,
 inline void Camera::setUpViewport(void) const
 {
 	glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
-}
-
-inline Matrix4 Camera::getViewmatrix(void) const
-{
-	return viewmat;
-}
-
-inline Matrix4 Camera::getProjectionmatrix(void) const
-{
-	return projmat;
-}
-
-inline Matrix4 Camera::getProjectionviewmatrix(void) const
-{
-	return projviewmat;
 }
 
 inline Camera::Camera(void) :
