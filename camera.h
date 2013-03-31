@@ -24,6 +24,8 @@ public:
 	inline Real getNear(void) const { return nearplane; }
 	inline Real getFar(void) const { return farplane; }
 
+	inline Vector3 getPosition(void) const { return transf.getPosition(); }
+
 	inline Matrix4 getViewmatrix(void) const;
 	inline Matrix4 getProjectionmatrix(void) const;
 	inline Matrix4 getProjectionviewmatrix(void) const;
