@@ -31,11 +31,9 @@ struct Collision2D
 };
 typedef std::vector< Collision2D > Collisions2D;
 
-typedef std::vector< Vector2 > Collisionpolygon;
-
 // Collisions are measured so that cp1 is seen as static that cannot move and
 // cp2 is the polygon that needs to move to remove collisions.
-inline void addCollisions(Collisions2D& result, Collisionpolygon const& cp1, Collisionpolygon const& cp2, Real extra_radius);
+inline void addCollisions(Collisions2D& result, Vector2::Vec const& collisionpolygon1, Vector2::Vec const& collisionpolygon2, Real extra_radius);
 
 // Removes extra radius from all collisions
 inline void removeExtraRadius(Collisions& colls, Real extra_radius);
@@ -344,7 +342,7 @@ inline Vector2 moveOut(Collisions2D& colls)
 	return result;
 }
 
-inline void addCollisions(Collisions2D& result, Collisionpolygon const& cp1, Collisionpolygon const& cp2, Real extra_radius)
+inline void addCollisions(Collisions2D& result, Vector2::Vec const& cp1, Vector2::Vec const& cp2, Real extra_radius)
 {
 	// Go all lines of cp2 through and check if they collide to lines of cp1
 	for (size_t cp2_it = 0; cp2_it < cp2.size(); cp2_it ++) {

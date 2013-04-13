@@ -28,7 +28,7 @@ public:
 	// plane that is one unit from the position of viewfrustrum.
 	inline Viewfrustum(Vector3 const& pos,
 	                   Vector3 const& dir, Vector3 const& up, Vector3 const& right,
-	                   std::vector< Vector2 > const& vrts,
+	                   Vector2::Vec const& vrts,
 	                   Real nearplane = 0.0);
 
 	inline Vector3 getPosition(void) const { return pos; }
@@ -65,7 +65,7 @@ private:
 	Vector3 dir, up, right;
 	// Vertices must always do loop counterclockwise, when looking through
 	// view frustrum.
-	std::vector< Vector2 > vrts;
+	Vector2::Vec vrts;
 	// Depth of near plane
 	Real nearplane;
 // TODO: Code support for farplane!
@@ -88,7 +88,7 @@ type(EMPTY)
 
 inline Viewfrustum::Viewfrustum(Vector3 const& pos,
                                 Vector3 const& dir, Vector3 const& up, Vector3 const& right,
-                                std::vector< Vector2 > const& vrts,
+                                Vector2::Vec const& vrts,
                                 Real nearplane) :
 type(NORMAL),
 pos(pos),
@@ -130,7 +130,7 @@ inline Viewfrustum Viewfrustum::fromCamera(Vector3 const& pos,
 	// Calculate vertices
 	Real fov_y_tan = (fov_y / 2).tan();
 	Real fov_x_tan = (fov_x / 2).tan();
-	std::vector< Vector2 > vrts;
+	Vector2::Vec vrts;
 	vrts.push_back(Vector2(fov_x_tan, fov_y_tan));
 	vrts.push_back(Vector2(-fov_x_tan, fov_y_tan));
 	vrts.push_back(Vector2(-fov_x_tan, -fov_y_tan));
@@ -265,10 +265,10 @@ inline Viewfrustum Viewfrustum::doIntersection(Viewfrustum const& vfrust) const
 	// container. If vertices at infinite location are found, then we
 	// switch to another container and finally move another container at
 	// the front of main one.
-	std::vector< Vector2 > vfrust_vrts;
-	std::vector< Vector2 > vfrust_vrts_extra;
+	Vector2::Vec vfrust_vrts;
+	Vector2::Vec vfrust_vrts_extra;
 	bool infinites_found = false;
-	for (std::vector< Vector2 >::const_iterator vrts_it = vfrust.vrts.begin();
+	for (Vector2::Vec::const_iterator vrts_it = vfrust.vrts.begin();
 	     vrts_it != vfrust.vrts.end();
 	     ++ vrts_it) {
 		Vector2 const& vrt = *vrts_it;
