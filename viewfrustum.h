@@ -49,6 +49,7 @@ public:
 	                                     Real nearplane);
 
 	inline static Viewfrustum all(Vector3 const& pos) { return Viewfrustum(ALL, pos); }
+	inline static Viewfrustum empty(Vector3 const& pos) { return Viewfrustum(EMPTY, pos); }
 
 	inline VFResult testBoundingsphere(Boundingsphere const& bs) const;
 
