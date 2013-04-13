@@ -9,6 +9,7 @@
 #include <cmath>
 #include <ostream>
 #include <string>
+#include <vector>
 
 namespace Hpp
 {
@@ -17,6 +18,8 @@ class Vector3
 {
 
 public:
+
+	typedef std::vector< Vector3 > Vec;
 
 	static Vector3 const ONE;
 	static Vector3 const ZERO;
