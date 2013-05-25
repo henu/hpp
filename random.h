@@ -29,8 +29,8 @@ inline size_t randomNBitInt(size_t n);
 // Returns random angle between [-180 - 180) degrees.
 inline Angle randomAngle(void);
 
-inline Vector2 randomVector2(Real max_radius);
-inline Vector3 randomVector3(Real max_radius);
+inline Vector2 randomVector2(Real max_radius, Real min_radius = -1);
+inline Vector3 randomVector3(Real max_radius, Real min_radius = -1);
 
 inline Color randomColor(bool randomize_alpha = false);
 
@@ -80,26 +80,44 @@ inline Angle randomAngle(void)
 	return Angle(random(-180, 180));
 }
 
-inline Vector2 randomVector2(Real max_radius)
+inline Vector2 randomVector2(Real max_radius, Real min_radius)
 {
 	Vector2 result;
 	Real const max_radius_to_2 = max_radius * max_radius;
+	Real const max_radius_half_to_2 = max_radius_to_2 / 4;
 	do {
 		result.x = random(-max_radius, max_radius);
 		result.y = random(-max_radius, max_radius);
-	} while (result.lengthTo2() > max_radius_to_2);
+	} while (result.lengthTo2() > max_radius_to_2 ||
+	         (min_radius >= 0 && result.lengthTo2() < max_radius_half_to_2));
+	if (min_radius >= 0) {
+		Real result_len = result.length();
+		HppAssert(result_len >= max_radius / 2, "Radius length should be bigger!");
+		Real target_len = (result_len - max_radius / 2) / max_radius * 2 * (max_radius - min_radius) + min_radius;
+		Real m = target_len / result_len;
+		result *= m;
+	}
 	return result;
 }
 
-inline Vector3 randomVector3(Real max_radius)
+inline Vector3 randomVector3(Real max_radius, Real min_radius)
 {
 	Vector3 result;
 	Real const max_radius_to_2 = max_radius * max_radius;
+	Real const max_radius_half_to_2 = max_radius_to_2 / 4;
 	do {
 		result.x = random(-max_radius, max_radius);
 		result.y = random(-max_radius, max_radius);
 		result.z = random(-max_radius, max_radius);
-	} while (result.lengthTo2() > max_radius_to_2);
+	} while (result.lengthTo2() > max_radius_to_2 ||
+	         (min_radius >= 0 && result.lengthTo2() < max_radius_half_to_2));
+	if (min_radius >= 0) {
+		Real result_len = result.length();
+		HppAssert(result_len >= max_radius / 2, "Radius length should be bigger!");
+		Real target_len = (result_len - max_radius / 2) / max_radius * 2 * (max_radius - min_radius) + min_radius;
+		Real m = target_len / result_len;
+		result *= m;
+	}
 	return result;
 }
 
