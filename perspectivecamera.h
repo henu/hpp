@@ -28,7 +28,7 @@ public:
 	inline Angle getFovY(void) const;
 	inline Angle getFovX(void) const;
 
-	inline virtual Viewfrustum getViewfrustum(void) const;
+	inline virtual Viewfrustum getViewfrustum(bool use_farplane = false) const;
 	inline virtual void shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const;
 
 	// Updates precalculated stuff after transform,
@@ -77,12 +77,17 @@ inline Angle Perspectivecamera::getFovX(void) const
 	return fovYToFovX(fov_y, getAspectratio());
 }
 
-inline Viewfrustum Perspectivecamera::getViewfrustum(void) const
+inline Viewfrustum Perspectivecamera::getViewfrustum(bool use_farplane) const
 {
+	Real farplane = -1;
+	if (use_farplane) {
+		farplane = getFar();
+	}
 	return Viewfrustum::fromCamera(getPosition(),
 	                                getDir(), getUp(), getRight(),
 	                                getFovY(), getFovX(),
-	                                getNear());
+	                                getNear(),
+	                                farplane);
 }
 
 inline void Perspectivecamera::shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const

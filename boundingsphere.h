@@ -1,6 +1,7 @@
 #ifndef HPP_BOUNDINGSPHERE_H
 #define HPP_BOUNDINGSPHERE_H
 
+#include "boundingvolume.h"
 #include "transform.h"
 #include "vector3.h"
 #include "real.h"
@@ -11,7 +12,7 @@
 namespace Hpp
 {
 
-class Boundingsphere
+class Boundingsphere : public Boundingvolume
 {
 
 public:
@@ -38,6 +39,9 @@ public:
 
 	// Hit tests
 	inline bool rayHits(Vector3 const& begin, Vector3 const& dir) const;
+
+	inline virtual Testresult testAnotherBoundingvolume(Boundingvolume const* bv) const;
+	inline virtual bool isPositionInside(Vector3 const& pos) const;
 
 private:
 
@@ -67,6 +71,42 @@ inline bool Boundingsphere::rayHits(Vector3 const& begin, Vector3 const& dir) co
 		nearestPointToRay(pos, begin, dir, NULL, NULL, &ray_dst_to_pos);
 		return ray_dst_to_pos < radius;
 	}
+}
+
+inline Boundingvolume::Testresult Boundingsphere::testAnotherBoundingvolume(Boundingvolume const* bv) const
+{
+	// If another Boundingvolume is Boundingsphere
+	Boundingsphere const* bs = dynamic_cast< Boundingsphere const* >(bv);
+	if (bs) {
+		if (isInfinite()) {
+			return INSIDE;
+		}
+
+		if (bs->isInfinite()) {
+			return PARTIALLY_INSIDE;
+		}
+
+		Real distance = (pos - bs->pos).length();
+
+		if (distance > radius + bs->radius) {
+			return OUTSIDE;
+		}
+
+		if (distance < radius - bs->radius) {
+			return INSIDE;
+		}
+
+		return PARTIALLY_INSIDE;
+	}
+
+	// This Boundingvolume cannot be handled, so try the other way
+	return bv->testAnotherBoundingvolume(this);
+}
+
+inline bool Boundingsphere::isPositionInside(Vector3 const& pos) const
+{
+	if (radius < 0) return true;
+	return (pos - this->pos).length() < radius;
 }
 
 inline std::ostream& operator<<(std::ostream& strm, Boundingsphere const& bs)

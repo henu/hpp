@@ -25,7 +25,7 @@ public:
 	// Size means distance between top and bottom viewfrustum planes.
 	inline void setSize(Real size);
 
-	inline virtual Viewfrustum getViewfrustum(void) const;
+	inline virtual Viewfrustum getViewfrustum(bool use_farplane = false) const;
 	inline virtual void shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const;
 
 	// Updates precalculated stuff after transform,
@@ -64,9 +64,10 @@ inline void Orthographiccamera::setSize(Real size)
 	this->size = size;
 }
 
-inline Viewfrustum Orthographiccamera::getViewfrustum(void) const
+inline Viewfrustum Orthographiccamera::getViewfrustum(bool use_farplane) const
 {
 // TODO: Code this!
+(void)use_farplane;
 HppAssert(false, "Not implemented yet!");
 return Viewfrustum();
 }

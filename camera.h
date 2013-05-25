@@ -28,7 +28,7 @@ public:
 	inline Vector3 getPosition(void) const { return transf.getPosition(); }
 	inline Hpp::Real getAspectratio(void) const { return aspectratio; }
 
-	virtual Viewfrustum getViewfrustum(void) const = 0;
+	virtual Viewfrustum getViewfrustum(bool use_farplane = false) const = 0;
 
 	inline Matrix4 getViewmatrix(void) const { return viewmat; }
 	inline Matrix4 getProjectionmatrix(void) const { return projmat; }
