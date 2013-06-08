@@ -14,7 +14,7 @@ class Runnable
 protected:
 
 	Runnable(void);
-	~Runnable(void);
+	virtual ~Runnable(void);
 
 	// Helper functions to control thread.
 	// It is not mandatory to use these.
