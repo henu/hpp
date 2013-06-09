@@ -47,14 +47,14 @@ public:
 		size_t add = end - begin;
 		ensureSpace(items + add);
 		if (write + add <= buf + res) {
-			memcpy(write, begin, add);
+			memcpy(write, begin, add * sizeof(T));
 			write += add;
 		} else {
 			size_t amount = buf + res - write;
-			memcpy(write, begin, amount);
+			memcpy(write, begin, amount * sizeof(T));
 			HppAssert(add >= amount, "Fail!");
 			size_t amount2 = add - amount;
-			memcpy(buf, begin + amount, amount2);
+			memcpy(buf, begin + amount, amount2 * sizeof(T));
 			write = buf + amount2;
 		}
 		items += add;
@@ -110,13 +110,13 @@ private:
 		if (items > 0) {
 			if (read < write || write == buf) {
 				HppAssert(read + items <= buf + res, "Overflow!");
-				memcpy(newbuf, read, items);
+				memcpy(newbuf, read, items * sizeof(T));
 			} else {
 				size_t amount = buf + res - read;
-				memcpy(newbuf, read, amount);
+				memcpy(newbuf, read, amount * sizeof(T));
 				HppAssert(items >= amount, "Fail!");
 				size_t amount2 = items - amount;
-				memcpy(newbuf + amount, buf, amount2);
+				memcpy(newbuf + amount, buf, amount2 * sizeof(T));
 			}
 		}
 		if (res > 0) {
