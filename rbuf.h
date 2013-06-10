@@ -28,6 +28,15 @@ public:
 		}
 	}
 
+	inline void clear(void)
+	{
+		if (res > 0) {
+			delete[] buf;
+		}
+		res = 0;
+		items = 0;
+	}
+
 	inline bool empty(void) const
 	{
 		return items == 0;
