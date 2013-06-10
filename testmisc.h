@@ -87,6 +87,29 @@ inline void testMisc(void)
 		}
 	}
 
+	// Test path name getting
+	{
+		Path p1("/tmp/package.tar.gz");
+		Path p2("/tmp/image.jpeg");
+
+		HppAssert(p1.getFilename() == "package.tar.gz", "Getting name of path has failed!");
+		HppAssert(p2.getFilename() == "image.jpeg", "Getting name of path has failed!");
+
+		HppAssert(p1.getFilenameWithoutExtension() == "package.tar", "Getting name of path has failed!");
+		HppAssert(p2.getFilenameWithoutExtension() == "image", "Getting name of path has failed!");
+		HppAssert(p1.getFilenameWithoutExtension(0) == "package.tar", "Getting name of path has failed!");
+		HppAssert(p2.getFilenameWithoutExtension(0) == "image", "Getting name of path has failed!");
+		HppAssert(p1.getFilenameWithoutExtension(1) == "package", "Getting name of path has failed!");
+		HppAssert(p2.getFilenameWithoutExtension(1) == "image.jpeg", "Getting name of path has failed!");
+
+		HppAssert(p1.getExtension() == "gz", "Getting name of path has failed!");
+		HppAssert(p2.getExtension() == "jpeg", "Getting name of path has failed!");
+		HppAssert(p1.getExtension(0) == "gz", "Getting name of path has failed!");
+		HppAssert(p2.getExtension(0) == "jpeg", "Getting name of path has failed!");
+		HppAssert(p1.getExtension(1) == "tar.gz", "Getting name of path has failed!");
+		HppAssert(p2.getExtension(1) == "", "Getting name of path has failed!");
+	}
+
 	// Test collision detection
 	{
 		Collisions colls;
@@ -102,6 +125,17 @@ inline void testMisc(void)
 		HppAssert(Collisiontests::sphereToSphere(coll, pos0, 2, pos1, 5, -1), "No collision detected!");
 		HppAssert(fabs(coll.depth + 0.141428429) < 0.0001, "Got invalid collision depth!");
 		HppAssert(angleBetweenVectors(coll.normal, pos0 - pos1) < Angle(0.001), "Invalid collision normal!");
+	}
+
+	// Test string case changing
+	{
+		std::string s = "fOoBaRTestING1234567890";
+
+		std::string s_u = Hpp::toUpper(s);
+		std::string s_l = Hpp::toLower(s);
+
+		HppAssert(s_u == "FOOBARTESTING1234567890", "Case conversion has failed!");
+		HppAssert(s_l == "foobartesting1234567890", "Case conversion has failed!");
 	}
 
 }

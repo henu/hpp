@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <string>
 #include <strings.h>
+#include <locale>
 
 #define HppFuncStr() (std::string(__FUNCTION__) + ": ")
 
@@ -59,6 +60,10 @@ inline std::string trim(std::string const& str, std::string ws = " \t\n");
 // Checks if string starts with/ends to specific substring
 inline bool startsWith(std::string const& str, std::string const& substr);
 inline bool endsTo(std::string const& str, std::string const& substr);
+
+// Converts string to uppercase/lowercase
+inline std::string toUpper(std::string const& s, std::locale const& loc = std::locale());
+inline std::string toLower(std::string const& s, std::locale const& loc = std::locale());
 
 // Power function for integers
 inline ssize_t ipow(ssize_t a, size_t n);
@@ -232,6 +237,32 @@ inline bool endsTo(std::string const& str, std::string const& substr)
 {
 	if (str.size() < substr.size()) return false;
 	return str.substr(str.size() - substr.size()) == substr;
+}
+
+inline std::string toUpper(std::string const& s, std::locale const& loc)
+{
+	std::string result;
+	result.reserve(s.size());
+	for (std::string::const_iterator it = s.begin();
+	     it != s.end();
+	     ++ it) {
+		char c = *it;
+		result.push_back(std::toupper(c, loc));
+	}
+	return result;
+}
+
+inline std::string toLower(std::string const& s, std::locale const& loc)
+{
+	std::string result;
+	result.reserve(s.size());
+	for (std::string::const_iterator it = s.begin();
+	     it != s.end();
+	     ++ it) {
+		char c = *it;
+		result.push_back(std::tolower(c, loc));
+	}
+	return result;
 }
 
 inline ssize_t ipow(ssize_t a, size_t n)

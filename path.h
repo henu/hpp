@@ -120,6 +120,10 @@ public:
 
 	// Returns name of that single file/folder at the end of whole Path
 	inline std::string getFilename(void) const;
+	inline std::string getFilenameWithoutExtension(size_t dots_to_include = 0) const;
+
+	// Returns file extension (for example .png) if path has it
+	inline std::string getExtension(size_t dots_to_include = 0) const;
 
 	// Get/check parent of this file/dir
 	inline bool hasParent(void) const;
@@ -769,7 +773,7 @@ inline void Path::writeString(std::string const& str) const
 inline std::string Path::getFilename(void) const
 {
 	if (isUnknown()) {
-		throw Exception("Unable to filename of unknown path!");
+		throw Exception("Unable to get filename of unknown path!");
 	}
 	if (parts.empty()) {
 		if (roottype == REL || roottype == HOME || roottype == CONFIG) {
@@ -780,6 +784,42 @@ inline std::string Path::getFilename(void) const
 		throw Exception("Unable to get filename of root!");
 	}
 	return parts.back();
+}
+
+inline std::string Path::getFilenameWithoutExtension(size_t dots_to_include) const
+{
+	std::string filename = getFilename();
+	for (size_t including_dots = 0;
+	     including_dots <= dots_to_include;
+	     ++ including_dots) {
+		std::string::size_type dot_pos = filename.find_last_of('.');
+		if (dot_pos == std::string::npos) {
+			return getFilename();
+		}
+		filename = filename.substr(0, dot_pos);
+	}
+	return filename;
+}
+
+inline std::string Path::getExtension(size_t dots_to_include) const
+{
+	std::string filename = getFilename();
+	std::string result = "";
+	for (size_t including_dots = 0;
+	     including_dots <= dots_to_include;
+	     ++ including_dots) {
+		std::string::size_type dot_pos = filename.find_last_of('.');
+		if (dot_pos == std::string::npos) {
+			return "";
+		}
+		if (including_dots == 0) {
+			result = filename.substr(dot_pos + 1);
+		} else {
+			result = filename.substr(dot_pos + 1) + "." + result;
+		}
+		filename = filename.substr(0, dot_pos);
+	}
+	return result;
 }
 
 inline bool Path::hasParent(void) const
