@@ -511,6 +511,8 @@ void TCPConnection::cleanRealConnection(RealConnection* rconn)
 
 void TCPConnection::close(RealConnection* rconn, bool closed_by_remote_server)
 {
+// TODO: Use "closed_by_remote_server" or remove it!
+(void)closed_by_remote_server;
 	HppAssert(rconn, "No RealConnect object!");
 
 	Lock connected_lock(rconn->connected_mutex);

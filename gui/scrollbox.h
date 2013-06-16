@@ -327,6 +327,8 @@ inline void Scrollbox::updateContentPosition(uint32_t width, uint32_t height)
 
 inline bool Scrollbox::handleGuiEvent(GuiEvent const& event)
 {
+// TODO: Do something with event?
+(void)event;
 	if (scrollbar_horiz) {
 		content_scroll.x = scrollbar_horiz->getValue();
 	}
