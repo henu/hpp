@@ -43,6 +43,7 @@ public:
 	inline static void GenBuffers(GLsizei n, GLuint* ids);
 	inline static void GenFramebuffers(GLsizei n, GLuint* ids);
 	inline static void GenVertexArrays(GLsizei n, GLuint* arrays);
+	inline static void GetActiveAttrib(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLint* size, GLenum* type, GLchar* name);
 	inline static void GetProgramInfoLog(GLuint program, GLsizei max_len, GLsizei* len, GLchar* log);
 	inline static void GetShaderInfoLog(GLuint shader, GLsizei max_len, GLsizei* len, GLchar* log);
 	inline static void GetProgramiv(GLuint program, GLenum param, GLint* value);
@@ -126,6 +127,7 @@ private:
 	static PFNGLGENBUFFERSPROC systemGenBuffers;
 	static PFNGLGENFRAMEBUFFERSPROC systemGenFramebuffers;
 	static PFNGLGENVERTEXARRAYSPROC systemGenVertexArrays;
+	static PFNGLGETACTIVEATTRIBPROC systemGetActiveAttrib;
 	static PFNGLGETPROGRAMINFOLOGPROC systemGetProgramInfoLog;
 	static PFNGLGETSHADERINFOLOGPROC systemGetShaderInfoLog;
 	static PFNGLGETPROGRAMIVPROC systemGetProgramiv;
@@ -314,6 +316,12 @@ inline void GlSystem::GenVertexArrays(GLsizei n, GLuint* arrays)
 {
 	HppAssert(systemGenVertexArrays, "Function does not exist!");
 	systemGenVertexArrays(n, arrays);
+}
+
+inline void GlSystem::GetActiveAttrib(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLint* size, GLenum* type, GLchar* name)
+{
+	HppAssert(systemGetActiveAttrib, "Function does not exist!");
+	systemGetActiveAttrib(program, index, bufSize, length, size, type, name);
 }
 
 inline void GlSystem::GetProgramInfoLog(GLuint program, GLsizei max_len, GLsizei* len, GLchar* log)
