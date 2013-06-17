@@ -292,7 +292,6 @@ inline void Shaderprogram::setBufferobject(std::string const& name, Bufferobject
 		return;
 	}
 	GLuint attrib_index = attribs_find->second;
-	HppAssert(used_attribs.find(attrib_index) == used_attribs.end(), "Attribute location already in use!");
 
 	GlSystem::EnableVertexAttribArray(attrib_index);
 	GlSystem::BindBuffer(buf->getTarget(), buf->getBufferId());
