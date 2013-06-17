@@ -161,6 +161,8 @@ inline void Renderqueue2d::renderSprite(Texture const* tex,
                                         Angle const& rotation,
                                         Vector2 const& rot_pos)
 {
+// TODO: Use "color"!
+(void)color;
 	if (tex != active_texture) {
 		flush();
 		if (active_texture) {

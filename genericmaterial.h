@@ -30,9 +30,9 @@ class GenericMaterial : public Material
 public:
 
 	// Constructor and destructor
-	inline GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures);
-	inline GenericMaterial(Rawmaterial const& rawmat, bool twosided = false);
-	inline GenericMaterial(void);
+	inline GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures, bool use_glsl_version_330 = false);
+	inline GenericMaterial(Rawmaterial const& rawmat, bool twosided = false, bool use_glsl_version_330 = false);
+	inline GenericMaterial(bool use_glsl_version_330 = false);
 	inline virtual ~GenericMaterial(void);
 
 	inline void setColor(Color const& color);
@@ -51,7 +51,14 @@ public:
 	inline bool needsUvBuffer(void) const;
 	inline bool needsTangentAndBinormalBuffer(void) const;
 
-	// These functions make it possible to add custom code
+	// These functions make it possible to add custom code.
+	// * "addCustomShader()" makes copy of default shader program and
+	//   attaches more Shaders every time the function is called.
+	// * "setCustomShaderFlag()" makes it possible to enable/disable
+	//   flags before beginning rendering.
+	// * "setShadowTestEnabled()" enables/disables calling of
+	//   getShadow(vec4) that tells how much given position is in the
+	//   shadow. This function must be found from some custom shader.
 	inline void addCustomShader(Shader const& shader);
 	inline void setCustomShaderFlag(std::string const& flag, bool enabled);
 	inline void setShadowTestEnabled(bool shadow_test_enabled);
@@ -83,6 +90,8 @@ private:
 	static float const AMBIENT_LIGHT_ON_THRESHOLD;
 	static float const NEEDS_LIGHT_THRESHOLD;
 	static float const TRANSLUCENT_THRESHOLD;
+
+	bool use_glsl_version_330;
 
 	// The color and alpha of Material
 	Color color;
@@ -117,16 +126,20 @@ private:
 	mutable Matrix4 rendering_viewmatrix;
 
 	// Class-wide shaders
-	static Shaderprogram* program;
-	static Shader shader_vrt;
-	static Shader shader_frg;
+	static Shaderprogram* program_110;
+	static Shader shader_vrt_110;
+	static Shader shader_frg_110;
+	static Shaderprogram* program_330;
+	static Shader shader_vrt_330;
+	static Shader shader_frg_330;
 
 	inline void updateNeedsLight(void);
 	inline void updateIsTranslucent(void);
 
 };
 
-inline GenericMaterial::GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures) :
+inline GenericMaterial::GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures, bool use_glsl_version_330) :
+use_glsl_version_330(use_glsl_version_330),
 color(Color(1, 1, 1)),
 specular(Color(0, 0, 0)),
 shininess(0),
@@ -199,7 +212,8 @@ needs_uvs(false)
 	updateIsTranslucent();
 }
 
-inline GenericMaterial::GenericMaterial(Rawmaterial const& rawmat, bool twosided) :
+inline GenericMaterial::GenericMaterial(Rawmaterial const& rawmat, bool twosided, bool use_glsl_version_330) :
+use_glsl_version_330(use_glsl_version_330),
 color(rawmat.color),
 specular(rawmat.specular),
 shininess(rawmat.shininess),
@@ -244,7 +258,8 @@ shadow_test_enabled(false)
 	updateIsTranslucent();
 }
 
-inline GenericMaterial::GenericMaterial(void) :
+inline GenericMaterial::GenericMaterial(bool use_glsl_version_330) :
+use_glsl_version_330(use_glsl_version_330),
 color(Color(1, 1, 1)),
 specular(Color(0, 0, 0)),
 shininess(0),
@@ -332,8 +347,13 @@ inline void GenericMaterial::addCustomShader(Shader const& shader)
 	// If custom shader is not yet loaded
 	if (!custom_program) {
 		custom_program = new Shaderprogram();
-		custom_program->attachShader(shader_vrt);
-		custom_program->attachShader(shader_frg);
+		if (use_glsl_version_330) {
+			custom_program->attachShader(shader_vrt_330);
+			custom_program->attachShader(shader_frg_330);
+		} else {
+			custom_program->attachShader(shader_vrt_110);
+			custom_program->attachShader(shader_frg_110);
+		}
 	}
 	custom_program->attachShader(shader);
 }
@@ -534,7 +554,10 @@ inline Shaderprogram* GenericMaterial::getProgram(void) const
 	if (custom_program) {
 		return custom_program;
 	}
-	return program;
+	if (use_glsl_version_330) {
+		return program_330;
+	}
+	return program_110;
 }
 
 inline void GenericMaterial::updateNeedsLight(void)
