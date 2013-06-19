@@ -14,6 +14,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <iostream>
 
 namespace Hpp
 {
@@ -284,20 +285,20 @@ inline void Shaderprogram::setBufferobject(std::string const& name, Bufferobject
 {
 	HppCheckGlErrors();
 
-	// Find vertex attribute index. If shader does not
+	// Find vertex attribute location. If shader does not
 	// have an attribute with that name, consider that
 	// it wants to discard all information in it.
 	AttribLocations::iterator attribs_find = enabled_program->attribs.find(name);
 	if (attribs_find == enabled_program->attribs.end()) {
 		return;
 	}
-	GLuint attrib_index = attribs_find->second;
+	GLuint attrib_location = attribs_find->second;
 
-	GlSystem::EnableVertexAttribArray(attrib_index);
+	GlSystem::EnableVertexAttribArray(attrib_location);
 	GlSystem::BindBuffer(buf->getTarget(), buf->getBufferId());
-	GlSystem::VertexAttribPointer(attrib_index, buf->getComponents(), buf->getType(), buf->getNormalized(), 0, NULL);
+	GlSystem::VertexAttribPointer(attrib_location, buf->getComponents(), buf->getType(), buf->getNormalized(), 0, NULL);
 
-	used_attribs.insert(attrib_index);
+	used_attribs.insert(attrib_location);
 
 	HppCheckGlErrors();
 }
@@ -451,7 +452,12 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 		GLenum buf_type;
 		GlSystem::GetActiveAttrib(new_lprog.prog_id, attrib_id, NAMEBUF_MAXLEN, &namebuf_len, &buf_size, &buf_type, namebuf);
 		std::string name(namebuf, namebuf_len);
-		new_lprog.attribs[name] = attrib_id;
+		GLint attrib_location = GlSystem::GetAttribLocation(new_lprog.prog_id, name.c_str());
+		if (attrib_location < 0) {
+			std::cerr << "WARNING: Attribute \"" << name << "\" location could not be found, but glGetActiveAttrib() claims it exists!" << std::endl;
+			continue;
+		}
+		new_lprog.attribs[name] = attrib_location;
 	}
 
 	lprogs[flags] = new_lprog;
