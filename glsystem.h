@@ -44,6 +44,7 @@ public:
 	inline static void GenFramebuffers(GLsizei n, GLuint* ids);
 	inline static void GenVertexArrays(GLsizei n, GLuint* arrays);
 	inline static void GetActiveAttrib(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLint* size, GLenum* type, GLchar* name);
+	inline static GLint GetAttribLocation(GLuint program, GLchar const* name);
 	inline static void GetProgramInfoLog(GLuint program, GLsizei max_len, GLsizei* len, GLchar* log);
 	inline static void GetShaderInfoLog(GLuint shader, GLsizei max_len, GLsizei* len, GLchar* log);
 	inline static void GetProgramiv(GLuint program, GLenum param, GLint* value);
@@ -128,6 +129,7 @@ private:
 	static PFNGLGENFRAMEBUFFERSPROC systemGenFramebuffers;
 	static PFNGLGENVERTEXARRAYSPROC systemGenVertexArrays;
 	static PFNGLGETACTIVEATTRIBPROC systemGetActiveAttrib;
+	static PFNGLGETATTRIBLOCATIONPROC systemGetAttribLocation;
 	static PFNGLGETPROGRAMINFOLOGPROC systemGetProgramInfoLog;
 	static PFNGLGETSHADERINFOLOGPROC systemGetShaderInfoLog;
 	static PFNGLGETPROGRAMIVPROC systemGetProgramiv;
@@ -322,6 +324,12 @@ inline void GlSystem::GetActiveAttrib(GLuint program, GLuint index, GLsizei bufS
 {
 	HppAssert(systemGetActiveAttrib, "Function does not exist!");
 	systemGetActiveAttrib(program, index, bufSize, length, size, type, name);
+}
+
+inline GLint GlSystem::GetAttribLocation(GLuint program, GLchar const* name)
+{
+	HppAssert(systemGetAttribLocation, "Function does not exist!");
+	return systemGetAttribLocation(program, name);
 }
 
 inline void GlSystem::GetProgramInfoLog(GLuint program, GLsizei max_len, GLsizei* len, GLchar* log)

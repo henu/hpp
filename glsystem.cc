@@ -36,6 +36,7 @@ PFNGLGENBUFFERSPROC GlSystem::systemGenBuffers = NULL;
 PFNGLGENFRAMEBUFFERSPROC GlSystem::systemGenFramebuffers = NULL;
 PFNGLGENVERTEXARRAYSPROC GlSystem::systemGenVertexArrays = NULL;
 PFNGLGETACTIVEATTRIBPROC GlSystem::systemGetActiveAttrib = NULL;
+PFNGLGETATTRIBLOCATIONPROC GlSystem::systemGetAttribLocation = NULL;
 PFNGLGETPROGRAMINFOLOGPROC GlSystem::systemGetProgramInfoLog = NULL;
 PFNGLGETSHADERINFOLOGPROC GlSystem::systemGetShaderInfoLog = NULL;
 PFNGLGETPROGRAMIVPROC GlSystem::systemGetProgramiv = NULL;
@@ -108,6 +109,7 @@ void GlSystem::initialize(void)
 	systemGenFramebuffers = reinterpret_cast< PFNGLGENFRAMEBUFFERSPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGenFramebuffers")));
 	systemGenVertexArrays = reinterpret_cast< PFNGLGENVERTEXARRAYSPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGenVertexArrays")));
 	systemGetActiveAttrib = reinterpret_cast< PFNGLGETACTIVEATTRIBPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGetActiveAttrib")));
+	systemGetAttribLocation = reinterpret_cast< PFNGLGETATTRIBLOCATIONPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGetAttribLocation")));
 	systemGetProgramInfoLog = reinterpret_cast< PFNGLGETPROGRAMINFOLOGPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGetProgramInfoLog")));
 	systemGetShaderInfoLog = reinterpret_cast< PFNGLGETSHADERINFOLOGPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGetShaderInfoLog")));
 	systemGetProgramiv = reinterpret_cast< PFNGLGETPROGRAMIVPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glGetProgramiv")));
@@ -167,6 +169,7 @@ void GlSystem::initialize(void)
 	systemGenFramebuffers = reinterpret_cast< PFNGLGENFRAMEBUFFERSPROC >(wglGetProcAddress("glGenFramebuffers"));
 	systemGenVertexArrays = reinterpret_cast< PFNGLGENVERTEXARRAYSPROC >(wglGetProcAddress("glGenVertexArrays"));
 	systemGetActiveAttrib = reinterpret_cast< PFNGLGETACTIVEATTRIBPROC >(wglGetProcAddress("glGetActiveAttrib"));
+	systemGetAttribLocation = reinterpret_cast< PFNGLGETATTRIBLOCATIONPROC >(wglGetProcAddress("glGetAttribLocation"));
 	systemGetProgramInfoLog = reinterpret_cast< PFNGLGETPROGRAMINFOLOGPROC >(wglGetProcAddress("glGetProgramInfoLog"));
 	systemGetShaderInfoLog = reinterpret_cast< PFNGLGETSHADERINFOLOGPROC >(wglGetProcAddress("glGetShaderInfoLog"));
 	systemGetProgramiv = reinterpret_cast< PFNGLGETPROGRAMIVPROC >(wglGetProcAddress("glGetProgramiv"));
