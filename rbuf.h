@@ -101,6 +101,27 @@ public:
 		return *read;
 	}
 
+	inline void swap(RBuf< T >& rbuf)
+	{
+		size_t swap_res = rbuf.res;
+		size_t swap_items = rbuf.items;
+		T* swap_write = rbuf.write;
+		T* swap_read = rbuf.read;
+		T* swap_buf = rbuf.buf;
+
+		rbuf.res = res;
+		rbuf.items = items;
+		rbuf.write = write;
+		rbuf.read = read;
+		rbuf.buf = buf;
+
+		res = swap_res;
+		items = swap_items;
+		write = swap_write;
+		read = swap_read;
+		buf = swap_buf;
+	}
+
 private:
 
 	size_t res;

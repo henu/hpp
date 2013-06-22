@@ -102,7 +102,7 @@ inline bool Plane::hitsLine(Vector3 const& begin, Vector3 const& dir, Vector3* r
 	}
 
 	Real radians = static_cast< Real >(::asin(dp_n_d / dir_len));
-	if (::finite(radians) && fabs(radians) < 0.0001) {
+	if (::finite(radians) && fabs(radians) < 0.0002) {
 		return false;
 	}
 
