@@ -209,8 +209,11 @@ inline void ensureThisIsDisplayThread(std::string file,
 	std::cerr << "Function   : " << function << std::endl;
 	std::cerr << "Description: Function is called from different thread than where display was opened at!" << std::endl;
 
-	exit(EXIT_FAILURE);
-
+	#ifdef HPP_ASSERT_ABORTS
+	abort();
+	#else
+	throw Exception("GL assertion has failed!");
+	#endif
 }
 
 

@@ -202,7 +202,13 @@ bound_texture_unit(0)
 	HppCheckGlErrorsIfCorrectThread();
 }
 
-inline Texture::Texture(Image const* image, Pixelformat format, Flags flags)
+inline Texture::Texture(Image const* image, Pixelformat format, Flags flags) :
+is_loaded(false),
+tempdata(NULL),
+clamp_to_edge_horizontally(false),
+clamp_to_edge_vertically(false),
+bound(false),
+bound_texture_unit(0)
 {
 	HppCheckGlErrorsIfCorrectThread();
 	loadFromImage(image, format, flags);
