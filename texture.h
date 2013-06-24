@@ -48,6 +48,7 @@ public:
 	inline Texture(void);
 	inline Texture(Path const& path, Pixelformat format = DEFAULT, Flags flags = 0);
 	inline Texture(ByteV const& data, Pixelformat format = DEFAULT, Flags flags = 0);
+	inline Texture(Image const* image, Pixelformat format = DEFAULT, Flags flags = 0);
 	inline ~Texture(void);
 
 	// Checks if Texture is loaded
@@ -56,6 +57,7 @@ public:
 	// Functions to (re)load Texture
 	inline void loadFromFile(Path const& path, Pixelformat format = DEFAULT, Flags flags = 0);
 	inline void loadFromData(ByteV const& data, Pixelformat format = DEFAULT, Flags flags = 0);
+	inline void loadFromImage(Image const* image, Pixelformat format = DEFAULT, Flags flags = 0);
 
 	// Function to create a new empty Texture
 	inline void createNew(uint16_t width, uint16_t height, Pixelformat format, Flags flags = 0);
@@ -144,7 +146,7 @@ private:
 
 	inline static Pixeldata load(Path const& path,
 	                             ByteV const& data,
-	                             bool load_from_data,
+	                             Image const* image,
 	                             Pixelformat format,
 	                             Flags flags);
 
@@ -200,6 +202,13 @@ bound_texture_unit(0)
 	HppCheckGlErrorsIfCorrectThread();
 }
 
+inline Texture::Texture(Image const* image, Pixelformat format, Flags flags)
+{
+	HppCheckGlErrorsIfCorrectThread();
+	loadFromImage(image, format, flags);
+	HppCheckGlErrorsIfCorrectThread();
+}
+
 inline Texture::~Texture(void)
 {
 	if (bound) {
@@ -215,7 +224,10 @@ inline Texture::~Texture(void)
 
 inline void Texture::loadFromFile(Path const& path, Pixelformat format, Flags flags)
 {
-	Pixeldata pdata = load(path, ByteV(), false, format, flags);
+	clamp_to_edge_horizontally = flags & CLAMP_TO_EDGE_HORIZONTALLY;
+	clamp_to_edge_vertically = flags & CLAMP_TO_EDGE_VERTICALLY;
+
+	Pixeldata pdata = load(path, ByteV(), NULL, format, flags);
 	tryToUsePixeldata(pdata);
 }
 
@@ -224,7 +236,16 @@ inline void Texture::loadFromData(ByteV const& data, Pixelformat format, Flags f
 	clamp_to_edge_horizontally = flags & CLAMP_TO_EDGE_HORIZONTALLY;
 	clamp_to_edge_vertically = flags & CLAMP_TO_EDGE_VERTICALLY;
 
-	Pixeldata pdata = load(Path::getUnknown(), data, true, format, flags);
+	Pixeldata pdata = load(Path::getUnknown(), data, NULL, format, flags);
+	tryToUsePixeldata(pdata);
+}
+
+inline void Texture::loadFromImage(Image const* image, Pixelformat format, Flags flags)
+{
+	clamp_to_edge_horizontally = flags & CLAMP_TO_EDGE_HORIZONTALLY;
+	clamp_to_edge_vertically = flags & CLAMP_TO_EDGE_VERTICALLY;
+
+	Pixeldata pdata = load(Path::getUnknown(), ByteV(), image, format, flags);
 	tryToUsePixeldata(pdata);
 }
 
@@ -528,7 +549,7 @@ inline void Texture::resizePixeldata(Pixeldata& pdata, size_t new_width, size_t 
 	pdata.height = new_height;
 }
 
-inline Texture::Pixeldata Texture::load(Path const& path, ByteV const& data, bool load_from_data, Pixelformat format, Flags flags)
+inline Texture::Pixeldata Texture::load(Path const& path, ByteV const& data, Image const* image, Pixelformat format, Flags flags)
 {
 	GLint min_filter = GL_LINEAR_MIPMAP_LINEAR;
 	if (flags & NEAREST) {
@@ -550,20 +571,25 @@ inline Texture::Pixeldata Texture::load(Path const& path, ByteV const& data, boo
 		min_filter = GL_LINEAR_MIPMAP_LINEAR;
 	}
 
-	Image image;
+	Image image2;
+	Image const* image_p;
 
-	if (!load_from_data) {
-		image = Image(path, format);
+	if (data.empty() && !image) {
+		image2 = Image(path, format);
+		image_p = &image2;
+	} else if (!image) {
+		image2 = Image(data, format);
+		image_p = &image2;
 	} else {
-		image = Image(data, format);
+		image_p = image;
 	}
 
 	Pixeldata result;
-	result.buf = image.getDataFlipped();
-	result.width = image.getWidth();
-	result.height = image.getHeight();
-	result.bytes_per_pixel = image.getBytesPerPixel();
-	result.alpha = image.hasAlpha() || (format == ALPHA);
+	result.buf = image_p->getDataFlipped();
+	result.width = image_p->getWidth();
+	result.height = image_p->getHeight();
+	result.bytes_per_pixel = image_p->getBytesPerPixel();
+	result.alpha = image_p->hasAlpha() || (format == ALPHA);
 	result.depth = pixelformatHasDepth(format);
 	result.min_filter = min_filter;
 
@@ -573,7 +599,6 @@ inline Texture::Pixeldata Texture::load(Path const& path, ByteV const& data, boo
 	}
 
 	return result;
-
 }
 
 inline void Texture::tryToUsePixeldata(Pixeldata const& pdata)
