@@ -16,12 +16,12 @@ namespace Hpp
 {
 
 template< typename Type >
-inline void toZero(Type* buf, size_t size)
+inline void toZero(Type* buf, size_t size_in_bytes)
 {
 	#ifndef WIN32
-	bzero(buf, size);
+	bzero(buf, size_in_bytes);
 	#else
-	char* buf_end = (char*)buf + size;
+	char* buf_end = (char*)buf + size_in_bytes;
 	for (char* buf_it = (char*)buf;
 	     buf_it != buf_end;
 	     buf_it ++) {
