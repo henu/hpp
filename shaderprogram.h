@@ -122,12 +122,14 @@ inline void Shaderprogram::enable(Flags const& flags)
 	HppAssert(!enabled_program, "Already enabled!");
 
 	// Ensure program is linked with these flags
-	if (lprogs.find(flags) == lprogs.end()) {
+	LinkedPrograms::iterator lprogs_find = lprogs.find(flags);
+	if (lprogs_find == lprogs.end()) {
 		linkProgram(flags);
+		lprogs_find = lprogs.find(flags);
 	}
 
-	HppAssert(lprogs.find(flags) != lprogs.end(), "Fail!");
-	enabled_program = &(lprogs[flags]);
+	HppAssert(lprogs_find != lprogs.end(), "Fail!");
+	enabled_program = &lprogs_find->second;
 	GlSystem::UseProgram(enabled_program->prog_id);
 	HppCheckGlErrors();
 
