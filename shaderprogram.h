@@ -53,6 +53,7 @@ public:
 	inline void setUniform4i(std::string const& name, GLint i0, GLint i1, GLint i2, GLint i3);
 
 	inline void setBufferobject(std::string const& name, Bufferobject const* buf);
+	inline void setBufferobject(Bufferobject::Shortcut shortcut, Bufferobject const* buf);
 
 	// Returns GLSL Id of enabled program. This may deprecate between
 	// enables and disables.
@@ -68,6 +69,7 @@ private:
 	{
 		GLuint prog_id;
 		AttribLocations attribs;
+		GLint attribs_by_shortcuts[Bufferobject::SHORTCUT_END];
 	};
 	typedef std::map< Flags, LinkedProgram > LinkedPrograms;
 
@@ -303,6 +305,28 @@ inline void Shaderprogram::setBufferobject(std::string const& name, Bufferobject
 	HppCheckGlErrors();
 }
 
+inline void Shaderprogram::setBufferobject(Bufferobject::Shortcut shortcut, Bufferobject const* buf)
+{
+	HppCheckGlErrors();
+
+	// Find vertex attribute location. If shader does not
+	// have an attribute with that name, consider that
+	// it wants to discard all information in it.
+	HppAssert(shortcut < Bufferobject::SHORTCUT_END, "Invalid attribute shortcut!");
+	GLint attrib_location = enabled_program->attribs_by_shortcuts[shortcut];
+	if (attrib_location < 0) {
+		return;
+	}
+
+	GlSystem::EnableVertexAttribArray(attrib_location);
+	GlSystem::BindBuffer(buf->getTarget(), buf->getBufferId());
+	GlSystem::VertexAttribPointer(attrib_location, buf->getComponents(), buf->getType(), buf->getNormalized(), 0, NULL);
+
+	used_attribs.insert(attrib_location);
+
+	HppCheckGlErrors();
+}
+
 inline GLuint Shaderprogram::getGLSLProgram(void) const
 {
 	HppCheckGlErrors();
@@ -316,6 +340,9 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	HppCheckGlErrors();
 
 	LinkedProgram new_lprog;
+	for (size_t i = 0; i < Bufferobject::SHORTCUT_END; ++ i) {
+		new_lprog.attribs_by_shortcuts[i] = -1;
+	}
 
 	// Convert flags to lines of codes that make some defines
 	Lines lines_flags;
@@ -458,6 +485,22 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 			continue;
 		}
 		new_lprog.attribs[name] = attrib_location;
+		// Store shortcuts too
+		if (name == "pos") {
+			new_lprog.attribs_by_shortcuts[Bufferobject::POS] = attrib_location;
+		} else if (name == "normal") {
+			new_lprog.attribs_by_shortcuts[Bufferobject::NORMAL] = attrib_location;
+		} else if (name == "tangent") {
+			new_lprog.attribs_by_shortcuts[Bufferobject::TANGENT] = attrib_location;
+		} else if (name == "binormal") {
+			new_lprog.attribs_by_shortcuts[Bufferobject::BINORMAL] = attrib_location;
+		} else if (name == "uv") {
+			new_lprog.attribs_by_shortcuts[Bufferobject::UV] = attrib_location;
+		} else if (name == "clr") {
+			new_lprog.attribs_by_shortcuts[Bufferobject::CLR] = attrib_location;
+		} else if (name == "index") {
+			new_lprog.attribs_by_shortcuts[Bufferobject::INDEX] = attrib_location;
+		}
 	}
 
 	lprogs[flags] = new_lprog;

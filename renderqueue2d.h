@@ -293,9 +293,9 @@ inline void Renderqueue2d::flush(void)
 	Bufferobject uvs_bo(GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], uvs.size());
 	Bufferobject clrs_bo(GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 4, &clrs[0], clrs.size());
 
-	program.setBufferobject("pos", &poss_bo);
-	program.setBufferobject("uv", &uvs_bo);
-	program.setBufferobject("clr", &clrs_bo);
+	program.setBufferobject(Bufferobject::POS, &poss_bo);
+	program.setBufferobject(Bufferobject::UV, &uvs_bo);
+	program.setBufferobject(Bufferobject::CLR, &clrs_bo);
 
 	glDrawArrays(GL_TRIANGLES, 0, poss.size() / 2);
 

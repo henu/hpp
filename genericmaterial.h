@@ -395,16 +395,16 @@ inline void GenericMaterial::renderMesh(Mesh const* mesh, Transform const& trans
 	Matrix4 mvmat = rendering_viewmatrix * transf.getMatrix();
 
 	// Bind all needed buffers
-	getProgram()->setBufferobject("pos", mesh->getBuffer("pos"));
+	getProgram()->setBufferobject(Bufferobject::POS, mesh->getBuffer(Bufferobject::POS));
 	if (rendering_light && needsNormalBuffer()) {
-		getProgram()->setBufferobject("normal", mesh->getBuffer("normal"));
+		getProgram()->setBufferobject(Bufferobject::NORMAL, mesh->getBuffer(Bufferobject::NORMAL));
 	}
 	if (needsUvBuffer()) {
-		getProgram()->setBufferobject("uv", mesh->getBuffer("uv"));
+		getProgram()->setBufferobject(Bufferobject::UV, mesh->getBuffer(Bufferobject::UV));
 	}
 	if (needsTangentAndBinormalBuffer()) {
-		getProgram()->setBufferobject("tangent", mesh->getBuffer("tangent"));
-		getProgram()->setBufferobject("binormal", mesh->getBuffer("binormal"));
+		getProgram()->setBufferobject(Bufferobject::TANGENT, mesh->getBuffer(Bufferobject::TANGENT));
+		getProgram()->setBufferobject(Bufferobject::BINORMAL, mesh->getBuffer(Bufferobject::BINORMAL));
 	}
 
 	getProgram()->setUniform("mvmat", mvmat, true);

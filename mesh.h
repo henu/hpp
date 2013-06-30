@@ -23,6 +23,7 @@ public:
 	inline void setBuffer(std::string const& name, Bufferobject* bo, bool release_automatically = false);
 
 	inline Bufferobject const* getBuffer(std::string const& name) const;
+	inline Bufferobject const* getBuffer(Bufferobject::Shortcut shortcut) const;
 
 private:
 
@@ -37,11 +38,13 @@ private:
 	typedef std::map< std::string, Buffer > Buffers;
 
 	Buffers bufs;
+	Bufferobject* bufs_by_shortcut[Bufferobject::SHORTCUT_END];
 
 };
 
 inline Mesh::Mesh(void)
 {
+	Hpp::toZero(bufs_by_shortcut, sizeof(bufs_by_shortcut));
 }
 
 inline Mesh::~Mesh(void)
@@ -66,7 +69,26 @@ inline void Mesh::setBuffer(std::string const& name, GLenum target, GLenum type,
 	}
 
 	// Create and store new buffer
-	bufs[name] = Buffer(new Bufferobject(target, type, usage, components, data, size), true);
+	Bufferobject* bo = new Bufferobject(target, type, usage, components, data, size);
+	bufs[name] = Buffer(bo, true);
+
+	// If buffer has shortcut name, then store it as shortcut too
+	if (name == "pos") {
+		bufs_by_shortcut[Bufferobject::POS] = bo;
+	} else if (name == "normal") {
+		bufs_by_shortcut[Bufferobject::NORMAL] = bo;
+	} else if (name == "tangent") {
+		bufs_by_shortcut[Bufferobject::TANGENT] = bo;
+	} else if (name == "binormal") {
+		bufs_by_shortcut[Bufferobject::BINORMAL] = bo;
+	} else if (name == "uv") {
+		bufs_by_shortcut[Bufferobject::UV] = bo;
+	} else if (name == "clr") {
+		bufs_by_shortcut[Bufferobject::CLR] = bo;
+	} else if (name == "index") {
+		bufs_by_shortcut[Bufferobject::INDEX] = bo;
+	}
+
 }
 
 inline void Mesh::setBuffer(std::string const& name, Bufferobject* bo, bool release_automatically)
@@ -81,6 +103,23 @@ inline void Mesh::setBuffer(std::string const& name, Bufferobject* bo, bool rele
 
 	// Create and store new buffer
 	bufs[name] = Buffer(bo, release_automatically);
+
+	// If buffer has shortcut name, then store it as shortcut too
+	if (name == "pos") {
+		bufs_by_shortcut[Bufferobject::POS] = bo;
+	} else if (name == "normal") {
+		bufs_by_shortcut[Bufferobject::NORMAL] = bo;
+	} else if (name == "tangent") {
+		bufs_by_shortcut[Bufferobject::TANGENT] = bo;
+	} else if (name == "binormal") {
+		bufs_by_shortcut[Bufferobject::BINORMAL] = bo;
+	} else if (name == "uv") {
+		bufs_by_shortcut[Bufferobject::UV] = bo;
+	} else if (name == "clr") {
+		bufs_by_shortcut[Bufferobject::CLR] = bo;
+	} else if (name == "index") {
+		bufs_by_shortcut[Bufferobject::INDEX] = bo;
+	}
 }
 
 inline Bufferobject const* Mesh::getBuffer(std::string const& name) const
@@ -90,6 +129,16 @@ inline Bufferobject const* Mesh::getBuffer(std::string const& name) const
 		throw Exception("Unable to get buffer \"" + name + "\" from mesh because it does not exist!");
 	}
 	return bufs_find->second.bo;
+}
+
+inline Bufferobject const* Mesh::getBuffer(Bufferobject::Shortcut shortcut) const
+{
+	HppAssert(shortcut < Bufferobject::SHORTCUT_END, "Invalid attribute shortcut!");
+	Bufferobject const* result = bufs_by_shortcut[shortcut];
+	if (!result) {
+		throw Exception("Unable to get buffer by shortcut from mesh because it does not exist!");
+	}
+	return result;
 }
 
 }
