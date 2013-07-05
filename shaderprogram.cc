@@ -15,7 +15,7 @@ Shaderprogramhandle* Shaderprogram::createHandle(Flags const& flags)
 	}
 
 	// Get pointer to program
-	LinkedProgram* program = &lprogs_find->second;
+	GLuint prog_id = lprogs_find->second;
 
 	// Construct conversion table for uniform locations
 	Shaderprogramhandle::Shortcuts uniformshortcuts;
@@ -24,7 +24,7 @@ Shaderprogramhandle* Shaderprogram::createHandle(Flags const& flags)
 	      uniforms_it != uniforms.end();
 	      ++ uniforms_it) {
 		std::string const& name = *uniforms_it;
-		GLint uniform_location = GlSystem::GetUniformLocation(program->prog_id, name.c_str());
+		GLint uniform_location = GlSystem::GetUniformLocation(prog_id, name.c_str());
 		uniformshortcuts.push_back(uniform_location);
 	}
 
@@ -36,7 +36,7 @@ Shaderprogramhandle* Shaderprogram::createHandle(Flags const& flags)
 	     vertexattr_loc < vertexattrs.size();
 	     ++ vertexattr_loc) {
 		std::string const& name = vertexattrs[vertexattr_loc];
-		GLint vertexattr_loc_check = GlSystem::GetAttribLocation(program->prog_id, name.c_str());
+		GLint vertexattr_loc_check = GlSystem::GetAttribLocation(prog_id, name.c_str());
 		if (vertexattr_loc_check >= 0) {
 			existing_vertexattrs.push_back(true);
 			if (vertexattr_loc_check != GLint(vertexattr_loc)) {
@@ -47,7 +47,7 @@ Shaderprogramhandle* Shaderprogram::createHandle(Flags const& flags)
 		}
 	}
 
-	return new Shaderprogramhandle(this, program, uniformshortcuts, existing_vertexattrs);
+	return new Shaderprogramhandle(this, prog_id, uniformshortcuts, existing_vertexattrs);
 }
 
 }

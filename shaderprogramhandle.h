@@ -46,16 +46,14 @@ private:
 	typedef std::vector< GLint > Shortcuts;
 
 	inline Shaderprogramhandle(Shaderprogram* program,
-	                           Shaderprogram::LinkedProgram* linkedprogram,
+	                           GLuint prog_id,
 	                           Shortcuts const& uniformshortcuts,
 	                           Bools const& existing_vertexattrs);
-
-	inline void* getLinkedProgram(void) { return linkedprogram; }
 
 private:
 
 	Shaderprogram* program;
-	Shaderprogram::LinkedProgram* linkedprogram;
+	GLuint prog_id;
 	Shortcuts uniformshortcuts;
 	Bools existing_vertexattrs;
 
@@ -75,7 +73,7 @@ inline void Shaderprogramhandle::enable(void)
 	// Inform Shaderprogram about this enabling
 	program->handleEnabled();
 
-	GlSystem::UseProgram(linkedprogram->prog_id);
+	GlSystem::UseProgram(prog_id);
 
 	HppCheckGlErrors();
 
@@ -253,11 +251,11 @@ inline void Shaderprogramhandle::setBufferobject(GLint vertexattr_loc, Bufferobj
 }
 
 inline Shaderprogramhandle::Shaderprogramhandle(Shaderprogram* program,
-                                                Shaderprogram::LinkedProgram* linkedprogram,
+                                                GLuint prog_id,
                                                 Shortcuts const& uniformshortcuts,
                                                 Bools const& existing_vertexattrs) :
 program(program),
-linkedprogram(linkedprogram),
+prog_id(prog_id),
 uniformshortcuts(uniformshortcuts),
 existing_vertexattrs(existing_vertexattrs),
 enabled(false)

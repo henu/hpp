@@ -464,16 +464,16 @@ inline void GenericMaterial::renderMesh(Mesh const* mesh, Transform const& trans
 	Matrix4 mvmat = rendering_viewmatrix * transf.getMatrix();
 
 	// Bind all needed buffers
-	rendering_programhandle->setBufferobject(VATR_POS, mesh->getBuffer(Bufferobject::POS));
+	rendering_programhandle->setBufferobject(VATR_POS, mesh->getBuffer(Mesh::POS));
 	if (rendering_light && needsNormalBuffer()) {
-		rendering_programhandle->setBufferobject(VATR_NORMAL, mesh->getBuffer(Bufferobject::NORMAL));
+		rendering_programhandle->setBufferobject(VATR_NORMAL, mesh->getBuffer(Mesh::NORMAL));
 	}
 	if (needsUvBuffer()) {
-		rendering_programhandle->setBufferobject(VATR_UV, mesh->getBuffer(Bufferobject::UV));
+		rendering_programhandle->setBufferobject(VATR_UV, mesh->getBuffer(Mesh::UV));
 	}
 	if (needsTangentAndBinormalBuffer()) {
-		rendering_programhandle->setBufferobject(VATR_TANGENT, mesh->getBuffer(Bufferobject::TANGENT));
-		rendering_programhandle->setBufferobject(VATR_BINORMAL, mesh->getBuffer(Bufferobject::BINORMAL));
+		rendering_programhandle->setBufferobject(VATR_TANGENT, mesh->getBuffer(Mesh::TANGENT));
+		rendering_programhandle->setBufferobject(VATR_BINORMAL, mesh->getBuffer(Mesh::BINORMAL));
 	}
 
 	rendering_programhandle->setUniform(UNIF_MVMAT, mvmat, true);
@@ -481,7 +481,7 @@ inline void GenericMaterial::renderMesh(Mesh const* mesh, Transform const& trans
 		rendering_programhandle->setUniform(UNIF_MMAT, transf.getMatrix(), true);
 	}
 
-	mesh->getBuffer(Bufferobject::INDEX)->drawElements(GL_TRIANGLES);
+	mesh->getBuffer(Mesh::INDEX)->drawElements(GL_TRIANGLES);
 
 }
 

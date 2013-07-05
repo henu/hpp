@@ -16,19 +16,6 @@ class Bufferobject : public NonCopyable
 
 public:
 
-	// These can be used to prevent slow name lookups.
-	enum Shortcut
-	{
-		POS = 0,
-		NORMAL = 1,
-		TANGENT = 2,
-		BINORMAL = 3,
-		UV = 4,
-		CLR = 5,
-		INDEX = 6,
-		SHORTCUT_END = 7
-	};
-
 	// The size is not given in bytes, but in elemenst
 	inline Bufferobject(GLenum target, GLenum type, GLenum usage, GLint components, GLvoid const* data, size_t size);
 	inline ~Bufferobject(void);

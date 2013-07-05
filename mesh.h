@@ -15,6 +15,20 @@ class Mesh
 
 public:
 
+	// These can be used to prevent slow string lookups.
+// TODO: In future, make all lookups to be done using integers!
+	enum Shortcut
+	{
+		POS = 0,
+		NORMAL = 1,
+		TANGENT = 2,
+		BINORMAL = 3,
+		UV = 4,
+		CLR = 5,
+		INDEX = 6,
+		SHORTCUT_END = 7
+	};
+
 	inline Mesh(void);
 	inline ~Mesh(void);
 
@@ -23,7 +37,7 @@ public:
 	inline void setBuffer(std::string const& name, Bufferobject* bo, bool release_automatically = false);
 
 	inline Bufferobject const* getBuffer(std::string const& name) const;
-	inline Bufferobject const* getBuffer(Bufferobject::Shortcut shortcut) const;
+	inline Bufferobject const* getBuffer(Shortcut shortcut) const;
 
 private:
 
@@ -38,13 +52,13 @@ private:
 	typedef std::map< std::string, Buffer > Buffers;
 
 	Buffers bufs;
-	Bufferobject* bufs_by_shortcut[Bufferobject::SHORTCUT_END];
+	Bufferobject* bufs_by_shortcut[SHORTCUT_END];
 
 };
 
 inline Mesh::Mesh(void)
 {
-	Hpp::toZero(bufs_by_shortcut, sizeof(bufs_by_shortcut));
+	toZero(bufs_by_shortcut, sizeof(bufs_by_shortcut));
 }
 
 inline Mesh::~Mesh(void)
@@ -74,21 +88,20 @@ inline void Mesh::setBuffer(std::string const& name, GLenum target, GLenum type,
 
 	// If buffer has shortcut name, then store it as shortcut too
 	if (name == "pos") {
-		bufs_by_shortcut[Bufferobject::POS] = bo;
+		bufs_by_shortcut[POS] = bo;
 	} else if (name == "normal") {
-		bufs_by_shortcut[Bufferobject::NORMAL] = bo;
+		bufs_by_shortcut[NORMAL] = bo;
 	} else if (name == "tangent") {
-		bufs_by_shortcut[Bufferobject::TANGENT] = bo;
+		bufs_by_shortcut[TANGENT] = bo;
 	} else if (name == "binormal") {
-		bufs_by_shortcut[Bufferobject::BINORMAL] = bo;
+		bufs_by_shortcut[BINORMAL] = bo;
 	} else if (name == "uv") {
-		bufs_by_shortcut[Bufferobject::UV] = bo;
+		bufs_by_shortcut[UV] = bo;
 	} else if (name == "clr") {
-		bufs_by_shortcut[Bufferobject::CLR] = bo;
+		bufs_by_shortcut[CLR] = bo;
 	} else if (name == "index") {
-		bufs_by_shortcut[Bufferobject::INDEX] = bo;
+		bufs_by_shortcut[INDEX] = bo;
 	}
-
 }
 
 inline void Mesh::setBuffer(std::string const& name, Bufferobject* bo, bool release_automatically)
@@ -106,19 +119,19 @@ inline void Mesh::setBuffer(std::string const& name, Bufferobject* bo, bool rele
 
 	// If buffer has shortcut name, then store it as shortcut too
 	if (name == "pos") {
-		bufs_by_shortcut[Bufferobject::POS] = bo;
+		bufs_by_shortcut[POS] = bo;
 	} else if (name == "normal") {
-		bufs_by_shortcut[Bufferobject::NORMAL] = bo;
+		bufs_by_shortcut[NORMAL] = bo;
 	} else if (name == "tangent") {
-		bufs_by_shortcut[Bufferobject::TANGENT] = bo;
+		bufs_by_shortcut[TANGENT] = bo;
 	} else if (name == "binormal") {
-		bufs_by_shortcut[Bufferobject::BINORMAL] = bo;
+		bufs_by_shortcut[BINORMAL] = bo;
 	} else if (name == "uv") {
-		bufs_by_shortcut[Bufferobject::UV] = bo;
+		bufs_by_shortcut[UV] = bo;
 	} else if (name == "clr") {
-		bufs_by_shortcut[Bufferobject::CLR] = bo;
+		bufs_by_shortcut[CLR] = bo;
 	} else if (name == "index") {
-		bufs_by_shortcut[Bufferobject::INDEX] = bo;
+		bufs_by_shortcut[INDEX] = bo;
 	}
 }
 
@@ -131,9 +144,9 @@ inline Bufferobject const* Mesh::getBuffer(std::string const& name) const
 	return bufs_find->second.bo;
 }
 
-inline Bufferobject const* Mesh::getBuffer(Bufferobject::Shortcut shortcut) const
+inline Bufferobject const* Mesh::getBuffer(Shortcut shortcut) const
 {
-	HppAssert(shortcut < Bufferobject::SHORTCUT_END, "Invalid attribute shortcut!");
+	HppAssert(shortcut < SHORTCUT_END, "Invalid attribute shortcut!");
 	Bufferobject const* result = bufs_by_shortcut[shortcut];
 	if (!result) {
 		throw Exception("Unable to get buffer by shortcut from mesh because it does not exist!");

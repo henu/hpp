@@ -49,14 +49,8 @@ public:
 private:
 
 	// ========================================
-	// Types and functions for friends
+	// Functions for friends
 	// ========================================
-
-	struct LinkedProgram
-	{
-		GLuint prog_id;
-		GLint attribs_by_shortcuts[Bufferobject::SHORTCUT_END];
-	};
 
 	// Shaderprogramhandles use these functions to
 	// inform when they are enabled or disabled.
@@ -71,7 +65,7 @@ private:
 
 	typedef std::vector< Shader > Shaders;
 
-	typedef std::map< Flags, LinkedProgram > LinkedPrograms;
+	typedef std::map< Flags, GLuint > LinkedPrograms;
 
 	typedef std::vector< GLuint > CompiledShaders;
 
@@ -165,10 +159,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	HppAssert(!handle_enabled, "Must not be enabled!");
 	HppCheckGlErrors();
 
-	LinkedProgram new_lprog;
-	for (size_t i = 0; i < Bufferobject::SHORTCUT_END; ++ i) {
-		new_lprog.attribs_by_shortcuts[i] = -1;
-	}
+	GLuint prog_id;
 
 	// Convert flags to lines of codes that make some defines
 	Lines lines_flags;
@@ -256,9 +247,9 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	}
 
 	// Create new program
-	new_lprog.prog_id = GlSystem::CreateProgram();
+	prog_id = GlSystem::CreateProgram();
 	HppCheckGlErrors();
-	if (new_lprog.prog_id == 0) {
+	if (prog_id == 0) {
 		cleanCompiledShaders(compiled_shaders);
 		throw Exception("Unable to create new program object!");
 	}
@@ -268,28 +259,28 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	for (CompiledShaders::const_iterator shaders_it = compiled_shaders.begin();
 	     shaders_it != compiled_shaders.end();
 	     ++ shaders_it) {
-		GlSystem::AttachShader(new_lprog.prog_id, *shaders_it);
+		GlSystem::AttachShader(prog_id, *shaders_it);
 	}
 
 	// Set vertexattribute bindings
 	for (size_t vertexattr_loc = 0;
 	     vertexattr_loc < vertexattrs.size();
 	     ++ vertexattr_loc) {
-		GlSystem::BindAttribLocation(new_lprog.prog_id, vertexattr_loc, vertexattrs[vertexattr_loc].c_str());
+		GlSystem::BindAttribLocation(prog_id, vertexattr_loc, vertexattrs[vertexattr_loc].c_str());
 	}
 
 	// Link program
-	GlSystem::LinkProgram(new_lprog.prog_id);
+	GlSystem::LinkProgram(prog_id);
 	GLint link_status;
-	GlSystem::GetProgramiv(new_lprog.prog_id, GL_LINK_STATUS, &link_status);
+	GlSystem::GetProgramiv(prog_id, GL_LINK_STATUS, &link_status);
 	if (!link_status) {
 		// Get error string
 		GLint error_str_len;
-		GlSystem::GetProgramiv(new_lprog.prog_id, GL_INFO_LOG_LENGTH, &error_str_len);
+		GlSystem::GetProgramiv(prog_id, GL_INFO_LOG_LENGTH, &error_str_len);
 		GLchar* error_c_str = new GLchar[error_str_len+1];
-		GlSystem::GetProgramInfoLog(new_lprog.prog_id, error_str_len+1, reinterpret_cast< GLsizei* >(&error_str_len), error_c_str);
+		GlSystem::GetProgramInfoLog(prog_id, error_str_len+1, reinterpret_cast< GLsizei* >(&error_str_len), error_c_str);
 		// Clean Shaderprogram
-		GlSystem::DeleteProgram(new_lprog.prog_id);
+		GlSystem::DeleteProgram(prog_id);
 		// Clean Shaders
 		cleanCompiledShaders(compiled_shaders);
 		// Throw exception
@@ -303,39 +294,23 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 
 	// Get locations of attributes
 	GLint attribs_count;
-	GlSystem::GetProgramiv(new_lprog.prog_id, GL_ACTIVE_ATTRIBUTES, &attribs_count);
+	GlSystem::GetProgramiv(prog_id, GL_ACTIVE_ATTRIBUTES, &attribs_count);
 	size_t const NAMEBUF_MAXLEN = 1024;
 	char namebuf[NAMEBUF_MAXLEN];
 	for (size_t attrib_id = 0; attrib_id < size_t(attribs_count); ++ attrib_id) {
 		GLsizei namebuf_len;
 		GLint buf_size;
 		GLenum buf_type;
-		GlSystem::GetActiveAttrib(new_lprog.prog_id, attrib_id, NAMEBUF_MAXLEN, &namebuf_len, &buf_size, &buf_type, namebuf);
+		GlSystem::GetActiveAttrib(prog_id, attrib_id, NAMEBUF_MAXLEN, &namebuf_len, &buf_size, &buf_type, namebuf);
 		std::string name(namebuf, namebuf_len);
-		GLint attrib_location = GlSystem::GetAttribLocation(new_lprog.prog_id, name.c_str());
+		GLint attrib_location = GlSystem::GetAttribLocation(prog_id, name.c_str());
 		if (attrib_location < 0) {
 			std::cerr << "WARNING: Attribute \"" << name << "\" location could not be found, but glGetActiveAttrib() claims it exists!" << std::endl;
 			continue;
 		}
-		// Store shortcuts too
-		if (name == "pos") {
-			new_lprog.attribs_by_shortcuts[Bufferobject::POS] = attrib_location;
-		} else if (name == "normal") {
-			new_lprog.attribs_by_shortcuts[Bufferobject::NORMAL] = attrib_location;
-		} else if (name == "tangent") {
-			new_lprog.attribs_by_shortcuts[Bufferobject::TANGENT] = attrib_location;
-		} else if (name == "binormal") {
-			new_lprog.attribs_by_shortcuts[Bufferobject::BINORMAL] = attrib_location;
-		} else if (name == "uv") {
-			new_lprog.attribs_by_shortcuts[Bufferobject::UV] = attrib_location;
-		} else if (name == "clr") {
-			new_lprog.attribs_by_shortcuts[Bufferobject::CLR] = attrib_location;
-		} else if (name == "index") {
-			new_lprog.attribs_by_shortcuts[Bufferobject::INDEX] = attrib_location;
-		}
 	}
 
-	lprogs[flags] = new_lprog;
+	lprogs[flags] = prog_id;
 
 	HppCheckGlErrors();
 }
@@ -346,8 +321,8 @@ inline void Shaderprogram::cleanLinkedPrograms(void)
 	for (LinkedPrograms::const_iterator lprogs_it = lprogs.begin();
 	     lprogs_it != lprogs.end();
 	     ++ lprogs_it) {
-	     	LinkedProgram const& lprog = lprogs_it->second;
-	     	GlSystem::DeleteProgram(lprog.prog_id);
+	     	GLuint prog_id = lprogs_it->second;
+	     	GlSystem::DeleteProgram(prog_id);
 	}
 	lprogs.clear();
 }
