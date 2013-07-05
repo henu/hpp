@@ -41,4 +41,36 @@ std::string const Renderqueue2d::SHADER_FRG =
 "	#endif\n"
 "}\n";
 
+Strings Renderqueue2d::uniformnames;
+Strings Renderqueue2d::vertexattributenames;
+
+Shaderprogram* Renderqueue2d::program = NULL;
+
+void Renderqueue2d::initShaders(void)
+{
+	uniformnames.clear();
+	uniformnames.push_back("viewmat");
+	uniformnames.push_back("tex");
+
+	vertexattributenames.clear();
+	vertexattributenames.push_back("pos");
+	vertexattributenames.push_back("uv");
+	vertexattributenames.push_back("clr");
+
+	// Initialize shaderprogram
+	Shader shader_vrt;
+	shader_vrt.load(SHADER_VRT, Shader::VERTEX_SHADER);
+	Shader shader_frg;
+	shader_frg.load(SHADER_FRG, Shader::FRAGMENT_SHADER);
+	program = new Shaderprogram(uniformnames, vertexattributenames);
+	program->attachShader(shader_vrt);
+	program->attachShader(shader_frg);
+}
+
+void Renderqueue2d::deinitShaders(void)
+{
+	delete program;
+	program = NULL;
+}
+
 }

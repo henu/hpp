@@ -2,6 +2,7 @@
 
 #include "videorecorder.h"
 #include "genericmaterial.h"
+#include "renderqueue2d.h"
 #include "texturemanager.h"
 #include "vbomanager.h"
 #include "lock.h"
@@ -149,6 +150,7 @@ void Display::open(uint32_t width,
 
 	// Initialize some shaders
 	GenericMaterial::initShaders();
+	Renderqueue2d::initShaders();
 
 	// Set desired defaults
 	glEnable(GL_DEPTH_TEST);
@@ -160,6 +162,7 @@ void Display::close(void)
 {
 	HppAssert(instance.opened, "Not opened!");
 
+	Renderqueue2d::deinitShaders();
 	GenericMaterial::deinitShaders();
 
 	instance.vbomanager.cleanReleasableVbos();

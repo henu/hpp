@@ -9,6 +9,7 @@
 #include "noncopyable.h"
 #include "matrix3.h"
 #include "matrix4.h"
+#include "types.h"
 
 #include <string>
 #include <map>
@@ -19,58 +20,57 @@
 namespace Hpp
 {
 
+class Shaderprogramhandle;
+
 class Shaderprogram : private NonCopyable
 {
+
+	friend class Shaderprogramhandle;
 
 public:
 
 	typedef std::set< std::string > Flags;
 
 	// Constructor and destructor
-	inline Shaderprogram(void);
+	inline Shaderprogram(Strings const& uniforms = Strings(), Strings const& vertexattrs = Strings());
 	inline ~Shaderprogram(void);
+
+	inline void addUniformnames(Strings const& uniforms);
+	inline void addVertexattributenames(Strings const& vertexattrs);
 
 	// Attachs shaders to program
 	inline void attachShader(Shader const& shader);
 
-	// Enables/disables shader
-	inline void enable(Flags const& flags = Flags());
-	inline void disable(void);
+	// Creates handle to this shaderprogram with specific flags and names
+	// of uniforms and vertexattributes in specific numeric shortcuts.
+// TODO: In future, make it so that program keeps handles of all flags and user must not destroy them!
+	Shaderprogramhandle* createHandle(Flags const& flags);
 
-	// Functions to set uniforms
-	inline void setUniform(std::string const& name, Matrix3 const& mat, bool transpose = false);
-	inline void setUniform(std::string const& name, Matrix4 const& mat, bool transpose = false);
-	inline void setUniform(std::string const& name, Vector3 const& v);
-	inline void setUniform(std::string const& name, Vector3 const& v, Real w);
-	inline void setUniform(std::string const& name, Color const& color, Pixelformat force_format = RGBA);
-	inline void setUniform1f(std::string const& name, GLfloat f0);
-	inline void setUniform2f(std::string const& name, GLfloat f0, GLfloat f1);
-	inline void setUniform3f(std::string const& name, GLfloat f0, GLfloat f1, GLfloat f2);
-	inline void setUniform4f(std::string const& name, GLfloat f0, GLfloat f1, GLfloat f2, GLfloat f3);
-	inline void setUniform1i(std::string const& name, GLint i0);
-	inline void setUniform2i(std::string const& name, GLint i0, GLint i1);
-	inline void setUniform3i(std::string const& name, GLint i0, GLint i1, GLint i2);
-	inline void setUniform4i(std::string const& name, GLint i0, GLint i1, GLint i2, GLint i3);
+private:
 
-	inline void setBufferobject(std::string const& name, Bufferobject const* buf);
-	inline void setBufferobject(Bufferobject::Shortcut shortcut, Bufferobject const* buf);
+	// ========================================
+	// Types and functions for friends
+	// ========================================
 
-	// Returns GLSL Id of enabled program. This may deprecate between
-	// enables and disables.
-	inline GLuint getGLSLProgram(void) const;
+	struct LinkedProgram
+	{
+		GLuint prog_id;
+		GLint attribs_by_shortcuts[Bufferobject::SHORTCUT_END];
+	};
+
+	// Shaderprogramhandles use these functions to
+	// inform when they are enabled or disabled.
+	inline void handleEnabled(void);
+	inline void handleDisabled(void);
+
+	// Adds Vertexattributes that are used. This way we know
+	// what should be disabled when shader is disabled.
+	inline void addUsedVertexattribute(GLuint vertexattribute_loc);
 
 private:
 
 	typedef std::vector< Shader > Shaders;
 
-	typedef std::map< std::string, GLuint > AttribLocations;
-
-	struct LinkedProgram
-	{
-		GLuint prog_id;
-		AttribLocations attribs;
-		GLint attribs_by_shortcuts[Bufferobject::SHORTCUT_END];
-	};
 	typedef std::map< Flags, LinkedProgram > LinkedPrograms;
 
 	typedef std::vector< GLuint > CompiledShaders;
@@ -79,8 +79,16 @@ private:
 
 	typedef std::set< GLuint > AttribsInUse;
 
-	// If shader is enabled, then this pointer points to enabled program.
-	LinkedProgram* enabled_program;
+	// These contain names of uniforms and vertexattributes. Their
+	// locations in linked shaders will be the same (actually locations
+	// of uniforms are defined by OpenGL, but we do a conversion table
+	// so it looks like they are always in same location)
+	Strings uniforms;
+	Strings vertexattrs;
+
+	// Shaderprogramhandle that is currently
+	// enabled or NULL if nothing is enabled.
+	bool handle_enabled;
 
 	Shaders shaders;
 
@@ -95,8 +103,10 @@ private:
 
 };
 
-inline Shaderprogram::Shaderprogram(void) :
-enabled_program(NULL)
+inline Shaderprogram::Shaderprogram(Strings const& uniforms, Strings const& vertexattrs) :
+uniforms(uniforms),
+vertexattrs(vertexattrs),
+handle_enabled(false)
 {
 	HppCheckForCorrectThread();
 }
@@ -107,6 +117,16 @@ inline Shaderprogram::~Shaderprogram(void)
 	cleanLinkedPrograms();
 }
 
+inline void Shaderprogram::addUniformnames(Strings const& uniforms)
+{
+	this->uniforms.insert(this->uniforms.end(), uniforms.begin(), uniforms.end());
+}
+
+inline void Shaderprogram::addVertexattributenames(Strings const& vertexattrs)
+{
+	this->vertexattrs.insert(this->vertexattrs.end(), vertexattrs.begin(), vertexattrs.end());
+}
+
 inline void Shaderprogram::attachShader(Shader const& shader)
 {
 	HppCheckForCorrectThread();
@@ -114,35 +134,17 @@ inline void Shaderprogram::attachShader(Shader const& shader)
 	shaders.push_back(shader);
 }
 
-inline void Shaderprogram::enable(Flags const& flags)
+inline void Shaderprogram::handleEnabled(void)
 {
-	HppCheckGlErrors();
-	HppCheckForCorrectThread();
-// TODO: Ensure only one shaderprogram is enabled!
-	HppAssert(!enabled_program, "Already enabled!");
-
-	// Ensure program is linked with these flags
-	LinkedPrograms::iterator lprogs_find = lprogs.find(flags);
-	if (lprogs_find == lprogs.end()) {
-		linkProgram(flags);
-		lprogs_find = lprogs.find(flags);
-	}
-
-	HppAssert(lprogs_find != lprogs.end(), "Fail!");
-	enabled_program = &lprogs_find->second;
-	GlSystem::UseProgram(enabled_program->prog_id);
-	HppCheckGlErrors();
-
-	HppAssert(used_attribs.empty(), "There are already bound Bufferobjects!");
+	HppAssert(!handle_enabled, "There is already a Shaderprogramhandle enabled!");
+	HppAssert(used_attribs.empty(), "There are already some Bufferobjects bound!");
+	handle_enabled = true;
 }
 
-inline void Shaderprogram::disable(void)
+inline void Shaderprogram::handleDisabled(void)
 {
-	HppCheckForCorrectThread();
-	HppAssert(enabled_program, "Not enabled!");
-	HppCheckGlErrors();
-	GlSystem::UseProgram(0);
-	HppCheckGlErrors();
+	HppAssert(handle_enabled, "There is no Shaderprogramhandle enabled!");
+	handle_enabled = false;
 
 	// Disable bufferobjects
 	for (AttribsInUse::iterator used_attribs_it = used_attribs.begin();
@@ -151,194 +153,16 @@ inline void Shaderprogram::disable(void)
 		GlSystem::DisableVertexAttribArray(*used_attribs_it);
 	}
 	used_attribs.clear();
-
-	enabled_program = NULL;
 }
 
-inline void Shaderprogram::setUniform(std::string const& name, Matrix3 const& mat, bool transpose)
+inline void Shaderprogram::addUsedVertexattribute(GLuint vertexattribute_loc)
 {
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::UniformMatrix3fv(uniform_id, 1, transpose, mat.getCells());
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform(std::string const& name, Matrix4 const& mat, bool transpose)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::UniformMatrix4fv(uniform_id, 1, transpose, mat.getCells());
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform(std::string const& name, Vector3 const& v)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::Uniform3f(uniform_id, v.x, v.y, v.z);
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform(std::string const& name, Vector3 const& v, Real w)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::Uniform4f(uniform_id, v.x, v.y, v.z, w);
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform(std::string const& name, Color const& color, Pixelformat force_format)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	if (force_format == RGBA) {
-		GlSystem::Uniform4f(uniform_id, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
-	} else if (force_format == RGB) {
-		GlSystem::Uniform3f(uniform_id, color.getRed(), color.getGreen(), color.getBlue());
-	} else if (force_format == GRAYSCALE) {
-		GlSystem::Uniform1f(uniform_id, color.getValue());
-	} else if (force_format == GRAYSCALE_ALPHA) {
-		GlSystem::Uniform2f(uniform_id, color.getValue(), color.getAlpha());
-	} else if (force_format == ALPHA) {
-		GlSystem::Uniform1f(uniform_id, color.getAlpha());
-	} else {
-		throw Exception("Invalid uniform format!");
-	}
-
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform1f(std::string const& name, GLfloat f0)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::Uniform1f(uniform_id, f0);
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform2f(std::string const& name, GLfloat f0, GLfloat f1)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::Uniform2f(uniform_id, f0, f1);
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform3f(std::string const& name, GLfloat f0, GLfloat f1, GLfloat f2)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::Uniform3f(uniform_id, f0, f1, f2);
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform4f(std::string const& name, GLfloat f0, GLfloat f1, GLfloat f2, GLfloat f3)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::Uniform4f(uniform_id, f0, f1, f2, f3);
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform1i(std::string const& name, GLint i0)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::Uniform1i(uniform_id, i0);
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform2i(std::string const& name, GLint i0, GLint i1)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::Uniform2i(uniform_id, i0, i1);
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform3i(std::string const& name, GLint i0, GLint i1, GLint i2)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::Uniform3i(uniform_id, i0, i1, i2);
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setUniform4i(std::string const& name, GLint i0, GLint i1, GLint i2, GLint i3)
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	GLuint uniform_id = GlSystem::GetUniformLocation(enabled_program->prog_id, name.c_str());
-	GlSystem::Uniform4i(uniform_id, i0, i1, i2, i3);
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setBufferobject(std::string const& name, Bufferobject const* buf)
-{
-	HppCheckGlErrors();
-
-	// Find vertex attribute location. If shader does not
-	// have an attribute with that name, consider that
-	// it wants to discard all information in it.
-	AttribLocations::iterator attribs_find = enabled_program->attribs.find(name);
-	if (attribs_find == enabled_program->attribs.end()) {
-		return;
-	}
-	GLuint attrib_location = attribs_find->second;
-
-	GlSystem::EnableVertexAttribArray(attrib_location);
-	GlSystem::BindBuffer(buf->getTarget(), buf->getBufferId());
-	GlSystem::VertexAttribPointer(attrib_location, buf->getComponents(), buf->getType(), buf->getNormalized(), 0, NULL);
-
-	used_attribs.insert(attrib_location);
-
-	HppCheckGlErrors();
-}
-
-inline void Shaderprogram::setBufferobject(Bufferobject::Shortcut shortcut, Bufferobject const* buf)
-{
-	HppCheckGlErrors();
-
-	// Find vertex attribute location. If shader does not
-	// have an attribute with that name, consider that
-	// it wants to discard all information in it.
-	HppAssert(shortcut < Bufferobject::SHORTCUT_END, "Invalid attribute shortcut!");
-	GLint attrib_location = enabled_program->attribs_by_shortcuts[shortcut];
-	if (attrib_location < 0) {
-		return;
-	}
-
-	GlSystem::EnableVertexAttribArray(attrib_location);
-	GlSystem::BindBuffer(buf->getTarget(), buf->getBufferId());
-	GlSystem::VertexAttribPointer(attrib_location, buf->getComponents(), buf->getType(), buf->getNormalized(), 0, NULL);
-
-	used_attribs.insert(attrib_location);
-
-	HppCheckGlErrors();
-}
-
-inline GLuint Shaderprogram::getGLSLProgram(void) const
-{
-	HppCheckGlErrors();
-	HppAssert(enabled_program, "Not enabled!");
-	return enabled_program->prog_id;
+	used_attribs.insert(vertexattribute_loc);
 }
 
 inline void Shaderprogram::linkProgram(Flags const& flags)
 {
-	HppAssert(!enabled_program, "Must not be enabled!");
+	HppAssert(!handle_enabled, "Must not be enabled!");
 	HppCheckGlErrors();
 
 	LinkedProgram new_lprog;
@@ -447,6 +271,13 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 		GlSystem::AttachShader(new_lprog.prog_id, *shaders_it);
 	}
 
+	// Set vertexattribute bindings
+	for (size_t vertexattr_loc = 0;
+	     vertexattr_loc < vertexattrs.size();
+	     ++ vertexattr_loc) {
+		GlSystem::BindAttribLocation(new_lprog.prog_id, vertexattr_loc, vertexattrs[vertexattr_loc].c_str());
+	}
+
 	// Link program
 	GlSystem::LinkProgram(new_lprog.prog_id);
 	GLint link_status;
@@ -486,7 +317,6 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 			std::cerr << "WARNING: Attribute \"" << name << "\" location could not be found, but glGetActiveAttrib() claims it exists!" << std::endl;
 			continue;
 		}
-		new_lprog.attribs[name] = attrib_location;
 		// Store shortcuts too
 		if (name == "pos") {
 			new_lprog.attribs_by_shortcuts[Bufferobject::POS] = attrib_location;
@@ -512,7 +342,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 
 inline void Shaderprogram::cleanLinkedPrograms(void)
 {
-	HppAssert(!enabled_program, "Must not be enabled!");
+	HppAssert(!handle_enabled, "Must not be enabled!");
 	for (LinkedPrograms::const_iterator lprogs_it = lprogs.begin();
 	     lprogs_it != lprogs.end();
 	     ++ lprogs_it) {

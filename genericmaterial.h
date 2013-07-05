@@ -15,6 +15,7 @@
 #include "texturemanager.h"
 #include "json.h"
 #include "exception.h"
+#include "shaderprogramhandle.h"
 
 #include <string>
 #include <map>
@@ -59,7 +60,9 @@ public:
 	// * "setShadowTestEnabled()" enables/disables calling of
 	//   getShadow(vec4) that tells how much given position is in the
 	//   shadow. This function must be found from some custom shader.
-	inline void addCustomShader(Shader const& shader);
+	inline void addCustomShader(Shader const& shader,
+	                            Strings const& uniformnames = Strings(),
+	                            Strings const& vertattrnams = Strings());
 	inline void setCustomShaderFlag(std::string const& flag, bool enabled);
 	inline void setShadowTestEnabled(bool shadow_test_enabled);
 
@@ -91,6 +94,38 @@ private:
 	static float const NEEDS_LIGHT_THRESHOLD;
 	static float const TRANSLUCENT_THRESHOLD;
 
+	// Shader flags that change so often, that it
+	// is better to keep all handles in memory.
+	typedef uint8_t FastFlag;
+	static FastFlag const FF_AMBIENT_LIGHT = 0x01;
+	static FastFlag const FF_LIGHT         = 0x02;
+	static FastFlag const FF_ATTENU_C      = 0x04;
+	static FastFlag const FF_ATTENU_L      = 0x08;
+	static FastFlag const FF_ATTENU_Q      = 0x10;
+	static FastFlag const FF_SHADOW_FUNC   = 0x20;
+	static FastFlag const FAST_FLAGS       = 0x40;
+
+	// Locations of all uniforms and vertex attributes
+	static uint16_t const UNIF_LIGHT_POS_VIEWSPACE = 0;
+	static uint16_t const UNIF_PMAT = 1;
+	static uint16_t const UNIF_MVMAT = 2;
+	static uint16_t const UNIF_MMAT = 3;
+	static uint16_t const UNIF_AMBIENT_LIGHT = 4;
+	static uint16_t const UNIF_LIGHT_CONSTANT_ATTENUATION = 5;
+	static uint16_t const UNIF_LIGHT_LINEAR_ATTENUATION = 6;
+	static uint16_t const UNIF_LIGHT_QUADRATIC_ATTENUATION = 7;
+	static uint16_t const UNIF_LIGHT_COLOR = 8;
+	static uint16_t const UNIF_MATERIAL_COLOR = 9;
+	static uint16_t const UNIF_CMAP = 10;
+	static uint16_t const UNIF_NMAP = 11;
+	static uint16_t const UNIF_SMAP = 12;
+
+	static uint16_t const VATR_POS = 0;
+	static uint16_t const VATR_NORMAL = 1;
+	static uint16_t const VATR_TANGENT = 2;
+	static uint16_t const VATR_BINORMAL = 3;
+	static uint16_t const VATR_UV = 4;
+
 	bool use_glsl_version_330;
 
 	// The color and alpha of Material
@@ -116,14 +151,22 @@ private:
 	Shaderprogram::Flags custom_program_flags;
 	bool shadow_test_enabled;
 
-	// State
+	// Container for Shaderhandles for every combination of fast flags
+	mutable Shaderprogramhandle* handles[FAST_FLAGS];
+
+	// State from options
 	bool needs_light;
 	bool is_translucent;
 	bool needs_uvs;
 
 	// Rendering state
+	mutable Shaderprogramhandle* rendering_programhandle;
 	mutable Light const* rendering_light;
 	mutable Matrix4 rendering_viewmatrix;
+
+	// Class-wide list of uniform and vertexattribute names
+	static Strings uniformnames;
+	static Strings vertexattributenames;
 
 	// Class-wide shaders
 	static Shaderprogram* program_110;
@@ -135,6 +178,8 @@ private:
 
 	inline void updateNeedsLight(void);
 	inline void updateIsTranslucent(void);
+
+	inline void resetAllShaderprogramhandles(void);
 
 };
 
@@ -153,8 +198,12 @@ shadeless(false),
 normalmap_weight(1),
 custom_program(NULL),
 shadow_test_enabled(false),
-needs_uvs(false)
+needs_uvs(false),
+rendering_programhandle(NULL),
+rendering_light(NULL)
 {
+	toZero(handles, sizeof(handles));
+
 	Json json(path.readString());
 
 	if (json.keyExists("color")) {
@@ -223,8 +272,12 @@ twosided(twosided),
 shadeless(false),
 normalmap_weight(rawmat.normalmap_weight),
 custom_program(NULL),
-shadow_test_enabled(false)
+shadow_test_enabled(false),
+rendering_programhandle(NULL),
+rendering_light(NULL)
 {
+	toZero(handles, sizeof(handles));
+
 	needs_uvs = false;
 	if (rawmat.colormap_tex) {
 		colormap = rawmat.colormap_tex;
@@ -273,14 +326,18 @@ shadeless(false),
 normalmap_weight(1),
 custom_program(NULL),
 shadow_test_enabled(false),
-needs_uvs(false)
+needs_uvs(false),
+rendering_programhandle(NULL),
+rendering_light(NULL)
 {
+	toZero(handles, sizeof(handles));
 	updateNeedsLight();
 	updateIsTranslucent();
 }
 
 inline GenericMaterial::~GenericMaterial(void)
 {
+	resetAllShaderprogramhandles();
 	delete custom_program;
 }
 
@@ -294,22 +351,26 @@ inline void GenericMaterial::setColor(Color const& color)
 inline void GenericMaterial::setColormap(Texture* cmap)
 {
 	colormap = cmap;
+	resetAllShaderprogramhandles();
 }
 
 inline void GenericMaterial::setNormalmap(Texture* nmap)
 {
 	normalmap = nmap;
+	resetAllShaderprogramhandles();
 }
 
 inline void GenericMaterial::setSpecularmap(Texture* smap)
 {
 	specularmap = smap;
+	resetAllShaderprogramhandles();
 }
 
 inline void GenericMaterial::setShadeless(bool shadeless)
 {
 	this->shadeless = shadeless;
 	updateNeedsLight();
+	resetAllShaderprogramhandles();
 }
 
 inline bool GenericMaterial::needsNormalBuffer(void) const
@@ -342,11 +403,13 @@ inline bool GenericMaterial::needsTangentAndBinormalBuffer(void) const
 	return false;
 }
 
-inline void GenericMaterial::addCustomShader(Shader const& shader)
+inline void GenericMaterial::addCustomShader(Shader const& shader,
+                                             Strings const& uniformnames,
+                                             Strings const& vertattrnams)
 {
 	// If custom shader is not yet loaded
 	if (!custom_program) {
-		custom_program = new Shaderprogram();
+		custom_program = new Shaderprogram(uniformnames, vertexattributenames);
 		if (use_glsl_version_330) {
 			custom_program->attachShader(shader_vrt_330);
 			custom_program->attachShader(shader_frg_330);
@@ -356,6 +419,11 @@ inline void GenericMaterial::addCustomShader(Shader const& shader)
 		}
 	}
 	custom_program->attachShader(shader);
+
+	custom_program->addUniformnames(uniformnames);
+	custom_program->addVertexattributenames(vertattrnams);
+
+	resetAllShaderprogramhandles();
 }
 
 inline void GenericMaterial::setCustomShaderFlag(std::string const& flag, bool enabled)
@@ -365,6 +433,7 @@ inline void GenericMaterial::setCustomShaderFlag(std::string const& flag, bool e
 	} else {
 		custom_program_flags.erase(flag);
 	}
+	resetAllShaderprogramhandles();
 }
 
 inline void GenericMaterial::setShadowTestEnabled(bool shadow_test_enabled)
@@ -376,9 +445,9 @@ inline void GenericMaterial::setViewmatrix(Matrix4 const& viewmatrix)
 {
 	if (rendering_light) {
 		if (rendering_light->getType() == Light::POINT) {
-			getProgram()->setUniform("light_pos_viewspace", viewmatrix * rendering_light->getPosition(), 1);
+			rendering_programhandle->setUniform(UNIF_LIGHT_POS_VIEWSPACE, viewmatrix * rendering_light->getPosition(), 1);
 		} else {
-			getProgram()->setUniform("light_pos_viewspace", matrix4ToMatrix3(viewmatrix) * -rendering_light->getDirection(), 0);
+			rendering_programhandle->setUniform(UNIF_LIGHT_POS_VIEWSPACE, matrix4ToMatrix3(viewmatrix) * -rendering_light->getDirection(), 0);
 		}
 	}
 	rendering_viewmatrix = viewmatrix;
@@ -386,7 +455,7 @@ inline void GenericMaterial::setViewmatrix(Matrix4 const& viewmatrix)
 
 inline void GenericMaterial::setProjectionmatrix(Matrix4 const& projectionmatrix)
 {
-	getProgram()->setUniform("pmat", projectionmatrix, true);
+	rendering_programhandle->setUniform(UNIF_PMAT, projectionmatrix, true);
 }
 
 inline void GenericMaterial::renderMesh(Mesh const* mesh, Transform const& transf)
@@ -395,29 +464,31 @@ inline void GenericMaterial::renderMesh(Mesh const* mesh, Transform const& trans
 	Matrix4 mvmat = rendering_viewmatrix * transf.getMatrix();
 
 	// Bind all needed buffers
-	getProgram()->setBufferobject(Bufferobject::POS, mesh->getBuffer(Bufferobject::POS));
+	rendering_programhandle->setBufferobject(VATR_POS, mesh->getBuffer(Bufferobject::POS));
 	if (rendering_light && needsNormalBuffer()) {
-		getProgram()->setBufferobject(Bufferobject::NORMAL, mesh->getBuffer(Bufferobject::NORMAL));
+		rendering_programhandle->setBufferobject(VATR_NORMAL, mesh->getBuffer(Bufferobject::NORMAL));
 	}
 	if (needsUvBuffer()) {
-		getProgram()->setBufferobject(Bufferobject::UV, mesh->getBuffer(Bufferobject::UV));
+		rendering_programhandle->setBufferobject(VATR_UV, mesh->getBuffer(Bufferobject::UV));
 	}
 	if (needsTangentAndBinormalBuffer()) {
-		getProgram()->setBufferobject(Bufferobject::TANGENT, mesh->getBuffer(Bufferobject::TANGENT));
-		getProgram()->setBufferobject(Bufferobject::BINORMAL, mesh->getBuffer(Bufferobject::BINORMAL));
+		rendering_programhandle->setBufferobject(VATR_TANGENT, mesh->getBuffer(Bufferobject::TANGENT));
+		rendering_programhandle->setBufferobject(VATR_BINORMAL, mesh->getBuffer(Bufferobject::BINORMAL));
 	}
 
-	getProgram()->setUniform("mvmat", mvmat, true);
+	rendering_programhandle->setUniform(UNIF_MVMAT, mvmat, true);
 	if (shadow_test_enabled) {
-		getProgram()->setUniform("mmat", transf.getMatrix(), true);
+		rendering_programhandle->setUniform(UNIF_MMAT, transf.getMatrix(), true);
 	}
 
-	mesh->getBuffer("index")->drawElements(GL_TRIANGLES);
+	mesh->getBuffer(Bufferobject::INDEX)->drawElements(GL_TRIANGLES);
 
 }
 
 inline void GenericMaterial::beginRendering(Color const& ambient_light, Light const* light, bool additive_rendering) const
 {
+	HppAssert(!rendering_programhandle, "Shaderprogramhandle is already enabled!");
+
 // TODO: Implement using of normalmap_weight!
 HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 // TODO: Implement additive rendering!
@@ -436,81 +507,94 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 		glDisable(GL_CULL_FACE);
 	}
 
-	Shaderprogram::Flags sflags = custom_program_flags;
-
-	if (colormap) {
-		colormap->bind();
-		sflags.insert("CMAP");
-	}
-	if (normalmap) {
-		normalmap->bind();
-		sflags.insert("NMAP");
-	}
-	if (specularmap) {
-		specularmap->bind();
-		sflags.insert("SMAP");
-	}
-	GlSystem::ActiveTexture(GL_TEXTURE0);
-
-	// Initialize shaders
-	if (shadeless) {
-		sflags.insert("SHADELESS");
-	} else {
+	// First gather only fast flags to test if proper
+	// Shaderprogramhandle already exists
+	FastFlag fast_flags = 0;
+	if (!shadeless) {
 		if (ambient_light_enabled) {
-			sflags.insert("AMBIENT_LIGHT");
+			fast_flags |= FF_AMBIENT_LIGHT;
 		}
 		if (light) {
-			sflags.insert("LIGHT");
-			// Set attenuation light flags
+			fast_flags |= FF_LIGHT;
+			// Check light attenuation flags
 			if (light->getType() == Light::POINT) {
-				float attenu_c = light->getConstantAttenuation();
-				float attenu_l = light->getLinearAttenuation();
-				float attenu_q = light->getQuadraticAttenuation();
-				if (attenu_c > 0) sflags.insert("ATTENU_C");
-				if (attenu_l > 0) sflags.insert("ATTENU_L");
-				if (attenu_q > 0) sflags.insert("ATTENU_Q");
+				if (light->getConstantAttenuation() > 0) fast_flags |= FF_ATTENU_C;
+				if (light->getLinearAttenuation() > 0) fast_flags |= FF_ATTENU_L;
+				if (light->getQuadraticAttenuation() > 0) fast_flags |= FF_ATTENU_Q;
 			}
 		}
+		if (shadow_test_enabled) fast_flags |= FF_SHADOW_FUNC;
 	}
 
-	if (color.getRed() > NEEDS_LIGHT_THRESHOLD || color.getGreen() > NEEDS_LIGHT_THRESHOLD || color.getBlue() > NEEDS_LIGHT_THRESHOLD) {
-		sflags.insert("COLOR");
+	// Try to get handle from already created handles.
+	HppAssert(fast_flags < FAST_FLAGS, "Flags overflow!");
+	rendering_programhandle = handles[fast_flags];
+	// If handle does not exist, then create it
+	if (!rendering_programhandle) {
+		// Gather all flags
+		Shaderprogram::Flags sflags = custom_program_flags;
+
+		if (colormap) sflags.insert("CMAP");
+		if (normalmap) sflags.insert("NMAP");
+		if (specularmap) sflags.insert("SMAP");
+		if (shadeless) {
+			sflags.insert("SHADELESS");
+		} else {
+			if (ambient_light_enabled) sflags.insert("AMBIENT_LIGHT");
+			if (light) {
+				sflags.insert("LIGHT");
+				// Check light attenuation flags
+				if (light->getType() == Light::POINT) {
+					if (light->getConstantAttenuation() > 0) sflags.insert("ATTENU_C");
+					if (light->getLinearAttenuation() > 0) sflags.insert("ATTENU_L");
+					if (light->getQuadraticAttenuation() > 0) sflags.insert("ATTENU_Q");
+				}
+			}
+		}
+		if (color.getRed() > NEEDS_LIGHT_THRESHOLD || color.getGreen() > NEEDS_LIGHT_THRESHOLD || color.getBlue() > NEEDS_LIGHT_THRESHOLD) sflags.insert("COLOR");
+		if (shadow_test_enabled) sflags.insert("SHADOW_FUNC");
+
+		rendering_programhandle = getProgram()->createHandle(sflags);
+
+		handles[fast_flags] = rendering_programhandle;
 	}
 // TODO: Set specular and other values!
 
-	if (shadow_test_enabled) {
-		sflags.insert("SHADOW_FUNC");
-	}
+	// Bind necessary textures
+	if (colormap) colormap->bind();
+	if (normalmap) normalmap->bind();
+	if (specularmap) specularmap->bind();
+	GlSystem::ActiveTexture(GL_TEXTURE0);
 
-	getProgram()->enable(sflags);
+	rendering_programhandle->enable();
 
 	if (!shadeless) {
 		if (ambient_light_enabled) {
-			getProgram()->setUniform("ambient_light", ambient_light);
+			rendering_programhandle->setUniform(UNIF_AMBIENT_LIGHT, ambient_light);
 		}
 		if (light) {
 			if (light->getType() == Light::POINT) {
 				float attenu_c = light->getConstantAttenuation();
 				float attenu_l = light->getLinearAttenuation();
 				float attenu_q = light->getQuadraticAttenuation();
-				if (attenu_c > 0) getProgram()->setUniform1f("light_constant_attenuation", attenu_c);
-				if (attenu_l > 0) getProgram()->setUniform1f("light_linear_attenuation", attenu_c);
-				if (attenu_q > 0) getProgram()->setUniform1f("light_quadratic_attenuation", attenu_c);
+				if (attenu_c > 0) rendering_programhandle->setUniform1f(UNIF_LIGHT_CONSTANT_ATTENUATION, attenu_c);
+				if (attenu_l > 0) rendering_programhandle->setUniform1f(UNIF_LIGHT_LINEAR_ATTENUATION, attenu_l);
+				if (attenu_q > 0) rendering_programhandle->setUniform1f(UNIF_LIGHT_QUADRATIC_ATTENUATION, attenu_q);
 			}
-			getProgram()->setUniform("light_color", light->getColor(), RGB);
+			rendering_programhandle->setUniform(UNIF_LIGHT_COLOR, light->getColor(), RGB);
 		}
 	}
 	if (color.getRed() > NEEDS_LIGHT_THRESHOLD || color.getGreen() > NEEDS_LIGHT_THRESHOLD || color.getBlue() > NEEDS_LIGHT_THRESHOLD) {
-		getProgram()->setUniform("material_color", color);
+		rendering_programhandle->setUniform(UNIF_MATERIAL_COLOR, color);
 	}
 	if (colormap) {
-		getProgram()->setUniform1i("cmap", colormap->getBoundTextureunit());
+		rendering_programhandle->setUniform1i(UNIF_CMAP, colormap->getBoundTextureunit());
 	}
 	if (normalmap) {
-		getProgram()->setUniform1i("nmap", normalmap->getBoundTextureunit());
+		rendering_programhandle->setUniform1i(UNIF_NMAP, normalmap->getBoundTextureunit());
 	}
 	if (specularmap) {
-		getProgram()->setUniform1i("smap", specularmap->getBoundTextureunit());
+		rendering_programhandle->setUniform1i(UNIF_SMAP, specularmap->getBoundTextureunit());
 	}
 
 	rendering_light = light;
@@ -518,7 +602,8 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 
 inline void GenericMaterial::endRendering(void) const
 {
-	getProgram()->disable();
+	rendering_programhandle->disable();
+	rendering_programhandle = NULL;
 
 	if (normalmap) {
 		normalmap->unbind();
@@ -581,6 +666,14 @@ inline void GenericMaterial::updateIsTranslucent(void)
 	} else {
 		is_translucent = false;
 	}
+}
+
+inline void GenericMaterial::resetAllShaderprogramhandles(void)
+{
+	for (size_t comb = 0; comb < FAST_FLAGS; ++ comb) {
+		delete handles[comb];
+	}
+	toZero(handles, sizeof(handles));
 }
 
 }

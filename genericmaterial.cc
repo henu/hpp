@@ -438,6 +438,9 @@ float const GenericMaterial::AMBIENT_LIGHT_ON_THRESHOLD = 0.005;
 float const GenericMaterial::NEEDS_LIGHT_THRESHOLD = 0.005;
 float const GenericMaterial::TRANSLUCENT_THRESHOLD = 0.995;
 
+Strings GenericMaterial::uniformnames;
+Strings GenericMaterial::vertexattributenames;
+
 Shaderprogram* GenericMaterial::program_110 = NULL;
 Shader GenericMaterial::shader_vrt_110;
 Shader GenericMaterial::shader_frg_110;
@@ -447,15 +450,37 @@ Shader GenericMaterial::shader_frg_330;
 
 void GenericMaterial::initShaders(void)
 {
+	uniformnames.clear();
+	uniformnames.push_back("light_pos_viewspace");
+	uniformnames.push_back("pmat");
+	uniformnames.push_back("mvmat");
+	uniformnames.push_back("mmat");
+	uniformnames.push_back("ambient_light");
+	uniformnames.push_back("light_constant_attenuation");
+	uniformnames.push_back("light_linear_attenuation");
+	uniformnames.push_back("light_quadratic_attenuation");
+	uniformnames.push_back("light_color");
+	uniformnames.push_back("material_color");
+	uniformnames.push_back("cmap");
+	uniformnames.push_back("nmap");
+	uniformnames.push_back("smap");
+
+	vertexattributenames.clear();
+	vertexattributenames.push_back("pos");
+	vertexattributenames.push_back("normal");
+	vertexattributenames.push_back("tangent");
+	vertexattributenames.push_back("binormal");
+	vertexattributenames.push_back("uv");
+
 	shader_vrt_110.load(SHADER_VRT_110, Shader::VERTEX_SHADER);
 	shader_frg_110.load(SHADER_FRG_110, Shader::FRAGMENT_SHADER);
-	program_110 = new Shaderprogram();
+	program_110 = new Shaderprogram(uniformnames, vertexattributenames);
 	program_110->attachShader(shader_vrt_110);
 	program_110->attachShader(shader_frg_110);
 
 	shader_vrt_330.load(SHADER_VRT_330, Shader::VERTEX_SHADER);
 	shader_frg_330.load(SHADER_FRG_330, Shader::FRAGMENT_SHADER);
-	program_330 = new Shaderprogram();
+	program_330 = new Shaderprogram(uniformnames, vertexattributenames);
 	program_330->attachShader(shader_vrt_330);
 	program_330->attachShader(shader_frg_330);
 }
@@ -464,6 +489,8 @@ void GenericMaterial::deinitShaders(void)
 {
 	delete program_110;
 	delete program_330;
+	program_110 = NULL;
+	program_330 = NULL;
 }
 
 }

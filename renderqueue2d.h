@@ -9,6 +9,7 @@
 #include "texture.h"
 #include "display.h"
 #include "exception.h"
+#include "shaderprogramhandle.h"
 
 #include <stdint.h>
 #include <vector>
@@ -18,6 +19,8 @@ namespace Hpp
 
 class Renderqueue2d : public NonCopyable
 {
+
+	friend class Display;
 
 public:
 
@@ -45,10 +48,31 @@ public:
 
 private:
 
+	// Functions for friends
+	static void initShaders(void);
+	static void deinitShaders(void);
+
+private:
+
+	// Uniform locations
+	static uint16_t const UNIF_VIEWMAT = 0;
+	static uint16_t const UNIF_TEX = 1;
+
+	// Vertex attribute locations
+	static uint16_t const VATR_POS = 0;
+	static uint16_t const VATR_UV = 1;
+	static uint16_t const VATR_CLR = 2;
+
 	uint32_t x, y;
 	uint32_t width, height;
 
-	Shaderprogram program;
+	static Shaderprogram* program;
+
+	// Class-wide list of uniform and vertexattribute names
+	static Strings uniformnames;
+	static Strings vertexattributenames;
+
+	Shaderprogramhandle* programhandle;
 
 	bool rendering_started;
 	Texture const* active_texture;
@@ -64,21 +88,17 @@ private:
 	// This enables program and sets appropriate flags, based on "rgb_forced_to_one".
 	inline void enableProgram(void);
 
+	inline void disableProgram(void);
+
 };
 
 inline Renderqueue2d::Renderqueue2d(uint32_t x, uint32_t y, uint32_t width, uint32_t height) :
 x(x), y(y),
 width(width), height(height),
+programhandle(NULL),
 rendering_started(false),
 rgb_forced_to_one(false)
 {
-	// Initialize shaderprogram
-	Shader shader_vrt;
-	shader_vrt.load(SHADER_VRT, Shader::VERTEX_SHADER);
-	Shader shader_frg;
-	shader_frg.load(SHADER_FRG, Shader::FRAGMENT_SHADER);
-	program.attachShader(shader_vrt);
-	program.attachShader(shader_frg);
 	// Set size
 	if (this->width == 0 && Display::getWidth() > x) {
 		this->width = Display::getWidth() - x;
@@ -93,6 +113,7 @@ inline Renderqueue2d::~Renderqueue2d(void)
 	if (rendering_started) {
 		end();
 	}
+	HppAssert(!programhandle, "Shaderprogram is still enabled!");
 }
 
 inline void Renderqueue2d::begin(void)
@@ -126,7 +147,7 @@ inline void Renderqueue2d::begin(void)
 	Matrix3 viewmat;
 	viewmat = Matrix3::translMatrix(Vector2(-1, -1));
 	viewmat *= Matrix3::scaleMatrix(Vector2(2.0 / width, 2.0 / height));
-	program.setUniform("viewmat", viewmat, true);
+	programhandle->setUniform(UNIF_VIEWMAT, viewmat, true);
 
 	HppCheckGlErrors();
 
@@ -143,7 +164,7 @@ inline void Renderqueue2d::end()
 	}
 	rendering_started = false;
 	// Restore Opengl stuff
-	program.disable();
+	disableProgram();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
@@ -172,7 +193,7 @@ inline void Renderqueue2d::renderSprite(Texture const* tex,
 		// Bind texture to OpenGL
 		HppCheckGlErrors();
 		tex->bind();
-		program.setUniform1i("tex", tex->getBoundTextureunit());
+		programhandle->setUniform1i(UNIF_TEX, tex->getBoundTextureunit());
 		HppCheckGlErrors();
 	}
 
@@ -181,7 +202,7 @@ inline void Renderqueue2d::renderSprite(Texture const* tex,
 	if (tex->getGlFormat() == GL_ALPHA) {
 		if (!rgb_forced_to_one) {
 			flush();
-			program.disable();
+			disableProgram();
 			rgb_forced_to_one = true;
 			enableProgram();
 		}
@@ -191,7 +212,7 @@ inline void Renderqueue2d::renderSprite(Texture const* tex,
 	else {
 		if (rgb_forced_to_one) {
 			flush();
-			program.disable();
+			disableProgram();
 			rgb_forced_to_one = false;
 			enableProgram();
 		}
@@ -293,9 +314,9 @@ inline void Renderqueue2d::flush(void)
 	Bufferobject uvs_bo(GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], uvs.size());
 	Bufferobject clrs_bo(GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 4, &clrs[0], clrs.size());
 
-	program.setBufferobject(Bufferobject::POS, &poss_bo);
-	program.setBufferobject(Bufferobject::UV, &uvs_bo);
-	program.setBufferobject(Bufferobject::CLR, &clrs_bo);
+	programhandle->setBufferobject(VATR_POS, &poss_bo);
+	programhandle->setBufferobject(VATR_UV, &uvs_bo);
+	programhandle->setBufferobject(VATR_CLR, &clrs_bo);
 
 	glDrawArrays(GL_TRIANGLES, 0, poss.size() / 2);
 
@@ -306,11 +327,19 @@ inline void Renderqueue2d::flush(void)
 
 inline void Renderqueue2d::enableProgram(void)
 {
-	Hpp::Shaderprogram::Flags flags;
+	Shaderprogram::Flags flags;
 	if (rgb_forced_to_one) {
 		flags.insert("FORCE_RGB_TO_ONE");
 	}
-	program.enable(flags);
+	programhandle = program->createHandle(flags);
+	programhandle->enable();
+}
+
+inline void Renderqueue2d::disableProgram(void)
+{
+	programhandle->disable();
+	delete programhandle;
+	programhandle = NULL;
 }
 
 }
