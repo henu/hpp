@@ -72,15 +72,15 @@ private:
 inline Mesh* Meshloader::createMesh(bool calculate_tangent_and_binormal)
 {
 	Mesh* result = new Mesh;
-	result->setBuffer("pos", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &poss[0], poss.size());
+	result->setBuffer(Mesh::POS, GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &poss[0], poss.size());
 	if (!nrms.empty()) {
-		result->setBuffer("normal", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &nrms[0], nrms.size());
+		result->setBuffer(Mesh::NORMAL, GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &nrms[0], nrms.size());
 	}
 	if (!uvs.empty()) {
-		result->setBuffer("uv", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], uvs.size());
+		result->setBuffer(Mesh::UV, GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], uvs.size());
 	}
 // TODO: In future, convert to GLushort ot GLubyte if there is only small number of vertices!
-	result->setBuffer("index", GL_ELEMENT_ARRAY_BUFFER, GL_UNSIGNED_INT, GL_STATIC_DRAW, 3, &indices[0], indices.size());
+	result->setBuffer(Mesh::INDEX, GL_ELEMENT_ARRAY_BUFFER, GL_UNSIGNED_INT, GL_STATIC_DRAW, 3, &indices[0], indices.size());
 
 	// Calculate tangent and binormal if they are requested
 	if (!nrms.empty() && !uvs.empty() && calculate_tangent_and_binormal) {
@@ -155,8 +155,8 @@ inline Mesh* Meshloader::createMesh(bool calculate_tangent_and_binormal)
 			binormals[v_id*3 + 2] = binormal.z;
 		}
 
-		result->setBuffer("tangent", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &tangents[0], tangents.size());
-		result->setBuffer("binormal", GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &binormals[0], binormals.size());
+		result->setBuffer(Mesh::TANGENT, GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &tangents[0], tangents.size());
+		result->setBuffer(Mesh::BINORMAL, GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &binormals[0], binormals.size());
 	}
 
 	return result;
