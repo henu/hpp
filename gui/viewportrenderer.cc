@@ -116,7 +116,7 @@ void ViewportRenderer::renderTextCursor(int32_t x_origin, int32_t y_origin)
 	(void)y_origin;
 }
 
-void ViewportRenderer::loadTexFromFile(TexturePtr& texptr, Hpp::Path const& path, bool clamp_to_edge_horizontally, bool clamp_to_edge_vertically)
+void ViewportRenderer::loadTexFromFile(TexturePtr& texptr, Path const& path, bool clamp_to_edge_horizontally, bool clamp_to_edge_vertically)
 {
 	if (texptr.clean) {
 		delete texptr.tex;
@@ -129,7 +129,7 @@ void ViewportRenderer::loadTexFromFile(TexturePtr& texptr, Hpp::Path const& path
 	texptr.clean = true;
 }
 
-void ViewportRenderer::setTexFromTex(TexturePtr& texptr, Hpp::Texture* tex, bool clamp_to_edge_horizontally, bool clamp_to_edge_vertically, bool clean)
+void ViewportRenderer::setTexFromTex(TexturePtr& texptr, Texture* tex, bool clamp_to_edge_horizontally, bool clamp_to_edge_vertically, bool clean)
 {
 	if (texptr.clean) {
 		delete texptr.tex;

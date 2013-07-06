@@ -49,7 +49,7 @@ private:
 	Real distance_from_origin;
 
 	// Normal must be normalized when this is called
-	inline void calculateDistanceToOrigin(Hpp::Vector3 const& pos_at_plane);
+	inline void calculateDistanceToOrigin(Vector3 const& pos_at_plane);
 
 };
 
@@ -175,7 +175,7 @@ inline std::string Plane::toString(void) const
 	return normal.toString() + ":" + floatToStr(distance_from_origin);
 }
 
-inline void Plane::calculateDistanceToOrigin(Hpp::Vector3 const& pos_at_plane)
+inline void Plane::calculateDistanceToOrigin(Vector3 const& pos_at_plane)
 {
 	Real dp_nn = dotProduct(normal, normal);
 	HppAssert(dp_nn != 0, "Division by zero! Normal is not normalized!");

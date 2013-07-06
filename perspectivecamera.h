@@ -92,11 +92,11 @@ inline Viewfrustum Perspectivecamera::getViewfrustum(bool use_farplane) const
 
 inline void Perspectivecamera::shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const
 {
-	Hpp::Angle fov_x = fovYToFovX(fov_y, aspectratio);
+	Angle fov_x = fovYToFovX(fov_y, aspectratio);
 
 	result_begin = transf.getPosition();
 
-	result_dir = Hpp::Vector3::ZERO;
+	result_dir = Vector3::ZERO;
 	result_dir += getRight() * (fov_x / 2).tan() * pos_rel.x;
 	result_dir += getUp() * (fov_y / 2).tan() * pos_rel.y;
 	result_dir += getDir();
@@ -111,9 +111,9 @@ inline void Perspectivecamera::update(void)
 	projviewmat = projmat * viewmat;
 
 	Transform transf_rotscale = transf.getRotScale();
-	right = transf_rotscale.applyToPosition(Hpp::Vector3(1, 0, 0));
-	up = transf_rotscale.applyToPosition(Hpp::Vector3(0, 1, 0));
-	dir = transf_rotscale.applyToPosition(Hpp::Vector3(0, 0, -1));
+	right = transf_rotscale.applyToPosition(Vector3(1, 0, 0));
+	up = transf_rotscale.applyToPosition(Vector3(0, 1, 0));
+	dir = transf_rotscale.applyToPosition(Vector3(0, 0, -1));
 }
 
 }

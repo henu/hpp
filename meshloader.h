@@ -61,9 +61,9 @@ private:
 
 	// Finds index of vertex that has required properties
 	// or creates new one, if nothing is found.
-	inline GLuint findIndex(Hpp::Vector3 const& pos,
-	                        Hpp::Vector3 const& nrm,
-	                        Hpp::Vector2 const& uv,
+	inline GLuint findIndex(Vector3 const& pos,
+	                        Vector3 const& nrm,
+	                        Vector2 const& uv,
 	                        bool use_nrm,
 	                        bool use_uv);
 
@@ -190,9 +190,9 @@ inline void Meshloader::addTriangle(Vector3 const& pos0, Vector3 const& pos1, Ve
 	HppAssert(nrms.empty(), "Unable to add triangle without normals if already added triangles have them!");
 	HppAssert(uvs.empty(), "Unable to add triangle without UVs if already added triangles have them!");
 
-	GLuint idx0 = findIndex(pos0, Hpp::Vector3::ZERO, Hpp::Vector2::ZERO, false, false);
-	GLuint idx1 = findIndex(pos1, Hpp::Vector3::ZERO, Hpp::Vector2::ZERO, false, false);
-	GLuint idx2 = findIndex(pos2, Hpp::Vector3::ZERO, Hpp::Vector2::ZERO, false, false);
+	GLuint idx0 = findIndex(pos0, Vector3::ZERO, Vector2::ZERO, false, false);
+	GLuint idx1 = findIndex(pos1, Vector3::ZERO, Vector2::ZERO, false, false);
+	GLuint idx2 = findIndex(pos2, Vector3::ZERO, Vector2::ZERO, false, false);
 
 	indices.push_back(idx0);
 	indices.push_back(idx1);
@@ -205,9 +205,9 @@ inline void Meshloader::addTriangle(Vector3 const& pos0, Vector3 const& pos1, Ve
 	HppAssert(poss.empty() || !nrms.empty(), "Unable to add triangle with normals if already added triangles do not have them!");
 	HppAssert(uvs.empty(), "Unable to add triangle without UVs if already added triangles have them!");
 
-	GLuint idx0 = findIndex(pos0, nrm0, Hpp::Vector2::ZERO, true, false);
-	GLuint idx1 = findIndex(pos1, nrm1, Hpp::Vector2::ZERO, true, false);
-	GLuint idx2 = findIndex(pos2, nrm2, Hpp::Vector2::ZERO, true, false);
+	GLuint idx0 = findIndex(pos0, nrm0, Vector2::ZERO, true, false);
+	GLuint idx1 = findIndex(pos1, nrm1, Vector2::ZERO, true, false);
+	GLuint idx2 = findIndex(pos2, nrm2, Vector2::ZERO, true, false);
 
 	indices.push_back(idx0);
 	indices.push_back(idx1);
@@ -220,9 +220,9 @@ inline void Meshloader::addTriangleWithoutNormals(Vector3 const& pos0, Vector3 c
 	HppAssert(nrms.empty(), "Unable to add triangle without normals if already added triangles have them!");
 	HppAssert(poss.empty() || !uvs.empty(), "Unable to add triangle with UVs if already added triangles do not have them!");
 
-	GLuint idx0 = findIndex(pos0, Hpp::Vector3::ZERO, uv0, false, true);
-	GLuint idx1 = findIndex(pos1, Hpp::Vector3::ZERO, uv1, false, true);
-	GLuint idx2 = findIndex(pos2, Hpp::Vector3::ZERO, uv2, false, true);
+	GLuint idx0 = findIndex(pos0, Vector3::ZERO, uv0, false, true);
+	GLuint idx1 = findIndex(pos1, Vector3::ZERO, uv1, false, true);
+	GLuint idx2 = findIndex(pos2, Vector3::ZERO, uv2, false, true);
 
 	indices.push_back(idx0);
 	indices.push_back(idx1);
@@ -332,9 +332,9 @@ inline void Meshloader::readArrays(std::vector< GLfloat > const& poss,
 
 }
 
-inline GLuint Meshloader::findIndex(Hpp::Vector3 const& pos,
-                                    Hpp::Vector3 const& nrm,
-                                    Hpp::Vector2 const& uv,
+inline GLuint Meshloader::findIndex(Vector3 const& pos,
+                                    Vector3 const& nrm,
+                                    Vector2 const& uv,
                                     bool use_nrm,
                                     bool use_uv)
 {
@@ -344,13 +344,13 @@ inline GLuint Meshloader::findIndex(Hpp::Vector3 const& pos,
 	for (GLuint vrt_idx = 0; vrt_idx < poss.size() / 3; ++ vrt_idx) {
 		size_t ofs3 = vrt_idx * 3;
 		// Check position
-		Hpp::Vector3 vrt_pos(poss[ofs3 + 0], poss[ofs3 + 1], poss[ofs3 + 2]);
+		Vector3 vrt_pos(poss[ofs3 + 0], poss[ofs3 + 1], poss[ofs3 + 2]);
 		if ((vrt_pos - pos).lengthTo2() > SAME_DIFF_THRESHOLD_TO_2) {
 			continue;
 		}
 		// Check normal
 		if (use_nrm) {
-			Hpp::Vector3 vrt_nrm(nrms[ofs3 + 0], nrms[ofs3 + 1], nrms[ofs3 + 2]);
+			Vector3 vrt_nrm(nrms[ofs3 + 0], nrms[ofs3 + 1], nrms[ofs3 + 2]);
 			if ((vrt_nrm - nrm).lengthTo2() > SAME_DIFF_THRESHOLD_TO_2) {
 				continue;
 			}
@@ -358,7 +358,7 @@ inline GLuint Meshloader::findIndex(Hpp::Vector3 const& pos,
 		// Check UV
 		if (use_uv) {
 			size_t ofs2 = vrt_idx * 2;
-			Hpp::Vector2 vrt_uv(nrms[ofs2 + 0], nrms[ofs2 + 1]);
+			Vector2 vrt_uv(nrms[ofs2 + 0], nrms[ofs2 + 1]);
 			if ((vrt_uv - uv).lengthTo2() > SAME_DIFF_THRESHOLD_TO_2) {
 				continue;
 			}

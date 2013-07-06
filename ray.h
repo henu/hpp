@@ -12,10 +12,10 @@ class Ray
 public:
 
 	inline Ray(void);
-	inline Ray(Hpp::Vector3 const& begin, Hpp::Vector3 const& dir);
+	inline Ray(Vector3 const& begin, Vector3 const& dir);
 
-	Hpp::Vector3 begin;
-	Hpp::Vector3 dir;
+	Vector3 begin;
+	Vector3 dir;
 
 };
 
@@ -23,7 +23,7 @@ inline Ray::Ray(void)
 {
 }
 
-inline Ray::Ray(Hpp::Vector3 const& begin, Hpp::Vector3 const& dir) :
+inline Ray::Ray(Vector3 const& begin, Vector3 const& dir) :
 begin(begin),
 dir(dir)
 {

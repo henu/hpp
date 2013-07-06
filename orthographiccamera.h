@@ -90,9 +90,9 @@ inline void Orthographiccamera::update(void)
 	projviewmat = projmat * viewmat;
 
 	Transform transf_rotscale = transf.getRotScale();
-	right = transf_rotscale.applyToPosition(Hpp::Vector3(1, 0, 0));
-	up = transf_rotscale.applyToPosition(Hpp::Vector3(0, 1, 0));
-	dir = transf_rotscale.applyToPosition(Hpp::Vector3(0, 0, -1));
+	right = transf_rotscale.applyToPosition(Vector3(1, 0, 0));
+	up = transf_rotscale.applyToPosition(Vector3(0, 1, 0));
+	dir = transf_rotscale.applyToPosition(Vector3(0, 0, -1));
 }
 
 }

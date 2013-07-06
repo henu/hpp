@@ -74,7 +74,7 @@ inline Real distanceToPlane(Vector2 const& plane_pos, Vector2 const& plane_norma
 // ray_dir.
 inline Real distanceToRay(Vector2 const& point, Vector2 const& ray_begin, Vector2 const& ray_dir);
 
-inline Real distanceToRay(Hpp::Vector3 const& point, Hpp::Ray const& ray);
+inline Real distanceToRay(Vector3 const& point, Ray const& ray);
 
 // Calculates nearest point between line/ray and a point. It is possible to get
 // the nearest point in two ways and it is possible to get the distance between
@@ -397,9 +397,9 @@ inline Real distanceToRay(Vector2 const& point, Vector2 const& ray_begin, Vector
 	return dotProduct(ray_dir_n.perp(), ray_begin - point);
 }
 
-inline Real distanceToRay(Hpp::Vector3 const& point, Hpp::Ray const& ray)
+inline Real distanceToRay(Vector3 const& point, Ray const& ray)
 {
-	Hpp::Real result;
+	Real result;
 	nearestPointToRay(point, ray, NULL, NULL, &result);
 	return result;
 }

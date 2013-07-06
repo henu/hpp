@@ -26,7 +26,7 @@ public:
 	inline Real getFar(void) const { return farplane; }
 
 	inline Vector3 getPosition(void) const { return transf.getPosition(); }
-	inline Hpp::Real getAspectratio(void) const { return aspectratio; }
+	inline Real getAspectratio(void) const { return aspectratio; }
 
 	virtual Viewfrustum getViewfrustum(bool use_farplane = false) const = 0;
 
