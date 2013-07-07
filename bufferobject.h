@@ -5,8 +5,8 @@
 #include "noncopyable.h"
 #include "gldebug.h"
 #include "assert.h"
-
-#include <GL/gl.h>
+#include "glsystem.h"
+#include "inc_gl.h"
 
 namespace Hpp
 {
@@ -19,6 +19,9 @@ public:
 	// The size is not given in bytes, but in elemenst
 	inline Bufferobject(GLenum target, GLenum type, GLenum usage, GLint components, GLvoid const* data, size_t size);
 	inline ~Bufferobject(void);
+
+	// Uses Bufferobject as a Vertex attribute
+	inline void useAsVertexAttribute(GLuint vertexattr_loc) const;
 
 	// Draws Bufferobject as specific elements.
 	inline void drawElements(GLenum mode, size_t offset = 0, size_t amount = size_t(-1)) const;
@@ -70,6 +73,13 @@ size(size)
 inline Bufferobject::~Bufferobject(void)
 {
 	GlSystem::DeleteBuffers(1, &buf_id);
+}
+
+inline void Bufferobject::useAsVertexAttribute(GLuint vertexattr_loc) const
+{
+	GlSystem::EnableVertexAttribArray(vertexattr_loc);
+	GlSystem::BindBuffer(target, buf_id);
+	GlSystem::VertexAttribPointer(vertexattr_loc, components, type, normalized, 0, NULL);
 }
 
 inline void Bufferobject::drawElements(GLenum mode, size_t offset, size_t amount) const

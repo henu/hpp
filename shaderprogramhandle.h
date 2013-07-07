@@ -241,9 +241,7 @@ inline void Shaderprogramhandle::setBufferobject(GLint vertexattr_loc, Bufferobj
 		return;
 	}
 
-	GlSystem::EnableVertexAttribArray(vertexattr_loc);
-	GlSystem::BindBuffer(buf->getTarget(), buf->getBufferId());
-	GlSystem::VertexAttribPointer(vertexattr_loc, buf->getComponents(), buf->getType(), buf->getNormalized(), 0, NULL);
+	buf->useAsVertexAttribute(vertexattr_loc);
 
 	program->addUsedVertexattribute(vertexattr_loc);
 
