@@ -243,8 +243,6 @@ inline void Shaderprogramhandle::setBufferobject(GLint vertexattr_loc, Bufferobj
 
 	buf->useAsVertexAttribute(vertexattr_loc);
 
-	program->addUsedVertexattribute(vertexattr_loc);
-
 	HppCheckGlErrors();
 }
 

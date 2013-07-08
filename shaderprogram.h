@@ -57,10 +57,6 @@ private:
 	inline void handleEnabled(void);
 	inline void handleDisabled(void);
 
-	// Adds Vertexattributes that are used. This way we know
-	// what should be disabled when shader is disabled.
-	inline void addUsedVertexattribute(GLuint vertexattribute_loc);
-
 private:
 
 	typedef std::vector< Shader > Shaders;
@@ -87,8 +83,6 @@ private:
 	Shaders shaders;
 
 	LinkedPrograms lprogs;
-
-	AttribsInUse used_attribs;
 
 	inline void linkProgram(Flags const& flags);
 
@@ -131,7 +125,6 @@ inline void Shaderprogram::attachShader(Shader const& shader)
 inline void Shaderprogram::handleEnabled(void)
 {
 	HppAssert(!handle_enabled, "There is already a Shaderprogramhandle enabled!");
-	HppAssert(used_attribs.empty(), "There are already some Bufferobjects bound!");
 	handle_enabled = true;
 }
 
@@ -141,17 +134,7 @@ inline void Shaderprogram::handleDisabled(void)
 	handle_enabled = false;
 
 	// Disable bufferobjects
-	for (AttribsInUse::iterator used_attribs_it = used_attribs.begin();
-	     used_attribs_it != used_attribs.end();
-	     ++ used_attribs_it) {
-		GlSystem::DisableVertexAttribArray(*used_attribs_it);
-	}
-	used_attribs.clear();
-}
-
-inline void Shaderprogram::addUsedVertexattribute(GLuint vertexattribute_loc)
-{
-	used_attribs.insert(vertexattribute_loc);
+	GlStatemanager::clearAllVertexarrays();
 }
 
 inline void Shaderprogram::linkProgram(Flags const& flags)

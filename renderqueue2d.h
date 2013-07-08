@@ -318,7 +318,11 @@ inline void Renderqueue2d::flush(void)
 	programhandle->setBufferobject(VATR_UV, &uvs_bo);
 	programhandle->setBufferobject(VATR_CLR, &clrs_bo);
 
+	GlStatemanager::syncVertexarrays();
+
 	glDrawArrays(GL_TRIANGLES, 0, poss.size() / 2);
+
+	GlStatemanager::clearAllVertexarrays();
 
 	poss.clear();
 	uvs.clear();

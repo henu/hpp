@@ -7,6 +7,7 @@
 #include "assert.h"
 #include "glsystem.h"
 #include "inc_gl.h"
+#include "glstatemanager.h"
 
 namespace Hpp
 {
@@ -72,14 +73,13 @@ size(size)
 
 inline Bufferobject::~Bufferobject(void)
 {
+	GlStatemanager::markBufferobjectDestroyed(this);
 	GlSystem::DeleteBuffers(1, &buf_id);
 }
 
 inline void Bufferobject::useAsVertexAttribute(GLuint vertexattr_loc) const
 {
-	GlSystem::EnableVertexAttribArray(vertexattr_loc);
-	GlSystem::BindBuffer(target, buf_id);
-	GlSystem::VertexAttribPointer(vertexattr_loc, components, type, normalized, 0, NULL);
+	GlStatemanager::setVertexattributeState(vertexattr_loc, this);
 }
 
 inline void Bufferobject::drawElements(GLenum mode, size_t offset, size_t amount) const
@@ -90,6 +90,8 @@ inline void Bufferobject::drawElements(GLenum mode, size_t offset, size_t amount
 	if (amount > size - offset) {
 		amount = size - offset;
 	}
+
+	GlStatemanager::syncVertexarrays();
 
 	HppCheckGlErrors();
 	GlSystem::BindBuffer(target, buf_id);
