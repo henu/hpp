@@ -17,7 +17,7 @@ public:
 
 	// Type for ID of buffer. There are several predefined IDs.
 	// User can make new ones, but they need to have positive value.
-	typedef uint16_t BufId;
+	typedef int16_t BufId;
 	static BufId const POS = -7;
 	static BufId const NORMAL = -6;
 	static BufId const TANGENT = -5;
@@ -76,12 +76,12 @@ inline void Mesh::setBuffer(BufId buf_id, GLenum target, GLenum type, GLenum usa
 	HppAssert(real_buf_id >= 0, "Buffer ID underflow!");
 
 	// Remove possible old buffer
-	if (real_buf_id < bufs.size()) {
+	if (real_buf_id < BufId(bufs.size())) {
 		delete bufs[real_buf_id].bo;
 	}
 	// There is not enough slots, so add them
 	else {
-		while (real_buf_id >= bufs.size()) {
+		while (real_buf_id >= BufId(bufs.size())) {
 			bufs.push_back(Buffer());
 		}
 	}
@@ -97,12 +97,12 @@ inline void Mesh::setBuffer(BufId buf_id, Bufferobject* bo, bool release_automat
 	HppAssert(real_buf_id >= 0, "Buffer ID underflow!");
 
 	// Remove possible old buffer
-	if (real_buf_id < bufs.size()) {
+	if (real_buf_id < BufId(bufs.size())) {
 		delete bufs[real_buf_id].bo;
 	}
 	// There is not enough slots, so add them
 	else {
-		while (real_buf_id >= bufs.size()) {
+		while (real_buf_id >= BufId(bufs.size())) {
 			bufs.push_back(Buffer());
 		}
 	}
@@ -116,7 +116,7 @@ inline Bufferobject const* Mesh::getBuffer(BufId buf_id) const
 	BufId real_buf_id = buf_id + NUM_OF_DEFAULT_BUFIDS;
 	HppAssert(real_buf_id >= 0, "Buffer ID underflow!");
 
-	if (real_buf_id >= bufs.size()) {
+	if (real_buf_id >= BufId(bufs.size())) {
 		throw Exception("Unable to get buffer from mesh because it does not exist!");
 	}
 	Bufferobject const* result = bufs[real_buf_id].bo;
