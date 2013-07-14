@@ -147,7 +147,7 @@ inline Font::~Font(void)
 	// Clear fonts
 	for (Sources::iterator sources_it = sources.begin();
 	     sources_it != sources.end();
-	     sources_it ++) {
+	     ++ sources_it) {
 		FT_Face& source = *sources_it;
 		FT_Done_Face(source);
 	}
@@ -171,7 +171,7 @@ inline void Font::setDefaultHeight(uint32_t font_default_size)
 	// Update font heights
 	for (Sources::iterator sources_it = sources.begin();
 	     sources_it != sources.end();
-	     sources_it ++) {
+	     ++ sources_it) {
 		FT_Face& source = *sources_it;
 		FT_Error error = FT_Set_Pixel_Sizes(source, 0, font_default_size);
 		if (error) {
@@ -211,7 +211,7 @@ inline Real Font::getStringWidth(UnicodeString const& str, Real font_size) const
 	Real result = 0.0;
 	for (UnicodeString::const_iterator str_it = str.begin();
 	     str_it != str.end();
-	     str_it ++) {
+	     ++ str_it) {
 		UChr chr = *str_it;
 		ensureCharacterExists(chr);
 		result += chrs.find(chr)->second.adv * (font_size / font_default_size);
@@ -228,7 +228,7 @@ inline void Font::renderString(UnicodeString const& str,
 	// Ensure all characters exist
 	for (UnicodeString::const_iterator str_it = str.begin();
 	     str_it != str.end();
-	     str_it ++) {
+	     ++ str_it) {
 		ensureCharacterExists(*str_it);
 	}
 
@@ -240,7 +240,7 @@ inline void Font::renderString(UnicodeString const& str,
 
 	for (UnicodeString::const_iterator str_it = str.begin();
 	     str_it != str.end();
-	     str_it ++) {
+	     ++ str_it) {
 		UChr chr_code = *str_it;
 		Character& chr = chrs[chr_code];
 		// Render
@@ -347,7 +347,7 @@ inline void Font::clear(void)
 	delete tex;
 	for (Textures::iterator old_texs_it = old_texs.begin();
 	     old_texs_it != old_texs.end();
-	     old_texs_it ++) {
+	     ++ old_texs_it) {
 		delete *old_texs_it;
 	}
 	old_texs.clear();
