@@ -82,6 +82,7 @@
 				"path.h",
 				"pixelformat.h",
 				"plane.h",
+				"printonce.h",
 				"profiler.h",
 				"profilermanager.h",
 				"quaternion.h",
@@ -126,6 +127,7 @@
 				"concurrencywatcher.cc",
 				"json.cc",
 				"memwatch.cc",
+				"printonce.cc",
 				"profilermanager.cc",
 				"runnable.cc",
 				"thread.cc"
