@@ -134,6 +134,7 @@ runnable(runnable)
 }
 
 inline Thread::Thread(Thread const& t) :
+runnable(t.runnable),
 thrd(t.thrd),
 #ifndef HPP_USE_SDL_MUTEX
 thrd_result(t.thrd_result),
@@ -144,6 +145,7 @@ error(t.error)
 
 inline Thread Thread::operator=(Thread const& t)
 {
+	runnable = t.runnable;
 	thrd = t.thrd;
 	#ifndef HPP_USE_SDL_MUTEX
 	thrd_result = t.thrd_result;
