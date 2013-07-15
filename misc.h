@@ -66,11 +66,15 @@ inline std::string toUpper(std::string const& s, std::locale const& loc = std::l
 inline std::string toLower(std::string const& s, std::locale const& loc = std::locale());
 
 // Power function for integers
-inline ssize_t ipow(ssize_t a, size_t n);
+inline ssize_t iPow(ssize_t a, size_t n);
 
 // Division functions for integers that always round to down/up
 inline ssize_t iDivFloor(ssize_t dividend, ssize_t divisor);
 inline ssize_t iDivCeil(ssize_t dividend, ssize_t divisor);
+
+// Ceiling and floor for integers
+inline ssize_t iFloor(double d);
+inline ssize_t iCeil(double d);
 
 // Modulo function that does not produce negative results. Always returns value
 // that is in range [0 - divisor). Note, that divisor must be positive!
@@ -265,7 +269,7 @@ inline std::string toLower(std::string const& s, std::locale const& loc)
 	return result;
 }
 
-inline ssize_t ipow(ssize_t a, size_t n)
+inline ssize_t iPow(ssize_t a, size_t n)
 {
 	ssize_t result = 1;
 	while (n > 0) {
@@ -310,6 +314,26 @@ inline ssize_t iDivCeil(ssize_t dividend, ssize_t divisor)
 		return (dividend + (divisor + 1)) / divisor;
 	}
 	return dividend / divisor;
+}
+
+inline ssize_t iFloor(double d)
+{
+	ssize_t result = d;
+	if (result > d) {
+		-- result;
+	}
+	HppAssert(result <= d, "Fail!");
+	return result;
+}
+
+inline ssize_t iCeil(double d)
+{
+	ssize_t result = d;
+	if (result < d) {
+		++ result;
+	}
+	HppAssert(result >= d, "Fail!");
+	return result;
 }
 
 inline size_t iMod(ssize_t dividend, size_t divisor)

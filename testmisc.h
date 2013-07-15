@@ -42,6 +42,14 @@ inline void testMisc(void)
 		HppAssert(iMod(-50, 9) == 4, "Testing of iMod has failed!")
 	}
 
+	// Test floor and ceiling functions
+	{
+		HppAssert(iFloor(-9.00001) == -10, "Testing of iFloor has failed!");
+		HppAssert(iFloor(9.99999) == 9, "Testing of iFloor has failed!");
+		HppAssert(iCeil(9.00001) == 10, "Testing of iCeil has failed!");
+		HppAssert(iCeil(-9.99999) == -9, "Testing of iCeil has failed!");
+	}
+
 	// Test SHA-256 hasher
 	{
 		Sha256Hasher hasher;
