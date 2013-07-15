@@ -3,10 +3,13 @@
 
 #include "assert.h"
 #include "exception.h"
+#include "misc.h"
+#include "time.h"
 
 #include <cstdlib>
 #include <stdint.h>
 #include <sys/time.h>
+#include <cstring>
 
 namespace Hpp
 {
@@ -22,10 +25,13 @@ public:
 	inline Randomizer(Randomizer const& rnd);
 	inline Randomizer operator=(Randomizer const& rnd);
 
-	// Seed functions
+	// Seed functions. All seed functions begin seeding from
+	// scratch, except the one that has "More" in it.
+	inline void seed(ByteV const& data);
+	inline void seedMore(ByteV const& data);
 	inline void seedFromTime(void);
 
-	// Getters
+	// Getters. "max" is inclusive.
 	inline uint32_t getUInt32(void);
 	inline uint32_t getUInt32(uint32_t min, uint32_t max);
 	inline double getDouble(void);
@@ -33,17 +39,20 @@ public:
 
 private:
 
+	uint8_t seedvalues[6];
+	uint8_t seedvalues_ofs;
+
 	drand48_data rnd;
+
+	inline void doSeedingFromSeedvalues(void);
 
 };
 
-inline Randomizer::Randomizer(void)
+inline Randomizer::Randomizer(void) :
+seedvalues_ofs(0)
 {
-	uint16_t seedvalue[3];
-	seedvalue[0] = 0;
-	seedvalue[1] = 0;
-	seedvalue[2] = 0;
-	seed48_r(seedvalue, &rnd);
+	toZero(seedvalues, 6);
+	doSeedingFromSeedvalues();
 }
 
 inline Randomizer::~Randomizer(void)
@@ -51,28 +60,45 @@ inline Randomizer::~Randomizer(void)
 }
 
 inline Randomizer::Randomizer(Randomizer const& rnd) :
+seedvalues_ofs(seedvalues_ofs),
 rnd(rnd.rnd)
 {
+	memcpy(seedvalues, rnd.seedvalues, 6);
 }
 
 inline Randomizer Randomizer::operator=(Randomizer const& rnd)
 {
+	this->seedvalues_ofs = rnd.seedvalues_ofs;
 	this->rnd = rnd.rnd;
+	memcpy(seedvalues, rnd.seedvalues, 6);
 	return *this;
+}
+
+inline void Randomizer::seed(ByteV const& data)
+{
+	seedvalues_ofs = 0;
+	seedMore(data);
+	toZero(seedvalues, 6);
+}
+
+inline void Randomizer::seedMore(ByteV const& data)
+{
+	for (ByteV::const_iterator it = data.begin();
+	     it != data.end();
+	     ++ it) {
+		seedvalues[seedvalues_ofs] ^= *it;
+		seedvalues_ofs = (seedvalues_ofs + 1) % 6;
+	}
+	doSeedingFromSeedvalues();
 }
 
 inline void Randomizer::seedFromTime(void)
 {
-	// Read time
-	timeval tv;
-	if (gettimeofday(&tv, NULL)) {
-		throw Exception("Unable to read time!");
-	}
-	uint16_t seedvalue[3];
-	seedvalue[0] = tv.tv_sec % 0xffff;
-	seedvalue[1] = (tv.tv_sec >> 16) % 0xffff;
-	seedvalue[2] = (tv.tv_usec >> 11) % 0xffff;
-	seed48_r(seedvalue, &rnd);
+	Time n = now();
+	uint64_t sec = n.getSeconds();
+	uint32_t nsec = n.getNanoseconds();
+	seed(uInt64ToByteV(sec));
+	seedMore(uInt32ToByteV(nsec));
 }
 
 inline uint32_t Randomizer::getUInt32(void)
@@ -102,6 +128,15 @@ inline double Randomizer::getDouble(double min, double max)
 	double result;
 	drand48_r(&rnd, &result);
 	return min + result * (max - min);
+}
+
+inline void Randomizer::doSeedingFromSeedvalues(void)
+{
+	uint16_t seedvalues16[3];
+	seedvalues16[0] = seedvalues[0] + (seedvalues[1] << 8);
+	seedvalues16[1] = seedvalues[2] + (seedvalues[3] << 8);
+	seedvalues16[2] = seedvalues[4] + (seedvalues[5] << 8);
+	seed48_r(seedvalues16, &rnd);
 }
 
 }
