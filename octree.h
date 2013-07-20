@@ -25,7 +25,7 @@ public:
 		inline Handle(Region* region);
 		inline ~Handle(void);
 
-		inline Region* getRegion(void) { return region; }		
+		inline Region* getRegion(void) { return region; }
 
 		// Copy constructor and assignment operator
 		inline Handle(Handle const& handle);
@@ -52,13 +52,16 @@ public:
 		inline Region(Vector3 const& min_corner, Vector3 const& max_corner, Octree* octree, Region* parent, uint8_t type);
 		inline ~Region(void);
 
-		inline void setSize(Vector3 const& min_corner, Vector3 const& max_corner);
-
-		inline Handle spawnHandle(Boundingbox const& bb);
+		inline Handle spawnHandle(Boundingbox const& handle_bb);
 
 		// This returns all hangles in this Region and in its ancestors
 		// and children. This will clear the result.
 		inline void getAllHandles(Handles& result);
+
+		// "result" is not cleared
+		inline void getCollidingHandles(Handles& result, Boundingvolume const* bv);
+
+		inline Boundingbox getBoundingbox(void) const { return bb; }
 
 		// Called by Handles
 		inline void registerHandle(Handle* handle);
@@ -75,15 +78,18 @@ public:
 
 		HandleSet handles;
 
+		// "result" is not cleared
 		inline void doGetAllHandles(Handles& result, bool descent_to_children_recursively);
 	};
 
 	inline Octree(void);
 	inline Octree(Vector3 const& min_corner, Vector3 const& max_corner);
 
-	inline void setSize(Vector3 const& min_corner, Vector3 const& max_corner);
+	inline Handle spawnHandle(Boundingbox const& handle_bb);
 
-	inline Handle spawnHandle(Boundingbox const& bb);
+	// Get all handles that are at the regions that touch
+	// to given Boundingvolume. "result" is not cleared.
+	inline void getCollidingHandles(Handles& result, Boundingvolume const* bv);
 
 private:
 
@@ -107,25 +113,20 @@ root(min_corner, max_corner, this, NULL, 8)
 {
 }
 
-inline void Octree::setSize(Vector3 const& min_corner, Vector3 const& max_corner)
+inline Octree::Handle Octree::spawnHandle(Boundingbox const& handle_bb)
 {
-	HppAssert(min_corner.x <= max_corner.x, "Minimum X component is bigger than maximum!");
-	HppAssert(min_corner.y <= max_corner.y, "Minimum Y component is bigger than maximum!");
-	HppAssert(min_corner.z <= max_corner.z, "Minimum Z component is bigger than maximum!");
-	cmin = min_corner;
-	cmax = max_corner;
-	root.setSize(min_corner, max_corner);
-}
-
-inline Octree::Handle Octree::spawnHandle(Boundingbox const& bb)
-{
-	return root.spawnHandle(bb);
+	return root.spawnHandle(handle_bb);
 }
 
 inline Octree::Handle::Handle(void) :
 region(NULL),
 data(NULL)
 {
+}
+
+inline void Octree::getCollidingHandles(Handles& result, Boundingvolume const* bv)
+{
+	root.getCollidingHandles(result, bv);
 }
 
 inline Octree::Handle::Handle(Region* region) :
@@ -195,30 +196,19 @@ inline Octree::Region::~Region(void)
 	}
 }
 
-inline void Octree::Region::setSize(Vector3 const& min_corner, Vector3 const& max_corner)
-{
-	bb.setSize(min_corner, max_corner),
-	center = bb.getCenter();
-
-if (!handles.empty() || std::count(children, children + 8, (Region*)NULL) != 8) {
-// TODO: Remove all handles and add them again! Removing them destroys children, and adding them again makes new children with correct sizes.
-HppAssert(false, "Not implemented yet!");
-}
-}
-
-inline Octree::Handle Octree::Region::spawnHandle(Boundingbox const& bb)
+inline Octree::Handle Octree::Region::spawnHandle(Boundingbox const& handle_bb)
 {
 	// If this does not fit to the children, then spawn it to this Region.
-	if ((bb.getMinX() < center.x && bb.getMaxX() > center.x) ||
-	    (bb.getMinY() < center.y && bb.getMaxY() > center.y) ||
-	    (bb.getMinZ() < center.z && bb.getMaxZ() > center.z)) {
+	if ((handle_bb.getMinX() < center.x && handle_bb.getMaxX() > center.x) ||
+	    (handle_bb.getMinY() < center.y && handle_bb.getMaxY() > center.y) ||
+	    (handle_bb.getMinZ() < center.z && handle_bb.getMaxZ() > center.z)) {
 		return Handle(this);
 	}
 
 	uint8_t child_id;
-	if (bb.getMaxZ() <= center.z) {
-		if (bb.getMaxY() <= center.y) {
-			if (bb.getMaxX() <= center.x) {
+	if (handle_bb.getMaxZ() <= center.z) {
+		if (handle_bb.getMaxY() <= center.y) {
+			if (handle_bb.getMaxX() <= center.x) {
 				child_id = 0;
 				if (!children[child_id]) {
 					Vector3 child_cmin(bb.getMinX(), bb.getMinY(), bb.getMinZ());
@@ -234,7 +224,7 @@ inline Octree::Handle Octree::Region::spawnHandle(Boundingbox const& bb)
 				}
 			}
 		} else {
-			if (bb.getMaxX() <= center.x) {
+			if (handle_bb.getMaxX() <= center.x) {
 				child_id = 2;
 				if (!children[child_id]) {
 					Vector3 child_cmin(bb.getMinX(), center.y, bb.getMinZ());
@@ -251,8 +241,8 @@ inline Octree::Handle Octree::Region::spawnHandle(Boundingbox const& bb)
 			}
 		}
 	} else {
-		if (bb.getMaxY() <= center.y) {
-			if (bb.getMaxX() <= center.x) {
+		if (handle_bb.getMaxY() <= center.y) {
+			if (handle_bb.getMaxX() <= center.x) {
 				child_id = 4;
 				if (!children[child_id]) {
 					Vector3 child_cmin(bb.getMinX(), bb.getMinY(), center.z);
@@ -268,7 +258,7 @@ inline Octree::Handle Octree::Region::spawnHandle(Boundingbox const& bb)
 				}
 			}
 		} else {
-			if (bb.getMaxX() <= center.x) {
+			if (handle_bb.getMaxX() <= center.x) {
 				child_id = 6;
 				if (!children[child_id]) {
 					Vector3 child_cmin(bb.getMinX(), center.y, center.z);
@@ -285,7 +275,7 @@ inline Octree::Handle Octree::Region::spawnHandle(Boundingbox const& bb)
 			}
 		}
 	}
-	return children[child_id]->spawnHandle(bb);
+	return children[child_id]->spawnHandle(handle_bb);
 }
 
 inline void Octree::Region::getAllHandles(Handles& result)
@@ -309,6 +299,25 @@ inline void Octree::Region::doGetAllHandles(Handles& result, bool descent_to_chi
 			if (child) {
 				child->doGetAllHandles(result, true);
 			}
+		}
+	}
+}
+
+inline void Octree::Region::getCollidingHandles(Handles& result, Boundingvolume const* bv)
+{
+	// If given boundingvolume does not hit to this Region, then do nothing.
+	if (bb.testAnotherBoundingvolume(bv) == Boundingvolume::OUTSIDE) {
+		return;
+	}
+
+	// Add all Handles from this Region
+	result.insert(result.end(), handles.begin(), handles.end());
+
+	// Check children too
+	for (uint8_t child_id = 0; child_id < 8; ++ child_id) {
+		Region* child = children[child_id];
+		if (child) {
+			child->getCollidingHandles(result, bv);
 		}
 	}
 }
