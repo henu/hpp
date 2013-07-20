@@ -67,6 +67,8 @@ public:
 
 	inline std::string toString(void) const;
 
+	inline Boundingconvex getBoundingconvex(void) const { return bconvex; }
+
 	// May return NULL if there is no faces to render.
 	// Also infinite faces will be constructed poorly.
 	inline Mesh* createMesh(void) const;
