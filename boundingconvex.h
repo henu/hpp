@@ -127,8 +127,23 @@ inline Boundingvolume::Testresult Boundingconvex::testAnotherBoundingvolume(Boun
 	// If another Boundingvolume is Boundingbox
 	Boundingbox const* bb = dynamic_cast< Boundingbox const* >(bv);
 	if (bb) {
-HppAssert(false, "Not implemented yet!");
-// TODO: Code this!
+		// Convert box into sphere and test it
+		Vector3 bs_pos = bb->getCenter();
+		Real bs_radius = bb->getSpacediagonalLength() / 2;
+		Boundingsphere bs(bs_pos, bs_radius);
+
+		Boundingvolume::Testresult bs_result = testAnotherBoundingvolume(&bs);
+		if (bs_result == OUTSIDE) return OUTSIDE;
+		if (bs_result == INSIDE) return INSIDE;
+
+		// To prevent false negative (box is completely inside, but
+		// partly inside is returned), try with smaller sphere.
+		bs_radius = std::min(std::min(bb->getWidthX(), bb->getDepthY()), bb->getHeightZ());
+		Boundingsphere bs2(bs_pos, bs_radius);
+
+		bs_result = testAnotherBoundingvolume(&bs2);
+		if (bs_result == INSIDE) return INSIDE;
+		return PARTIALLY_INSIDE;
 	}
 
 	// If another Boundingvolume is Boundingconvex
