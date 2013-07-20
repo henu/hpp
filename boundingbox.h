@@ -31,7 +31,15 @@ public:
 	inline Real getMaxY(void) const { return cmax.y; }
 	inline Real getMaxZ(void) const { return cmax.z; }
 
+	inline Vector3 getMinCorner(void) const { return cmin; }
+	inline Vector3 getMaxCorner(void) const { return cmax; }
+
+	inline Real getWidthX(void) const { return cmax.x - cmin.x; }
+	inline Real getDepthY(void) const { return cmax.y - cmin.y; }
+	inline Real getHeightZ(void) const { return cmax.z - cmin.z; }
+
 	inline Vector3 getCenter(void) const;
+	inline Real getSpacediagonalLength(void) const;
 
 	inline virtual Testresult testAnotherBoundingvolume(Boundingvolume const* bv) const;
 	inline virtual bool isPositionInside(Vector3 const& pos) const;
@@ -95,6 +103,11 @@ inline void Boundingbox::setSize(Vector3 const& cmin, Vector3 const& cmax)
 inline Vector3 Boundingbox::getCenter(void) const
 {
 	return (cmin + cmax) / 2;
+}
+
+inline Real Boundingbox::getSpacediagonalLength(void) const
+{
+	return (cmin - cmax).length();
 }
 
 inline Boundingvolume::Testresult Boundingbox::testAnotherBoundingvolume(Boundingvolume const* bv) const
