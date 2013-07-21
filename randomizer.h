@@ -60,7 +60,7 @@ inline Randomizer::~Randomizer(void)
 }
 
 inline Randomizer::Randomizer(Randomizer const& rnd) :
-seedvalues_ofs(seedvalues_ofs),
+seedvalues_ofs(rnd.seedvalues_ofs),
 rnd(rnd.rnd)
 {
 	memcpy(seedvalues, rnd.seedvalues, 6);
@@ -68,7 +68,7 @@ rnd(rnd.rnd)
 
 inline Randomizer Randomizer::operator=(Randomizer const& rnd)
 {
-	this->seedvalues_ofs = rnd.seedvalues_ofs;
+	seedvalues_ofs = rnd.seedvalues_ofs;
 	this->rnd = rnd.rnd;
 	memcpy(seedvalues, rnd.seedvalues, 6);
 	return *this;
@@ -77,8 +77,8 @@ inline Randomizer Randomizer::operator=(Randomizer const& rnd)
 inline void Randomizer::seed(ByteV const& data)
 {
 	seedvalues_ofs = 0;
-	seedMore(data);
 	toZero(seedvalues, 6);
+	seedMore(data);
 }
 
 inline void Randomizer::seedMore(ByteV const& data)
