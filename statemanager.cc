@@ -208,6 +208,13 @@ void Statemanager::start(void)
 		instance.states.pop_back();
 	}
 
+	// Destroy removable states
+	for (Statevector::iterator removable_states_it = instance.removable_states.begin();
+	     removable_states_it != instance.removable_states.end();
+	     removable_states_it ++) {
+		delete *removable_states_it;
+	}
+	instance.removable_states.clear();
 }
 
 float Statemanager::getFps(void)
