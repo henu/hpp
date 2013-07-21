@@ -76,8 +76,6 @@ private:
 	Strings uniforms;
 	Strings vertexattrs;
 
-	// Shaderprogramhandle that is currently
-	// enabled or NULL if nothing is enabled.
 	bool handle_enabled;
 
 	Shaders shaders;

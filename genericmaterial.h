@@ -81,6 +81,9 @@ public:
 	// after rendering has been started!
 	inline Shaderprogram* getProgram(void) const;
 
+	// Returns enabled Shaderprogramhandle.
+	inline Shaderprogramhandle* getProgramhandle(void) const { return rendering_programhandle; }
+
 private:
 
 	// Functions for friends
