@@ -222,7 +222,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 			// Throw exception
 			std::string error_str(error_c_str, error_str_len);
 			delete[] error_c_str;
-			throw Exception(std::string("Unable to compile GLSL shader! Reason: ") + error_str);
+			throw Exception("In code\n" + shader_src + "\nUnable to compile GLSL shader! Reason: " + error_str);
 		}
 		HppCheckGlErrors();
 	}
