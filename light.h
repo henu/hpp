@@ -35,6 +35,7 @@ public:
 	inline Vector3 getDirection(void) const;
 
 	// For point
+	inline void setPosition(Hpp::Vector3 const& pos);
 // TODO: Code setters!
 	inline Vector3 getPosition(void) const;
 	inline Real getConstantAttenuation(void) const;
@@ -100,6 +101,12 @@ inline Vector3 Light::getDirection(void) const
 {
 	HppAssert(type == SUN, "Unable to get direction, because light is not sun!");
 	return v1;
+}
+
+void Light::setPosition(Hpp::Vector3 const& pos)
+{
+	HppAssert(type == POINT, "Unable to set position, because light is not point!");
+	v1 = pos;
 }
 
 inline Vector3 Light::getPosition(void) const
