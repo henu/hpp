@@ -30,6 +30,13 @@ class GenericMaterial : public Material
 
 public:
 
+	enum AlphaUsage
+	{
+		NORMAL,
+		ROUND_TO_ZERO_OR_ONE,
+		DISCARD_LESS_THAN_HALF
+	};
+
 	// Constructor and destructor
 	inline GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures, bool use_glsl_version_330 = false);
 	inline GenericMaterial(Rawmaterial const& rawmat, bool twosided = false, bool use_glsl_version_330 = false);
@@ -44,13 +51,17 @@ public:
 	inline void setColormap(Texture* cmap);
 	inline void setNormalmap(Texture* nmap);
 	inline void setSpecularmap(Texture* smap);
+	inline void setTwosided(bool twosided);
 	inline void setShadeless(bool shadeless);
+	inline void setAlphaUsage(AlphaUsage alpha_usage);
 
 	inline Color getColor(void) const { return color; }
 	inline Texture* getColormap(void) const { return colormap; }
 	inline Texture* getNormalmap(void) const { return normalmap; }
 	inline Texture* getSpecularmap(void) const { return specularmap; }
+	inline bool getTwosided(void) const { return twosided; }
 	inline bool getShadeless(void) const { return shadeless; }
+	inline AlphaUsage getAlphaUsage(void) const { return alpha_usage; }
 
 	inline bool needsNormalBuffer(void) const;
 	inline bool needsUvBuffer(void) const;
@@ -152,6 +163,7 @@ private:
 	bool twosided;
 	bool shadeless;
 	float normalmap_weight;
+	AlphaUsage alpha_usage;
 
 	// Custom shader program for only this instance. The booleans
 	// tell which extra function calls should be made.
@@ -204,6 +216,7 @@ specularmap(NULL),
 twosided(false),
 shadeless(false),
 normalmap_weight(1),
+alpha_usage(NORMAL),
 custom_program(NULL),
 shadow_test_enabled(false),
 needs_uvs(false),
@@ -228,6 +241,18 @@ rendering_light(NULL)
 	}
 	if (json.keyExists("emittance")) {
 		emittance = json.getMember("emittance").getNumber();
+	}
+	if (json.keyExists("alpha")) {
+		std::string alpha_usage_str = json.getMember("alpha").getString();
+		if (alpha_usage_str == "normal") {
+			alpha_usage = NORMAL;
+		} else if (alpha_usage_str == "round to zero or one") {
+			alpha_usage = ROUND_TO_ZERO_OR_ONE;
+		} else if (alpha_usage_str == "discard less than half") {
+			alpha_usage = DISCARD_LESS_THAN_HALF;
+		} else {
+			throw Hpp::Exception("Invalid alpha value! Must be either \"normal\", \"round to zero or one\" or \"discard less than half\"!");
+		}
 	}
 
 	if (json.keyExists("colormap")) {
@@ -279,6 +304,7 @@ emittance(rawmat.emittance),
 twosided(twosided),
 shadeless(false),
 normalmap_weight(rawmat.normalmap_weight),
+alpha_usage(NORMAL),
 custom_program(NULL),
 shadow_test_enabled(false),
 rendering_programhandle(NULL),
@@ -332,6 +358,7 @@ specularmap(NULL),
 twosided(false),
 shadeless(false),
 normalmap_weight(1),
+alpha_usage(NORMAL),
 custom_program(NULL),
 shadow_test_enabled(false),
 needs_uvs(false),
@@ -398,10 +425,23 @@ inline void GenericMaterial::setSpecularmap(Texture* smap)
 	resetAllShaderprogramhandles();
 }
 
+void GenericMaterial::setTwosided(bool twosided)
+{
+	this->twosided = twosided;
+	resetAllShaderprogramhandles();
+}
+
 inline void GenericMaterial::setShadeless(bool shadeless)
 {
 	this->shadeless = shadeless;
 	updateNeedsLight();
+	resetAllShaderprogramhandles();
+}
+
+void GenericMaterial::setAlphaUsage(GenericMaterial::AlphaUsage alpha_usage)
+{
+	this->alpha_usage = alpha_usage;
+	updateIsTranslucent();
 	resetAllShaderprogramhandles();
 }
 
@@ -588,6 +628,9 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 		    color.getBlue() < NOT_WHITE_THRESHOLD) sflags.insert("COLOR");
 		if (shadow_test_enabled) sflags.insert("SHADOW_FUNC");
 
+		if (alpha_usage == ROUND_TO_ZERO_OR_ONE) sflags.insert("ROUND_ALPHA");
+		else if (alpha_usage == DISCARD_LESS_THAN_HALF) sflags.insert("DISCARD_HALF_ALPHA");
+
 		rendering_programhandle = getProgram()->createHandle(sflags);
 
 		handles[fast_flags] = rendering_programhandle;
@@ -700,7 +743,7 @@ inline void GenericMaterial::updateIsTranslucent(void)
 	if (color.getAlpha() <= TRANSLUCENT_THRESHOLD) {
 		is_translucent = true;
 	} else if (colormap && colormap->hasAlpha()) {
-		is_translucent = true;
+		is_translucent = (alpha_usage != ROUND_TO_ZERO_OR_ONE);
 	} else {
 		is_translucent = false;
 	}
