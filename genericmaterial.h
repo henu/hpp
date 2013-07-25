@@ -36,6 +36,10 @@ public:
 	inline GenericMaterial(bool use_glsl_version_330 = false);
 	inline virtual ~GenericMaterial(void);
 
+	// This can be used to get names of textures
+	// that material at "path" needs.
+	inline static Strings getNeededTextures(Path const& path);
+
 	inline void setColor(Color const& color);
 	inline void setColormap(Texture* cmap);
 	inline void setNormalmap(Texture* nmap);
@@ -342,6 +346,28 @@ inline GenericMaterial::~GenericMaterial(void)
 {
 	resetAllShaderprogramhandles();
 	delete custom_program;
+}
+
+inline Strings GenericMaterial::getNeededTextures(Path const& path)
+{
+	std::set< std::string > result_set;
+
+	Hpp::Json json(path.readString());
+
+	if (json.keyExists("colormap")) {
+		std::string colormap_name = json.getMember("colormap").getString();
+		result_set.insert(colormap_name);
+	}
+	if (json.keyExists("normalmap")) {
+		std::string normalmap_name = json.getMember("normalmap").getString();
+		result_set.insert(normalmap_name);
+	}
+	if (json.keyExists("specularmap")) {
+		std::string specularmap_name = json.getMember("specularmap").getString();
+		result_set.insert(specularmap_name);
+	}
+
+	return Strings(result_set.begin(), result_set.end());
 }
 
 inline void GenericMaterial::setColor(Color const& color)
