@@ -24,6 +24,12 @@ public:
 
 	inline void setSize(Vector3 const& cmin, Vector3 const& cmax);
 
+	inline void translate(Vector3 const& transl);
+	inline void transform(Transform const& transf);
+
+	inline void add(Hpp::Vector3 const& pos);
+	inline void add(Boundingbox const& bb);
+
 	inline Real getMinX(void) const { return cmin.x; }
 	inline Real getMinY(void) const { return cmin.y; }
 	inline Real getMinZ(void) const { return cmin.z; }
@@ -98,6 +104,59 @@ inline void Boundingbox::setSize(Vector3 const& cmin, Vector3 const& cmax)
 	HppAssert(cmin.x <= cmax.x, "Minimum X component is bigger than maximum!");
 	HppAssert(cmin.y <= cmax.y, "Minimum Y component is bigger than maximum!");
 	HppAssert(cmin.z <= cmax.z, "Minimum Z component is bigger than maximum!");
+}
+
+inline void Boundingbox::translate(Vector3 const& transl)
+{
+	cmin += transl;
+	cmax += transl;
+}
+
+inline void Boundingbox::transform(Transform const& transf)
+{
+	Hpp::Vector3 cmin_old = cmin;
+	Hpp::Vector3 cmax_old = cmax;
+
+	// Do new initialization, using one of corners and Transform
+	Hpp::Vector3 corner = transf.applyToPosition(cmin_old);
+	cmin = corner;
+	cmax = corner;
+
+	// Grow rest of Boundingbox using other corners and Transform
+	corner = transf.applyToPosition(Hpp::Vector3(cmin_old.x, cmin_old.y, cmax_old.z));
+	add(corner);
+	corner = transf.applyToPosition(Hpp::Vector3(cmin_old.x, cmax_old.y, cmin_old.z));
+	add(corner);
+	corner = transf.applyToPosition(Hpp::Vector3(cmin_old.x, cmax_old.y, cmax_old.z));
+	add(corner);
+	corner = transf.applyToPosition(Hpp::Vector3(cmax_old.x, cmin_old.y, cmin_old.z));
+	add(corner);
+	corner = transf.applyToPosition(Hpp::Vector3(cmax_old.x, cmin_old.y, cmax_old.z));
+	add(corner);
+	corner = transf.applyToPosition(Hpp::Vector3(cmax_old.x, cmax_old.y, cmin_old.z));
+	add(corner);
+	corner = transf.applyToPosition(cmax_old);
+	add(corner);
+}
+
+void Boundingbox::add(Hpp::Vector3 const& pos)
+{
+	cmin.x = std::min(cmin.x, pos.x);
+	cmin.y = std::min(cmin.y, pos.y);
+	cmin.z = std::min(cmin.z, pos.z);
+	cmax.x = std::max(cmax.x, pos.x);
+	cmax.y = std::max(cmax.y, pos.y);
+	cmax.z = std::max(cmax.z, pos.z);
+}
+
+inline void Boundingbox::add(Boundingbox const& bb)
+{
+	cmin.x = std::min(cmin.x, bb.cmin.x);
+	cmin.y = std::min(cmin.y, bb.cmin.y);
+	cmin.z = std::min(cmin.z, bb.cmin.z);
+	cmax.x = std::max(cmax.x, bb.cmax.x);
+	cmax.y = std::max(cmax.y, bb.cmax.y);
+	cmax.z = std::max(cmax.z, bb.cmax.z);
 }
 
 inline Vector3 Boundingbox::getCenter(void) const
