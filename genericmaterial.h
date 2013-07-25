@@ -100,6 +100,7 @@ private:
 	static float const AMBIENT_LIGHT_ON_THRESHOLD;
 	static float const NEEDS_LIGHT_THRESHOLD;
 	static float const TRANSLUCENT_THRESHOLD;
+	static float const NOT_WHITE_THRESHOLD;
 
 	// Shader flags that change so often, that it
 	// is better to keep all handles in memory.
@@ -375,11 +376,13 @@ inline void GenericMaterial::setColor(Color const& color)
 	this->color = color;
 	updateNeedsLight();
 	updateIsTranslucent();
+	resetAllShaderprogramhandles();
 }
 
 inline void GenericMaterial::setColormap(Texture* cmap)
 {
 	colormap = cmap;
+	updateIsTranslucent();
 	resetAllShaderprogramhandles();
 }
 
@@ -580,7 +583,9 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 				}
 			}
 		}
-		if (color.getRed() > NEEDS_LIGHT_THRESHOLD || color.getGreen() > NEEDS_LIGHT_THRESHOLD || color.getBlue() > NEEDS_LIGHT_THRESHOLD) sflags.insert("COLOR");
+		if (color.getRed() < NOT_WHITE_THRESHOLD &&
+		    color.getGreen() < NOT_WHITE_THRESHOLD &&
+		    color.getBlue() < NOT_WHITE_THRESHOLD) sflags.insert("COLOR");
 		if (shadow_test_enabled) sflags.insert("SHADOW_FUNC");
 
 		rendering_programhandle = getProgram()->createHandle(sflags);
@@ -613,7 +618,9 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 			rendering_programhandle->setUniform(UNIF_LIGHT_COLOR, light->getColor(), RGB);
 		}
 	}
-	if (color.getRed() > NEEDS_LIGHT_THRESHOLD || color.getGreen() > NEEDS_LIGHT_THRESHOLD || color.getBlue() > NEEDS_LIGHT_THRESHOLD) {
+	if (color.getRed() < NOT_WHITE_THRESHOLD &&
+	    color.getGreen() < NOT_WHITE_THRESHOLD &&
+	    color.getBlue() < NOT_WHITE_THRESHOLD) {
 		rendering_programhandle->setUniform(UNIF_MATERIAL_COLOR, color);
 	}
 	if (colormap) {
@@ -691,6 +698,8 @@ inline void GenericMaterial::updateNeedsLight(void)
 inline void GenericMaterial::updateIsTranslucent(void)
 {
 	if (color.getAlpha() <= TRANSLUCENT_THRESHOLD) {
+		is_translucent = true;
+	} else if (colormap && colormap->hasAlpha()) {
 		is_translucent = true;
 	} else {
 		is_translucent = false;

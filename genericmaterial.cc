@@ -148,7 +148,9 @@ std::string const SHADER_FRG_110 =
 "{\n"
 "\n"
 "	#ifdef COLOR\n"
-"	vec3 color = material_color.xyz;\n"
+"	vec4 color = material_color;\n"
+"	#else\n"
+"	vec4 color = vec4(1.0, 1.0, 1.0, 1.0);\n"
 "	#endif\n"
 "\n"
 "	#ifdef NMAP\n"
@@ -158,7 +160,7 @@ std::string const SHADER_FRG_110 =
 "		vec3 frag_normal = normalize(nmap_normal);\n"
 "	#endif\n"
 "	#ifdef CMAP\n"
-"		color *= texture2D(cmap, frag_uv).xyz;\n"
+"		color *= texture2D(cmap, frag_uv);\n"
 "	#endif\n"
 "\n"
 "	// If shadeless, then do not calculate lights\n"
@@ -210,11 +212,7 @@ std::string const SHADER_FRG_110 =
 "\n"
 "	#endif\n"
 "\n"
-"	#ifdef COLOR\n"
-"	gl_FragColor = vec4(color.xyz * light, 1);\n"
-"	#else\n"
-"	gl_FragColor = vec4(light.xyz, 1);\n"
-"	#endif\n"
+"	gl_FragColor = vec4(color.xyz * light, color.w);\n"
 "\n"
 "}\n";
 
@@ -364,7 +362,9 @@ std::string const SHADER_FRG_330 =
 "{\n"
 "\n"
 "	#ifdef COLOR\n"
-"	vec3 color = material_color.xyz;\n"
+"	vec4 color = material_color;\n"
+"	#else\n"
+"	vec4 color = vec4(1.0, 1.0, 1.0, 1.0);\n"
 "	#endif\n"
 "\n"
 "	#ifdef NMAP\n"
@@ -374,7 +374,7 @@ std::string const SHADER_FRG_330 =
 "		vec3 frag_normal = normalize(nmap_normal);\n"
 "	#endif\n"
 "	#ifdef CMAP\n"
-"		color *= texture2D(cmap, frag_uv).xyz;\n"
+"		color *= texture2D(cmap, frag_uv);\n"
 "	#endif\n"
 "\n"
 "	// If shadeless, then do not calculate lights\n"
@@ -426,17 +426,14 @@ std::string const SHADER_FRG_330 =
 "\n"
 "	#endif\n"
 "\n"
-"	#ifdef COLOR\n"
-"	final_color = vec4(color.xyz * light, 1);\n"
-"	#else\n"
-"	final_color = vec4(light.xyz, 1);\n"
-"	#endif\n"
+"	final_color = vec4(color.xyz * light, color.w);\n"
 "\n"
 "}\n";
 
 float const GenericMaterial::AMBIENT_LIGHT_ON_THRESHOLD = 0.005;
 float const GenericMaterial::NEEDS_LIGHT_THRESHOLD = 0.005;
 float const GenericMaterial::TRANSLUCENT_THRESHOLD = 0.995;
+float const GenericMaterial::NOT_WHITE_THRESHOLD = 0.995;
 
 Strings GenericMaterial::uniformnames;
 Strings GenericMaterial::vertexattributenames;
