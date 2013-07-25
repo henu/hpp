@@ -54,6 +54,7 @@ public:
 	inline void setTwosided(bool twosided);
 	inline void setShadeless(bool shadeless);
 	inline void setAlphaUsage(AlphaUsage alpha_usage);
+	inline void setNormalWeight(float normal_weight);
 
 	inline Color getColor(void) const { return color; }
 	inline Texture* getColormap(void) const { return colormap; }
@@ -62,6 +63,7 @@ public:
 	inline bool getTwosided(void) const { return twosided; }
 	inline bool getShadeless(void) const { return shadeless; }
 	inline AlphaUsage getAlphaUsage(void) const { return alpha_usage; }
+	inline float getNormalWeight(void) const { return normal_weight; }
 
 	inline bool needsNormalBuffer(void) const;
 	inline bool needsUvBuffer(void) const;
@@ -108,10 +110,8 @@ private:
 private:
 
 	// Some options
-	static float const AMBIENT_LIGHT_ON_THRESHOLD;
-	static float const NEEDS_LIGHT_THRESHOLD;
-	static float const TRANSLUCENT_THRESHOLD;
-	static float const NOT_WHITE_THRESHOLD;
+	static float const ZERO_THRESHOLD;
+	static float const ONE_THRESHOLD;
 
 	// Shader flags that change so often, that it
 	// is better to keep all handles in memory.
@@ -138,6 +138,7 @@ private:
 	static uint16_t const UNIF_CMAP = 10;
 	static uint16_t const UNIF_NMAP = 11;
 	static uint16_t const UNIF_SMAP = 12;
+	static uint16_t const UNIF_NORMAL_WEIGHT = 13;
 
 	static uint16_t const VATR_POS = 0;
 	static uint16_t const VATR_NORMAL = 1;
@@ -164,6 +165,7 @@ private:
 	bool shadeless;
 	float normalmap_weight;
 	AlphaUsage alpha_usage;
+	float normal_weight;
 
 	// Custom shader program for only this instance. The booleans
 	// tell which extra function calls should be made.
@@ -217,6 +219,7 @@ twosided(false),
 shadeless(false),
 normalmap_weight(1),
 alpha_usage(NORMAL),
+normal_weight(1),
 custom_program(NULL),
 shadow_test_enabled(false),
 needs_uvs(false),
@@ -253,6 +256,9 @@ rendering_light(NULL)
 		} else {
 			throw Hpp::Exception("Invalid alpha value! Must be either \"normal\", \"round to zero or one\" or \"discard less than half\"!");
 		}
+	}
+	if (json.keyExists("normal_weight")) {
+		normal_weight = json.getMember("normal_weight").getNumber();
 	}
 
 	if (json.keyExists("colormap")) {
@@ -305,6 +311,7 @@ twosided(twosided),
 shadeless(false),
 normalmap_weight(rawmat.normalmap_weight),
 alpha_usage(NORMAL),
+normal_weight(1),
 custom_program(NULL),
 shadow_test_enabled(false),
 rendering_programhandle(NULL),
@@ -359,6 +366,7 @@ twosided(false),
 shadeless(false),
 normalmap_weight(1),
 alpha_usage(NORMAL),
+normal_weight(1),
 custom_program(NULL),
 shadow_test_enabled(false),
 needs_uvs(false),
@@ -445,17 +453,26 @@ void GenericMaterial::setAlphaUsage(GenericMaterial::AlphaUsage alpha_usage)
 	resetAllShaderprogramhandles();
 }
 
+void GenericMaterial::setNormalWeight(float normal_weight)
+{
+	this->normal_weight = normal_weight;
+	resetAllShaderprogramhandles();
+}
+
 inline bool GenericMaterial::needsNormalBuffer(void) const
 {
+	if (normal_weight <= ZERO_THRESHOLD) {
+		return false;
+	}
 	if (shadeless) {
 		return false;
 	}
-	if (color.getRed() <= NEEDS_LIGHT_THRESHOLD &&
-	    color.getGreen() <= NEEDS_LIGHT_THRESHOLD &&
-	    color.getBlue() <= NEEDS_LIGHT_THRESHOLD &&
-	    specular.getRed() <= NEEDS_LIGHT_THRESHOLD &&
-	    specular.getGreen() <= NEEDS_LIGHT_THRESHOLD &&
-	    specular.getBlue() <= NEEDS_LIGHT_THRESHOLD) {
+	if (color.getRed() <= ZERO_THRESHOLD &&
+	    color.getGreen() <= ZERO_THRESHOLD &&
+	    color.getBlue() <= ZERO_THRESHOLD &&
+	    specular.getRed() <= ZERO_THRESHOLD &&
+	    specular.getGreen() <= ZERO_THRESHOLD &&
+	    specular.getBlue() <= ZERO_THRESHOLD) {
 		return false;
 	}
 	return true;
@@ -471,6 +488,7 @@ inline bool GenericMaterial::needsUvBuffer(void) const
 
 inline bool GenericMaterial::needsTangentAndBinormalBuffer(void) const
 {
+	if (normal_weight <= ZERO_THRESHOLD) return false;
 	if (normalmap) return true;
 	return false;
 }
@@ -564,7 +582,7 @@ inline void GenericMaterial::beginRendering(Color const& ambient_light, Light co
 // TODO: Implement using of normalmap_weight!
 HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 // TODO: Implement additive rendering!
-	bool ambient_light_enabled = ambient_light.getRed() > AMBIENT_LIGHT_ON_THRESHOLD || ambient_light.getGreen() > AMBIENT_LIGHT_ON_THRESHOLD || ambient_light.getBlue() > AMBIENT_LIGHT_ON_THRESHOLD;
+	bool ambient_light_enabled = ambient_light.getRed() > ZERO_THRESHOLD || ambient_light.getGreen() > ZERO_THRESHOLD || ambient_light.getBlue() > ZERO_THRESHOLD;
 
 	HppCheckGlErrors();
 
@@ -607,7 +625,7 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 		Shaderprogram::Flags sflags = custom_program_flags;
 
 		if (colormap) sflags.insert("CMAP");
-		if (normalmap) sflags.insert("NMAP");
+		if (normalmap && normal_weight > ZERO_THRESHOLD) sflags.insert("NMAP");
 		if (specularmap) sflags.insert("SMAP");
 		if (shadeless) {
 			sflags.insert("SHADELESS");
@@ -623,13 +641,16 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 				}
 			}
 		}
-		if (color.getRed() < NOT_WHITE_THRESHOLD &&
-		    color.getGreen() < NOT_WHITE_THRESHOLD &&
-		    color.getBlue() < NOT_WHITE_THRESHOLD) sflags.insert("COLOR");
+		if (color.getRed() < ONE_THRESHOLD &&
+		    color.getGreen() < ONE_THRESHOLD &&
+		    color.getBlue() < ONE_THRESHOLD) sflags.insert("COLOR");
 		if (shadow_test_enabled) sflags.insert("SHADOW_FUNC");
 
 		if (alpha_usage == ROUND_TO_ZERO_OR_ONE) sflags.insert("ROUND_ALPHA");
 		else if (alpha_usage == DISCARD_LESS_THAN_HALF) sflags.insert("DISCARD_HALF_ALPHA");
+
+		if (normal_weight <= ZERO_THRESHOLD) sflags.insert("ZERO_WEIGHTED_NORMALS");
+		else if (normal_weight < ONE_THRESHOLD) sflags.insert("WEIGHTED_NORMALS");
 
 		rendering_programhandle = getProgram()->createHandle(sflags);
 
@@ -639,7 +660,7 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 
 	// Bind necessary textures
 	if (colormap) colormap->bind();
-	if (normalmap) normalmap->bind();
+	if (normalmap && normal_weight > ZERO_THRESHOLD) normalmap->bind();
 	if (specularmap) specularmap->bind();
 	GlSystem::ActiveTexture(GL_TEXTURE0);
 
@@ -661,19 +682,23 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 			rendering_programhandle->setUniform(UNIF_LIGHT_COLOR, light->getColor(), RGB);
 		}
 	}
-	if (color.getRed() < NOT_WHITE_THRESHOLD &&
-	    color.getGreen() < NOT_WHITE_THRESHOLD &&
-	    color.getBlue() < NOT_WHITE_THRESHOLD) {
+	if (color.getRed() < ONE_THRESHOLD &&
+	    color.getGreen() < ONE_THRESHOLD &&
+	    color.getBlue() < ONE_THRESHOLD) {
 		rendering_programhandle->setUniform(UNIF_MATERIAL_COLOR, color);
 	}
 	if (colormap) {
 		rendering_programhandle->setUniform1i(UNIF_CMAP, colormap->getBoundTextureunit());
 	}
-	if (normalmap) {
+	if (normalmap && normal_weight > ZERO_THRESHOLD) {
 		rendering_programhandle->setUniform1i(UNIF_NMAP, normalmap->getBoundTextureunit());
 	}
 	if (specularmap) {
 		rendering_programhandle->setUniform1i(UNIF_SMAP, specularmap->getBoundTextureunit());
+	}
+
+	if (normal_weight > ZERO_THRESHOLD && normal_weight < ONE_THRESHOLD) {
+		rendering_programhandle->setUniform1f(UNIF_NORMAL_WEIGHT, normal_weight);
 	}
 
 	rendering_light = light;
@@ -684,7 +709,7 @@ inline void GenericMaterial::endRendering(void) const
 	rendering_programhandle->disable();
 	rendering_programhandle = NULL;
 
-	if (normalmap) {
+	if (normalmap && normal_weight > ZERO_THRESHOLD) {
 		normalmap->unbind();
 		HppCheckGlErrors();
 	}
@@ -726,12 +751,12 @@ inline Shaderprogram* GenericMaterial::getProgram(void) const
 
 inline void GenericMaterial::updateNeedsLight(void)
 {
-	if (color.getRed() > NEEDS_LIGHT_THRESHOLD ||
-	    color.getGreen() > NEEDS_LIGHT_THRESHOLD ||
-	    color.getBlue() > NEEDS_LIGHT_THRESHOLD ||
-	    specular.getRed() > NEEDS_LIGHT_THRESHOLD ||
-	    specular.getGreen() > NEEDS_LIGHT_THRESHOLD ||
-	    specular.getBlue() > NEEDS_LIGHT_THRESHOLD) {
+	if (color.getRed() > ZERO_THRESHOLD ||
+	    color.getGreen() > ZERO_THRESHOLD ||
+	    color.getBlue() > ZERO_THRESHOLD ||
+	    specular.getRed() > ZERO_THRESHOLD ||
+	    specular.getGreen() > ZERO_THRESHOLD ||
+	    specular.getBlue() > ZERO_THRESHOLD) {
 	    	needs_light = true;
 	} else {
 		needs_light = false;
@@ -740,7 +765,7 @@ inline void GenericMaterial::updateNeedsLight(void)
 
 inline void GenericMaterial::updateIsTranslucent(void)
 {
-	if (color.getAlpha() <= TRANSLUCENT_THRESHOLD) {
+	if (color.getAlpha() <= ONE_THRESHOLD) {
 		is_translucent = true;
 	} else if (colormap && colormap->hasAlpha()) {
 		is_translucent = (alpha_usage != ROUND_TO_ZERO_OR_ONE);
