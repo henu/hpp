@@ -155,13 +155,13 @@ inline Time now(void)
 inline Delay Delay::fromSecondsAsDouble(double secs)
 {
 	int64_t secs2 = floor(secs);
-	int64_t nsecs = round((secs - secs2) * (1000 * 1000 * 1000));
-	if (nsecs >= 1000 * 1000 * 1000) {
-		nsecs -= 1000 * 1000 * 1000;
+	int64_t nsecs = round((secs - secs2) * MLRD);
+	if (nsecs >= MLRD) {
+		nsecs -= MLRD;
 		secs2 += 1;
 	}
 	if (nsecs < 0) {
-		nsecs += 1000 * 1000 * 1000;
+		nsecs += MLRD;
 		secs2 -= 1;
 	}
 	return Delay(secs2, nsecs);
@@ -169,6 +169,16 @@ inline Delay Delay::fromSecondsAsDouble(double secs)
 
 inline void Delay::sleep(void) const
 {
+	if (inf_) {
+		throw Exception("You really don\'t want to sleep eternally, do you?");
+	}
+
+	// Negative sleep means do not sleep at all
+	HppAssert(nsecs_ < MLRD, "Too many nanoseconds!");
+	if (secs_ < 0) {
+		return;
+	}
+
 	#ifndef WIN32
 	timespec sleeptime;
 	sleeptime.tv_sec = getSeconds();
