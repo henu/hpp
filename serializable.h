@@ -17,6 +17,7 @@ public:
 
 private:
 
+	// "result" must not be cleared!
 	virtual void doSerialize(ByteV& result) const = 0;
 
 };

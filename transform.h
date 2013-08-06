@@ -9,11 +9,12 @@
 #include "angle.h"
 #include "axis.h"
 #include "json.h"
+#include "serializable.h"
 
 namespace Hpp
 {
 
-class Transform
+class Transform : public Serializable
 {
 
 public:
@@ -77,6 +78,9 @@ public:
 private:
 
 	Matrix4 transf;
+
+	// Virtual function needed by superclass Serializable
+	inline virtual void doSerialize(ByteV& result) const;
 
 };
 
@@ -246,6 +250,11 @@ inline Json Transform::toJson(void) const
 	result.addItem(Json::newString("matrix"));
 	result.addItem(transf.toJson());
 	return result;
+}
+
+inline void Transform::doSerialize(ByteV& result) const
+{
+	transf.serialize(result);
 }
 
 }

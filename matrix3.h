@@ -8,13 +8,14 @@
 #include "quaternion.h"
 #include "real.h"
 #include "axis.h"
+#include "serializable.h"
 
 #include <stdint.h>
 
 namespace Hpp
 {
 
-class Matrix3
+class Matrix3 : public Serializable
 {
 
 public:
@@ -90,6 +91,10 @@ private:
 
 	// Function to get complement of spcific cell in Matrix
 	inline Real subdeterminant(uint8_t cell_id) const;
+
+	// Virtual function needed by superclass Serializable
+	inline virtual void doSerialize(ByteV& result) const;
+
 };
 
 inline Matrix3 transpose(Matrix3 const& m);
@@ -497,6 +502,14 @@ inline Real Matrix3::subdeterminant(uint8_t cell_id) const
 
 	HppAssert(false, "Cell ID Overflow");
 	return 0;
+}
+
+inline void Matrix3::doSerialize(ByteV& result) const
+{
+	result.reserve(result.size() + 4*9);
+	for (size_t cell_id = 0; cell_id < 9; ++ cell_id) {
+		result += floatToByteV(cells[cell_id]);
+	}
 }
 
 
