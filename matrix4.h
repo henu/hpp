@@ -9,13 +9,14 @@
 #include "real.h"
 #include "axis.h"
 #include "serializable.h"
+#include "deserializable.h"
 
 #include <stdint.h>
 
 namespace Hpp
 {
 
-class Matrix4 : public Serializable
+class Matrix4 : public Serializable, public Deserializable
 {
 
 public:
@@ -113,8 +114,9 @@ private:
 	// Function to get complement of spcific cell in Matrix
 	inline Real complement(uint8_t cell_id) const;
 
-	// Virtual function needed by superclass Serializable
+	// Virtual functions needed by superclasses Serializable and Deserializable
 	inline virtual void doSerialize(ByteV& result) const;
+	inline virtual void doDeserialize(std::istream& strm);
 
 };
 
@@ -793,6 +795,18 @@ inline void Matrix4::doSerialize(ByteV& result) const
 	result.reserve(result.size() + 4*16);
 	for (size_t cell_id = 0; cell_id < 16; ++ cell_id) {
 		result += floatToByteV(cells[cell_id]);
+	}
+}
+
+inline void Matrix4::doDeserialize(std::istream& strm)
+{
+	char buf[4];
+	for (size_t cell_id = 0; cell_id < 16; ++ cell_id) {
+		strm.read(buf, 4);
+		if (strm.eof()) {
+			throw Exception("Unexpected end of data!");
+		}
+		cells[cell_id] = cStrToFloat(buf, true);
 	}
 }
 

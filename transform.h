@@ -10,11 +10,12 @@
 #include "axis.h"
 #include "json.h"
 #include "serializable.h"
+#include "deserializable.h"
 
 namespace Hpp
 {
 
-class Transform : public Serializable
+class Transform : public Serializable, public Deserializable
 {
 
 public:
@@ -79,8 +80,9 @@ private:
 
 	Matrix4 transf;
 
-	// Virtual function needed by superclass Serializable
+	// Virtual functions needed by superclasses Serializable and Deserializable
 	inline virtual void doSerialize(ByteV& result) const;
+	inline virtual void doDeserialize(std::istream& strm);
 
 };
 
@@ -255,6 +257,11 @@ inline Json Transform::toJson(void) const
 inline void Transform::doSerialize(ByteV& result) const
 {
 	transf.serialize(result);
+}
+
+inline void Transform::doDeserialize(std::istream& strm)
+{
+	transf.deserialize(strm);
 }
 
 }

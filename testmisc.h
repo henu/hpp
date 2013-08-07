@@ -8,6 +8,7 @@
 #include "assert.h"
 #include "cast.h"
 #include "path.h"
+#include "bytevreaderbuf.h"
 
 namespace Hpp
 {
@@ -144,6 +145,39 @@ inline void testMisc(void)
 
 		HppAssert(s_u == "FOOBARTESTING1234567890", "Case conversion has failed!");
 		HppAssert(s_l == "foobartesting1234567890", "Case conversion has failed!");
+	}
+
+	// Test ByteVReaderBuf
+	{
+		ByteV bv(10, 0);
+		char nullbuf[10];
+
+		ByteV::const_iterator bv_it = bv.begin();
+		ByteVReaderBuf rbuf1(bv_it, bv.end());
+		for (size_t reading = 0; reading < 6; ++ reading) {
+			rbuf1.get();
+		}
+		HppAssert(bv.end() - bv_it == 4, "Iterator advancing has failed!");
+
+		ByteVReaderBuf rbuf2(bv);
+		for (size_t reading = 0; reading < 10; ++ reading) {
+			rbuf2.get();
+		}
+		HppAssert(!rbuf2.eof(), "Unexpected EOF!");
+		rbuf2.get();
+		HppAssert(rbuf2.eof(), "No EOF found!");
+
+		bv_it = bv.begin();
+		ByteVReaderBuf rbuf3(bv_it, bv.end());
+		rbuf3.read(nullbuf, 6);
+		HppAssert(bv.end() - bv_it == 4, "Iterator advancing has failed!");
+
+		ByteVReaderBuf rbuf4(bv);
+		rbuf4.read(nullbuf, 10);
+		HppAssert(!rbuf4.eof(), "Unexpected EOF!");
+		rbuf4.get();
+		HppAssert(rbuf4.eof(), "No EOF found!");
+
 	}
 
 }

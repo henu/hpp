@@ -6,11 +6,12 @@
 #include "angle.h"
 #include "json.h"
 #include "serializable.h"
+#include "deserializable.h"
 
 namespace Hpp
 {
 
-class Transform2D : public Serializable
+class Transform2D : public Serializable, public Deserializable
 {
 
 public:
@@ -63,8 +64,9 @@ private:
 
 	Matrix3 transf;
 
-	// Virtual function needed by superclass Serializable
+	// Virtual functions needed by superclasses Serializable and Deserializable
 	inline virtual void doSerialize(ByteV& result) const;
+	inline virtual void doDeserialize(std::istream& strm);
 
 };
 
@@ -202,6 +204,11 @@ inline Json Transform2D::toJson(void) const
 inline void Transform2D::doSerialize(ByteV& result) const
 {
 	transf.serialize(result);
+}
+
+inline void Transform2D::doDeserialize(std::istream& strm)
+{
+	transf.deserialize(strm);
 }
 
 }
