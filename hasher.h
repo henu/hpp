@@ -29,8 +29,9 @@ public:
 	inline void addData(uint8_t const* data, size_t data_size);
 	inline void addData(std::string const& data);
 
-	// Gets hash. This also resets hashing.
+	// Gets hash. This also resets hashing. "result" is cleared.
 	inline void getHash(ByteV& result);
+	inline ByteV getHash(void);
 
 private:
 
@@ -68,6 +69,13 @@ inline void Hasher::getHash(ByteV& result)
 	result.resize(getSize());
 	doGetHash(&result[0]);
 	reset();
+}
+
+inline ByteV Hasher::getHash(void)
+{
+	ByteV result;
+	getHash(result);
+	return result;
 }
 
 }
