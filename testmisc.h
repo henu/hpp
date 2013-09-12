@@ -41,6 +41,9 @@ inline void testMisc(void)
 
 		HppAssert(iMod(50, 9) == 5, "Testing of iMod has failed!")
 		HppAssert(iMod(-50, 9) == 4, "Testing of iMod has failed!")
+
+		HppAssert(abs(dMod(9.5, 2) - 1.5) < 0.001, "Testing of dMod has failed!")
+		HppAssert(abs(dMod(-8.5, 2) - 1.5) < 0.001, "Testing of dMod has failed!")
 	}
 
 	// Test floor and ceiling functions

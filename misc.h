@@ -79,6 +79,7 @@ inline ssize_t iCeil(double d);
 // Modulo function that does not produce negative results. Always returns value
 // that is in range [0 - divisor). Note, that divisor must be positive!
 inline size_t iMod(ssize_t dividend, size_t divisor);
+inline double dMod(double dividend, double divisor);
 
 // Converts tab, enter, \ and given characters to slashes
 inline std::string slashEncode(std::string str, std::string const& chars = "\"\'");
@@ -343,6 +344,19 @@ inline size_t iMod(ssize_t dividend, size_t divisor)
 		return dividend % divisor;
 	}
 	return (dividend % (ssize_t)divisor) + divisor;
+}
+
+inline double dMod(double dividend, double divisor)
+{
+	HppAssert(divisor != 0, "Division by zero!");
+	if (dividend >= 0) {
+		dividend /= divisor;
+		dividend -= ssize_t(dividend);
+		return dividend * divisor;
+	}
+	dividend /= divisor;
+	dividend += ssize_t(-dividend) + 1;
+	return dividend * divisor;
 }
 
 inline std::string slashEncode(std::string str, std::string const& chars)
