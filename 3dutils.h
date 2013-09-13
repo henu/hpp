@@ -281,7 +281,9 @@ inline void forceVectorsPerpendicular(Vector3& v1, Vector3& v2)
 		v1 = center + m1 * to_v1;
 		v2 = center + m1 * to_v2;
 	} else {
-		HppAssert(m2 > 0.0, "Impossible situation!");
+		if (m2 <= 0.0) {
+			throw Exception("Impossible situation!");
+		}
 		v1 = center + m2 * to_v1;
 		v2 = center + m2 * to_v2;
 	}

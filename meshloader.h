@@ -106,8 +106,8 @@ inline Mesh* Meshloader::createMesh(bool calculate_tangent_and_binormal)
 
 			Vector3 tangent = v0_to_v2_pos * v0_to_v2_uv.y - v0_to_v1_pos * v0_to_v2_uv.x;
 			Vector3 binormal = v0_to_v1_pos * v0_to_v1_uv.x - v0_to_v2_pos * v0_to_v1_uv.y;
-			tangent.normalize();
-			binormal.normalize();
+			if (tangent.length() != 0) tangent.normalize();
+			if (binormal.length() != 0) binormal.normalize();
 
 			tangents[v0_id*3 + 0] += tangent.x;
 			tangents[v0_id*3 + 1] += tangent.y;
@@ -127,7 +127,6 @@ inline Mesh* Meshloader::createMesh(bool calculate_tangent_and_binormal)
 			binormals[v2_id*3 + 0] += binormal.x;
 			binormals[v2_id*3 + 1] += binormal.y;
 			binormals[v2_id*3 + 2] += binormal.z;
-
 		}
 
 		for (size_t v_id = 0; v_id < nrms.size()/3; ++ v_id) {
@@ -137,22 +136,29 @@ inline Mesh* Meshloader::createMesh(bool calculate_tangent_and_binormal)
 			// Ensure tangent and binormal are at the plane that is formed by the normal
 			tangent = posToPlane(tangent, Vector3::ZERO, normal);
 			binormal = posToPlane(binormal, Vector3::ZERO, normal);
-			tangent.normalize();
-			binormal.normalize();
-			// Ensure angle between these is 90 °
-			forceVectorsPerpendicular(tangent, binormal);
+			if (tangent.length() != 0 && binormal.length() != 0) {
+				tangent.normalize();
+				binormal.normalize();
+				// Ensure angle between these is 90 °
+				try {
+					forceVectorsPerpendicular(tangent, binormal);
 // TODO: Make this more logical!
-			tangent = binormal;
-			tangent.normalize();
-			//binormal.normalize();
-			binormal = crossProduct(normal, tangent);
-			// Store modified vectors
-			tangents[v_id*3 + 0] = tangent.x;
-			tangents[v_id*3 + 1] = tangent.y;
-			tangents[v_id*3 + 2] = tangent.z;
-			binormals[v_id*3 + 0] = binormal.x;
-			binormals[v_id*3 + 1] = binormal.y;
-			binormals[v_id*3 + 2] = binormal.z;
+					tangent = binormal;
+					tangent.normalize();
+					//binormal.normalize();
+					binormal = crossProduct(normal, tangent);
+					// Store modified vectors
+					tangents[v_id*3 + 0] = tangent.x;
+					tangents[v_id*3 + 1] = tangent.y;
+					tangents[v_id*3 + 2] = tangent.z;
+					binormals[v_id*3 + 0] = binormal.x;
+					binormals[v_id*3 + 1] = binormal.y;
+					binormals[v_id*3 + 2] = binormal.z;
+				}
+				catch (Exception)
+				{
+				}
+			}
 		}
 
 		result->setBuffer(Mesh::TANGENT, GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 3, &tangents[0], tangents.size());
