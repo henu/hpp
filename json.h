@@ -1,6 +1,12 @@
 #ifndef HPP_JSON_H
 #define HPP_JSON_H
 
+// This class can be used to encode and decode JSON.
+//
+// It can also be used to represent other than JSON types, by using Userdata.
+// However, since userdata is not part of JSON standard, no JSON string can be
+// decoded so it would contain any userdata.
+
 #include "bytev.h"
 #include "exception.h"
 
@@ -16,7 +22,7 @@ class Json
 
 public:
 
-	enum Type { NUMBER, STRING, BOOLEAN, OBJECT, ARRAY, NUL };
+	enum Type { NUMBER, STRING, BOOLEAN, OBJECT, ARRAY, NUL, USERDATA };
 
 	typedef std::map< std::string, Json > Object;
 	typedef std::vector< Json > Array;
@@ -49,6 +55,8 @@ public:
 	inline static Json newNumber(uint8_t num = 0) { return newNumber(int64_t(num)); }
 	inline static Json newBoolean(bool value = false);
 	inline static Json newNull(void);
+	inline static Json newUserdata(ssize_t type, void* data);
+	inline static Json newUserdata(void* data);
 
 	// Setters
 	inline void setMember(std::string const& key, Json const& var);
@@ -65,6 +73,8 @@ public:
 	inline size_t getArraySize(void) const;
 	Json getItem(size_t index) const;
 	inline bool getBoolean(void) const;
+	inline ssize_t getUserdataType(void) const;
+	inline void* getUserdata(void) const;
 
 	// For iterating Object. If there is no more keys,
 	// then key that is not found is returned.
@@ -85,6 +95,7 @@ private:
 	std::string str;
 	Object obj;
 	Array arr;
+	void* userdata;
 
 	std::string doEncode(size_t indent, bool nice = false) const;
 
@@ -128,6 +139,10 @@ type(json.type)
 	case ARRAY:
 		arr = json.arr;
 		break;
+	case USERDATA:
+		num_i = json.num_i;
+		userdata = json.userdata;
+		break;
 	default:
 		break;
 	}
@@ -152,6 +167,10 @@ inline Json const& Json::operator=(Json const& json)
 		break;
 	case ARRAY:
 		arr = json.arr;
+		break;
+	case USERDATA:
+		num_i = json.num_i;
+		userdata = json.userdata;
 		break;
 	default:
 		break;
@@ -243,6 +262,24 @@ inline Json Json::newBoolean(bool value)
 inline Json Json::newNull(void)
 {
 	Json result;
+	return result;
+}
+
+inline Json Json::newUserdata(ssize_t type, void* data)
+{
+	Json result;
+	result.type = USERDATA;
+	result.num_i = type;
+	result.userdata = data;
+	return result;
+}
+
+inline Json Json::newUserdata(void* data)
+{
+	Json result;
+	result.type = USERDATA;
+	result.num_i = 0;
+	result.userdata = data;
 	return result;
 }
 
@@ -338,6 +375,22 @@ inline bool Json::getBoolean(void) const
 	return num_is_integer;
 }
 
+inline ssize_t Json::getUserdataType(void) const
+{
+	if (type != USERDATA) {
+		throw Exception("Unable to get type of userdata, because this JSON is not userdata!");
+	}
+	return num_i;
+}
+
+inline void* Json::getUserdata(void) const
+{
+	if (type != USERDATA) {
+		throw Exception("Unable to get userdata, because this JSON is not userdata!");
+	}
+	return userdata;
+}
+
 inline std::string Json::getFirstKey(void) const
 {
 	if (type != OBJECT) {
@@ -371,6 +424,8 @@ inline bool Json::operator==(Json const& json) const
 		return obj == json.obj;
 	case ARRAY:
 		return arr == json.arr;
+	case USERDATA:
+		return num_i == json.num_i && userdata == json.userdata;
 	default:
 		break;
 	}

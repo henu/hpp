@@ -109,6 +109,8 @@ std::string Json::doEncode(size_t indent, bool nice) const
 		}
 	case NUL:
 		return "null";
+	case USERDATA:
+		return "<<< USERDATA >>>";
 	default:
 		break;
 	}
