@@ -53,6 +53,7 @@ public:
 	inline void rotateZ(Angle const& angle) { transf = Matrix4::rotMatrixZ(angle) * transf; }
 	inline void rotate(Quaternion const& q) { transf = quaternionToMatrix4(q) * transf; }
 	inline void rotate(Vector3 const& axis, Angle const& angle) { transf = Matrix4::rotMatrix(axis, angle) * transf; }
+	inline void rotate(Axis axis, Angle const& angle) { transf = Matrix4::rotMatrix(axis, angle) * transf; }
 	inline void scale(Vector3 const& v) { transf = Matrix4::scaleMatrix(v) * transf; }
 
 	// Operators for combining transforms. First this
