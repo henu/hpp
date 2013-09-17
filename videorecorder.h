@@ -22,7 +22,7 @@ public:
 
 	inline ~Videorecorder(void);
 
-	// Use %N in filename to represent frame number. Comes with automatoc
+	// Use %N in filename to represent frame number. Comes with automatic
 	// '0' padding.
 	inline void saveFrames(Path const& basepath, std::string const& filename);
 
@@ -90,6 +90,12 @@ void Videorecorder::saveFrames(Path const& basepath, std::string const& filename
 	while (isEncodingPossible()) {
 		Delay::msecs(250).sleep();
 	}
+
+	if (filename.find("%N") == std::string::npos) {
+		throw Exception("Filename of frames does not have %N in it!");
+	}
+
+	basepath.ensureDirExists();
 
 	Lock frames_lock(frames_mutex);
 	uint8_t fullpadding = sizeToStr(frames.size()-1).size();
@@ -199,35 +205,34 @@ inline void Videorecorder::encoder(void* recorder_raw)
 				HppAssert(nframe - dbf < nframe, "Fail!");
 				disp->getVideoframesFromRange(rawframes, nframe - dbf, nframe);
 				times_lock.unlock();
+				if (!rawframes.empty()) {
+					Image rawframe0 = rawframes.begin()->second;
+					// Encode frame
+					size_t result_size = rawframe0.getWidth() * rawframe0.getHeight() * rawframe0.getBytesPerPixel();
+					std::vector< size_t > result(result_size, 0);
+					for (Display::Rawframes::const_iterator rawframes_it = rawframes.begin();
+					     rawframes_it != rawframes.end();
+					     ++ rawframes_it) {
+						Image const& rawframe = rawframes_it->second;
+						ByteV rawframe_data = rawframe.getData();
+						for (size_t offset = 0; offset < result_size; offset ++) {
+							result[offset] += rawframe_data[offset];
+						}
+					}
+					ByteV result_bv;
+					result_bv.reserve(result_size);
+					for (size_t offset = 0; offset < result_size; offset ++) {
+						size_t byte = result[offset] / rawframes.size();
+						HppAssert(byte <= 255, "Too big value!");
+						result_bv.push_back(byte);
+					}
+					Image frame(result_bv, rawframe0.getWidth(), rawframe0.getHeight(), rawframe0.getFormat());
 
-				HppAssert(!rawframes.empty(), "No frames found!");
-				Image const& rawframe0 = rawframes.begin()->second;
-
-				// Encode frame
-				size_t result_size = rawframe0.getWidth() * rawframe0.getHeight() * rawframe0.getBytesPerPixel();
-				std::vector< size_t > result(result_size, 0);
-				for (Display::Rawframes::const_iterator rawframes_it = rawframes.begin();
-				     rawframes_it != rawframes.end();
-				     ++ rawframes_it) {
-				     	Image const& rawframe = rawframes_it->second;
-				     	ByteV rawframe_data = rawframe.getData();
-				     	for (size_t offset = 0; offset < result_size; offset ++) {
-				     		result[offset] += rawframe_data[offset];
-				     	}
+					// Push frame to container
+					Lock frames_lock(frames_mutex);
+					frames.push_back(frame);
+					frames_lock.unlock();
 				}
-				ByteV result_bv;
-				result_bv.reserve(result_size);
-				for (size_t offset = 0; offset < result_size; offset ++) {
-					size_t byte = result[offset] / rawframes.size();
-					HppAssert(byte <= 255, "Too big value!");
-					result_bv.push_back(byte);
-				}
-				Image frame(result_bv, rawframe0.getWidth(), rawframe0.getHeight(), rawframe0.getFormat());
-
-				// Push frame to container
-				Lock frames_lock(frames_mutex);
-				frames.push_back(frame);
-				frames_lock.unlock();
 				times_lock.relock();
 				nframe += dbf;
 			}

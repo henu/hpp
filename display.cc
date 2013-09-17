@@ -314,7 +314,6 @@ void Display::getVideoframesFromRange(Rawframes& result, Time const& min, Time c
 	     ++ rawframes_it) {
 	     	result[rawframes_it->first] = rawframes_it->second;
 	}
-	HppAssert(!result.empty(), "No frames found!");
 }
 
 Display::Display(void) :

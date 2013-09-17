@@ -36,6 +36,10 @@ public:
 	Image(uint8_t const* filedata, Pixelformat format = DEFAULT, Flags flags = 0);
 	~Image(void);
 
+	// Copy constructor and assignment operator
+	Image(Image const& image);
+	Image& operator=(Image const& image);
+
 	// Converts format of this Image
 	void convertTo(Pixelformat format);
 

@@ -66,6 +66,23 @@ Image::~Image(void)
 {
 }
 
+Image::Image(Image const& image) :
+data(image.data),
+format(image.format),
+width(image.width),
+height(image.height)
+{
+}
+
+Image& Image::operator=(Image const& image)
+{
+	this->data = image.data;
+	this->format = image.format;
+	this->width = image.width;
+	this->height = image.height;
+	return *this;
+}
+
 void Image::convertTo(Pixelformat format)
 {
 	HppAssert(data.size() == getBppOfPixelformat(this->format) * width * height, "Fail!");
