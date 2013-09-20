@@ -11,7 +11,7 @@
 
 #include <algorithm>
 
-#include <iostream>
+#include "printonce.h"
 namespace Hpp
 {
 
@@ -584,14 +584,14 @@ inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
 		}
 
 // TODO: Code this!
-std::cerr << __FILE__ << ":" << __LINE__ << " WARNING: Not implemented yet, so giving rough estimation!" << std::endl;
+HppPrintOnce("WARNING: Not implemented yet, so giving rough estimation!");
 return distanceBetweenLines(begin1, dir1, begin2, dir2);
 
 	}
 	// Angle between rays is exactly 90 °
 	else {
 // TODO: Code this!
-std::cerr << __FILE__ << ":" << __LINE__ << " WARNING: Not implemented yet, so giving rough estimation!" << std::endl;
+HppPrintOnce("WARNING: Not implemented yet, so giving rough estimation!");
 return distanceBetweenLines(begin1, dir1, begin2, dir2);
 	}
 }
