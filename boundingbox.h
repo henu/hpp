@@ -18,6 +18,7 @@ public:
 
 	// Constructors and creators
 	inline Boundingbox(void);
+	inline Boundingbox(Vector3 const& pos);
 	inline Boundingbox(Vector3 const& cmin, Vector3 const& cmax);
 	inline static Boundingbox fromTriangle(Vector3 const& v0, Vector3 const& v1, Vector3 const& v2);
 	inline static Boundingbox fromCapsule(Vector3 const& pos0, Vector3 const& pos1, Real radius);
@@ -59,6 +60,12 @@ private:
 inline Boundingbox::Boundingbox(void) :
 cmin(Vector3::ZERO),
 cmax(Vector3::ZERO)
+{
+}
+
+inline Boundingbox::Boundingbox(Vector3 const& pos) :
+cmin(pos),
+cmax(pos)
 {
 }
 
