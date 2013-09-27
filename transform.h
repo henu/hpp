@@ -22,6 +22,7 @@ public:
 
 	inline Transform(void);
 	inline Transform(Vector3 const& pos);
+	inline Transform(Vector3 const& axis, Angle const& angle);
 	inline Transform(Axis axis, Angle const& angle);
 	inline Transform(Matrix3 const& m);
 	inline Transform(Matrix4 const& m);
@@ -94,6 +95,11 @@ transf(Matrix4::IDENTITY)
 
 inline Transform::Transform(Vector3 const& pos) :
 transf(Matrix4::translMatrix(pos))
+{
+}
+
+inline Transform::Transform(Vector3 const& axis, Angle const& angle) :
+transf(Matrix4::rotMatrix(axis, angle))
 {
 }
 
