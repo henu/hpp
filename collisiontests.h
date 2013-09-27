@@ -190,10 +190,17 @@ inline bool capsuleToTriangle(Collision& result,
 		if (depth + extra_radius > 0) {
 			Collision new_ccoll;
 			new_ccoll.depth = depth;
-			new_ccoll.normal = (point_at_centerline - corner).normalized();
+			new_ccoll.normal = point_at_centerline - corner;
+			Real new_ccoll_normal_len = new_ccoll.normal.length();
+			// If division by zero would occure,
+			// then just ignore this collision
+			if (new_ccoll_normal_len == 0) {
+				continue;
+			}
+			new_ccoll.normal /= new_ccoll_normal_len;
 			ccolls.push_back(new_ccoll);
 		}
-		
+
 	}
 
 	// Then check if edges are inside cylinder
@@ -232,7 +239,7 @@ inline bool capsuleToTriangle(Collision& result,
 				}
 			}
 		}
-		
+
 		// Get collision where edge leaves cylinder from above
 		if (end_outside == 1) {
 			Real dp_d_e = dotProduct(diff, edge);
