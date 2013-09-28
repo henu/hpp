@@ -7,6 +7,7 @@
 #include "misc.h"
 #include "pixelformat.h"
 #include <ostream>
+#include <vector>
 
 namespace Hpp
 {
@@ -15,6 +16,8 @@ class Color
 {
 
 public:
+
+	typedef std::vector< Color > Vec;
 
 	// Constructors
 	inline Color(void);
@@ -29,6 +32,13 @@ public:
 
 	// Operators
 	inline Color operator*(float f) const;
+
+	// Setters. Format must support setting of given component
+	inline void setRed(float red);
+	inline void setGreen(float green);
+	inline void setBlue(float blue);
+	inline void setValue(float val);
+	inline void setAlpha(float alpha);
 
 	// Getters. These will always return proper values based on format
 	inline float getRed(void) const;
@@ -212,6 +222,43 @@ inline Color Color::operator*(float f) const
 		HppAssert(false, "Invalid format!");
 	}
 	return result;
+}
+
+inline void Color::setRed(float red)
+{
+	HppAssert(format == RGB || format == RGBA, "This format does not have component \"red\"!");
+	this->red = red;
+}
+
+inline void Color::setGreen(float green)
+{
+	HppAssert(format == RGB || format == RGBA, "This format does not have component \"green\"!");
+	this->green = green;
+}
+
+inline void Color::setBlue(float blue)
+{
+	HppAssert(format == RGB || format == RGBA, "This format does not have component \"blue\"!");
+	this->blue = blue;
+}
+
+inline void Color::setValue(float val)
+{
+	if (format == RGB || format == RGBA) {
+		red = val;
+		green = val;
+		blue = val;
+	} else if (format == GRAYSCALE || format == GRAYSCALE_ALPHA) {
+		red = val;
+	} else {
+		HppAssert(false, "This format does not have component \"value\"!");
+	}
+}
+
+inline void Color::setAlpha(float alpha)
+{
+	HppAssert(format == RGBA || format == GRAYSCALE_ALPHA || format == ALPHA, "This format does not have component \"alpha\"!");
+	this->alpha = alpha;
 }
 
 inline float Color::getRed(void) const
