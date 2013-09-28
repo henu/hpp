@@ -117,6 +117,9 @@ inline Vector3 moveOut(Collisions& colls)
 	#endif
 	Real deepest2_depth = -999999;
 	Vector3 deepest2_nrm_p;
+	#ifndef NDEBUG
+	deepest2_nrm_p = Hpp::Vector3::ZERO;
+	#endif
 	for (size_t colls_id = 0;
 	     colls_id < colls.size();
 	     colls_id ++) {

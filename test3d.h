@@ -121,8 +121,8 @@ inline void test3D(void)
 			Vector3 ray_begin = randomVector3(100);
 			if (fabs(plane.distanceToPosition(ray_begin)) > 0.01) {
 				Vector3 ray_dir = (hitpos - ray_begin).normalized();
-				Vector3 hitresult_pos;
-				Real hitresult_dir_mult;
+				Vector3 hitresult_pos = Hpp::randomVector3(0, 1);
+				Real hitresult_dir_mult = Hpp::random(0, 1);
 				bool hits = plane.hitsLine(ray_begin, ray_dir, &hitresult_pos, &hitresult_dir_mult);
 				HppAssert(hits, "Unable to detect hit!");
 				HppAssert((hitresult_pos - hitpos).length() < 0.01, "Hitposition calculation has failed!");

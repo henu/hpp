@@ -38,9 +38,12 @@ stop_threads(false)
 	int inpipe[2];
 	int errpipe[2];
 
-	(void)::pipe(outpipe);
-	(void)::pipe(inpipe);
-	(void)::pipe(errpipe);
+	int ignore1 = ::pipe(outpipe);
+	int ignore2 = ::pipe(inpipe);
+	int ignore3 = ::pipe(errpipe);
+	(void)ignore1;
+	(void)ignore2;
+	(void)ignore3;
 
 	int stdin_old = ::dup(STDIN_FILENO);
 	int stdout_old = ::dup(STDOUT_FILENO);

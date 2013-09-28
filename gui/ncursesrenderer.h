@@ -90,16 +90,16 @@ private:
 	inline virtual uint32_t getLabelHeight(void) const { return 1; }
 	inline virtual uint32_t getTextinputWidth(size_t cols) const { return cols; }
 	inline virtual uint32_t getTextinputHeight(void) const { return 1; }
-	inline virtual uint32_t getMinimumTextinputContentsWidth(UnicodeString const& value) const { return 1; }
+	inline virtual uint32_t getMinimumTextinputContentsWidth(UnicodeString const& value) const { (void)value; return 1; }
 	inline virtual uint32_t getTextinputContentsHeight(void) const { return 1; }
-	inline virtual void getTextinputContentsCursorProps(uint32_t& cursor_pos_x, uint32_t& cursor_pos_y, uint32_t& cursor_width, uint32_t& cursor_height, UnicodeString const& value, ssize_t cursor) const { cursor_pos_x = cursor; cursor_pos_y = 0; cursor_width = 1; cursor_height = 1; }
+	inline virtual void getTextinputContentsCursorProps(uint32_t& cursor_pos_x, uint32_t& cursor_pos_y, uint32_t& cursor_width, uint32_t& cursor_height, UnicodeString const& value, ssize_t cursor) const { (void)value; cursor_pos_x = cursor; cursor_pos_y = 0; cursor_width = 1; cursor_height = 1; }
 	inline virtual void getTextinputEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const { edge_top = 0; edge_left = 0; edge_right = 0; edge_bottom = 0; }
 	inline virtual uint32_t getButtonWidth(UnicodeString const& label) const { return label.size(); }
 	inline virtual uint32_t getButtonHeight(void) const { return 1; }
 	inline virtual uint32_t getMinimumFolderviewWidth(void) const { return 0; }
 	inline virtual uint32_t getFolderviewHeight(void) const { return 1; }
-	inline virtual uint32_t getMinimumFolderviewContentsWidth(UnicodeString const& label) const { return 0; }
-	inline virtual uint32_t getFolderviewContentsHeight(size_t items) const { return 1; }
+	inline virtual uint32_t getMinimumFolderviewContentsWidth(UnicodeString const& label) const { (void)label; return 0; }
+	inline virtual uint32_t getFolderviewContentsHeight(size_t items) const { (void)items; return 1; }
 	inline virtual void getFolderviewEdgeSizes(uint32_t& edge_top, uint32_t& edge_left, uint32_t& edge_right, uint32_t& edge_bottom) const { edge_top = 0; edge_left = 0; edge_right = 0; edge_bottom = 0; }
 	inline virtual uint32_t getScrollbarWidth(void) const { return 1; }
 	inline virtual uint32_t getScrollbarHeight(void) const { return 1; }

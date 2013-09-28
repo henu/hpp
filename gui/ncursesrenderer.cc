@@ -182,6 +182,7 @@ void NCursesRenderer::deinitRendering(void)
 
 void NCursesRenderer::renderMenubarBackground(int32_t x_origin, int32_t y_origin, uint32_t width, AreaWithMenubar const* areawithmenubar)
 {
+	(void)areawithmenubar;
 	setCursor(x_origin, y_origin);
 	setColors(NC::BLACK, NC::GRAY);
 	printString(std::string(width, ' '));
@@ -189,6 +190,8 @@ void NCursesRenderer::renderMenubarBackground(int32_t x_origin, int32_t y_origin
 
 void NCursesRenderer::renderMenuLabel(int32_t x_origin, int32_t y_origin, Menu const* menu, UnicodeString const& label, bool mouse_over)
 {
+	(void)menu;
+	(void)mouse_over;
 	setCursor(x_origin, y_origin);
 	setColors(NC::BLACK, NC::GRAY);
 	printChar(' ');
@@ -198,51 +201,89 @@ void NCursesRenderer::renderMenuLabel(int32_t x_origin, int32_t y_origin, Menu c
 
 void NCursesRenderer::renderMenuseparator(int32_t x_origin, int32_t y_origin, Menuseparator const* menusep)
 {
+(void)x_origin;
+(void)y_origin;
+(void)menusep;
 HppAssert(false, "Not implemented yet!");
 }
 
 void NCursesRenderer::renderMenuitem(int32_t x_origin, int32_t y_origin, Menuitem const* menuitem, UnicodeString const& label, bool mouse_over)
 {
+(void)x_origin;
+(void)y_origin;
+(void)menuitem;
+(void)label;
+(void)mouse_over;
 HppAssert(false, "Not implemented yet!");
 }
 
 void NCursesRenderer::renderWindow(int32_t x_origin, int32_t y_origin, Window const* window, UnicodeString const& title)
 {
+(void)x_origin;
+(void)y_origin;
+(void)window;
+(void)title;
 HppAssert(false, "Not implemented yet!");
 }
 
 void NCursesRenderer::renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str)
 {
+(void)x_origin;
+(void)y_origin;
+(void)label;
+(void)label_str;
 HppAssert(false, "Not implemented yet!");
 }
 
 void NCursesRenderer::renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput)
 {
+(void)x_origin;
+(void)y_origin;
+(void)textinput;
 HppAssert(false, "Not implemented yet!");
 }
 
 void NCursesRenderer::renderTextinputContents(int32_t x_origin, int32_t y_origin, TextinputContents const* textinputcontents, ssize_t cursor)
 {
+(void)x_origin;
+(void)y_origin;
+(void)textinputcontents;
+(void)cursor;
 HppAssert(false, "Not implemented yet!");
 }
 
 void NCursesRenderer::renderButton(int32_t x_origin, int32_t y_origin, Button const* button, UnicodeString const& label, bool pressed)
 {
+(void)x_origin;
+(void)y_origin;
+(void)button;
+(void)label;
+(void)pressed;
 HppAssert(false, "Not implemented yet!");
 }
 
 void NCursesRenderer::renderFolderview(int32_t x_origin, int32_t y_origin, Folderview const* folderview)
 {
+(void)x_origin;
+(void)y_origin;
+(void)folderview;
 HppAssert(false, "Not implemented yet!");
 }
 
 void NCursesRenderer::renderFolderviewContents(int32_t x_origin, int32_t y_origin, FolderviewContents const* folderviewcontents, Path::DirChildren const& items)
 {
+(void)x_origin;
+(void)y_origin;
+(void)folderviewcontents;
+(void)items;
 HppAssert(false, "Not implemented yet!");
 }
 
 void NCursesRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed, bool slider_pressed)
 {
+	(void)down_or_right_key_pressed;
+	(void)up_or_left_key_pressed;
+	(void)slider_pressed;
 	Real slider_size_rel = scrollbar->getSliderSize();
 	Real value = scrollbar->getValue();
 
@@ -295,11 +336,19 @@ void NCursesRenderer::renderScrollbar(int32_t x_origin, int32_t y_origin, Scroll
 
 void NCursesRenderer::renderSlider(int32_t x_origin, int32_t y_origin, Slider const* slider, bool horizontal, bool slider_pressed)
 {
+(void)x_origin;
+(void)y_origin;
+(void)slider;
+(void)horizontal;
+(void)slider_pressed;
 HppAssert(false, "Not implemented yet!");
 }
 
 void NCursesRenderer::renderTabs(int32_t x_origin, int32_t y_origin, Tabs const* tabs)
 {
+(void)x_origin;
+(void)y_origin;
+(void)tabs;
 HppAssert(false, "Not implemented yet!");
 }
 
