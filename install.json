@@ -218,11 +218,13 @@
 			"deb_deps": [ "libsdl-image1.2" ],
 			"headers": [
 				"image_draw.h",
-				"image.h"
+				"image.h",
+				"imageeffects/edges.h"
 			],
 			"sources": [
 				"image.cc",
-				"image_draw.cc"
+				"image_draw.cc",
+				"imageeffects/edges.cc"
 			],
 			"deps": [ "main" ]
 		},
