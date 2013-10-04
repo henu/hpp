@@ -80,7 +80,7 @@ class ByteVReaderBuf : public std::basic_istream< char, std::char_traits< char >
 
 public:
 
-	inline ByteVReaderBuf(Hpp::ByteV& bv);
+	inline ByteVReaderBuf(Hpp::ByteV const& bv);
 	inline ByteVReaderBuf(Hpp::ByteV::const_iterator& it, Hpp::ByteV::const_iterator const& end);
 	inline ~ByteVReaderBuf(void);
 
@@ -94,7 +94,7 @@ private:
 
 };
 
-inline ByteVReaderBuf::ByteVReaderBuf(Hpp::ByteV& bv) :
+inline ByteVReaderBuf::ByteVReaderBuf(Hpp::ByteV const& bv) :
 std::basic_istream< char, std::char_traits< char > >(&buf),
 my_it(new Hpp::ByteV::const_iterator(bv.begin()))
 {
