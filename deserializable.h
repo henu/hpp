@@ -13,35 +13,35 @@ class Deserializable
 
 public:
 
-	inline void deserialize(ByteV const& bytes);
-	inline void deserialize(ByteV::const_iterator& bytes_it, ByteV::const_iterator const& bytes_end);
-	inline void deserialize(std::istream& strm);
+	inline void deserialize(ByteV const& bytes, bool bigendian = true);
+	inline void deserialize(ByteV::const_iterator& bytes_it, ByteV::const_iterator const& bytes_end, bool bigendian = true);
+	inline void deserialize(std::istream& strm, bool bigendian = true);
 
 private:
 
-	virtual void doDeserialize(std::istream& strm) = 0;
+	virtual void doDeserialize(std::istream& strm, bool bigendian) = 0;
 
 };
 
-inline void Deserializable::deserialize(ByteV const& bytes)
+inline void Deserializable::deserialize(ByteV const& bytes, bool bigendian)
 {
 	ByteV::const_iterator bytes_it = bytes.begin();
 	ByteVReaderBuf rbuf(bytes_it, bytes.end());
-	doDeserialize(rbuf);
+	doDeserialize(rbuf, bigendian);
 	if (bytes_it != bytes.end()) {
 		throw Exception("Deserializable did not use all bytes!");
 	}
 }
 
-inline void Deserializable::deserialize(ByteV::const_iterator& bytes_it, ByteV::const_iterator const& bytes_end)
+inline void Deserializable::deserialize(ByteV::const_iterator& bytes_it, ByteV::const_iterator const& bytes_end, bool bigendian)
 {
 	ByteVReaderBuf rbuf(bytes_it, bytes_end);
-	doDeserialize(rbuf);
+	doDeserialize(rbuf, bigendian);
 }
 
-inline void Deserializable::deserialize(std::istream& strm)
+inline void Deserializable::deserialize(std::istream& strm, bool bigendian)
 {
-	doDeserialize(strm);
+	doDeserialize(strm, bigendian);
 }
 
 }

@@ -83,8 +83,8 @@ private:
 	Matrix4 transf;
 
 	// Virtual functions needed by superclasses Serializable and Deserializable
-	inline virtual void doSerialize(ByteV& result) const;
-	inline virtual void doDeserialize(std::istream& strm);
+	inline virtual void doSerialize(ByteV& result, bool bigendian) const;
+	inline virtual void doDeserialize(std::istream& strm, bool bigendian);
 
 };
 
@@ -261,14 +261,14 @@ inline Json Transform::toJson(void) const
 	return result;
 }
 
-inline void Transform::doSerialize(ByteV& result) const
+inline void Transform::doSerialize(ByteV& result, bool bigendian) const
 {
-	transf.serialize(result);
+	transf.serialize(result, bigendian);
 }
 
-inline void Transform::doDeserialize(std::istream& strm)
+inline void Transform::doDeserialize(std::istream& strm, bool bigendian)
 {
-	transf.deserialize(strm);
+	transf.deserialize(strm, bigendian);
 }
 
 }

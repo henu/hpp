@@ -137,7 +137,7 @@ inline void Rawmesh::readVersion100(std::istream& strm)
 		vrts.reserve(vrts_size);
 		while (vrts.size() < vrts_size) {
 			Vertex new_vrt;
-			new_vrt.pos = deserializeVector3(strm);
+			new_vrt.pos.deserialize(strm);
 			uint32_t vginfls_size = deserializeUInt32(strm, false);
 			while (new_vrt.vginfls.size() < vginfls_size) {
 				uint32_t vg_id = deserializeUInt32(strm, false);

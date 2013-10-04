@@ -94,8 +94,8 @@ private:
 	inline Real subdeterminant(uint8_t cell_id) const;
 
 	// Virtual functions needed by superclasses Serializable and Deserializable
-	inline virtual void doSerialize(ByteV& result) const;
-	inline virtual void doDeserialize(std::istream& strm);
+	inline virtual void doSerialize(ByteV& result, bool bigendian) const;
+	inline virtual void doDeserialize(std::istream& strm, bool bigendian);
 
 };
 
@@ -506,15 +506,15 @@ inline Real Matrix3::subdeterminant(uint8_t cell_id) const
 	return 0;
 }
 
-inline void Matrix3::doSerialize(ByteV& result) const
+inline void Matrix3::doSerialize(ByteV& result, bool bigendian) const
 {
 	result.reserve(result.size() + 4*9);
 	for (size_t cell_id = 0; cell_id < 9; ++ cell_id) {
-		result += floatToByteV(cells[cell_id]);
+		result += floatToByteV(cells[cell_id], bigendian);
 	}
 }
 
-inline void Matrix3::doDeserialize(std::istream& strm)
+inline void Matrix3::doDeserialize(std::istream& strm, bool bigendian)
 {
 	char buf[4];
 	for (size_t cell_id = 0; cell_id < 9; ++ cell_id) {
@@ -522,7 +522,7 @@ inline void Matrix3::doDeserialize(std::istream& strm)
 		if (strm.eof()) {
 			throw Exception("Unexpected end of data!");
 		}
-		cells[cell_id] = cStrToFloat(buf, true);
+		cells[cell_id] = cStrToFloat(buf, bigendian);
 	}
 }
 

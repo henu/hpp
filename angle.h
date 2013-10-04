@@ -4,6 +4,9 @@
 #include "constants.h"
 #include "assert.h"
 #include "real.h"
+#include "serializable.h"
+#include "deserializable.h"
+#include "serialize.h"
 
 #include <string>
 #include <cmath>
@@ -12,7 +15,7 @@
 namespace Hpp
 {
 
-class Angle
+class Angle : public Serializable, public Deserializable
 {
 
 public:
@@ -77,6 +80,10 @@ public:
 private:
 
 	float rad;
+
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual void doSerialize(ByteV& result, bool bigendian) const;
+	inline virtual void doDeserialize(std::istream& strm, bool bigendian);
 
 };
 
@@ -258,6 +265,16 @@ inline Angle Angle::abs(void) const
 	Angle result = *this;
 	if (rad < 0) result.rad = -rad;
 	return result;
+}
+
+inline void Angle::doSerialize(ByteV& result, bool bigendian) const
+{
+	result += floatToByteV(rad, bigendian);
+}
+
+inline void Angle::doDeserialize(std::istream& strm, bool bigendian)
+{
+	rad = deserializeFloat(strm, bigendian);
 }
 
 inline Angle operator*(float f, Angle const& a)

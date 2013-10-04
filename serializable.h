@@ -12,25 +12,25 @@ class Serializable
 public:
 
 	// "result" is not cleared
-	inline void serialize(ByteV& result) const;
-	inline ByteV serialize(void) const;
+	inline void serialize(ByteV& result, bool bigendian = true) const;
+	inline ByteV serialize(bool bigendian = true) const;
 
 private:
 
 	// "result" must not be cleared!
-	virtual void doSerialize(ByteV& result) const = 0;
+	virtual void doSerialize(ByteV& result, bool bigendian) const = 0;
 
 };
 
-inline void Serializable::serialize(ByteV& result) const
+inline void Serializable::serialize(ByteV& result, bool bigendian) const
 {
-	doSerialize(result);
+	doSerialize(result, bigendian);
 }
 
-inline ByteV Serializable::serialize(void) const
+inline ByteV Serializable::serialize(bool bigendian) const
 {
 	ByteV result;
-	doSerialize(result);
+	doSerialize(result, bigendian);
 	return result;
 }
 

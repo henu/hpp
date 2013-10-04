@@ -66,8 +66,8 @@ inline void Skeleton::readVersion100(std::istream& strm)
 		}
 
 		Bone new_bone;
-		new_bone.pos_abs = deserializeVector3(strm);
-		new_bone.coordsystem = deserializeMatrix3(strm);
+		new_bone.pos_abs.deserialize(strm);
+		new_bone.coordsystem.deserialize(strm);
 		new_bone.parent = deserializeString(strm, 4);
 
 		bones[bone_name] = new_bone;

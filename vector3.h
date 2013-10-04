@@ -76,8 +76,8 @@ public:
 private:
 
 	// Virtual functions needed by superclasses Serializable and Deserializable
-	inline virtual void doSerialize(ByteV& result) const;
-	inline virtual void doDeserialize(std::istream& strm);
+	inline virtual void doSerialize(ByteV& result, bool bigendian) const;
+	inline virtual void doDeserialize(std::istream& strm, bool bigendian);
 
 };
 
@@ -307,24 +307,24 @@ inline Vector3 operator*(Real f, Vector3 const& v)
 	return Vector3(f * v.x, f * v.y, f * v.z);
 }
 
-inline void Vector3::doSerialize(ByteV& result) const
+inline void Vector3::doSerialize(ByteV& result, bool bigendian) const
 {
 	result.reserve(result.size() + 4*3);
-	result += floatToByteV(x);
-	result += floatToByteV(y);
-	result += floatToByteV(z);
+	result += floatToByteV(x, bigendian);
+	result += floatToByteV(y, bigendian);
+	result += floatToByteV(z, bigendian);
 }
 
-inline void Vector3::doDeserialize(std::istream& strm)
+inline void Vector3::doDeserialize(std::istream& strm, bool bigendian)
 {
 	char buf[12];
 	strm.read(buf, 12);
 	if (strm.eof()) {
 		throw Exception("Unexpected end of data!");
 	}
-	x = cStrToFloat(buf, true);
-	y = cStrToFloat(buf + 4, true);
-	z = cStrToFloat(buf + 8, true);
+	x = cStrToFloat(buf, bigendian);
+	y = cStrToFloat(buf + 4, bigendian);
+	z = cStrToFloat(buf + 8, bigendian);
 }
 
 }
