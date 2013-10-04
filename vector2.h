@@ -5,6 +5,8 @@
 #include "json.h"
 #include "real.h"
 #include "assert.h"
+#include "serializable.h"
+#include "deserializable.h"
 
 #include <cmath>
 #include <ostream>
@@ -14,7 +16,7 @@
 namespace Hpp
 {
 
-class Vector2
+class Vector2 : public Serializable, public Deserializable
 {
 
 public:
@@ -69,6 +71,12 @@ public:
 	inline Vector2 perp(void) const;
 
 	Real x, y;
+
+private:
+
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual void doSerialize(ByteV& result) const;
+	inline virtual void doDeserialize(std::istream& strm);
 
 };
 
@@ -274,6 +282,24 @@ inline std::ostream& operator<<(std::ostream& strm, Vector2 const& v)
 inline Vector2 operator*(Real f, Vector2 const& v)
 {
 	return Vector2(f * v.x, f * v.y);
+}
+
+inline void Vector2::doSerialize(ByteV& result) const
+{
+	result.reserve(result.size() + 4*2);
+	result += floatToByteV(x);
+	result += floatToByteV(y);
+}
+
+inline void Vector2::doDeserialize(std::istream& strm)
+{
+	char buf[8];
+	strm.read(buf, 8);
+	if (strm.eof()) {
+		throw Exception("Unexpected end of data!");
+	}
+	x = cStrToFloat(buf, true);
+	y = cStrToFloat(buf + 4, true);
 }
 
 }
