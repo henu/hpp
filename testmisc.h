@@ -181,6 +181,16 @@ inline void testMisc(void)
 		rbuf4.get();
 		HppAssert(rbuf4.eof(), "No EOF found!");
 
+		ByteV word;
+		word.push_back('o');
+		word.push_back('m');
+		word.push_back('g');
+		word.push_back('z');
+		ByteVReaderBuf word_rbuf(word);
+		for (int i = 0; i < 4; ++ i) {
+			int c = word_rbuf.get();
+			HppAssert(c == word[i], "get() does not work!");
+		}
 	}
 
 }

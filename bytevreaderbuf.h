@@ -24,6 +24,7 @@ protected:
 	inline virtual std::streamsize showmanyc(void);
 	inline virtual int underflow(void);
 	inline virtual std::streamsize xsgetn(char_type* s, std::streamsize count);
+	inline virtual int uflow(void);
 
 private:
 
@@ -73,6 +74,20 @@ inline std::streamsize ByteVReaderBufStreambuf::xsgetn(char_type* s, std::stream
 	::memcpy(s, &**it, amount);
 	*it += amount;
 	return amount;
+}
+
+inline int ByteVReaderBufStreambuf::uflow(void)
+{
+	// If there is nothing left, then return EOF
+	if (*it == end) {
+		return traits_type::eof();
+	}
+
+	// Return result and do not update buffer
+	// because there really isn't one.
+	int result = **it;
+	++ *it;
+	return result;
 }
 
 class ByteVReaderBuf : public std::basic_istream< char, std::char_traits< char > >
