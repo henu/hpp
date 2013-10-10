@@ -48,7 +48,9 @@ public:
 	// Modifiers. Right hand rotations, where your thumb is rotation axis
 	// and your fingers show the direction of turning when your fingers are
 	// in "fist form".
-	inline void translate(Vector3 const& v) { transf = Matrix4::translMatrix(v) * transf; }
+//	inline void translate(Vector3 const& v) { transf = Matrix4::translMatrix(v) * transf; }
+// TODO: Ensure the following works!
+	inline void translate(Vector3 const& v) { transf.cell(3) += v.x; transf.cell(7) += v.y; transf.cell(11) += v.z; }
 	inline void rotateX(Angle const& angle) { transf = Matrix4::rotMatrixX(angle) * transf; }
 	inline void rotateY(Angle const& angle) { transf = Matrix4::rotMatrixY(angle) * transf; }
 	inline void rotateZ(Angle const& angle) { transf = Matrix4::rotMatrixZ(angle) * transf; }
