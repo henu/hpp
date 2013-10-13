@@ -37,6 +37,8 @@ public:
 	// do not appear properly or might be completely hidden.
 	inline Mesh* createMesh(void) const;
 
+	inline void translate(Vector3 const& transl);
+
 private:
 
 	// Edges of visible parts of cutplanes
@@ -263,6 +265,23 @@ inline Mesh* Boundingconvex::createMesh(void) const
 	}
 
 	return mloader.createMesh();
+}
+
+inline void Boundingconvex::translate(Vector3 const& transl)
+{
+	for (Cutplanes::iterator cutplanes_it = cutplanes.begin();
+	     cutplanes_it != cutplanes.end();
+	     ++ cutplanes_it) {
+		Cutplane& cutplane = *cutplanes_it;
+		cutplane.plane = Plane(cutplane.plane.getNormal(), cutplane.plane.getPosition() + transl);
+		for (Edges::iterator edges_it = cutplane.edges.begin();
+		     edges_it != cutplane.edges.end();
+		     ++ edges_it) {
+			Edge& edge = *edges_it;
+			edge.begin += transl;
+			edge.end += transl;
+		}
+	}
 }
 
 inline void Boundingconvex::discardUselessCutplanes(void)
