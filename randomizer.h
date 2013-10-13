@@ -103,17 +103,18 @@ inline void Randomizer::seedFromTime(void)
 
 inline uint32_t Randomizer::getUInt32(void)
 {
-	long int result;
-	lrand48_r(&rnd, &result);
-	return static_cast< uint32_t >(result);
+	long int subresult0;
+	long int subresult1;
+	lrand48_r(&rnd, &subresult0);
+	lrand48_r(&rnd, &subresult1);
+	return (uint32_t(subresult0 & 0xffff) << 16) + uint32_t(subresult1 & 0xffff);
 }
 
 inline uint32_t Randomizer::getUInt32(uint32_t min, uint32_t max)
 {
 	HppAssert(max >= min, "Max range must be equal or greater than min range!");
-	long int result;
-	lrand48_r(&rnd, &result);
-	return min + static_cast< uint32_t >(result) % (max - min + 1);
+	uint32_t result = getUInt32();
+	return min + result % (max - min + 1);
 }
 
 inline double Randomizer::getDouble(void)
