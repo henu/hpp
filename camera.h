@@ -16,7 +16,10 @@ class Camera
 
 public:
 
+	virtual Camera* clone(void) const = 0;
+
 	inline void setTransform(Transform const& transf);
+	inline Transform getTransform(void) const { return transf; }
 
 	inline void setNearAndFarPlanes(Real nearplane, Real farplane);
 	inline void setViewport(size_t viewport_x, size_t viewport_y,
@@ -67,6 +70,10 @@ protected:
 	Matrix4 viewmat;
 	Matrix4 projmat;
 	Matrix4 projviewmat;
+
+	// For clone(). This copies all information
+	// from this Camera to another one.
+	inline void copyDataTo(Camera* cam) const;
 
 private:
 
@@ -119,6 +126,24 @@ viewport_width(viewport_width),
 viewport_height(viewport_height),
 aspectratio(viewport_width / Real(viewport_height))
 {
+}
+
+void Camera::copyDataTo(Camera* cam) const
+{
+	cam->transf = transf;
+	cam->right = right;
+	cam->up = up;
+	cam->dir = dir;
+	cam->nearplane = nearplane;
+	cam->farplane = farplane;
+	cam->viewport_x = viewport_x;
+	cam->viewport_y = viewport_y;
+	cam->viewport_width = viewport_width;
+	cam->viewport_height = viewport_height;
+	cam->aspectratio = aspectratio;
+	cam->viewmat = viewmat;
+	cam->projmat = projmat;
+	cam->projviewmat = projviewmat;
 }
 
 }

@@ -22,6 +22,8 @@ public:
 	                          size_t viewport_x = 0, size_t viewport_y = 0,
 	                          size_t viewport_width = 0, size_t viewport_height = 0);
 
+	inline virtual Camera* clone(void) const;
+
 	// Size means distance between top and bottom viewfrustum planes.
 	inline void setSize(Real size);
 
@@ -57,6 +59,14 @@ size(size)
 		viewport_height = Display::getHeight() - viewport_y;
 	}
 	update();
+}
+
+Camera* Orthographiccamera::clone(void) const
+{
+	Orthographiccamera* result = new Orthographiccamera;
+	result->size = size;
+	copyDataTo(result);
+	return result;
 }
 
 inline void Orthographiccamera::setSize(Real size)

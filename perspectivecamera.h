@@ -22,6 +22,8 @@ public:
 	                         size_t viewport_x = 0, size_t viewport_y = 0,
 	                         size_t viewport_width = 0, size_t viewport_height = 0);
 
+	inline virtual Camera* clone(void) const;
+
 	// FOV means angle between opposite viewfrustum planes.
 	inline void setFovY(Angle const& fov_y);
 
@@ -60,6 +62,14 @@ fov_y(fov_y)
 		viewport_height = Display::getHeight() - viewport_y;
 	}
 	update();
+}
+
+Camera* Perspectivecamera::clone(void) const
+{
+	Perspectivecamera* result = new Perspectivecamera;
+	result->fov_y = fov_y;
+	copyDataTo(result);
+	return result;
 }
 
 inline void Perspectivecamera::setFovY(Angle const& fov_y)
