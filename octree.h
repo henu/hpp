@@ -91,6 +91,9 @@ public:
 	// to given Boundingvolume. "result" is not cleared.
 	inline void getCollidingHandles(Handles& result, Boundingvolume const* bv);
 
+	// "result" is not cleared
+	inline void getAllHandles(Handles& result);
+
 private:
 
 	Vector3 cmin, cmax;
@@ -127,6 +130,11 @@ data(NULL)
 inline void Octree::getCollidingHandles(Handles& result, Boundingvolume const* bv)
 {
 	root.getCollidingHandles(result, bv);
+}
+
+void Octree::getAllHandles(Handles& result)
+{
+	root.getAllHandles(result);
 }
 
 inline Octree::Handle::Handle(Region* region) :
