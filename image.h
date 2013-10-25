@@ -59,6 +59,10 @@ public:
 
 	inline bool hasAlpha(void) const { return pixelformatHasAlpha(format); }
 
+	inline void setPixel(size_t offset, Color const& color);
+	inline void setPixel(IVector2 const& pos, Color const& color);
+	inline void setPixel(size_t x, size_t y, Color const& color);
+
 	// Adds pixel. Like setPixel(), but effect of new color depends its
 	// alpha. Also, the alpha of image is never decreased by this operation.
 	inline void addPixel(size_t offset, Color const& color);
@@ -127,6 +131,58 @@ inline Color Image::getPixel(size_t x, size_t y) const
 	return getPixel(y * width + x);
 }
 
+inline void Image::setPixel(size_t offset, Color const& color)
+{
+	switch (format) {
+	case RGB:
+		{
+			size_t offset_fixed = offset*3;
+			data[offset_fixed+0] = clamp< int >(0, 255, 255 * color.getRed() + 0.5);
+			data[offset_fixed+1] = clamp< int >(0, 255, 255 * color.getGreen() + 0.5);
+			data[offset_fixed+2] = clamp< int >(0, 255, 255 * color.getBlue() + 0.5);
+		}
+		break;
+	case RGBA:
+		{
+			size_t offset_fixed = offset*4;
+			data[offset_fixed+0] = clamp< int >(0, 255, 255 * color.getRed() + 0.5);
+			data[offset_fixed+1] = clamp< int >(0, 255, 255 * color.getGreen() + 0.5);
+			data[offset_fixed+2] = clamp< int >(0, 255, 255 * color.getBlue() + 0.5);
+			data[offset_fixed+3] = clamp< int >(0, 255, 255 * color.getAlpha() + 0.5);
+		}
+		break;
+	case GRAYSCALE:
+		{
+			data[offset] = clamp< int >(0, 255, 255 * color.getValue() + 0.5);
+		}
+		break;
+	case GRAYSCALE_ALPHA:
+		{
+			size_t offset_fixed = offset*2;
+			data[offset_fixed+0] = clamp< int >(0, 255, 255 * color.getValue() + 0.5);
+			data[offset_fixed+1] = clamp< int >(0, 255, 255 * color.getAlpha() + 0.5);
+		}
+		break;
+	case ALPHA:
+		{
+			data[offset] = clamp< int >(0, 255, 255 * color.getAlpha() + 0.5);
+		}
+		break;
+	default:
+		HppAssert(false, "Invalid image format!");
+	}
+}
+
+inline void Image::setPixel(IVector2 const& pos, Color const& color)
+{
+	setPixel(pos.y * width + pos.x, color);
+}
+
+inline void Image::setPixel(size_t x, size_t y, Color const& color)
+{
+	setPixel(y * width + x, color);
+}
+
 inline void Image::addPixel(size_t offset, Color const& color)
 {
 	switch (format) {
@@ -134,39 +190,39 @@ inline void Image::addPixel(size_t offset, Color const& color)
 		{
 			size_t offset_fixed = offset*3;
 			float alpha = color.getAlpha();
-			data[offset_fixed+0] = clamp< int >(0, 255, data[offset_fixed+0] * (1-alpha) + 255 * color.getRed() * alpha);
-			data[offset_fixed+1] = clamp< int >(0, 255, data[offset_fixed+1] * (1-alpha) + 255 * color.getGreen() * alpha);
-			data[offset_fixed+2] = clamp< int >(0, 255, data[offset_fixed+2] * (1-alpha) + 255 * color.getBlue() * alpha);
+			data[offset_fixed+0] = clamp< int >(0, 255, data[offset_fixed+0] * (1-alpha) + 255 * color.getRed() * alpha + 0.5);
+			data[offset_fixed+1] = clamp< int >(0, 255, data[offset_fixed+1] * (1-alpha) + 255 * color.getGreen() * alpha + 0.5);
+			data[offset_fixed+2] = clamp< int >(0, 255, data[offset_fixed+2] * (1-alpha) + 255 * color.getBlue() * alpha + 0.5);
 		}
 		break;
 	case RGBA:
 		{
 			size_t offset_fixed = offset*4;
 			float alpha = color.getAlpha();
-			data[offset_fixed+0] = clamp< int >(0, 255, data[offset_fixed+0] * (1-alpha) + 255 * color.getRed() * alpha);
-			data[offset_fixed+1] = clamp< int >(0, 255, data[offset_fixed+1] * (1-alpha) + 255 * color.getGreen() * alpha);
-			data[offset_fixed+2] = clamp< int >(0, 255, data[offset_fixed+2] * (1-alpha) + 255 * color.getBlue() * alpha);
-			data[offset_fixed+3] = clamp< int >(0, 255, data[offset_fixed+3] * (1-alpha) + 255 * alpha);
+			data[offset_fixed+0] = clamp< int >(0, 255, data[offset_fixed+0] * (1-alpha) + 255 * color.getRed() * alpha + 0.5);
+			data[offset_fixed+1] = clamp< int >(0, 255, data[offset_fixed+1] * (1-alpha) + 255 * color.getGreen() * alpha + 0.5);
+			data[offset_fixed+2] = clamp< int >(0, 255, data[offset_fixed+2] * (1-alpha) + 255 * color.getBlue() * alpha + 0.5);
+			data[offset_fixed+3] = clamp< int >(0, 255, data[offset_fixed+3] * (1-alpha) + 255 * alpha + 0.5);
 		}
 		break;
 	case GRAYSCALE:
 		{
 			float alpha = color.getAlpha();
-			data[offset] = clamp< int >(0, 255, data[offset] * (1-alpha) + 255 * color.getValue() * alpha);
+			data[offset] = clamp< int >(0, 255, data[offset] * (1-alpha) + 255 * color.getValue() * alpha + 0.5);
 		}
 		break;
 	case GRAYSCALE_ALPHA:
 		{
 			size_t offset_fixed = offset*2;
 			float alpha = color.getAlpha();
-			data[offset_fixed+0] = clamp< int >(0, 255, data[offset_fixed+0] * (1-alpha) + 255 * color.getValue() * alpha);
-			data[offset_fixed+1] = clamp< int >(0, 255, data[offset_fixed+1] * (1-alpha) + 255 * alpha);
+			data[offset_fixed+0] = clamp< int >(0, 255, data[offset_fixed+0] * (1-alpha) + 255 * color.getValue() * alpha + 0.5);
+			data[offset_fixed+1] = clamp< int >(0, 255, data[offset_fixed+1] * (1-alpha) + 255 * alpha + 0.5);
 		}
 		break;
 	case ALPHA:
 		{
 			float alpha = color.getAlpha();
-			data[offset] = clamp< int >(0, 255, data[offset] * (1-alpha) + 255 * alpha);
+			data[offset] = clamp< int >(0, 255, data[offset] * (1-alpha) + 255 * alpha + 0.5);
 		}
 		break;
 	default:
