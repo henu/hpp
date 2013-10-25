@@ -9,7 +9,8 @@ namespace Hpp
 namespace Imageeffects
 {
 
-Image detectEdges(Image const& img, size_t threads = 1);
+// If threads is zero, then amount of cores is used
+Image detectEdges(Image const& img, size_t threads = 0);
 
 }
 

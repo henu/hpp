@@ -1,5 +1,6 @@
 #include "edges.h"
 
+#include "../cores.h"
 #include "../thread.h"
 
 namespace Hpp
@@ -56,12 +57,16 @@ void detectEdgesThread(void* dei_raw)
 		            max.getBlue() - min.getBlue(),
 		            max.getGreen() - min.getGreen());
 
-		dei->dest->addPixel(pixel_ofs, pixel);
+		dei->dest->setPixel(pixel_ofs, pixel);
 	}
 }
 
 Image detectEdges(Image const& img, size_t threads)
 {
+	if (threads == 0) {
+		threads = getNumberOfCores();
+	}
+
 	size_t img_w = img.getWidth();
 	size_t img_h = img.getHeight();
 	uint8_t* pixels_random = new uint8_t[img_w * img_h * 3];
