@@ -219,11 +219,13 @@
 			"headers": [
 				"image_draw.h",
 				"image.h",
+				"imageeffects/blur.h",
 				"imageeffects/edges.h"
 			],
 			"sources": [
 				"image.cc",
 				"image_draw.cc",
+				"imageeffects/blur.cc",
 				"imageeffects/edges.cc"
 			],
 			"deps": [ "main" ]
