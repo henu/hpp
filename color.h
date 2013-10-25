@@ -1,3 +1,7 @@
+// This class represent color using floats. Zero means no light and one means
+// full light. However values can also be out of this range, and they are not
+// clamped by default ever.
+
 #ifndef HPP_COLOR_H
 #define HPP_COLOR_H
 
@@ -30,8 +34,13 @@ public:
 	// Comparison operators
 	inline bool operator==(Color const& c) const;
 
-	// Operators
+	// Operators. These do not clam
+	inline Color operator+(Color const& c) const;
 	inline Color operator*(float f) const;
+	inline Color operator/(float f) const;
+	inline Color operator+=(Color const& c);
+	inline Color operator*=(float f);
+	inline Color operator/=(float f);
 
 	// Setters. Format must support setting of given component
 	inline void setRed(float red);
@@ -40,7 +49,7 @@ public:
 	inline void setValue(float val);
 	inline void setAlpha(float alpha);
 
-	// Getters. These will always return proper values based on format
+	// Getters. These will always return proper values based on format.
 	inline float getRed(void) const;
 	inline float getGreen(void) const;
 	inline float getBlue(void) const;
@@ -190,6 +199,40 @@ inline bool Color::operator==(Color const& c) const
 	return true;
 }
 
+inline Color Color::operator+(Color const& c) const
+{
+	Color result;
+	result.format = format;
+	switch (format)
+	{
+	case RGB:
+		result.red = red + c.getRed();
+		result.green = green + c.getGreen();
+		result.blue = blue + c.getBlue();
+		break;
+	case RGBA:
+		result.red = red + c.getRed();
+		result.green = green + c.getGreen();
+		result.blue = blue + c.getBlue();
+		result.alpha = alpha + c.getAlpha();
+		break;
+	case GRAYSCALE:
+		result.red = red + c.getValue();
+		break;
+	case GRAYSCALE_ALPHA:
+		result.red = red + c.getValue();
+		result.alpha = alpha + c.getAlpha();
+		break;
+	case ALPHA:
+		result.alpha = alpha + c.getAlpha();
+		break;
+	case DEFAULT:
+	default:
+		HppAssert(false, "Invalid format!");
+	}
+	return result;
+}
+
 inline Color Color::operator*(float f) const
 {
 	Color result;
@@ -222,6 +265,136 @@ inline Color Color::operator*(float f) const
 		HppAssert(false, "Invalid format!");
 	}
 	return result;
+}
+
+inline Color Color::operator/(float f) const
+{
+	Color result;
+	result.format = format;
+	switch (format)
+	{
+	case RGB:
+		result.red = red / f;
+		result.green = green / f;
+		result.blue = blue / f;
+		break;
+	case RGBA:
+		result.red = red / f;
+		result.green = green / f;
+		result.blue = blue / f;
+		result.alpha = alpha / f;
+		break;
+	case GRAYSCALE:
+		result.red = red / f;
+		break;
+	case GRAYSCALE_ALPHA:
+		result.red = red / f;
+		result.alpha = alpha / f;
+		break;
+	case ALPHA:
+		result.alpha = alpha / f;
+		break;
+	case DEFAULT:
+	default:
+		HppAssert(false, "Invalid format!");
+	}
+	return result;
+}
+
+inline Color Color::operator+=(Color const& c)
+{
+	switch (format)
+	{
+	case RGB:
+		red += c.getRed();
+		green += c.getGreen();
+		blue += c.getBlue();
+		break;
+	case RGBA:
+		red += c.getRed();
+		green += c.getGreen();
+		blue += c.getBlue();
+		alpha += c.getAlpha();
+		break;
+	case GRAYSCALE:
+		red += c.getValue();
+		break;
+	case GRAYSCALE_ALPHA:
+		red += c.getValue();
+		alpha += c.getAlpha();
+		break;
+	case ALPHA:
+		alpha += c.getAlpha();
+		break;
+	case DEFAULT:
+	default:
+		HppAssert(false, "Invalid format!");
+	}
+	return *this;
+}
+
+inline Color Color::operator*=(float f)
+{
+	switch (format)
+	{
+	case RGB:
+		red *= f;
+		green *= f;
+		blue *= f;
+		break;
+	case RGBA:
+		red *= f;
+		green *= f;
+		blue *= f;
+		alpha *= f;
+		break;
+	case GRAYSCALE:
+		red *= f;
+		break;
+	case GRAYSCALE_ALPHA:
+		red *= f;
+		alpha *= f;
+		break;
+	case ALPHA:
+		alpha *= f;
+		break;
+	case DEFAULT:
+	default:
+		HppAssert(false, "Invalid format!");
+	}
+	return *this;
+}
+
+inline Color Color::operator/=(float f)
+{
+	switch (format)
+	{
+	case RGB:
+		red /= f;
+		green /= f;
+		blue /= f;
+		break;
+	case RGBA:
+		red /= f;
+		green /= f;
+		blue /= f;
+		alpha /= f;
+		break;
+	case GRAYSCALE:
+		red /= f;
+		break;
+	case GRAYSCALE_ALPHA:
+		red /= f;
+		alpha /= f;
+		break;
+	case ALPHA:
+		alpha /= f;
+		break;
+	case DEFAULT:
+	default:
+		HppAssert(false, "Invalid format!");
+	}
+	return *this;
 }
 
 inline void Color::setRed(float red)
@@ -285,7 +458,7 @@ inline float Color::getValue(void) const
 {
 	if (format == GRAYSCALE || format == GRAYSCALE_ALPHA) return red;
 	if (format == ALPHA) return 1.0;
-	return clamp(0.0, 1.0, (red + green + blue) / 3.0);
+	return (red + green + blue) / 3.0;
 }
 
 inline float Color::getAlpha(void) const
