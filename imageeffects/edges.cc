@@ -69,9 +69,7 @@ Image detectEdges(Image const& img, size_t threads)
 
 	size_t img_w = img.getWidth();
 	size_t img_h = img.getHeight();
-	uint8_t* pixels_random = new uint8_t[img_w * img_h * 3];
-	Image result(pixels_random, img_w, img_h, RGB);
-	delete[] pixels_random;
+	Image result(img_w, img_h, RGB);
 
 	if (threads == 1) {
 		DetectEdgesInfo dei;

@@ -34,6 +34,7 @@ public:
 	Image(uint8_t const* data, size_t width, size_t height, Pixelformat format, Flags flags = 0);
 	Image(ByteV const& filedata, Pixelformat format = DEFAULT, Flags flags = 0);
 	Image(uint8_t const* filedata, Pixelformat format = DEFAULT, Flags flags = 0);
+	Image(size_t width, size_t height, Pixelformat format);
 	~Image(void);
 
 	// Copy constructor and assignment operator
@@ -77,6 +78,7 @@ private:
 
 	SDL_Surface* convertToSDLSurface(void) const;
 
+	// If "data" is NULL, then content of image is full black and zero alpha.
 	void loadFromPixeldata(uint8_t const* data, size_t width, size_t height, Pixelformat format, Flags flags);
 	void loadFromFiledata(uint8_t const* filedata, Pixelformat format, Flags flags);
 };

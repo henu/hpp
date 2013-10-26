@@ -58,9 +58,7 @@ Image divide(Image const& bottom, Image const& top)
 		throw Hpp::Exception("Invalid format!");
 	}
 
-	uint8_t* pixels_random = new uint8_t[w * h * getBppOfPixelformat(final_format)];
-	Image result(pixels_random, w, h, final_format);
-	delete[] pixels_random;
+	Image result(w, h, final_format);
 
 	for (size_t ofs = 0; ofs < area; ++ ofs) {
 		Color c1 = bottom.getPixel(ofs);

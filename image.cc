@@ -62,6 +62,11 @@ Image::Image(uint8_t const* filedata, Pixelformat format, Flags flags)
 	loadFromFiledata(filedata, format, flags);
 }
 
+Image::Image(size_t width, size_t height, Pixelformat format)
+{
+	loadFromPixeldata(NULL, width, height, format, 0);
+}
+
 Image::~Image(void)
 {
 }
