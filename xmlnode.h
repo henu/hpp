@@ -321,7 +321,7 @@ inline void XMLNode::deserialize(std::string::const_iterator& str_begin, std::st
 		str_begin ++;
 		std::string::const_iterator tag_name_begin = str_begin;
 		try {
-			readUntil(str_begin, str_end, " \t\x0a\x0d>");
+			readUntil(str_begin, str_end, " \t\x0a\x0d>/");
 		}
 		catch ( ... ) {
 			throw Exception("Tag \"" + std::string(tag_name_begin, str_end) + "\" has incomplete start-tag!");
