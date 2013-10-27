@@ -13,40 +13,25 @@ class XMLDocument : public XMLNode
 
 public:
 
+	// Constructors and "constructors"
 	inline XMLDocument(Path const& filename);
 	inline XMLDocument(std::string const& nodename);
+	inline static XMLDocument fromString(std::string const& data);
 	inline virtual ~XMLDocument(void);
 
 	inline void save(Path const& path);
 
 private:
 
+	inline XMLDocument(void);
+
 };
 
 inline XMLDocument::XMLDocument(Path const& filename) :
 XMLNode(XMLNode::NORMAL, "")
 {
-	std::ifstream file(filename.toString().c_str());
-	if (!file.is_open()) {
-		throw Exception("Unable to open XML file \"" + filename.toString() + "\"!");
-	}
-
-	std::string file_contents;
-	// Reserve enough space
-	file.seekg(0, std::ios::end);
-	size_t file_contents_size = file.tellg();
-	file.seekg(0, std::ios::beg);
-
 	// Read file to memory
-	size_t const CHUNK_SIZE = 1024*1024;
-	char chunk[CHUNK_SIZE];
-	while (file_contents.size() < file_contents_size) {
-		size_t read_amount = std::min(file_contents_size - file_contents.size(), CHUNK_SIZE);
-		file.read(chunk, read_amount);
-		file_contents.insert(file_contents.end(), chunk, chunk + read_amount);
-	}
-	HppAssert(!file.eof(), "File ended prematurely!");
-	file.close();
+	std::string file_contents = filename.readString();
 
 	std::string::const_iterator file_contents_begin = file_contents.begin();
 	std::string::const_iterator file_contents_end = file_contents.end();
@@ -59,6 +44,20 @@ XMLNode(XMLNode::NORMAL, "")
 inline XMLDocument::XMLDocument(std::string const& nodename) :
 XMLNode(XMLNode::NORMAL, nodename)
 {
+}
+
+inline XMLDocument XMLDocument::fromString(std::string const& data)
+{
+	XMLDocument result;
+
+	std::string::const_iterator data_begin = data.begin();
+	std::string::const_iterator data_end = data.end();
+	result.deserialize(data_begin, data_end);
+	if (data_begin != data_end) {
+		throw Exception("XML file contains extra tags or garbage!");
+	}
+
+	return result;
 }
 
 inline XMLDocument::~XMLDocument(void)
@@ -77,6 +76,11 @@ inline void XMLDocument::save(Path const& path)
 	serialize(file, 0);
 
 	file.close();
+}
+
+inline XMLDocument::XMLDocument(void) :
+XMLNode(XMLNode::NORMAL, "")
+{
 }
 
 }

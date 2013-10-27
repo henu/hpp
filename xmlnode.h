@@ -282,8 +282,41 @@ inline void XMLNode::deserialize(std::string::const_iterator& str_begin, std::st
 	if (str_begin == str_end) throw Exception("No XML node content!");
 	cleanWhitespaceAndCommentsFromEnd(str_begin, str_end);
 
+	// Clean possible !DOCTYPE
+	if (str_end - str_begin >= 9 && std::string(str_begin, str_begin + 9) == "<!DOCTYPE") {
+		str_begin += 9;
+		readUntil(str_begin, str_end, ">");
+		if (str_begin == str_end) throw Exception("No XML node content!");
+		++ str_begin;
+		cleanWhitespaceAndCommentsFromBegin(str_begin, str_end);
+	}
+
+	// CDATA
+	if (str_end - str_begin >= 9 && std::string(str_begin, str_begin + 9) == "<![CDATA[") {
+		str_begin += 9;
+
+		std::string::const_iterator cdata_begin = str_begin;
+
+		do {
+			if (str_end - str_begin < 3) {
+				throw Exception("CDATA was not closed!");
+			}
+			if (std::string(str_begin, str_begin + 3) == "]]>") {
+				break;
+			}
+			++ str_begin;
+		} while (true);
+
+		std::string cdata(cdata_begin, str_begin);
+		str_begin += 3;
+
+		type = TEXT;
+		value = cdata;
+
+		cleanWhitespaceFromEnd(value);
+	}
 	// Normal node
-	if (*str_begin == '<') {
+	else if (*str_begin == '<') {
 		// Tag name
 		str_begin ++;
 		std::string::const_iterator tag_name_begin = str_begin;
@@ -291,9 +324,10 @@ inline void XMLNode::deserialize(std::string::const_iterator& str_begin, std::st
 			readUntil(str_begin, str_end, " \t\x0a\x0d>");
 		}
 		catch ( ... ) {
-			throw Exception("Tag \"" + std::string(tag_name_begin, str_end) + "\" was not closed!");
+			throw Exception("Tag \"" + std::string(tag_name_begin, str_end) + "\" has incomplete start-tag!");
 		}
 		std::string tag_name(tag_name_begin, str_begin);
+		HppAssert(tag_name != "!DOCTYPE", "!DOCTYPE node should not be found!");
 
 		// Attributes and ending
 		bool tag_closed;
@@ -306,7 +340,7 @@ inline void XMLNode::deserialize(std::string::const_iterator& str_begin, std::st
 			if (*str_begin == '/') {
 				str_begin ++;
 				if (str_begin == str_end || *str_begin != '>') {
-					throw Exception("Tag \"" + tag_name + "\" is not closed properly!");
+					throw Exception("Tag \"" + tag_name + "\" has incomplete start-tag!");
 				}
 				// Skip '>'
 				str_begin ++;
@@ -373,19 +407,19 @@ inline void XMLNode::deserialize(std::string::const_iterator& str_begin, std::st
 
 		// If tag was not closed, then it might have children
 		if (!tag_closed) {
-			cleanWhitespaceFromBegin(str_begin, str_end);
+			cleanWhitespaceAndCommentsFromBegin(str_begin, str_end);
 			while (str_begin != str_end) {
 				// Check if this is closing of this tag
 				if (*str_begin == '<' && str_end - str_begin >= 1 && *(str_begin + 1) == '/') {
 					str_begin += 2;
 					cleanWhitespaceFromBegin(str_begin, str_end);
 					if (str_end - str_begin < static_cast< ssize_t >(tag_name.size()) || std::string(str_begin, str_begin + tag_name.size()) != tag_name) {
-						throw Exception("Tag \"" + tag_name + "\" was not closed!");
+						throw Exception("Tag \"" + tag_name + "\" is missing end-tag!");
 					}
 					str_begin += tag_name.size();
 					cleanWhitespaceFromBegin(str_begin, str_end);
 					if (str_begin == str_end || *str_begin != '>') {
-						throw Exception("Closing tag of \"" + tag_name + "\" was not complete!");
+						throw Exception("End-tag of \"" + tag_name + "\" was not complete!");
 					}
 					// Skip '>'
 					str_begin ++;
@@ -406,7 +440,18 @@ inline void XMLNode::deserialize(std::string::const_iterator& str_begin, std::st
 					children.clear();
 					throw;
 				}
-				cleanWhitespaceFromBegin(str_begin, str_end);
+
+				// If last two child are text, then merge
+				// them. This happens in case of CDATA
+				if (children.size() >= 2 &&
+				    children[children.size() - 1]->type == TEXT &&
+				    children[children.size() - 2]->type == TEXT) {
+					children[children.size() - 2]->value += children[children.size() - 1]->value;
+					delete children.back();
+					children.pop_back();
+				}
+
+				cleanWhitespaceAndCommentsFromBegin(str_begin, str_end);
 			}
 		}
 
