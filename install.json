@@ -278,6 +278,18 @@
 				"tcpserver.cc"
 			],
 			"deps": [ "main" ]
+		},
+
+		"http": {
+			"libs": "-lcurl",
+			"deb_deps": [ "libcurl3" ],
+			"headers": [
+				"http/request.h"
+			],
+			"sources": [
+				"http/request.cc"
+			],
+			"deps": [ "main" ]
 		}
 
 	}
