@@ -11,11 +11,11 @@ namespace Http
 Request::Request(std::string const& url) :
 curl(curl_easy_init())
 {
-	open(url);
-
 	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_error);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, responseReader);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+	open(url);
 }
 
 Request::~Request(void)
@@ -26,6 +26,7 @@ Request::~Request(void)
 void Request::open(std::string const& url)
 {
 	response_data.clear();
+	response_http_code = 0;
 
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
