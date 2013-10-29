@@ -251,6 +251,7 @@
 			"libs": "-lcrypto",
 			"deb_deps": [ "libssl0.9.8" ],
 			"headers": [
+				"crypto/rsakey.h",
 				"hasher.h",
 				"opensslhasher.h",
 				"sha256hasher.h",
