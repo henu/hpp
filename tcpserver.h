@@ -34,6 +34,8 @@ public:
 	void startListening(uint16_t port, ConnHandlerFunc connhandler, void* data);
 	void stopListening(uint16_t port);
 
+	bool isListeningPort(uint16_t port) const;
+
 private:
 
 	// Struct for providing information to listener threads

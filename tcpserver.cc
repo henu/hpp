@@ -125,6 +125,11 @@ void TCPServer::stopListening(uint16_t port)
 	thread.wait();
 }
 
+bool TCPServer::isListeningPort(uint16_t port) const
+{
+	return listeners.find(port) != listeners.end();
+}
+
 void TCPServer::listenerThread(void* linfo_raw)
 {
 
