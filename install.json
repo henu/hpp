@@ -6,6 +6,14 @@
 
 	"parts": {
 
+		"all": {
+			"libs": "",
+			"deb_deps": [ ],
+			"headers": [ ],
+			"sources": [ ],
+			"deps": [ "main", "3d", "image", "crypto", "ncurses", "network", "http" ]
+		},
+
 		"main": {
 			"libs": "-lpthread -lrt",
 			"deb_deps": [ "libc6-dev" ],
