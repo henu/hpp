@@ -99,7 +99,7 @@ inline void test3D(void)
 
 	// Planes
 	{
-		for (size_t i = 0; i < 100; ++ i) {
+		for (size_t i = 0; i < 10000; ++ i) {
 			Vector3 plane_pos = randomVector3(100);
 			Vector3 plane_normal = randomVector3(1, 1);
 			Vector3 plane_binormal = plane_normal.perp();
@@ -119,7 +119,8 @@ inline void test3D(void)
 			// Test hitsLine()
 			Vector3 hitpos = plane_pos + plane_binormal * random(-100, 100) + plane_tangent * random(-100, 100);
 			Vector3 ray_begin = randomVector3(100);
-			if (fabs(plane.distanceToPosition(ray_begin)) > 0.01) {
+			Angle angle_between_ray_and_plane = angleBetweenVectors(plane_normal, ray_begin - plane_pos);
+			if ((angle_between_ray_and_plane - Angle(90)).abs() > Angle(0.1)) {
 				Vector3 ray_dir = (hitpos - ray_begin).normalized();
 				Vector3 hitresult_pos = Hpp::randomVector3(0, 1);
 				Real hitresult_dir_mult = Hpp::random(0, 1);
