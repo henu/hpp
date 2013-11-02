@@ -54,6 +54,7 @@ public:
 	inline Delay operator*(double d) const;
 	inline Delay operator/(int64_t d) const;
 	inline double operator/(Delay const& d) const;
+	inline Delay operator-(void) const;
 
 	// Comparison operators
 	inline bool operator==(Delay const& d) const;
@@ -292,6 +293,24 @@ inline double Delay::operator/(Delay const& d) const
 	double d_f = d.secs_ + d.nsecs_ / (double)(MLRD);
 	HppAssert(d_f != 0, "Division by zero!");
 	return this_f / d_f;
+}
+
+inline Delay Delay::operator-(void) const
+{
+	if (inf_) {
+		return Delay::inf();
+	}
+	int64_t result_secs = -secs_;
+	uint32_t result_nsecs;
+
+	if (nsecs_ > 0) {
+		result_nsecs = MLRD - nsecs_;
+		-- result_secs;
+	} else {
+		result_nsecs = 0;
+	}
+
+	return Delay(result_secs, result_nsecs);
 }
 
 inline bool Delay::operator==(Delay const& d) const
