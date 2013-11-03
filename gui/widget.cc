@@ -102,22 +102,17 @@ void Widget::repositionIfNeeded(int32_t x, int32_t y, uint32_t w, uint32_t h)
 		return;
 	}
 */
-	// Apply padding
-// TODO: Uncomment this, when Gui supports padding!
-/*
-	x += padding;
-	y += padding;
-	w -= padding * 2;
-	h -= padding * 2;
-*/
-// TODO: Remove this when actual padding works!
-uint32_t padding = 0;
+	// Apply margin
+	x += margin;
+	y += margin;
+	w -= margin * 2;
+	h -= margin * 2;
 
 	// Get real dimensions
 	uint32_t real_w, real_h;
-	if (expanding_horiz == 0) real_w = getMinWidth() - padding*2;
+	if (expanding_horiz == 0) real_w = getMinWidth() - margin*2;
 	else real_w = w;
-	if (expanding_vert == 0) real_h = getMinHeight(real_w) - padding*2;
+	if (expanding_vert == 0) real_h = getMinHeight(real_w) - margin*2;
 	else real_h = h;
 
 	// Calculate real position

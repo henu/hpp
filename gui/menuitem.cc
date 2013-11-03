@@ -17,12 +17,12 @@ Menuitem::~Menuitem(void)
 {
 }
 
-uint32_t Menuitem::getMinWidth(void) const
+uint32_t Menuitem::doGetMinWidth(void) const
 {
 	return getRenderer()->getMenuitemWidth(label);
 }
 
-uint32_t Menuitem::getMinHeight(uint32_t width) const
+uint32_t Menuitem::doGetMinHeight(uint32_t width) const
 {
 	(void)width;
 	return getRenderer()->getMenuitemHeight();

@@ -43,9 +43,8 @@ public:
 	inline uint32_t getHeight(void) const { return height; }
 
 	// Size getters
-// TODO: Make these abstract, or better, make them be used through doGetMinWidth, like in my java gui library!
-	inline virtual uint32_t getMinWidth(void) const { return 0; }
-	inline virtual uint32_t getMinHeight(uint32_t width) const { (void)width; return 0; }
+	inline uint32_t getMinWidth(void) const;
+	inline uint32_t getMinHeight(uint32_t width) const;
 
 	// Alignment
 	inline Alignment getHorizontalAlignment(void) const { return align; }
@@ -58,6 +57,10 @@ public:
 	inline uint8_t getVerticalExpanding(void) const { return expanding_vert; }
 	inline void setHorizontalExpanding(uint8_t expanding) { expanding_horiz = expanding; markToNeedReposition(); }
 	inline void setVerticalExpanding(uint8_t expanding) { expanding_vert = expanding; markToNeedReposition(); }
+
+	// Margin
+	inline uint32_t getMargin(void) const { return margin; }
+	inline void setMargin(uint32_t margin) { this->margin = margin; markToNeedReposition(); }
 
 	inline void setEventlistener(Eventlistener* eventlistener) { this->eventlistener = eventlistener; }
 
@@ -109,6 +112,9 @@ protected:
 	inline void moveWidgetBack(Widget* child);
 	inline void moveWidgetFront(Widget* child);
 
+	inline virtual uint32_t doGetMinWidth(void) const { return 0; }
+	inline virtual uint32_t doGetMinHeight(uint32_t width) const { (void)width; return 0; }
+
 	inline void repositionChild(Widget* child, int32_t x, int32_t y, uint32_t width, uint32_t height);
 
 	inline void setChildState(Widget* child, State state);
@@ -155,6 +161,7 @@ private:
 
 	Alignment align, valign;
 	uint8_t expanding_horiz, expanding_vert;
+	uint32_t margin;
 
 	Eventlistener* eventlistener;
 
@@ -188,9 +195,7 @@ private:
 	inline virtual void onMouseKeyUpOther(Widget* widget, int32_t mouse_x, int32_t mouse_y, Mousekey::Keycode mouse_key) { (void)widget; (void)mouse_x; (void)mouse_y; (void)mouse_key; }
 	inline virtual void onMouseMove(int32_t mouse_x, int32_t mouse_y) { (void)mouse_x; (void)mouse_y; }
 	inline virtual void onKeyDown(Key::Keycode keycode, UChr uchr) { (void)keycode; (void)uchr; }
-	inline virtual void onChildSizeChange(void) { }
 	inline virtual void onChildRemoved(Widget* child) { (void)child; }
-	inline virtual void onPositionChange(void) { }
 	inline virtual void onKeyboardListeningStop(void) { }
 
 };
@@ -207,6 +212,7 @@ align(CENTER),
 valign(CENTER),
 expanding_horiz(0),
 expanding_vert(0),
+margin(0),
 eventlistener(NULL),
 renderarealimit(false)
 {
@@ -222,6 +228,16 @@ inline int32_t Widget::getAbsolutePositionY(void) const
 {
 	if (!parent) return y;
 	return y + parent->getAbsolutePositionY();
+}
+
+inline uint32_t Widget::getMinWidth(void) const
+{
+	return margin * 2 + doGetMinWidth();
+}
+
+inline uint32_t Widget::getMinHeight(uint32_t width) const
+{
+	return margin * 2 + doGetMinHeight(width);
 }
 
 inline void Widget::setParent(Widget* parent)

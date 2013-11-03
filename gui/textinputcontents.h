@@ -26,8 +26,8 @@ public:
 	inline UnicodeString getValue(void) const { return value; }
 
 	// Virtual functions for Widget
-	inline virtual uint32_t getMinWidth(void) const;
-	inline virtual uint32_t getMinHeight(uint32_t width) const;
+	inline virtual uint32_t doGetMinWidth(void) const;
+	inline virtual uint32_t doGetMinHeight(uint32_t width) const;
 
 private:
 
@@ -64,14 +64,14 @@ inline void TextinputContents::setValue(UnicodeString const& value)
 	markToNeedReposition();
 }
 
-inline uint32_t TextinputContents::getMinWidth(void) const
+inline uint32_t TextinputContents::doGetMinWidth(void) const
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
 	return rend->getMinimumTextinputContentsWidth(value);
 }
 
-inline uint32_t TextinputContents::getMinHeight(uint32_t width) const
+inline uint32_t TextinputContents::doGetMinHeight(uint32_t width) const
 {
 	(void)width;
 	Renderer const* rend = getRenderer();

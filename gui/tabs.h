@@ -27,8 +27,8 @@ public:
 	inline UnicodeString getTabLabel(size_t tab_id) const;
 
 	// Virtual functions for Widget
-	inline virtual uint32_t getMinWidth(void) const;
-	inline virtual uint32_t getMinHeight(uint32_t width) const;
+	inline virtual uint32_t doGetMinWidth(void) const;
+	inline virtual uint32_t doGetMinHeight(uint32_t width) const;
 
 private:
 
@@ -75,7 +75,7 @@ inline UnicodeString Tabs::getTabLabel(size_t tab_id) const
 	return tabs[tab_id].label;
 }
 
-inline uint32_t Tabs::getMinWidth(void) const
+inline uint32_t Tabs::doGetMinWidth(void) const
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
@@ -96,7 +96,7 @@ inline uint32_t Tabs::getMinWidth(void) const
 	return min_width + rend->getTabsLeftEdgeWidth() + rend->getTabsRightEdgeWidth();
 }
 
-inline uint32_t Tabs::getMinHeight(uint32_t width) const
+inline uint32_t Tabs::doGetMinHeight(uint32_t width) const
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;

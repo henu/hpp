@@ -27,8 +27,8 @@ public:
 	inline void setOrientation(Orientation ori);
 	inline Orientation getOrientation(void) const { return ori; }
 
-	inline virtual uint32_t getMinWidth(void) const;
-	inline virtual uint32_t getMinHeight(uint32_t width) const;
+	inline virtual uint32_t doGetMinWidth(void) const;
+	inline virtual uint32_t doGetMinHeight(uint32_t width) const;
 
 private:
 
@@ -83,7 +83,7 @@ inline void Slider::setOrientation(Orientation ori)
 	markToNeedReposition();
 }
 
-inline uint32_t Slider::getMinWidth(void) const
+inline uint32_t Slider::doGetMinWidth(void) const
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
@@ -94,7 +94,7 @@ inline uint32_t Slider::getMinWidth(void) const
 	}
 }
 
-inline uint32_t Slider::getMinHeight(uint32_t width) const
+inline uint32_t Slider::doGetMinHeight(uint32_t width) const
 {
 	(void)width;
 	Renderer const* rend = getRenderer();

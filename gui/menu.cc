@@ -18,14 +18,14 @@ Menu::~Menu(void)
 {
 }
 
-uint32_t Menu::getMinWidth(void) const
+uint32_t Menu::doGetMinWidth(void) const
 {
 	Gui::Renderer const* rend = getRenderer();
 	if (!rend) return 0;
 	return rend->getMenuLabelWidth(label);
 }
 
-uint32_t Menu::getMinHeight(uint32_t width) const
+uint32_t Menu::doGetMinHeight(uint32_t width) const
 {
 	(void)width;
 	Gui::Renderer const* rend = getRenderer();
@@ -67,8 +67,8 @@ void Menu::onMouseKeyDownOther(Widget* widget, int32_t mouse_x, int32_t mouse_y,
 
 void Menu::doRepositioning(void)
 {
-	uint32_t content_width = content.getMinWidth();
-	uint32_t content_height = content.getMinHeight(content_width);
+	uint32_t content_width = content.doGetMinWidth();
+	uint32_t content_height = content.doGetMinHeight(content_width);
 	repositionChild(&content, 0, getHeight(), content_width, content_height);
 }
 

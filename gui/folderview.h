@@ -40,8 +40,8 @@ public:
 	inline Path::DirChild getItem(size_t item_id) const { return contents.getItem(item_id); }
 
 	// Virtual functions for Widget
-	inline virtual uint32_t getMinWidth(void) const;
-	inline virtual uint32_t getMinHeight(uint32_t width) const;
+	inline virtual uint32_t doGetMinWidth(void) const;
+	inline virtual uint32_t doGetMinHeight(uint32_t width) const;
 
 private:
 
@@ -85,14 +85,14 @@ inline Path Folderview::getFolder(void) const
 	return contents.getFolder();
 }
 
-inline uint32_t Folderview::getMinWidth(void) const
+inline uint32_t Folderview::doGetMinWidth(void) const
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
 	return rend->getMinimumFolderviewWidth();
 }
 
-inline uint32_t Folderview::getMinHeight(uint32_t width) const
+inline uint32_t Folderview::doGetMinHeight(uint32_t width) const
 {
 	(void)width;
 	Renderer const* rend = getRenderer();

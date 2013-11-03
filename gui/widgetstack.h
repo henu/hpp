@@ -19,8 +19,8 @@ public:
 
 	inline void addWidget(Widget* widget);
 
-	inline virtual uint32_t getMinWidth(void) const;
-	inline virtual uint32_t getMinHeight(uint32_t width) const;
+	inline virtual uint32_t doGetMinWidth(void) const;
+	inline virtual uint32_t doGetMinHeight(uint32_t width) const;
 
 private:
 
@@ -50,7 +50,7 @@ inline void Widgetstack::addWidget(Widget* widget)
 	markToNeedReposition();
 }
 
-inline uint32_t Widgetstack::getMinWidth(void) const
+inline uint32_t Widgetstack::doGetMinWidth(void) const
 {
 	uint32_t min_width = 0;
 	for (Widgets::const_iterator widgets_it = widgets.begin();
@@ -62,7 +62,7 @@ inline uint32_t Widgetstack::getMinWidth(void) const
 	return min_width;
 }
 
-inline uint32_t Widgetstack::getMinHeight(uint32_t width) const
+inline uint32_t Widgetstack::doGetMinHeight(uint32_t width) const
 {
 	uint32_t min_height = 0;
 	for (Widgets::const_iterator widgets_it = widgets.begin();

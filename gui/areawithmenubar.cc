@@ -43,7 +43,7 @@ void AreaWithMenubar::setContent(Widget* widget)
 	markToNeedReposition();
 }
 
-uint32_t AreaWithMenubar::getMinWidth(void) const
+uint32_t AreaWithMenubar::doGetMinWidth(void) const
 {
 	uint32_t result = 0;
 	for (Menus::const_iterator menus_it = menus.begin();
@@ -56,7 +56,7 @@ uint32_t AreaWithMenubar::getMinWidth(void) const
 	return result;
 }
 
-uint32_t AreaWithMenubar::getMinHeight(uint32_t width) const
+uint32_t AreaWithMenubar::doGetMinHeight(uint32_t width) const
 {
 	uint32_t result = 0;
 	Renderer const* rend = getRenderer();

@@ -32,7 +32,7 @@ void Menucontent::close(void)
 	parent->close();
 }
 
-uint32_t Menucontent::getMinWidth(void) const
+uint32_t Menucontent::doGetMinWidth(void) const
 {
 	uint32_t min_width = 0;
 	for (Menuitems::const_iterator items_it = items.begin();
@@ -44,7 +44,7 @@ uint32_t Menucontent::getMinWidth(void) const
 	return min_width;
 }
 
-uint32_t Menucontent::getMinHeight(uint32_t width) const
+uint32_t Menucontent::doGetMinHeight(uint32_t width) const
 {
 	uint32_t min_height = 0;
 	for (Menuitems::const_iterator items_it = items.begin();

@@ -29,8 +29,8 @@ public:
 	inline size_t getCols(void) const { return cols; }
 
 	// Virtual functions for Widget
-	inline virtual uint32_t getMinWidth(void) const;
-	inline virtual uint32_t getMinHeight(uint32_t width) const;
+	inline virtual uint32_t doGetMinWidth(void) const;
+	inline virtual uint32_t doGetMinHeight(uint32_t width) const;
 
 private:
 
@@ -82,14 +82,14 @@ inline void Textinput::setCols(size_t cols)
 	markToNeedReposition();
 }
 
-inline uint32_t Textinput::getMinWidth(void) const
+inline uint32_t Textinput::doGetMinWidth(void) const
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
 	return rend->getTextinputWidth(cols);
 }
 
-inline uint32_t Textinput::getMinHeight(uint32_t width) const
+inline uint32_t Textinput::doGetMinHeight(uint32_t width) const
 {
 	(void)width;
 	Renderer const* rend = getRenderer();

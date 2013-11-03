@@ -36,8 +36,8 @@ public:
 	// are does not fit to view, then it centers area to view.
 	inline void scrollTo(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
-	inline virtual uint32_t getMinWidth(void) const;
-	inline virtual uint32_t getMinHeight(uint32_t width) const;
+	inline virtual uint32_t doGetMinWidth(void) const;
+	inline virtual uint32_t doGetMinHeight(uint32_t width) const;
 
 private:
 
@@ -53,7 +53,6 @@ private:
 	uint32_t scrollbar_vert_buttonmove;
 
 	// Virtual functions for Widget
-	inline virtual void onChildSizeChange(void);
 	inline virtual void onSizeChange(void);
 	inline virtual void onEnvironmentUpdated(void);
 
@@ -176,25 +175,19 @@ inline void Scrollbox::scrollTo(uint32_t x, uint32_t y, uint32_t width, uint32_t
 	updateContentPosition(content->getWidth(), content->getHeight());
 }
 
-inline uint32_t Scrollbox::getMinWidth(void) const
+inline uint32_t Scrollbox::doGetMinWidth(void) const
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
 	return rend->getScrollboxMinWidth();
 }
 
-inline uint32_t Scrollbox::getMinHeight(uint32_t width) const
+inline uint32_t Scrollbox::doGetMinHeight(uint32_t width) const
 {
 	(void)width;
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
 	return rend->getScrollboxMinHeight();
-}
-
-
-inline void Scrollbox::onChildSizeChange(void)
-{
-	updateContent();
 }
 
 inline void Scrollbox::onSizeChange(void)

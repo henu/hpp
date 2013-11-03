@@ -23,8 +23,8 @@ public:
 
 	inline void addWidget(Widget* widget);
 
-	inline virtual uint32_t getMinWidth(void) const;
-	inline virtual uint32_t getMinHeight(uint32_t width) const;
+	inline virtual uint32_t doGetMinWidth(void) const;
+	inline virtual uint32_t doGetMinHeight(uint32_t width) const;
 
 private:
 
@@ -55,7 +55,7 @@ inline void Autogridcontainer::addWidget(Widget* widget)
 	markToNeedReposition();
 }
 
-inline uint32_t Autogridcontainer::getMinWidth(void) const
+inline uint32_t Autogridcontainer::doGetMinWidth(void) const
 {
 	uint32_t min_width = 0;
 	for (Widgets::const_iterator widgets_it = widgets.begin();
@@ -67,7 +67,7 @@ inline uint32_t Autogridcontainer::getMinWidth(void) const
 	return min_width;
 }
 
-inline uint32_t Autogridcontainer::getMinHeight(uint32_t width) const
+inline uint32_t Autogridcontainer::doGetMinHeight(uint32_t width) const
 {
 	Sizes widths = calculateWidthsOfColumns(width);
 	Sizes heights = calculateHeightsOfRows(widths);

@@ -42,8 +42,8 @@ private:
 	Menuitems items;
 
 	// Virtual functions for Widget
-	virtual uint32_t getMinWidth(void) const;
-	virtual uint32_t getMinHeight(uint32_t width) const;
+	virtual uint32_t doGetMinWidth(void) const;
+	virtual uint32_t doGetMinHeight(uint32_t width) const;
 
 	virtual void doRepositioning(void);
 

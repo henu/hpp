@@ -16,12 +16,12 @@ Menuseparator::~Menuseparator(void)
 {
 }
 
-uint32_t Menuseparator::getMinWidth(void) const
+uint32_t Menuseparator::doGetMinWidth(void) const
 {
 	return getRenderer()->getMenuseparatorMinWidth();
 }
 
-uint32_t Menuseparator::getMinHeight(uint32_t width) const
+uint32_t Menuseparator::doGetMinHeight(uint32_t width) const
 {
 	(void)width;
 	return getRenderer()->getMenuseparatorHeight();

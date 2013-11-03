@@ -31,8 +31,8 @@ public:
 	inline bool isEnabled(void) const { return enabled; }
 
 	// Virtual functions for Widget
-	inline virtual uint32_t getMinWidth(void) const;
-	inline virtual uint32_t getMinHeight(uint32_t width) const;
+	inline virtual uint32_t doGetMinWidth(void) const;
+	inline virtual uint32_t doGetMinHeight(uint32_t width) const;
 
 private:
 
@@ -62,14 +62,14 @@ inline Button::~Button(void)
 {
 }
 
-inline uint32_t Button::getMinWidth(void) const
+inline uint32_t Button::doGetMinWidth(void) const
 {
 	Renderer const* rend = getRenderer();
 	if (!rend) return 0;
 	return rend->getButtonWidth(label);
 }
 
-inline uint32_t Button::getMinHeight(uint32_t width) const
+inline uint32_t Button::doGetMinHeight(uint32_t width) const
 {
 	(void)width;
 	Renderer const* rend = getRenderer();

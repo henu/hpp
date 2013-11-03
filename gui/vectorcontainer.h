@@ -25,8 +25,8 @@ public:
 
 	inline void addWidget(Widget* widget);
 
-	inline virtual uint32_t getMinWidth(void) const;
-	inline virtual uint32_t getMinHeight(uint32_t width) const;
+	inline virtual uint32_t doGetMinWidth(void) const;
+	inline virtual uint32_t doGetMinHeight(uint32_t width) const;
 
 private:
 
@@ -63,7 +63,7 @@ inline void Vectorcontainer::addWidget(Widget* widget)
 	markToNeedReposition();
 }
 
-inline uint32_t Vectorcontainer::getMinWidth(void) const
+inline uint32_t Vectorcontainer::doGetMinWidth(void) const
 {
 	uint32_t min_width = 0;
 	if (dir == HORIZONTAL) {
@@ -84,7 +84,7 @@ inline uint32_t Vectorcontainer::getMinWidth(void) const
 	return min_width;
 }
 
-inline uint32_t Vectorcontainer::getMinHeight(uint32_t width) const
+inline uint32_t Vectorcontainer::doGetMinHeight(uint32_t width) const
 {
 	uint32_t min_height = 0;
 	if (dir == HORIZONTAL) {
@@ -111,7 +111,7 @@ inline void Vectorcontainer::doRepositioning(void)
 		return;
 	}
 	if (dir == HORIZONTAL) {
-		int32_t min_width = getMinWidth();
+		int32_t min_width = doGetMinWidth();
 		int32_t space_left = getWidth() - min_width;
 		if (space_left < 0) space_left = 0;
 		// Calculate total expanding, so relative expandings
@@ -156,7 +156,7 @@ inline void Vectorcontainer::doRepositioning(void)
 			pos_x += child_width;
 		}
 	} else {
-		int32_t min_height = getMinHeight(getWidth());
+		int32_t min_height = doGetMinHeight(getWidth());
 		int32_t space_left = getHeight() - min_height;
 		if (space_left < 0) space_left = 0;
 		// Calculate total expanding, so relative expandings
