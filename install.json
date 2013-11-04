@@ -43,6 +43,7 @@
 				"gui/vectorcontainer.h",
 				"gui/widget.h",
 				"gui/widgetstack.h",
+				"gui/widgetwithbackground.h",
 				"gui/windowarea.h",
 				"gui/window.h",
 				"3dconversions.h",

@@ -741,6 +741,27 @@ void ViewportRenderer::renderTabs(int32_t x_origin, int32_t y_origin, Tabs const
 	renderSprite(tex_field_edge_topleft_concave.tex, Vector2(width - tex_field_edge_left.tex->getWidth(), height - tex_field_edge_top.tex->getHeight()));
 }
 
+void ViewportRenderer::renderBackground(int32_t x_origin, int32_t y_origin, int32_t width, int32_t height, Texture* tex, Color const& color)
+{
+	Hpp::Vector2 rend_size(width, height);
+	if (tex) {
+		Hpp::Vector2 rend_uv_size(width / tex->getWidth(), height / tex->getHeight());
+		rqueue->renderSprite(tex,
+		                     Vector2(x_origin, rqueue->getHeight() - y_origin - height),
+		                     rend_size,
+		                     Vector2(0.0, 0.0),
+		                     rend_uv_size,
+		                     color);
+	} else if (color.getAlpha() > 0.01) {
+		rqueue->renderSprite(NULL,
+		                     Vector2(x_origin, rqueue->getHeight() - y_origin - height),
+		                     rend_size,
+		                     Vector2::ZERO,
+		                     Vector2::ONE,
+		                     color);
+	}
+}
+
 uint32_t ViewportRenderer::getMenubarHeight(void) const
 {
 	return tex_menubar_bg.tex->getHeight();

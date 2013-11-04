@@ -338,6 +338,7 @@ private:
 	virtual void renderScrollbar(int32_t x_origin, int32_t y_origin, Scrollbar const* scrollbar, bool horizontal, bool up_or_left_key_pressed, bool down_or_right_key_pressed, bool slider_pressed);
 	virtual void renderSlider(int32_t x_origin, int32_t y_origin, Slider const* slider, bool horizontal, bool slider_pressed);
 	virtual void renderTabs(int32_t x_origin, int32_t y_origin, Tabs const* tabs);
+	virtual void renderBackground(int32_t x_origin, int32_t y_origin, int32_t width, int32_t height, Texture* tex, Color const& color);
 	virtual uint32_t getMenubarHeight(void) const;
 	virtual uint32_t getMenuLabelWidth(UnicodeString const& label) const;
 	virtual uint32_t getMenuseparatorMinWidth(void) const;

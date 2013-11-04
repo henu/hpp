@@ -1,7 +1,7 @@
 #ifndef HPP_GUI_VECTORCONTAINER_H
 #define HPP_GUI_VECTORCONTAINER_H
 
-#include "widget.h"
+#include "widgetwithbackground.h"
 
 #include <vector>
 
@@ -11,7 +11,7 @@ namespace Hpp
 namespace Gui
 {
 
-class Vectorcontainer : public Widget
+class Vectorcontainer : public WidgetWithBackground
 {
 
 public:

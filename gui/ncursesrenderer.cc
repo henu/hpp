@@ -352,6 +352,17 @@ void NCursesRenderer::renderTabs(int32_t x_origin, int32_t y_origin, Tabs const*
 HppAssert(false, "Not implemented yet!");
 }
 
+void NCursesRenderer::renderBackground(int32_t x_origin, int32_t y_origin, int32_t width, int32_t height, Texture* tex, Color const& color)
+{
+(void)x_origin;
+(void)y_origin;
+(void)width;
+(void)height;
+(void)tex;
+(void)color;
+HppAssert(false, "Not implemented yet!");
+}
+
 void NCursesRenderer::renderTextCursor(int32_t x_origin, int32_t y_origin)
 {
 	if (isAtRenderarea(x_origin, y_origin)) {

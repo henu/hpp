@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <vector>
 
+#include "printonce.h"
 namespace Hpp
 {
 
@@ -182,6 +183,10 @@ inline void Renderqueue2d::renderSprite(Texture const* tex,
                                         Angle const& rotation,
                                         Vector2 const& rot_pos)
 {
+// TODO: Support rendering without texture! In this mode, only color affects!
+if (!tex) {
+	HppPrintOnce("2D rendering without texture not implemented yet!");
+}
 // TODO: Use "color"!
 (void)color;
 	if (tex != active_texture) {
