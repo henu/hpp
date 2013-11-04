@@ -64,6 +64,11 @@ public:
 
 	inline void setEventlistener(Eventlistener* eventlistener) { this->eventlistener = eventlistener; }
 
+	// Hides/reveals Widget. Widget is still present, but
+	// it is not shown and it cannot take input or events.
+	inline bool isVisible(void) const { return visible; }
+	inline void setVisible(bool visible) { this->visible = visible; markToNeedReposition(); }
+
 private:
 
 	// Called by Engine and other Widgets
@@ -165,6 +170,9 @@ private:
 
 	Eventlistener* eventlistener;
 
+// TODO: This conflicts with state! Find some good solution!
+	bool visible;
+
 	// Renderarea limitation. This is measured in parent's coordinates.
 	bool renderarealimit;
 	int32_t renderarealimit_x;
@@ -214,6 +222,7 @@ expanding_horiz(0),
 expanding_vert(0),
 margin(0),
 eventlistener(NULL),
+visible(true),
 renderarealimit(false)
 {
 }

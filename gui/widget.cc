@@ -147,7 +147,7 @@ void Widget::repositionIfNeeded(int32_t x, int32_t y, int32_t w, int32_t h)
 
 void Widget::render(int32_t x_origin, int32_t y_origin)
 {
-	if (state == HIDDEN) {
+	if (state == HIDDEN || !visible) {
 		return;
 	}
 
@@ -174,7 +174,7 @@ void Widget::render(int32_t x_origin, int32_t y_origin)
 bool Widget::mouseEvent(Event const& event)
 {
 	// If hidden or disabled, then do nothing
-	if (state != ENABLED) {
+	if (state != ENABLED || !visible) {
 		return false;
 	}
 	int32_t mouse_x_relative = event.x - getAbsolutePositionX();

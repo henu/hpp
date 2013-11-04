@@ -187,8 +187,6 @@ inline void Renderqueue2d::renderSprite(Texture const* tex,
 if (!tex) {
 	HppPrintOnce("2D rendering without texture not implemented yet!");
 }
-// TODO: Use "color"!
-(void)color;
 	if (tex != active_texture) {
 		flush();
 		if (active_texture) {
