@@ -120,7 +120,7 @@ inline void test3D(void)
 			Vector3 hitpos = plane_pos + plane_binormal * random(-100, 100) + plane_tangent * random(-100, 100);
 			Vector3 ray_begin = randomVector3(100);
 			Angle angle_between_ray_and_plane = angleBetweenVectors(plane_normal, ray_begin - plane_pos);
-			if ((angle_between_ray_and_plane - Angle(90)).abs() > Angle(0.1)) {
+			if ((angle_between_ray_and_plane - Angle(90)).abs() > Angle(5)) {
 				Vector3 ray_dir = (hitpos - ray_begin).normalized();
 				Vector3 hitresult_pos = Hpp::randomVector3(0, 1);
 				Real hitresult_dir_mult = Hpp::random(0, 1);
