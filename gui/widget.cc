@@ -92,7 +92,7 @@ void Widget::setEngine(Engine* engine)
 markToNeedReposition();
 }
 
-void Widget::repositionIfNeeded(int32_t x, int32_t y, uint32_t w, uint32_t h)
+void Widget::repositionIfNeeded(int32_t x, int32_t y, int32_t w, int32_t h)
 {
 // TODO: Uncomment this, when Gui supports shrinking!
 /*
@@ -109,7 +109,7 @@ void Widget::repositionIfNeeded(int32_t x, int32_t y, uint32_t w, uint32_t h)
 	h -= margin * 2;
 
 	// Get real dimensions
-	uint32_t real_w, real_h;
+	int32_t real_w, real_h;
 	if (expanding_horiz == 0) real_w = getMinWidth() - margin*2;
 	else real_w = w;
 	if (expanding_vert == 0) real_h = getMinHeight(real_w) - margin*2;
@@ -125,7 +125,7 @@ void Widget::repositionIfNeeded(int32_t x, int32_t y, uint32_t w, uint32_t h)
 	else real_y = y + (h - real_h) / 2;
 
 	// If position or size differs, then reposition is needed
-	if (real_x != x || real_y != y || real_w != width || real_h != height) {
+	if (real_x != x || real_y != y || real_w != int32_t(width) || real_h != int32_t(height)) {
 		reposition_needed = true;
 	}
 

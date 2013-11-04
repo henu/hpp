@@ -73,7 +73,7 @@ type(SAVE)
 	filenamecontainer.setHorizontalExpanding(1);
 	maincontainer.addWidget(&filenamecontainer);
 	// Filename label
-	filenamelabel.setLabel("Filename:");
+	filenamelabel.setText("Filename:");
 	filenamecontainer.addWidget(&filenamelabel);
 	// Filename input
 	filenameinput.setHorizontalExpanding(1);

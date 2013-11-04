@@ -76,7 +76,7 @@ public:
 	virtual uint32_t getWindowEdgeBottomHeight(void) const = 0;
 	virtual uint32_t getWindowDragcornerSize(void) const = 0;
 	virtual uint32_t getLabelWidth(UnicodeString const& label) const = 0;
-	virtual uint32_t getLabelHeight(void) const = 0;
+	virtual uint32_t getLabelHeight(size_t lines) const = 0;
 	virtual uint32_t getTextinputWidth(size_t cols) const = 0;
 	virtual uint32_t getTextinputHeight(void) const = 0;
 	virtual uint32_t getMinimumTextinputContentsWidth(UnicodeString const& value) const = 0;

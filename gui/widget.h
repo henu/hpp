@@ -72,7 +72,7 @@ private:
 
 	// Repositions this Widget and all of its children, if needed. This may
 	// ONLY be called by Widget itself through repositionChild or by Engine!
-	void repositionIfNeeded(int32_t x, int32_t y, uint32_t w, uint32_t h);
+	void repositionIfNeeded(int32_t x, int32_t y, int32_t w, int32_t h);
 
 	// Called by Engine and parent Widgets. Origin means absolute position
 	// of parent, or topleft corner of the total area, if called by Engine.

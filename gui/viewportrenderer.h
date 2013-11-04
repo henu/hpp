@@ -351,7 +351,7 @@ private:
 	virtual uint32_t getWindowEdgeBottomHeight(void) const { return tex_window_edge_bottom.tex->getHeight(); }
 	virtual uint32_t getWindowDragcornerSize(void) const { return window_dragcorner_size; }
 	virtual uint32_t getLabelWidth(UnicodeString const& label) const;
-	virtual uint32_t getLabelHeight(void) const;
+	virtual uint32_t getLabelHeight(size_t lines) const;
 	virtual uint32_t getTextinputWidth(size_t cols) const { return tex_field_edge_left.tex->getWidth() + tex_field_edge_right.tex->getWidth() + font.getStringWidth("_", font_input_size) * cols; }
 	virtual uint32_t getTextinputHeight(void) const { return tex_field_edge_top.tex->getHeight() + tex_field_edge_bottom.tex->getHeight() + font_input_size; }
 	virtual uint32_t getMinimumTextinputContentsWidth(UnicodeString const& value) const { return font.getStringWidth(value, font_input_size) + font.getStringWidth("|", font_input_size); }

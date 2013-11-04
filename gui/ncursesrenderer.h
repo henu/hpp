@@ -87,7 +87,7 @@ private:
 	inline virtual uint32_t getWindowEdgeBottomHeight(void) const { return 0; }
 	inline virtual uint32_t getWindowDragcornerSize(void) const { return 0; }
 	inline virtual uint32_t getLabelWidth(UnicodeString const& label) const { return label.size(); }
-	inline virtual uint32_t getLabelHeight(void) const { return 1; }
+	inline virtual uint32_t getLabelHeight(size_t lines) const { return lines; }
 	inline virtual uint32_t getTextinputWidth(size_t cols) const { return cols; }
 	inline virtual uint32_t getTextinputHeight(void) const { return 1; }
 	inline virtual uint32_t getMinimumTextinputContentsWidth(UnicodeString const& value) const { (void)value; return 1; }

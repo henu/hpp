@@ -326,19 +326,16 @@ void ViewportRenderer::renderWindow(int32_t x_origin, int32_t y_origin, Window c
 
 void ViewportRenderer::renderLabel(int32_t x_origin, int32_t y_origin, Label const* label, UnicodeString const& label_str)
 {
-	Real width = label->getWidth();
 	Real height = label->getHeight();
 
-	Color color(0, 0, 0);
+	Color color = label->getColor();
 
 	// Render label
-	Real label_width = font.getStringWidth(label_str, font_label_size);
-
 	font.renderString(label_str,
 	                  font_label_size,
 	                  color,
 	                  rqueue,
-	                  Vector2(x_origin + (width - label_width) / 2.0, rqueue->getHeight() - y_origin - height + (height - font_label_size) / 2.0));
+	                  Vector2(x_origin, rqueue->getHeight() - y_origin - height));
 }
 
 void ViewportRenderer::renderTextinput(int32_t x_origin, int32_t y_origin, Textinput const* textinput)
@@ -779,9 +776,9 @@ uint32_t ViewportRenderer::getLabelWidth(UnicodeString const& label) const
 	return font.getStringWidth(label, font_label_size);
 }
 
-uint32_t ViewportRenderer::getLabelHeight(void) const
+uint32_t ViewportRenderer::getLabelHeight(size_t lines) const
 {
-	return font_label_size;
+	return font_label_size * lines;
 }
 
 void ViewportRenderer::getTextinputContentsCursorProps(uint32_t& cursor_pos_x, uint32_t& cursor_pos_y, uint32_t& cursor_width, uint32_t& cursor_height, UnicodeString const& value, ssize_t cursor) const
