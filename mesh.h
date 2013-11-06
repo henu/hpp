@@ -117,11 +117,11 @@ inline Bufferobject const* Mesh::getBuffer(BufId buf_id) const
 	HppAssert(real_buf_id >= 0, "Buffer ID underflow!");
 
 	if (real_buf_id >= BufId(bufs.size())) {
-		throw Exception("Unable to get buffer from mesh because it does not exist!");
+		throw Exception("Unable to get buffer #" + ssizeToStr(buf_id) + " from mesh because it does not exist!");
 	}
 	Bufferobject const* result = bufs[real_buf_id].bo;
 	if (!result) {
-		throw Exception("Unable to get buffer from mesh because it does not exist!");
+		throw Exception("Unable to get buffer #" + ssizeToStr(buf_id) + " from mesh because it does not exist!");
 	}
 	return result;
 }
