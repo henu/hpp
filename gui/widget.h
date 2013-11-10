@@ -53,8 +53,8 @@ public:
 	inline void setVerticalAlignment(Alignment align) { valign = align; markToNeedReposition(); }
 
 	// Expanding
-	inline uint8_t getHorizontalExpanding(void) const { return expanding_horiz; }
-	inline uint8_t getVerticalExpanding(void) const { return expanding_vert; }
+	inline uint8_t getHorizontalExpanding(void) const;
+	inline uint8_t getVerticalExpanding(void) const;
 	inline void setHorizontalExpanding(uint8_t expanding) { expanding_horiz = expanding; markToNeedReposition(); }
 	inline void setVerticalExpanding(uint8_t expanding) { expanding_vert = expanding; markToNeedReposition(); }
 
@@ -66,8 +66,14 @@ public:
 
 	// Hides/reveals Widget. Widget is still present, but
 	// it is not shown and it cannot take input or events.
-	inline bool isVisible(void) const { return visible; }
+// TODO: It blocks clickings. Is this bad?
+	inline bool isVisible(void) const { return visible && !shrunken; }
 	inline void setVisible(bool visible) { this->visible = visible; markToNeedReposition(); }
+
+	// Shrinks/expands Widget. When Widget is shrunken,
+	// its size is always 0 x 0 and it is also hidden.
+	inline bool isShrunken(void) const { return shrunken; }
+	inline void setShrunken(bool shrunken) { this->shrunken = shrunken; markToNeedReposition(); }
 
 private:
 
@@ -170,8 +176,9 @@ private:
 
 	Eventlistener* eventlistener;
 
-// TODO: This conflicts with state! Find some good solution!
+// TODO: These conflicts with state! Find some good solution!
 	bool visible;
+	bool shrunken;
 
 	// Renderarea limitation. This is measured in parent's coordinates.
 	bool renderarealimit;
@@ -223,6 +230,7 @@ expanding_vert(0),
 margin(0),
 eventlistener(NULL),
 visible(true),
+shrunken(false),
 renderarealimit(false)
 {
 }
@@ -241,12 +249,26 @@ inline int32_t Widget::getAbsolutePositionY(void) const
 
 inline uint32_t Widget::getMinWidth(void) const
 {
+	if (shrunken) return 0;
 	return margin * 2 + doGetMinWidth();
 }
 
 inline uint32_t Widget::getMinHeight(uint32_t width) const
 {
+	if (shrunken) return 0;
 	return margin * 2 + doGetMinHeight(width);
+}
+
+inline uint8_t Widget::getHorizontalExpanding(void) const
+{
+	if (shrunken) return 0;
+	return expanding_horiz;
+}
+
+inline uint8_t Widget::getVerticalExpanding(void) const
+{
+	if (shrunken) return 0;
+	return expanding_vert;
 }
 
 inline void Widget::setParent(Widget* parent)

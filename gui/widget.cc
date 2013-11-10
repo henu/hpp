@@ -94,14 +94,15 @@ markToNeedReposition();
 
 void Widget::repositionIfNeeded(int32_t x, int32_t y, int32_t w, int32_t h)
 {
-// TODO: Uncomment this, when Gui supports shrinking!
-/*
 	if (shrunken) {
-		size = IVector2(0, 0);
+		width = 0;
+		height = 0;
+		this->x = 0;
+		this->y = 0;
 		reposition_needed = false;
 		return;
 	}
-*/
+
 	// Apply margin
 	x += margin;
 	y += margin;
@@ -147,7 +148,7 @@ void Widget::repositionIfNeeded(int32_t x, int32_t y, int32_t w, int32_t h)
 
 void Widget::render(int32_t x_origin, int32_t y_origin)
 {
-	if (state == HIDDEN || !visible) {
+	if (state == HIDDEN || !visible || shrunken) {
 		return;
 	}
 
