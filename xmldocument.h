@@ -35,6 +35,8 @@ XMLNode(XMLNode::NORMAL, "")
 
 	std::string::const_iterator file_contents_begin = file_contents.begin();
 	std::string::const_iterator file_contents_end = file_contents.end();
+	cleanWhitespaceFromBegin(file_contents_begin, file_contents_end);
+	cleanWhitespaceFromEnd(file_contents_begin, file_contents_end);
 	deserialize(file_contents_begin, file_contents_end);
 	if (file_contents_begin != file_contents_end) {
 		throw Exception("XML file contains extra tags or garbage!");
@@ -52,6 +54,8 @@ inline XMLDocument XMLDocument::fromString(std::string const& data)
 
 	std::string::const_iterator data_begin = data.begin();
 	std::string::const_iterator data_end = data.end();
+	cleanWhitespaceFromBegin(data_begin, data_end);
+	cleanWhitespaceFromEnd(data_begin, data_end);
 	result.deserialize(data_begin, data_end);
 	if (data_begin != data_end) {
 		throw Exception("XML file contains extra tags or garbage!");

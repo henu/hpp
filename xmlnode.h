@@ -90,9 +90,12 @@ private:
 
 	// Whitespace and comment cleaners
 	inline static void cleanWhitespaceFromBegin(std::string::const_iterator& str_begin, std::string::const_iterator const& str_end);
+	inline static void cleanWhitespaceFromEnd(std::string::const_iterator const& str_begin, std::string::const_iterator& str_end);
 	inline static void cleanWhitespaceFromEnd(std::string& str);
 	inline static void cleanWhitespaceAndCommentsFromBegin(std::string::const_iterator& str_begin, std::string::const_iterator const& str_end);
 	inline static void cleanWhitespaceAndCommentsFromEnd(std::string::const_iterator const& str_begin, std::string::const_iterator& str_end);
+	inline static void cleanCommentFromBegin(std::string::const_iterator& str_begin, std::string::const_iterator const& str_end);
+	inline static void cleanCommentFromEnd(std::string::const_iterator const& str_begin, std::string::const_iterator& str_end);
 
 	// Read until str_begin == str_end or until *str_begin is one of given
 	// characters
@@ -275,12 +278,15 @@ inline void XMLNode::serialize(std::ostream& strm, size_t indent) const
 
 inline void XMLNode::deserialize(std::string::const_iterator& str_begin, std::string::const_iterator& str_end)
 {
-	// Clear whitespace and comments from the beginning and end of string
-	// and also ensure there is content in string.
+	// Check if there is text node at the beginning
 	if (str_begin == str_end) throw Exception("No XML node content!");
-	cleanWhitespaceAndCommentsFromBegin(str_begin, str_end);
-	if (str_begin == str_end) throw Exception("No XML node content!");
-	cleanWhitespaceAndCommentsFromEnd(str_begin, str_end);
+	std::string::const_iterator str_old_begin = str_begin;
+	readUntil(str_begin, str_end, "<");
+	if (str_begin - str_old_begin > 0) {
+		type = TEXT;
+		value = std::string(str_old_begin, str_begin);
+		return;
+	}
 
 	// Clean possible !DOCTYPE
 	if (str_end - str_begin >= 9 && std::string(str_begin, str_begin + 9) == "<!DOCTYPE") {
@@ -312,8 +318,6 @@ inline void XMLNode::deserialize(std::string::const_iterator& str_begin, std::st
 
 		type = TEXT;
 		value = cdata;
-
-		cleanWhitespaceFromEnd(value);
 	}
 	// Normal node
 	else if (*str_begin == '<') {
@@ -407,7 +411,8 @@ inline void XMLNode::deserialize(std::string::const_iterator& str_begin, std::st
 
 		// If tag was not closed, then it might have children
 		if (!tag_closed) {
-			cleanWhitespaceAndCommentsFromBegin(str_begin, str_end);
+			cleanCommentFromBegin(str_begin, str_end);
+			cleanCommentFromEnd(str_begin, str_end);
 			while (str_begin != str_end) {
 				// Check if this is closing of this tag
 				if (*str_begin == '<' && str_end - str_begin >= 1 && *(str_begin + 1) == '/') {
@@ -451,7 +456,7 @@ inline void XMLNode::deserialize(std::string::const_iterator& str_begin, std::st
 					children.pop_back();
 				}
 
-				cleanWhitespaceAndCommentsFromBegin(str_begin, str_end);
+				cleanCommentFromBegin(str_begin, str_end);
 			}
 		}
 
@@ -468,8 +473,6 @@ inline void XMLNode::deserialize(std::string::const_iterator& str_begin, std::st
 			value += c;
 			str_begin ++;
 		}
-		// Remove whitespace from end
-		cleanWhitespaceFromEnd(value);
 	}
 }
 
@@ -480,6 +483,23 @@ inline void XMLNode::cleanWhitespaceFromBegin(std::string::const_iterator& str_b
 	                                *str_begin == '\x0a' ||
 	                                *str_begin == '\x0d')) {
 		str_begin ++;
+	}
+}
+
+inline void XMLNode::cleanWhitespaceFromEnd(std::string::const_iterator const& str_begin, std::string::const_iterator& str_end)
+{
+	while (str_begin != str_end) {
+		-- str_end;
+		if (*str_end == ' ' ||
+		    *str_end == '\t' ||
+		    *str_end == '\x0a' ||
+		    *str_end == '\x0d') {
+			// It was white space, so cleaning was okay
+		} else {
+			// It was not white space, so cancel and stop
+			++ str_end;
+			return;
+		}
 	}
 }
 
@@ -589,6 +609,43 @@ inline void XMLNode::cleanWhitespaceAndCommentsFromEnd(std::string::const_iterat
 
 	} while (true);
 	str_end ++;
+}
+
+inline void XMLNode::cleanCommentFromBegin(std::string::const_iterator& str_begin, std::string::const_iterator const& str_end)
+{
+	if (str_end - str_begin >= 4 && std::string(str_begin, str_begin + 4) == "<!--") {
+
+		// Read until "-->" is met
+		char comm_end[3] = { 0, 0, 0 };
+		do {
+			if (str_begin == str_end) {
+				throw Exception("XML comment was not closed!");
+			}
+			comm_end[0] = comm_end[1];
+			comm_end[1] = comm_end[2];
+			comm_end[2] = *str_begin;
+			++ str_begin;
+		} while (std::strncmp(comm_end, "-->", 3) != 0);
+	}
+}
+
+inline void XMLNode::cleanCommentFromEnd(std::string::const_iterator const& str_begin, std::string::const_iterator& str_end)
+{
+	if (str_end - str_begin >= 3 && std::string(str_end - 3, str_end) == "-->") {
+
+		// Read until "<!--" is met
+		char comm_begin[4] = { 0, 0, 0, 0 };
+		do {
+			if (str_begin == str_end) {
+				throw Exception("XML comment was not opened!");
+			}
+			-- str_end;
+			comm_begin[3] = comm_begin[2];
+			comm_begin[2] = comm_begin[1];
+			comm_begin[1] = comm_begin[0];
+			comm_begin[0] = *str_end;
+		} while (std::strncmp(comm_begin, "<!--", 4) != 0);
+	}
 }
 
 inline void XMLNode::readUntil(std::string::const_iterator& str_begin, std::string::const_iterator const& str_end, std::string const& chars)
