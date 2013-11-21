@@ -2,7 +2,7 @@
 
 #include "../cores.h"
 #include "../thread.h"
-#include "../misc.h"
+#include "../math.h"
 #include "../ivector2.h"
 
 #include <vector>

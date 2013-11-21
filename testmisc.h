@@ -1,6 +1,7 @@
 #ifndef HPP_TESTMISC_H
 #define HPP_TESTMISC_H
 
+#include "math.h"
 #include "collisiontests.h"
 #include "collisions.h"
 #include "sha256hasher.h"
@@ -46,8 +47,12 @@ inline void testMisc(void)
 		HppAssert(abs(dMod(-8.5, 2) - 1.5) < 0.001, "Testing of dMod has failed!")
 	}
 
-	// Test floor and ceiling functions
+	// Test round, floor and ceiling functions
 	{
+		HppAssert(iRound(-9.00001) == -9, "Testing of iRound has failed!");
+		HppAssert(iRound(9.99999) == 10, "Testing of iRound has failed!");
+		HppAssert(iRound(9.00001) == 9, "Testing of iRound has failed!");
+		HppAssert(iRound(-9.99999) == -10, "Testing of iRound has failed!");
 		HppAssert(iFloor(-9.00001) == -10, "Testing of iFloor has failed!");
 		HppAssert(iFloor(9.99999) == 9, "Testing of iFloor has failed!");
 		HppAssert(iCeil(9.00001) == 10, "Testing of iCeil has failed!");

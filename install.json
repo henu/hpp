@@ -83,6 +83,7 @@
 				"lock.h",
 				"magic.h",
 				"main.h",
+				"math.h",
 				"matrix3.h",
 				"matrix4.h",
 				"memwatch.h",
