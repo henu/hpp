@@ -389,7 +389,7 @@ inline void Widget::fireEvent(int action)
 
 inline bool Widget::mouseOver(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const
 {
-	if (state != HIDDEN &&
+	if (state != HIDDEN && !shrunken &&
 	    mouse_x >= x_origin + x && mouse_x < x_origin + x + (int32_t)width &&
 	    mouse_y >= y_origin + y && mouse_y < y_origin + y + (int32_t)height) {
 		if (positionOutsideRenderarealimit(x_origin, y_origin, mouse_x, mouse_y)) {
@@ -402,7 +402,7 @@ inline bool Widget::mouseOver(int32_t x_origin, int y_origin, int32_t mouse_x, i
 
 inline Widget const* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y) const
 {
-	if (state == HIDDEN) {
+	if (state == HIDDEN || shrunken) {
 		return NULL;
 	}
 	if (positionOutsideRenderarealimit(x_origin, y_origin, mouse_x, mouse_y)) {
@@ -425,7 +425,7 @@ inline Widget const* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, 
 
 inline Widget* Widget::mouseOverRecursive(int32_t x_origin, int y_origin, int32_t mouse_x, int32_t mouse_y)
 {
-	if (state == HIDDEN) {
+	if (state == HIDDEN || shrunken) {
 		return NULL;
 	}
 	if (positionOutsideRenderarealimit(x_origin, y_origin, mouse_x, mouse_y)) {
