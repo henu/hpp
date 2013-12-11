@@ -641,9 +641,10 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 				}
 			}
 		}
-		if (color.getRed() < ONE_THRESHOLD &&
-		    color.getGreen() < ONE_THRESHOLD &&
-		    color.getBlue() < ONE_THRESHOLD) sflags.insert("COLOR");
+		if (color.getRed() < ONE_THRESHOLD ||
+		    color.getGreen() < ONE_THRESHOLD ||
+		    color.getBlue() < ONE_THRESHOLD ||
+		    color.getAlpha() < ONE_THRESHOLD) sflags.insert("COLOR");
 		if (shadow_test_enabled) sflags.insert("SHADOW_FUNC");
 
 		if (alpha_usage == ROUND_TO_ZERO_OR_ONE) sflags.insert("ROUND_ALPHA");
@@ -682,9 +683,10 @@ HppAssert(!additive_rendering, "Additive rendering not implemented yet!");
 			rendering_programhandle->setUniform(UNIF_LIGHT_COLOR, light->getColor(), RGB);
 		}
 	}
-	if (color.getRed() < ONE_THRESHOLD &&
-	    color.getGreen() < ONE_THRESHOLD &&
-	    color.getBlue() < ONE_THRESHOLD) {
+	if (color.getRed() < ONE_THRESHOLD ||
+	    color.getGreen() < ONE_THRESHOLD ||
+	    color.getBlue() < ONE_THRESHOLD ||
+	    color.getAlpha() < ONE_THRESHOLD) {
 		rendering_programhandle->setUniform(UNIF_MATERIAL_COLOR, color);
 	}
 	if (colormap) {
