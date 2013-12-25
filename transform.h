@@ -1,6 +1,7 @@
 #ifndef HPP_TRANSFORM_H
 #define HPP_TRANSFORM_H
 
+#include "ray.h"
 #include "3dconversions.h"
 #include "quaternion.h"
 #include "matrix4.h"
@@ -73,6 +74,9 @@ public:
 	inline Transform addAnotherTransform(Transform const& transf2) const;
 
 	inline Vector3 applyToPosition(Vector3 const& pos) const;
+
+	inline Ray applyToRay(Ray const& ray) const;
+
 	inline Real getMaximumScaling(void) const;
 
 	// Get how Transform sees the given absolute position
@@ -233,6 +237,11 @@ inline Transform Transform::addAnotherTransform(Transform const& transf2) const
 inline Vector3 Transform::applyToPosition(Vector3 const& pos) const
 {
 	return transf * pos;
+}
+
+Ray Transform::applyToRay(Ray const& ray) const
+{
+	return Ray(transf * ray.begin, matrix4ToMatrix3(transf) * ray.dir);
 }
 
 inline Real Transform::getMaximumScaling(void) const
