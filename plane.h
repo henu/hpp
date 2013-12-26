@@ -2,6 +2,7 @@
 #define HPP_PLANE_H
 
 #include "vector3.h"
+#include "ray.h"
 
 #include <vector>
 #include <string>
@@ -29,6 +30,10 @@ public:
 	// "result_dir_mult" tells how many times dir
 	// must be added to begin so hitpos is reached.
 	inline bool hitsLine(Vector3 const& begin, Vector3 const& dir, Vector3* result_hitpos = NULL, Real* result_dir_mult = NULL) const;
+
+	// "result_dir_mult" tells how many times dir
+	// must be added to begin so hitpos is reached.
+	inline bool hitsRay(Ray const& ray, Vector3* result_hitpos = NULL, Real* result_dir_mult = NULL) const;
 
 	// In case of hit, result_hitline_dir will be normalized
 	inline bool hitsPlane(Plane const& plane2, Vector3* result_hitline_pos = NULL, Vector3* result_hitline_dir = NULL) const;
@@ -117,6 +122,18 @@ inline bool Plane::hitsLine(Vector3 const& begin, Vector3 const& dir, Vector3* r
 		*result_dir_mult = dir_m;
 	}
 
+	return true;
+}
+
+bool Plane::hitsRay(Ray const& ray, Vector3* result_hitpos, Real* result_dir_mult) const
+{
+	Hpp::Real result_dir_mult2;
+	bool hits_line = hitsLine(ray.begin, ray.dir, result_hitpos, &result_dir_mult2);
+	// If it does not hit plane
+	if (!hits_line) return false;
+	if (result_dir_mult2 < 0) return false;
+	// If it hits
+	if (result_dir_mult) *result_dir_mult = result_dir_mult2;
 	return true;
 }
 
