@@ -9,7 +9,6 @@ namespace Hpp
 namespace Imageeffects
 {
 
-// If threads is zero, then amount of cores is used
 Image divide(Image const& bottom, Image const& top);
 
 }

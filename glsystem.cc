@@ -19,6 +19,7 @@ PFNGLBINDBUFFERPROC GlSystem::systemBindBuffer = NULL;
 PFNGLBINDFRAMEBUFFERPROC GlSystem::systemBindFramebuffer = NULL;
 PFNGLBINDVERTEXARRAYPROC GlSystem::systemBindVertexArray = NULL;
 PFNGLBUFFERDATAPROC GlSystem::systemBufferData = NULL;
+PFNGLCHECKFRAMEBUFFERSTATUSPROC GlSystem::systemCheckFramebufferStatus;
 PFNGLCOMPILESHADERPROC GlSystem::systemCompileShader = NULL;
 PFNGLCREATEPROGRAMPROC GlSystem::systemCreateProgram = NULL;
 PFNGLCREATESHADERPROC GlSystem::systemCreateShader = NULL;
@@ -92,6 +93,7 @@ void GlSystem::initialize(void)
 	systemBindFramebuffer = reinterpret_cast< PFNGLBINDFRAMEBUFFERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBindFramebuffer")));
 	systemBindVertexArray = reinterpret_cast< PFNGLBINDVERTEXARRAYPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBindVertexArray")));
 	systemBufferData = reinterpret_cast< PFNGLBUFFERDATAPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glBufferData")));
+ 	systemCheckFramebufferStatus = reinterpret_cast< PFNGLCHECKFRAMEBUFFERSTATUSPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCheckFramebufferStatus")));
 	systemCompileShader = reinterpret_cast< PFNGLCOMPILESHADERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCompileShader")));
 	systemCreateProgram = reinterpret_cast< PFNGLCREATEPROGRAMPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCreateProgram")));
 	systemCreateShader = reinterpret_cast< PFNGLCREATESHADERPROC >(glXGetProcAddress(reinterpret_cast< GLubyte const* >("glCreateShader")));
@@ -152,6 +154,7 @@ void GlSystem::initialize(void)
 	systemBindFramebuffer = reinterpret_cast< PFNGLBINDFRAMEBUFFERPROC >(wglGetProcAddress("glBindFramebuffer"));
 	systemBindVertexArray = reinterpret_cast< PFNGLBINDVERTEXARRAYPROC >(wglGetProcAddress("glBindVertexBuffer"));
 	systemBufferData = reinterpret_cast< PFNGLBUFFERDATAPROC >(wglGetProcAddress("glBufferData"));
+ 	systemCheckFramebufferStatus = reinterpret_cast< PFNGLCHECKFRAMEBUFFERSTATUSPROC >(wglGetProcAddress("glCheckFramebufferStatus"));
 	systemCompileShader = reinterpret_cast< PFNGLCOMPILESHADERPROC >(wglGetProcAddress("glCompileShader"));
 	systemCreateProgram = reinterpret_cast< PFNGLCREATEPROGRAMPROC >(wglGetProcAddress("glCreateProgram"));
 	systemCreateShader = reinterpret_cast< PFNGLCREATESHADERPROC >(wglGetProcAddress("glCreateShader"));

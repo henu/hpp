@@ -27,9 +27,10 @@ public:
 	inline static void BindFramebuffer(GLenum target, GLuint framebuffer);
 	inline static void BindVertexArray(GLuint array);
 	inline static void BufferData(GLenum target, GLsizei size, const void* data, GLenum usage);
+	inline static GLenum CheckFramebufferStatus(GLenum target);
+	inline static void CompileShader(GLuint shader);
 	inline static GLuint CreateProgram(void);
 	inline static GLuint CreateShader(GLenum type);
-	inline static void CompileShader(GLuint shader);
 	inline static void DeleteBuffers(GLsizei n, GLuint const* buffers);
 	inline static void DeleteFramebuffers(GLsizei n, GLuint const* framebuffers);
 	inline static void DeleteProgram(GLuint program);
@@ -112,6 +113,7 @@ private:
 	static PFNGLBINDFRAMEBUFFERPROC systemBindFramebuffer;
 	static PFNGLBINDVERTEXARRAYPROC systemBindVertexArray;
 	static PFNGLBUFFERDATAPROC systemBufferData;
+	static PFNGLCHECKFRAMEBUFFERSTATUSPROC systemCheckFramebufferStatus;
 	static PFNGLCOMPILESHADERPROC systemCompileShader;
 	static PFNGLCREATEPROGRAMPROC systemCreateProgram;
 	static PFNGLCREATESHADERPROC systemCreateShader;
@@ -224,6 +226,18 @@ inline void GlSystem::AttachShader(GLuint program, GLuint shader)
 	systemAttachShader(program, shader);
 }
 
+inline GLenum GlSystem::CheckFramebufferStatus(GLenum target)
+{
+	HppAssert(systemCheckFramebufferStatus, "Function does not exist!");
+	return systemCheckFramebufferStatus(target);
+}
+
+inline void GlSystem::CompileShader(GLuint shader)
+{
+	HppAssert(systemCompileShader, "Function does not exist!");
+	systemCompileShader(shader);
+}
+
 inline GLuint GlSystem::CreateProgram(void)
 {
 	HppAssert(systemCreateProgram, "Function does not exist!");
@@ -234,12 +248,6 @@ inline GLuint GlSystem::CreateShader(GLenum type)
 {
 	HppAssert(systemCreateShader, "Function does not exist!");
 	return systemCreateShader(type);
-}
-
-inline void GlSystem::CompileShader(GLuint shader)
-{
-	HppAssert(systemCompileShader, "Function does not exist!");
-	systemCompileShader(shader);
 }
 
 inline void GlSystem::DeleteBuffers(GLsizei n, GLuint const* buffers)
