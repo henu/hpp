@@ -37,6 +37,8 @@ public:
 		DISCARD_LESS_THAN_HALF
 	};
 
+	static uint16_t const NUMBER_OF_UNIFORMS = 14;
+
 	// Constructor and destructor
 	inline GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures, bool use_glsl_version_330 = false);
 	inline GenericMaterial(Rawmaterial const& rawmat, bool twosided = false, bool use_glsl_version_330 = false);
@@ -499,7 +501,7 @@ inline void GenericMaterial::addCustomShader(Shader const& shader,
 {
 	// If custom shader is not yet loaded
 	if (!custom_program) {
-		custom_program = new Shaderprogram(uniformnames, vertexattributenames);
+		custom_program = new Shaderprogram(GenericMaterial::uniformnames, GenericMaterial::vertexattributenames);
 		if (use_glsl_version_330) {
 			custom_program->attachShader(shader_vrt_330);
 			custom_program->attachShader(shader_frg_330);
