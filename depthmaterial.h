@@ -63,13 +63,6 @@ private:
 	// Class-wide shaders
 	static Shaderprogram* program;
 
-	inline virtual void doRendering(Renderable const* renderable,
-	                                Rendbuf< Real > const* poss,
-	                                Rendbuf< Real > const* nrms,
-	                                std::vector< Rendbuf< Real > const* > const& uvs,
-	                                Rendbuf< Real > const* clrs,
-	                                Rendbuf< RIdx > const* tris) const;
-
 };
 
 inline Depthmaterial::Depthmaterial(Real near, Real far, Flags flags) :
@@ -150,22 +143,6 @@ inline void Depthmaterial::endRendering(void) const
 		glEnable(GL_CULL_FACE);
 		HppCheckGlErrors();
 	}
-}
-
-inline void Depthmaterial::doRendering(Renderable const* renderable,
-                                       Rendbuf< Real > const* poss,
-                                       Rendbuf< Real > const* nrms,
-                                       std::vector< Rendbuf< Real > const* > const& uvs,
-                                       Rendbuf< Real > const* clrs,
-                                       Rendbuf< RIdx > const* tris) const
-{
-	(void)renderable;
-	(void)poss;
-	(void)nrms;
-	(void)uvs;
-	(void)clrs;
-	(void)tris;
-	HppAssert(false, "This method is not supported any more!");
 }
 
 }
