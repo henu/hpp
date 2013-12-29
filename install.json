@@ -163,6 +163,7 @@
 				"glstatemanager.h",
 				"glsystem.h",
 				"font.h",
+				"framebuf.h",
 				"inc_gl.h",
 				"inc_glx.h",
 				"joystick.h",
