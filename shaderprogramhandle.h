@@ -37,6 +37,9 @@ public:
 	// Functions to set Bufferobjects
 	inline void setBufferobject(GLint vertexattr_loc, Bufferobject const* buf);
 
+	// Returns list of active uniforms. This is mainly for debugging purposes.
+	inline Strings getListOfUniforms(void) const;
+
 private:
 
 	// ========================================
@@ -244,6 +247,34 @@ inline void Shaderprogramhandle::setBufferobject(GLint vertexattr_loc, Bufferobj
 	buf->useAsVertexAttribute(vertexattr_loc);
 
 	HppCheckGlErrors();
+}
+
+Strings Shaderprogramhandle::getListOfUniforms(void) const
+{
+	GLsizei const NAME_MAXLEN = 1024;
+	GLchar name[NAME_MAXLEN];
+
+	GLint uniforms;
+	GlSystem::GetProgramiv(prog_id, GL_ACTIVE_UNIFORMS, &uniforms);
+
+	Strings result;
+	result.reserve(uniforms);
+
+	for (GLint uniform_id = 0; uniform_id < uniforms; ++ uniform_id) {
+		GLsizei name_len;
+		GLint uniform_size;
+		GLenum uniform_type;
+		GlSystem::GetActiveUniform(prog_id,
+		                           uniform_id,
+		                           NAME_MAXLEN,
+		                           &name_len,
+		                           &uniform_size,
+		                           &uniform_type,
+		                           name);
+		result.push_back(std::string(name, name_len));
+	}
+
+	return result;
 }
 
 inline Shaderprogramhandle::Shaderprogramhandle(Shaderprogram* program,
