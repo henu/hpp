@@ -256,7 +256,7 @@ rendering_light(NULL)
 		} else if (alpha_usage_str == "discard less than half") {
 			alpha_usage = DISCARD_LESS_THAN_HALF;
 		} else {
-			throw Hpp::Exception("Invalid alpha value! Must be either \"normal\", \"round to zero or one\" or \"discard less than half\"!");
+			throw Exception("Invalid alpha value! Must be either \"normal\", \"round to zero or one\" or \"discard less than half\"!");
 		}
 	}
 	if (json.keyExists("normal_weight")) {
@@ -390,7 +390,7 @@ inline Strings GenericMaterial::getNeededTextures(Path const& path)
 {
 	std::set< std::string > result_set;
 
-	Hpp::Json json(path.readString());
+	Json json(path.readString());
 
 	if (json.keyExists("colormap")) {
 		std::string colormap_name = json.getMember("colormap").getString();
