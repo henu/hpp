@@ -31,6 +31,7 @@ public:
 	inline Vector3 getPosition(void) const { return transf.getPosition(); }
 	inline Real getAspectratio(void) const { return aspectratio; }
 
+	// Camera must be updated, when this is called.
 	virtual Viewfrustum getViewfrustum(bool use_farplane = false) const = 0;
 
 	inline Matrix4 getViewmatrix(void) const { return viewmat; }

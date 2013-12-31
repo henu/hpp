@@ -15,7 +15,7 @@ class Orthographiccamera : public Camera
 
 public:
 
-	// Constructor. FOV means angle between opposite viewfrustum planes.
+	// Constructor. "size" means distance between top and bottom edges of screen.
 	inline Orthographiccamera(void);
 	inline Orthographiccamera(Real size,
 	                          Real nearplane, Real farplane,
@@ -76,10 +76,28 @@ inline void Orthographiccamera::setSize(Real size)
 
 inline Viewfrustum Orthographiccamera::getViewfrustum(bool use_farplane) const
 {
-// TODO: Code this!
-(void)use_farplane;
-HppAssert(false, "Not implemented yet!");
-return Viewfrustum();
+	Plane::Vec cutplanes;
+
+	Vector3 pos = transf.getPosition();
+
+	Real size_x = (size / viewport_width) * viewport_height;
+
+	// Top plane
+	cutplanes.push_back(Plane(-up, pos + up.normalized() * size / 2));
+	// Bottom plane
+	cutplanes.push_back(Plane(up, pos - up.normalized() * size / 2));
+	// Right plane
+	cutplanes.push_back(Plane(-right, pos + right.normalized() * size_x / 2));
+	// Left plane
+	cutplanes.push_back(Plane(right, pos - right.normalized() * size_x / 2));
+	// Near plane
+	cutplanes.push_back(Plane(dir, pos + dir.normalized() * nearplane));
+	// Far plane
+	if (use_farplane) {
+		cutplanes.push_back(Plane(-dir, pos + dir.normalized() * farplane));
+	}
+
+	return Viewfrustum(pos, Boundingconvex(cutplanes));
 }
 
 inline void Orthographiccamera::shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const

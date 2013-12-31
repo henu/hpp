@@ -94,10 +94,10 @@ inline Viewfrustum Perspectivecamera::getViewfrustum(bool use_farplane) const
 		farplane = getFar();
 	}
 	return Viewfrustum::fromCamera(getPosition(),
-	                                getDir(), getUp(), getRight(),
-	                                getFovY(), getFovX(),
-	                                getNear(),
-	                                farplane);
+	                               getDir(), getUp(), getRight(),
+	                               getFovY(), getFovX(),
+	                               getNear(),
+	                               farplane);
 }
 
 inline void Perspectivecamera::shootRay(Vector3& result_begin, Vector3& result_dir, Vector2 const& pos_rel) const
