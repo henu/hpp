@@ -1,6 +1,9 @@
 #ifndef HPP_DEPTHMATERIAL_H
 #define HPP_DEPTHMATERIAL_H
 
+#include "texture.h"
+#include "path.h"
+#include "json.h"
 #include "material.h"
 #include "mesh.h"
 #include "shaderprogram.h"
@@ -22,7 +25,12 @@ public:
 	static Flags const PACK_COLOR = 0x04;
 	static Flags const TWOSIDED = 0x08;
 
-	inline Depthmaterial(Real nearplane, Real farplane, Flags flags = 0);
+	inline Depthmaterial(Real nearplane, Real farplane, Flags flags = 0, Texture* alphamask = NULL);
+	inline Depthmaterial(Path const& path, Texture* alphamask);
+
+	// This can be used to get name of possible texture, that this
+	// material needs. Returns true, if material needs texture.
+	inline static bool getNeededTexture(std::string& result, Path const& path);
 
 	inline void setNearAndFar(Real nearplane, Real farplane);
 
@@ -55,6 +63,7 @@ private:
 	bool use_color;
 	bool pack_color;
 	bool twosided;
+	Texture* alphamask;
 
 	// Rendering state
 	mutable Shaderprogramhandle* rendering_programhandle;
@@ -65,18 +74,69 @@ private:
 
 };
 
-inline Depthmaterial::Depthmaterial(Real near, Real far, Flags flags) :
+inline Depthmaterial::Depthmaterial(Real near, Real far, Flags flags, Texture* alphamask) :
 nearplane(near),
 farplane(far),
 radial_depth(flags & RADIAL_DEPTH),
 use_color(flags & USE_COLOR),
 pack_color(flags & PACK_COLOR),
 twosided(flags & TWOSIDED),
+alphamask(alphamask),
 rendering_programhandle(NULL)
 {
 	if (pack_color && !use_color) {
 		throw Exception("You cannot pack colors if you are not using them!");
 	}
+}
+
+inline Depthmaterial::Depthmaterial(Path const& path, Texture* alphamask) :
+nearplane(0),
+farplane(0),
+radial_depth(false),
+use_color(false),
+pack_color(false),
+twosided(false),
+alphamask(NULL),
+rendering_programhandle(NULL)
+{
+	Json json(path.readString());
+
+	if (json.keyExists("radial depth")) {
+		radial_depth = json.getMember("radial depth").getBoolean();
+	}
+
+	if (json.keyExists("use color")) {
+		use_color = json.getMember("use color").getBoolean();
+	}
+
+	if (json.keyExists("pack color")) {
+		pack_color = json.getMember("pack color").getBoolean();
+	}
+
+	if (json.keyExists("twosided")) {
+		twosided = json.getMember("twosided").getBoolean();
+	}
+
+	// Mask
+	if (json.keyExists("alphamask")) {
+		if (!alphamask) {
+			throw Exception("Depthmaterial needs alphamask texture, but it is not provided!");
+		}
+		alphamask = alphamask;
+	} else if (alphamask) {
+		throw Exception("Depthmaterial does not need alphamask texture, but it is still provided!");
+	}
+
+}
+
+bool Depthmaterial::getNeededTexture(std::string& result, Path const& path)
+{
+	Json json(path.readString());
+	if (json.keyExists("alphamask")) {
+		result = json.getMember("alphamask").getString();
+		return true;
+	}
+	return false;
 }
 
 inline void Depthmaterial::setNearAndFar(Real near, Real far)
