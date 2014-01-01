@@ -53,8 +53,10 @@ private:
 	static uint16_t const UNIF_MVMAT = 1;
 	static uint16_t const UNIF_NEAR = 2;
 	static uint16_t const UNIF_FAR = 3;
+	static uint16_t const UNIF_ALPHAMASK = 4;
 
 	static uint16_t const VATR_POS = 0;
+	static uint16_t const VATR_UV = 1;
 
 	// Options
 	Real nearplane;
@@ -122,7 +124,7 @@ rendering_programhandle(NULL)
 		if (!alphamask) {
 			throw Exception("Depthmaterial needs alphamask texture, but it is not provided!");
 		}
-		alphamask = alphamask;
+		this->alphamask = alphamask;
 	} else if (alphamask) {
 		throw Exception("Depthmaterial does not need alphamask texture, but it is still provided!");
 	}
@@ -157,9 +159,15 @@ inline void Depthmaterial::setProjectionmatrix(Matrix4 const& projectionmatrix)
 
 inline void Depthmaterial::renderMesh(Mesh const* mesh, Transform const& transf)
 {
-	// Only position buffer is needed
+	// Position buffer is needed always.
 	rendering_programhandle->setBufferobject(VATR_POS, mesh->getBuffer(Mesh::POS));
 	HppCheckGlErrors();
+
+	// UV buffer is needed only, if there is an alphamask.
+	if (alphamask) {
+		rendering_programhandle->setBufferobject(VATR_UV, mesh->getBuffer(Mesh::UV));
+		HppCheckGlErrors();
+	}
 
 	// Calculate and set ModelViewMatrix
 	Matrix4 mvmat = rendering_viewmatrix * transf.getMatrix();
@@ -186,11 +194,25 @@ inline void Depthmaterial::beginRendering(Color const& ambient_light, Light cons
 	}
 
 	Shaderprogram::Flags sflags;
+
+	// If there is alpha mask, then bind it and enable appropriate shaderflag.
+	if (alphamask) {
+		alphamask->bind();
+		HppCheckGlErrors();
+		sflags.insert("ALPHAMASK");
+	}
+
 	if (radial_depth) sflags.insert("RADIAL");
 	if (use_color) sflags.insert("COLOR");
 	if (pack_color) sflags.insert("PACK");
 	rendering_programhandle = program->createHandle(sflags);
+// TODO: Optimize this!
 	rendering_programhandle->enable();
+
+	// Set alphamask as uniform, if it exists
+	if (alphamask) {
+		rendering_programhandle->setUniform1i(UNIF_ALPHAMASK, alphamask->getBoundTextureunit());
+	}
 }
 
 inline void Depthmaterial::endRendering(void) const
@@ -199,6 +221,13 @@ inline void Depthmaterial::endRendering(void) const
 	delete rendering_programhandle;
 	rendering_programhandle = NULL;
 	HppCheckGlErrors();
+
+	// If there is alpha mask, then unbind it
+	if (alphamask) {
+		alphamask->unbind();
+		HppCheckGlErrors();
+	}
+
 	if (twosided) {
 		glEnable(GL_CULL_FACE);
 		HppCheckGlErrors();

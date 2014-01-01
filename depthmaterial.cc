@@ -13,11 +13,19 @@ std::string const SHADER_VRT =
 "uniform mat4 mvmat;\n"
 "uniform mat4 pmat;\n"
 "\n"
+"#ifdef ALPHAMASK\n"
+"attribute vec2 uv;\n"
+"varying vec2 frag_uv;\n"
+"#endif\n"
+"\n"
 "void main()\n"
 "{\n"
 "\n"
 "	frag_pos = mvmat * pos;\n"
 "	gl_Position = (pmat * mvmat) * pos;\n"
+"	#ifdef ALPHAMASK\n"
+"	frag_uv = uv;\n"
+"	#endif\n"
 "}\n";
 
 std::string const SHADER_FRG =
@@ -27,6 +35,11 @@ std::string const SHADER_FRG =
 "\n"
 "uniform float near;\n"
 "uniform float far;\n"
+"\n"
+"#ifdef ALPHAMASK\n"
+"varying vec2 frag_uv;\n"
+"uniform sampler2D alphamask;\n"
+"#endif\n"
 "\n"
 "vec4 depthToColor(float depth)\n"
 "{\n"
@@ -48,6 +61,13 @@ std::string const SHADER_FRG =
 "\n"
 "void main()\n"
 "{\n"
+"\n"
+"	#ifdef ALPHAMASK\n"
+"	float alphamask_alpha = texture2D(alphamask, frag_uv).w;\n"
+"	if (alphamask_alpha < 0.5) {\n"
+"		discard;\n"
+"	}\n"
+"	#endif\n"
 "\n"
 "	#ifndef RADIAL\n"
 "	float depth_raw = (abs(frag_pos.z) - near) / (far - near);\n"
@@ -73,8 +93,10 @@ void Depthmaterial::initShaders(void)
 	uniformnames.push_back("mvmat");
 	uniformnames.push_back("near");
 	uniformnames.push_back("far");
+	uniformnames.push_back("alphamask");
 
 	vertexattributenames.push_back("pos");
+	vertexattributenames.push_back("uv");
 
 	Shader shader_vrt;
 	shader_vrt.load(SHADER_VRT, Shader::VERTEX_SHADER);
