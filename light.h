@@ -42,10 +42,10 @@ public:
 	inline Real getLinearAttenuation(void) const;
 	inline Real getQuadraticAttenuation(void) const;
 
-	// Get Camera for shadow mapping. You may not destroy this
-	// Camera! Also, in case of point light, only one of
-	// cameras can be used at a time. NULL is returned if
-	// Camera is not needed to show the requested area.
+	// Get Camera for shadow mapping. You may not destroy this Camera!
+	// Also, in case of point light, only one of cameras can be used at a
+	// time. NULL is returned if Camera is not needed to show the requested
+	// area. Note, that actual shadowarea might be bigger than given here.
 	inline Camera* getCameraFromLight(Boundingsphere const& area,
 	                                  size_t texture_width,
 	                                  size_t camera_id = 0) const;
@@ -150,19 +150,20 @@ return NULL;
 		}
 		// Construct or update camera
 		Real camera_size = area.getRadius() * 2;
+		Real camera_depth = camera_size * 2;
 		if (!camera) {
-			camera = new Orthographiccamera(camera_size, 0, camera_size,
+			camera = new Orthographiccamera(camera_size, 0, camera_depth,
 			                                0, 0, texture_width, texture_width);
 		} else {
 			Orthographiccamera* ocamera = dynamic_cast< Orthographiccamera* >(camera);
 			HppAssert(ocamera, "Invalid camera!");
 			ocamera->setSize(camera_size);
-			camera->setNearAndFarPlanes(0, camera_size);
+			camera->setNearAndFarPlanes(0, camera_depth);
 			camera->setViewport(0, 0, texture_width, texture_width);
 		}
 		// Prepare for camera positioning and rotating
 		Vector3 const& camera_dir = v1;
-		Vector3 camera_pos = area.getPosition() - camera_dir * area.getRadius();
+		Vector3 camera_pos = area.getPosition() - camera_dir * camera_depth / 2;
 		Vector2 camera_dir_xy(camera_dir.x, camera_dir.y);
 		Angle camera_yaw = angleOfVector(camera_dir_xy);
 		Angle camera_pitch = angleOfVector(Vector2(-camera_dir.z, camera_dir_xy.length()));
