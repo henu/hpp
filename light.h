@@ -48,7 +48,8 @@ public:
 	// area. Note, that actual shadowarea might be bigger than given here.
 	inline Camera* getCameraFromLight(Boundingsphere const& area,
 	                                  size_t texture_width,
-	                                  size_t camera_id = 0) const;
+	                                  size_t camera_id = 0,
+	                                  Hpp::Real shadowbox_depthscale = 1.0) const;
 
 private:
 
@@ -133,7 +134,8 @@ inline Real Light::getQuadraticAttenuation(void) const
 	return v2.z;
 }
 
-inline Camera* Light::getCameraFromLight(Boundingsphere const& area, size_t texture_width, size_t camera_id) const
+inline Camera* Light::getCameraFromLight(Boundingsphere const& area, size_t texture_width,
+                                         size_t camera_id, Hpp::Real shadowbox_depthscale) const
 {
 	if (area.isNothing()) {
 		return NULL;
@@ -150,7 +152,7 @@ return NULL;
 		}
 		// Construct or update camera
 		Real camera_size = area.getRadius() * 2;
-		Real camera_depth = camera_size * 2;
+		Real camera_depth = camera_size * shadowbox_depthscale;
 		if (!camera) {
 			camera = new Orthographiccamera(camera_size, 0, camera_depth,
 			                                0, 0, texture_width, texture_width);
