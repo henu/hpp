@@ -43,6 +43,8 @@ public:
 	inline virtual Testresult testAnotherBoundingvolume(Boundingvolume const* bv) const;
 	inline virtual bool isPositionInside(Vector3 const& pos) const;
 
+	inline virtual void translate(Vector3 const& transl);
+
 private:
 
 	Vector3 pos;
@@ -107,6 +109,11 @@ inline bool Boundingsphere::isPositionInside(Vector3 const& pos) const
 {
 	if (radius < 0) return true;
 	return (pos - this->pos).length() < radius;
+}
+
+inline void Boundingsphere::translate(Vector3 const& transl)
+{
+	pos += transl;
 }
 
 inline std::ostream& operator<<(std::ostream& strm, Boundingsphere const& bs)

@@ -25,7 +25,6 @@ public:
 
 	inline void setSize(Vector3 const& cmin, Vector3 const& cmax);
 
-	inline void translate(Vector3 const& transl);
 	inline void transform(Transform const& transf);
 
 	inline void add(Hpp::Vector3 const& pos);
@@ -50,6 +49,8 @@ public:
 
 	inline virtual Testresult testAnotherBoundingvolume(Boundingvolume const* bv) const;
 	inline virtual bool isPositionInside(Vector3 const& pos) const;
+
+	inline virtual void translate(Vector3 const& transl);
 
 private:
 
@@ -111,12 +112,6 @@ inline void Boundingbox::setSize(Vector3 const& cmin, Vector3 const& cmax)
 	HppAssert(cmin.x <= cmax.x, "Minimum X component is bigger than maximum!");
 	HppAssert(cmin.y <= cmax.y, "Minimum Y component is bigger than maximum!");
 	HppAssert(cmin.z <= cmax.z, "Minimum Z component is bigger than maximum!");
-}
-
-inline void Boundingbox::translate(Vector3 const& transl)
-{
-	cmin += transl;
-	cmax += transl;
 }
 
 inline void Boundingbox::transform(Transform const& transf)
@@ -251,6 +246,12 @@ inline bool Boundingbox::isPositionInside(Vector3 const& pos) const
 	if (pos.y > cmax.y) return false;
 	if (pos.z > cmax.z) return false;
 	return true;
+}
+
+inline void Boundingbox::translate(Vector3 const& transl)
+{
+	cmin += transl;
+	cmax += transl;
 }
 
 }

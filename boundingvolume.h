@@ -25,6 +25,9 @@ public:
 
 	virtual bool isPositionInside(Vector3 const& pos) const = 0;
 
+	// Fast way to move Boundingvolume
+	virtual void translate(Vector3 const& transl) = 0;
+
 private:
 
 };

@@ -37,7 +37,7 @@ public:
 	// do not appear properly or might be completely hidden.
 	inline Mesh* createMesh(void) const;
 
-	inline void translate(Vector3 const& transl);
+	inline virtual void translate(Vector3 const& transl);
 
 private:
 
