@@ -21,6 +21,8 @@ enum Pixelformat { RGB,
                    DEPTH32,
                    DEFAULT };
 
+// Returns BytesPerPixel that is used outside OpenGL. Because of this,
+// even 16 and 24 bit depth components are considered 32 bit floats.
 inline uint8_t getBppOfPixelformat(Pixelformat format)
 {
 	switch (format)
@@ -36,9 +38,9 @@ inline uint8_t getBppOfPixelformat(Pixelformat format)
 	case ALPHA:
 		return 1;
 	case DEPTH16:
-		return 2;
+		return 4;
 	case DEPTH24:
-		return 3;
+		return 4;
 	case DEPTH32:
 		return 4;
 	case DEFAULT:
