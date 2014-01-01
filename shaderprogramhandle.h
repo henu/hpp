@@ -65,6 +65,8 @@ private:
 
 	inline GLint getUniformRealLocation(uint16_t loc_raw) { return uniformshortcuts[loc_raw]; }
 
+	inline void checkGlErrorsForUniformSetting(GLint uniform_loc_real) const;
+
 };
 
 inline void Shaderprogramhandle::enable(void)
@@ -105,7 +107,7 @@ inline void Shaderprogramhandle::setUniform(GLint uniform_loc, Matrix3 const& ma
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::UniformMatrix3fv(uniform_loc_real, 1, transpose, mat.getCells());
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform(GLint uniform_loc, Matrix4 const& mat, bool transpose)
@@ -114,7 +116,7 @@ inline void Shaderprogramhandle::setUniform(GLint uniform_loc, Matrix4 const& ma
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::UniformMatrix4fv(uniform_loc_real, 1, transpose, mat.getCells());
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform(GLint uniform_loc, Vector3 const& v)
@@ -123,7 +125,7 @@ inline void Shaderprogramhandle::setUniform(GLint uniform_loc, Vector3 const& v)
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::Uniform3f(uniform_loc_real, v.x, v.y, v.z);
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform(GLint uniform_loc, Vector3 const& v, Real w)
@@ -132,7 +134,7 @@ inline void Shaderprogramhandle::setUniform(GLint uniform_loc, Vector3 const& v,
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::Uniform4f(uniform_loc_real, v.x, v.y, v.z, w);
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform(GLint uniform_loc, Color const& color, Pixelformat force_format)
@@ -157,7 +159,7 @@ inline void Shaderprogramhandle::setUniform(GLint uniform_loc, Color const& colo
 		}
 	}
 
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform1f(GLint uniform_loc, GLfloat f0)
@@ -166,7 +168,7 @@ inline void Shaderprogramhandle::setUniform1f(GLint uniform_loc, GLfloat f0)
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::Uniform1f(uniform_loc_real, f0);
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform2f(GLint uniform_loc, GLfloat f0, GLfloat f1)
@@ -175,7 +177,7 @@ inline void Shaderprogramhandle::setUniform2f(GLint uniform_loc, GLfloat f0, GLf
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::Uniform2f(uniform_loc_real, f0, f1);
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform3f(GLint uniform_loc, GLfloat f0, GLfloat f1, GLfloat f2)
@@ -184,7 +186,7 @@ inline void Shaderprogramhandle::setUniform3f(GLint uniform_loc, GLfloat f0, GLf
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::Uniform3f(uniform_loc_real, f0, f1, f2);
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform4f(GLint uniform_loc, GLfloat f0, GLfloat f1, GLfloat f2, GLfloat f3)
@@ -193,7 +195,7 @@ inline void Shaderprogramhandle::setUniform4f(GLint uniform_loc, GLfloat f0, GLf
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::Uniform4f(uniform_loc_real, f0, f1, f2, f3);
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform1i(GLint uniform_loc, GLint i0)
@@ -202,7 +204,7 @@ inline void Shaderprogramhandle::setUniform1i(GLint uniform_loc, GLint i0)
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::Uniform1i(uniform_loc_real, i0);
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform2i(GLint uniform_loc, GLint i0, GLint i1)
@@ -211,7 +213,7 @@ inline void Shaderprogramhandle::setUniform2i(GLint uniform_loc, GLint i0, GLint
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::Uniform2i(uniform_loc_real, i0, i1);
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform3i(GLint uniform_loc, GLint i0, GLint i1, GLint i2)
@@ -220,7 +222,7 @@ inline void Shaderprogramhandle::setUniform3i(GLint uniform_loc, GLint i0, GLint
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::Uniform3i(uniform_loc_real, i0, i1, i2);
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setUniform4i(GLint uniform_loc, GLint i0, GLint i1, GLint i2, GLint i3)
@@ -229,7 +231,7 @@ inline void Shaderprogramhandle::setUniform4i(GLint uniform_loc, GLint i0, GLint
 	HppAssert(enabled, "Not enabled!");
 	GLint uniform_loc_real = getUniformRealLocation(uniform_loc);
 	if (uniform_loc_real >= 0) GlSystem::Uniform4i(uniform_loc_real, i0, i1, i2, i3);
-	HppCheckGlErrors();
+	checkGlErrorsForUniformSetting(uniform_loc_real);
 }
 
 inline void Shaderprogramhandle::setBufferobject(GLint vertexattr_loc, Bufferobject const* buf)
@@ -288,6 +290,81 @@ existing_vertexattrs(existing_vertexattrs),
 enabled(false)
 {
 }
+
+inline void Shaderprogramhandle::checkGlErrorsForUniformSetting(GLint uniform_loc_real) const
+{
+	#ifndef NDEBUG
+
+	// First check that uniform is not out of range
+	GLint uniforms;
+	GlSystem::GetProgramiv(prog_id, GL_ACTIVE_UNIFORMS, &uniforms);
+	if (uniform_loc_real >= uniforms) {
+		throw Hpp::Exception("Uniform ID overflow!");
+	}
+
+	// Convert possible error to string
+	std::string error_str;
+	GLenum error = glGetError();
+	switch (error) {
+
+	case GL_NO_ERROR:
+		return;
+
+	case GL_INVALID_ENUM:
+		error_str = "Invalid enum!";
+		break;
+
+	case GL_INVALID_VALUE:
+		error_str = "Numeric argument out of range!";
+		break;
+
+	case GL_INVALID_OPERATION:
+		error_str = "Invalid operation!";
+		break;
+
+	case GL_STACK_OVERFLOW:
+		error_str = "Stack overflow!";
+		break;
+
+	case GL_STACK_UNDERFLOW:
+		error_str = "Stack underflow!";
+		break;
+
+	case GL_OUT_OF_MEMORY:
+		error_str = "Out of memory!";
+		break;
+
+	default:
+		std::ostringstream errorcode_strm;
+		errorcode_strm << error;
+		std::string errorcode_str;
+		errorcode_str = errorcode_strm.str();
+		error_str = "Unrecognized error #" +  errorcode_str + "!";
+		break;
+
+	}
+
+	// Get name of uniform
+	GLsizei const NAME_MAXLEN = 1024;
+	GLchar name[NAME_MAXLEN];
+	GLsizei name_len;
+	GLint uniform_size;
+	GLenum uniform_type;
+	GlSystem::GetActiveUniform(prog_id,
+	                           uniform_loc_real,
+	                           NAME_MAXLEN,
+	                           &name_len,
+	                           &uniform_size,
+	                           &uniform_type,
+	                           name);
+
+	throw Hpp::Exception("Error while setting uniform \"" + std::string(name, name_len) + "\": " + error_str);
+
+	#else
+	(void)uniform_loc_real;
+	#endif
+}
+
 
 }
 
