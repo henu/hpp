@@ -97,7 +97,11 @@ inline Real distanceBetweenLines(Vector3 const& begin1, Vector3 const& dir1,
                                  Vector3* nearest_point1 = NULL, Vector3* nearest_point2 = NULL);
 
 inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
-                                Vector3 const& begin2, Vector3 const& dir2);
+                                Vector3 const& begin2, Vector3 const& dir2,
+                                Vector3* nearest_point1 = NULL, Vector3* nearest_point2 = NULL);
+
+inline Real distanceBetweenRays(Ray const& ray1, Ray const& ray2,
+                                Vector3* nearest_point1 = NULL, Vector3* nearest_point2 = NULL);
 
 // Transforms a 3D or 2D point at the plane of triangle to the space of it so
 // that the point can be defined using axes of triangle. This can be used to
@@ -504,7 +508,8 @@ inline Real distanceBetweenLines(Vector3 const& begin1, Vector3 const& dir1,
 }
 
 inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
-                                Vector3 const& begin2, Vector3 const& dir2)
+                                Vector3 const& begin2, Vector3 const& dir2,
+                                Vector3* nearest_point1, Vector3* nearest_point2)
 {
 	Real dp_d1_d2 = dotProduct(dir1, dir2);
 
@@ -519,6 +524,8 @@ inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
 		// If both rays begin from the backside of each others,
 		// then this means that they will never get any closer.
 		if (!ray1_begins_front && !ray2_begins_front) {
+			if (nearest_point1) *nearest_point1 = begin1;
+			if (nearest_point2) *nearest_point2 = begin2;
 			return (begin1 - begin2).length();
 		}
 
@@ -526,7 +533,7 @@ inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
 		// others, then it means they will get closer
 		// and distance between lines can be used.
 		if (ray1_begins_front && ray2_begins_front) {
-			return distanceBetweenLines(begin1, dir1, begin2, dir2);
+			return distanceBetweenLines(begin1, dir1, begin2, dir2, nearest_point1, nearest_point2);
 		}
 
 		// If another begin is at frontside and another at
@@ -542,10 +549,11 @@ inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
 			// then rays cannot get any closer.
 			if (dotProduct(begin1 - new_begin, dir2) <= 0) {
 				Real result;
-				nearestPointToRay(begin1, new_begin, dir2, NULL, NULL, &result);
+				if (nearest_point1) *nearest_point1 = begin1;
+				nearestPointToRay(begin1, new_begin, dir2, nearest_point2, NULL, &result);
 				return result;
 			} else {
-				return distanceBetweenLines(begin1, dir1, begin2, dir2);
+				return distanceBetweenLines(begin1, dir1, begin2, dir2, nearest_point1, nearest_point2);
 			}
 		} else {
 			Real move_amount = (dotProduct(dir2, begin2) - dotProduct(dir2, begin1)) / dp_d1_d2;
@@ -554,10 +562,11 @@ inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
 			// then rays cannot get any closer.
 			if (dotProduct(begin2 - new_begin, dir1) <= 0) {
 				Real result;
-				nearestPointToRay(begin2, new_begin, dir1, NULL, NULL, &result);
+				if (nearest_point2) *nearest_point2 = begin2;
+				nearestPointToRay(begin2, new_begin, dir1, nearest_point1, NULL, &result);
 				return result;
 			} else {
-				return distanceBetweenLines(begin1, dir1, begin2, dir2);
+				return distanceBetweenLines(begin1, dir1, begin2, dir2, nearest_point1, nearest_point2);
 			}
 		}
 
@@ -567,6 +576,8 @@ inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
 		// If both of rays begin from the backside of eachothers,
 		// then it means that rays can never get any closer
 		if (!ray1_begins_front && !ray2_begins_front) {
+			if (nearest_point1) *nearest_point1 = begin1;
+			if (nearest_point2) *nearest_point2 = begin2;
 			return (begin1 - begin2).length();
 		}
 
@@ -585,15 +596,21 @@ inline Real distanceBetweenRays(Vector3 const& begin1, Vector3 const& dir1,
 
 // TODO: Code this!
 HppPrintOnce("WARNING: Not implemented yet, so giving rough estimation!");
-return distanceBetweenLines(begin1, dir1, begin2, dir2);
+return distanceBetweenLines(begin1, dir1, begin2, dir2, nearest_point1, nearest_point2);
 
 	}
 	// Angle between rays is exactly 90 °
 	else {
 // TODO: Code this!
 HppPrintOnce("WARNING: Not implemented yet, so giving rough estimation!");
-return distanceBetweenLines(begin1, dir1, begin2, dir2);
+return distanceBetweenLines(begin1, dir1, begin2, dir2, nearest_point1, nearest_point2);
 	}
+}
+
+inline Real distanceBetweenRays(Ray const& ray1, Ray const& ray2,
+                                Vector3* nearest_point1, Vector3* nearest_point2)
+{
+	return distanceBetweenRays(ray1.begin, ray1.dir, ray2.begin, ray2.dir, nearest_point1, nearest_point2);
 }
 
 inline Vector2 transformPointToTrianglespace(Vector3 const& pos, Vector3 const& x_axis, Vector3 const& y_axis)
