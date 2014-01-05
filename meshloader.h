@@ -43,6 +43,12 @@ public:
 	                        Vector3 const& nrm0, Vector3 const& nrm1, Vector3 const& nrm2,
 	                        Vector2 const& uv0, Vector2 const& uv1, Vector2 const& uv2);
 
+	// Recalculates normals using positions of Triangles. If
+	// some triangle share same vertex, then the normal will
+	// have average direction from both triangles. If there
+	// are already old normals, they will be overwritten.
+	inline void calculateNormals(void);
+
 protected:
 
 	inline void readArrays(std::vector< GLfloat > const& poss,
@@ -249,6 +255,53 @@ inline void Meshloader::addTriangle(Vector3 const& pos0, Vector3 const& pos1, Ve
 	indices.push_back(idx0);
 	indices.push_back(idx1);
 	indices.push_back(idx2);
+}
+
+void Meshloader::calculateNormals()
+{
+	// Reset all normals to have zero length
+	nrms.assign(poss.size(), 0);
+
+	// Go all triangles through
+	for (size_t tri_id = 0; tri_id < indices.size()/3; ++ tri_id) {
+		GLuint idx0 = indices[tri_id*3 + 0];
+		GLuint idx1 = indices[tri_id*3 + 1];
+		GLuint idx2 = indices[tri_id*3 + 2];
+
+		Vector3 c0(poss[idx0*3 + 0], poss[idx0*3 + 1], poss[idx0*3 + 2]);
+		Vector3 c1(poss[idx1*3 + 0], poss[idx1*3 + 1], poss[idx1*3 + 2]);
+		Vector3 c2(poss[idx2*3 + 0], poss[idx2*3 + 1], poss[idx2*3 + 2]);
+
+		// Calculate normal and normalize it
+		Vector3 normal = crossProduct(c1 - c0, c2 - c0);
+		Hpp::Real normal_len = normal.length();
+		if (normal_len > 0) {
+			normal /= normal_len;
+		}
+
+		// Add normals to buffer
+		nrms[idx0*3 + 0] = normal.x;
+		nrms[idx0*3 + 1] = normal.y;
+		nrms[idx0*3 + 2] = normal.z;
+		nrms[idx1*3 + 0] = normal.x;
+		nrms[idx1*3 + 1] = normal.y;
+		nrms[idx1*3 + 2] = normal.z;
+		nrms[idx2*3 + 0] = normal.x;
+		nrms[idx2*3 + 1] = normal.y;
+		nrms[idx2*3 + 2] = normal.z;
+	}
+
+	// Finally go all normals through and normalize them.
+	for (size_t vertex_id = 0; vertex_id < nrms.size() / 3; ++ vertex_id) {
+		Hpp::Vector3 normal(nrms[vertex_id*3 + 0], nrms[vertex_id*3 + 1], nrms[vertex_id*3 + 2]);
+		Hpp::Real normal_len = normal.length();
+		if (normal_len > 0) {
+			normal /= normal_len;
+		}
+		nrms[vertex_id*3 + 0] = normal.x;
+		nrms[vertex_id*3 + 1] = normal.y;
+		nrms[vertex_id*3 + 2] = normal.z;
+	}
 }
 
 inline void Meshloader::readArrays(std::vector< GLfloat > const& poss,
