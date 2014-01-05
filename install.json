@@ -106,6 +106,8 @@
 				"runnable.h",
 				"serializable.h",
 				"serialize.h",
+				"sharedlock.h",
+				"sharedmutex.h",
 				"thread.h",
 				"time.h",
 				"transform2d.h",
