@@ -66,7 +66,7 @@ def main(pname, args):
 	if not user_debug:
 		cflags = '-O3 -DNDEBUG'
 	else:
-		cflags = '-O2 -g'
+		cflags = '-O1 -g'
 	libs = ''
 	for part_name in parts:
 		part = data['parts'][part_name]
