@@ -16,6 +16,9 @@ public:
 	inline SharedLock(SharedMutex* mutex);
 	inline SharedLock(SharedMutex& mutex);
 
+	inline void unlock(void);
+	inline void relock(void);
+
 private:
 
 	Lock lock;
@@ -30,6 +33,16 @@ lock(mutex->ro->mutex)
 inline SharedLock::SharedLock(SharedMutex& mutex) :
 lock(mutex.ro->mutex)
 {
+}
+
+inline void SharedLock::unlock(void)
+{
+	lock.unlock();
+}
+
+inline void SharedLock::relock(void)
+{
+	lock.relock();
 }
 
 }
