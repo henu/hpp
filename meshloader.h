@@ -417,7 +417,7 @@ inline GLuint Meshloader::findIndex(Vector3 const& pos,
 		// Check UV
 		if (use_uv) {
 			size_t ofs2 = vrt_idx * 2;
-			Vector2 vrt_uv(nrms[ofs2 + 0], nrms[ofs2 + 1]);
+			Vector2 vrt_uv(uvs[ofs2 + 0], uvs[ofs2 + 1]);
 			if ((vrt_uv - uv).lengthTo2() > SAME_DIFF_THRESHOLD_TO_2) {
 				continue;
 			}
