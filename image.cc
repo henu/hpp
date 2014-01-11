@@ -180,6 +180,37 @@ void Image::save(Path const& filename) const
 	SDL_FreeSurface(surf);
 }
 
+Image Image::getSubimage(IVector2 begin, IVector2 size) const
+{
+	// Ensure begin and size do not overflow
+	if (begin.x < 0) {
+		size.x += begin.x;
+		begin.x = 0;
+	}
+	if (begin.y < 0) {
+		size.y += begin.y;
+		begin.y = 0;
+	}
+	if (begin.x >= ssize_t(width)) begin.x = 0;
+	if (begin.y >= ssize_t(height)) begin.y = 0;
+	if (begin.x + size.x > ssize_t(width)) size.x = width - begin.x;
+	if (begin.y + size.y > ssize_t(height)) size.y = height - begin.y;
+	if (size.x < 0) size.x = 0;
+	if (size.y < 0) size.y = 0;
+
+	Image result(NULL, size.x, size.y, format);
+
+	IVector2 it;
+	for (it.y = 0; it.y < size.y; ++ it.y) {
+		for (it.x = 0; it.x < size.x; ++ it.x) {
+			Color pixel = getPixel(begin + it);
+			result.setPixel(it, pixel);
+		}
+	}
+
+	return result;
+}
+
 static SDL_Surface* loadSDLSurface(std::string const& filename, uint8_t const* data, size_t data_size)
 {
 	if (!filename.empty()) {

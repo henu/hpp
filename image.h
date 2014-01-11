@@ -58,6 +58,8 @@ public:
 	inline Color getPixel(IVector2 const& pos) const;
 	inline Color getPixel(size_t x, size_t y) const;
 
+	Image getSubimage(IVector2 begin, IVector2 size) const;
+
 	inline bool hasAlpha(void) const { return pixelformatHasAlpha(format); }
 
 	inline void setPixel(size_t offset, Color const& color);
