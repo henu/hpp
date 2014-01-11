@@ -236,14 +236,16 @@
 				"image.h",
 				"imageeffects/blendingmodes.h",
 				"imageeffects/blur.h",
-				"imageeffects/edges.h"
+				"imageeffects/edges.h",
+				"imageeffects/flip.h"
 			],
 			"sources": [
 				"image.cc",
 				"image_draw.cc",
 				"imageeffects/blendingmodes.cc",
 				"imageeffects/blur.cc",
-				"imageeffects/edges.cc"
+				"imageeffects/edges.cc",
+				"imageeffects/flip.cc"
 			],
 			"deps": [ "main" ]
 		},
