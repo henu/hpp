@@ -67,7 +67,7 @@ inline void Boundingsphere::add(Hpp::Vector3 const& pos)
 	// If already inside boundingsphere
 	Hpp::Vector3 diff = (pos - this->pos);
 	Hpp::Real dst = diff.length();
-	if (dst < radius) return;
+	if (dst <= radius) return;
 
 	// Increase boundingsphere
 	Hpp::Vector3 end_finder = diff.normalized() * -radius;
