@@ -34,6 +34,8 @@ public:
 	inline bool isInfinite(void) const { return radius < 0; }
 	inline bool isNothing(void) const { return radius == 0.0; }
 
+	inline void add(Hpp::Vector3 const& pos);
+
 	// Applies transform to this boundingsphere
 	inline void applyTransform(Transform const& transf);
 
@@ -48,12 +50,30 @@ public:
 private:
 
 	Vector3 pos;
+
+	// If radius is less than zero, then boundingsphere is infinite
 	Real radius;
 
 };
 typedef std::vector< Boundingsphere > Boundingspheres;
 
 inline std::ostream& operator<<(std::ostream& strm, Boundingsphere const& bs);
+
+inline void Boundingsphere::add(Hpp::Vector3 const& pos)
+{
+	// If already infinite
+	if (radius < 0) return;
+
+	// If already inside boundingsphere
+	Hpp::Vector3 diff = (pos - this->pos);
+	Hpp::Real dst = diff.length();
+	if (dst < radius) return;
+
+	// Increase boundingsphere
+	Hpp::Vector3 end_finder = diff.normalized() * -radius;
+	radius = (radius + dst) / 2;
+	this->pos = (pos + this->pos + end_finder) / 2;
+}
 
 inline void Boundingsphere::applyTransform(Transform const& transf)
 {
