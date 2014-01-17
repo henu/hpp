@@ -329,7 +329,7 @@ inline void Meshloader::readArrays(std::vector< GLfloat > const& poss,
 		}
 	}
 	if (!indices_uvs.empty()) {
-		if (indices_uvs.size() != indices_uvs.size()) {
+		if (indices_uvs.size() != indices_poss.size()) {
 			throw Exception("Amount of position and UV indices is not equal!");
 		}
 		if (uvs.size() % 2 != 0) {
