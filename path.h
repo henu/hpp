@@ -7,6 +7,7 @@
 #include "misc.h"
 #include "time.h"
 #include "cast.h"
+#include "types.h"
 
 #include <string>
 #include <vector>
@@ -157,10 +158,8 @@ private:
 	                HOME,
 	                CONFIG };
 
-	typedef std::vector< std::string > Parts;
-
 	RootType roottype;
-	Parts parts;
+	Strings parts;
 
 	// Ensures that path is either absolute or relative.
 	inline void ensureAbsoluteOrRelative(void);
@@ -325,7 +324,7 @@ inline std::string Path::toString(bool compact) const
 	}
 	#endif
 
-	for (Parts::const_iterator parts_it = parts.begin();
+	for (Strings::const_iterator parts_it = parts.begin();
 	     parts_it != parts.end();
 	     ++ parts_it) {
 		if (parts_it == parts.begin()) {
@@ -650,9 +649,9 @@ HppAssert(false, "Not implemented yet!");
 	#endif
 
 	roottype = ABS;
-	Parts parts_begin = splitString(parts_begin_str, '/');
-	Parts parts_begin_fixed;
-	for (Parts::const_iterator parts_begin_it = parts_begin.begin();
+	Strings parts_begin = splitString(parts_begin_str, '/');
+	Strings parts_begin_fixed;
+	for (Strings::const_iterator parts_begin_it = parts_begin.begin();
 	     parts_begin_it != parts_begin.end();
 	     ++ parts_begin_it) {
 	     	if (!parts_begin_it->empty()) {

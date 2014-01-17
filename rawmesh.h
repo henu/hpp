@@ -8,6 +8,7 @@
 #include "vertexgroupinfluences.h"
 #include "rawmaterial.h"
 #include "skeleton.h"
+#include "types.h"
 
 #include <fstream>
 #include <cstring>
@@ -29,8 +30,6 @@ public:
 		VGInfls vginfls;
 	};
 	typedef std::vector< Vertex > Vertices;
-
-	typedef std::vector< std::string > VGroups;
 
 	typedef std::vector< std::vector< Real > > FaceUVs;
 	struct FaceLayer
@@ -86,7 +85,7 @@ public:
 	// Public members;
 	std::string name;
 	Vertices vrts;
-	VGroups vgroups;
+	Strings vgroups;
 	Submeshes submeshes;
 	Rawmaterials mats;
 	bool skeleton_exists;

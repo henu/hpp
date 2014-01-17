@@ -6,6 +6,7 @@
 #include "misc.h"
 #include "exception.h"
 #include "cast.h"
+#include "types.h"
 
 #include <GL/gl.h>
 #include <fstream>
@@ -58,7 +59,7 @@ inline MeshloaderObj::MeshloaderObj(Path const& path)
 			continue;
 		}
 
-		std::vector< std::string > words = splitString(line, makeVector(' ')('\t'), true);
+		Strings words = splitString(line, makeVector(' ')('\t'), true);
 		HppAssert(!words.empty(), "Fail!");
 
 		// Position of vertex
@@ -97,7 +98,7 @@ inline MeshloaderObj::MeshloaderObj(Path const& path)
 				throw Exception("Quads not supported yet!");
 			}
 			for (uint8_t word_id = 1; word_id <= 3; ++ word_id) {
-				std::vector< std::string > parts = splitString(words[word_id], '/');
+				Strings parts = splitString(words[word_id], '/');
 				if (parts.size() == 1) {
 					indices_poss.push_back(strToSize(parts[0]) - 1);
 				} else if (parts.size() == 2) {

@@ -4,6 +4,7 @@
 #include "bytev.h"
 #include "angle.h"
 #include "trigon.h"
+#include "types.h"
 
 #include <algorithm>
 #include <string>
@@ -46,13 +47,13 @@ inline int compare(Iter1 range1_begin, Iter2 range1_end, Iter3 range2_begin);
 // Last functions do this in parts to save memory. They return true
 // whenever subsearch was found.
 inline std::vector< ByteV > splitString(ByteV const& v, char delimiter, bool skip_empty_strings = false);
-inline std::vector< std::string > splitString(std::string const& str, char delimiter, bool skip_empty_strings = false);
+inline Strings splitString(std::string const& str, char delimiter, bool skip_empty_strings = false);
 inline std::vector< ByteV > splitString(ByteV const& v, std::vector< char > delimiters, bool skip_empty_strings = false);
-inline std::vector< std::string > splitString(std::string const& str, std::vector< char > delimiters, bool skip_empty_strings = false);
+inline Strings splitString(std::string const& str, std::vector< char > delimiters, bool skip_empty_strings = false);
 template < class Type, class IterIt, class IterEnd, class Char >
 inline bool splitStringInParts(Type& result, IterIt& it, IterEnd const& end, Char delimiter);
 
-inline std::string joinStrings(std::vector< std::string > const& strs, std::string const& delimiter = "");
+inline std::string joinStrings(Strings const& strs, std::string const& delimiter = "");
 
 // Removes whitespace from beginning and end of string
 inline std::string trim(std::string const& str, std::string ws = " \t\n");
@@ -118,7 +119,7 @@ inline std::vector< ByteV > splitString(ByteV const& v, char delimiter, bool ski
 	return splitString(v, std::vector< char >(1, delimiter), skip_empty_strings);
 }
 
-inline std::vector< std::string > splitString(std::string const& str, char delimiter, bool skip_empty_strings)
+inline Strings splitString(std::string const& str, char delimiter, bool skip_empty_strings)
 {
 	return splitString(str, std::vector< char >(1, delimiter), skip_empty_strings);
 }
@@ -146,9 +147,9 @@ inline std::vector< ByteV > splitString(ByteV const& v, std::vector< char > deli
 	return result;
 }
 
-inline std::vector< std::string > splitString(std::string const& str, std::vector< char > delimiters, bool skip_empty_strings)
+inline Strings splitString(std::string const& str, std::vector< char > delimiters, bool skip_empty_strings)
 {
-	std::vector< std::string > result;
+	Strings result;
 	std::string::const_iterator part_begin = str.begin();
 	for (std::string::const_iterator str_it = str.begin();
 	     str_it != str.end();
@@ -193,7 +194,7 @@ inline bool splitStringInParts(Type& result, IterIt& it, IterEnd const& end, Cha
 	return true;
 }
 
-inline std::string joinStrings(std::vector< std::string > const& strs, std::string const& delimiter)
+inline std::string joinStrings(Strings const& strs, std::string const& delimiter)
 {
 	std::string result;
 	for (size_t str_id = 0; str_id < strs.size(); ++ str_id) {
@@ -294,12 +295,12 @@ inline std::string wrapWords(std::string const& text, std::string const& prefix,
 	}
 
 	// Split line to words
-	std::vector< std::string > words = splitString(text, ' ');
+	Strings words = splitString(text, ' ');
 
 	// Form nice lines
 	std::string result;
 	size_t line_len = 0;
-	for (std::vector< std::string >::const_iterator words_it = words.begin();
+	for (Strings::const_iterator words_it = words.begin();
 	     words_it != words.end();
 	     ++ words_it) {
 		std::string const& word = *words_it;

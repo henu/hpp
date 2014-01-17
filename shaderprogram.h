@@ -65,8 +65,6 @@ private:
 
 	typedef std::vector< GLuint > CompiledShaders;
 
-	typedef std::vector< std::string > Lines;
-
 	typedef std::set< GLuint > AttribsInUse;
 
 	// These contain names of uniforms and vertexattributes. Their
@@ -143,7 +141,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	GLuint prog_id;
 
 	// Convert flags to lines of codes that make some defines
-	Lines lines_flags;
+	Strings lines_flags;
 	for (Flags::const_iterator flags_it = flags.begin();
 	     flags_it != flags.end();
 	     ++ flags_it) {
@@ -175,18 +173,18 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 		compiled_shaders.push_back(shader_id);
 
 		// Get shader source and convert it to lines of code
-		Lines lines_src = splitString(shader.getSource(), '\n');
+		Strings lines_src = splitString(shader.getSource(), '\n');
 
 		// Merge code lines from flags and from shader sources.
 		// If there is version information in shader sources,
 		// then ensure it is at the first line. If there are no
 		// flags, then no modifications to the source is made.
-		Lines lines;
+		Strings lines;
 		if (flags.empty()) {
 			lines = lines_src;
 		} else {
 			// Search for version information
-			for (Lines::iterator lines_find = lines_src.begin();
+			for (Strings::iterator lines_find = lines_src.begin();
 			     lines_find != lines_src.end();
 			     ++ lines_find) {
 				std::string const& line = *lines_find;

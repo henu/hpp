@@ -385,7 +385,7 @@ inline void Meshloader::readArrays(std::vector< GLfloat > const& poss,
 	if (!this->nrms.empty() && this->poss.size() != this->nrms.size()) {
 		throw Exception("Invalid number of normals in buffer!");
 	}
-	if (!this->uvs.empty() && this->poss.size() / 3 != this->uvs.size() / 2) {
+	if (!this->uvs.empty() && this->poss.size() * 2 != this->uvs.size() * 3) {
 		throw Exception("Invalid number of UVs in buffer!");
 	}
 
