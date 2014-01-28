@@ -76,9 +76,9 @@ private:
 
 };
 
-inline Depthmaterial::Depthmaterial(Real near, Real far, Flags flags, Texture* alphamask) :
-nearplane(near),
-farplane(far),
+inline Depthmaterial::Depthmaterial(Real nearplane, Real farplane, Flags flags, Texture* alphamask) :
+nearplane(nearplane),
+farplane(farplane),
 radial_depth(flags & RADIAL_DEPTH),
 use_color(flags & USE_COLOR),
 pack_color(flags & PACK_COLOR),
@@ -141,10 +141,10 @@ bool Depthmaterial::getNeededTexture(std::string& result, Path const& path)
 	return false;
 }
 
-inline void Depthmaterial::setNearAndFar(Real near, Real far)
+inline void Depthmaterial::setNearAndFar(Real nearplane, Real farplane)
 {
-	nearplane = near;
-	farplane = far;
+	this->nearplane = nearplane;
+	this->farplane = farplane;
 }
 
 inline void Depthmaterial::setViewmatrix(Matrix4 const& viewmatrix)
