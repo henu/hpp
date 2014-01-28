@@ -143,8 +143,8 @@ bool Depthmaterial::getNeededTexture(std::string& result, Path const& path)
 
 inline void Depthmaterial::setNearAndFar(Real near, Real far)
 {
-	this->nearplane = near;
-	this->farplane = far;
+	nearplane = near;
+	farplane = far;
 }
 
 inline void Depthmaterial::setViewmatrix(Matrix4 const& viewmatrix)
