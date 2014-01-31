@@ -138,8 +138,6 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	HppAssert(!handle_enabled, "Must not be enabled!");
 	HppCheckGlErrors();
 
-	GLuint prog_id;
-
 	// Convert flags to lines of codes that make some defines
 	Strings lines_flags;
 	for (Flags::const_iterator flags_it = flags.begin();
@@ -226,7 +224,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	}
 
 	// Create new program
-	prog_id = GlSystem::CreateProgram();
+	GLuint prog_id = GlSystem::CreateProgram();
 	HppCheckGlErrors();
 	if (prog_id == 0) {
 		cleanCompiledShaders(compiled_shaders);
@@ -272,6 +270,7 @@ inline void Shaderprogram::linkProgram(Flags const& flags)
 	cleanCompiledShaders(compiled_shaders);
 
 	// Get locations of attributes
+// TODO: Is this useless?
 	GLint attribs_count;
 	GlSystem::GetProgramiv(prog_id, GL_ACTIVE_ATTRIBUTES, &attribs_count);
 	size_t const NAMEBUF_MAXLEN = 1024;

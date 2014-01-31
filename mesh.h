@@ -77,6 +77,7 @@ inline void Mesh::setBuffer(BufId buf_id, GLenum target, GLenum type, GLenum usa
 
 	// Remove possible old buffer
 	if (real_buf_id < BufId(bufs.size())) {
+// TODO: What if automatic releasing is not enabled?
 		delete bufs[real_buf_id].bo;
 	}
 	// There is not enough slots, so add them

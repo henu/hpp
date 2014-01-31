@@ -85,7 +85,7 @@ inline Mesh* Meshloader::createMesh(bool calculate_tangent_and_binormal)
 	if (!uvs.empty()) {
 		result->setBuffer(Mesh::UV, GL_ARRAY_BUFFER, GL_FLOAT, GL_STATIC_DRAW, 2, &uvs[0], uvs.size());
 	}
-// TODO: In future, convert to GLushort ot GLubyte if there is only small number of vertices!
+// TODO: In future, convert to GLushort ot GLubyte if there is only small number of vertices! Is this needed? Maybe GL_UNSIGNED_INT just defines how it is stored externally, i.e. outside OpenGL?
 	result->setBuffer(Mesh::INDEX, GL_ELEMENT_ARRAY_BUFFER, GL_UNSIGNED_INT, GL_STATIC_DRAW, 3, &indices[0], indices.size());
 
 	// Calculate tangent and binormal if they are requested
