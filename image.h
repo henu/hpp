@@ -26,6 +26,11 @@ public:
 	static Flags const DONT_DETECT_GRAYSCALE	= 0x02;
 	static Flags const FLIP_VERTICALLY		= 0x04;
 
+	enum Filetype {
+		FT_BMP,
+		FT_PNG
+	};
+
 	Image(void);
 // TODO: Remove support for C style filename!
 	Image(std::string const& filename, Pixelformat format = DEFAULT, Flags flags = 0);
@@ -44,8 +49,8 @@ public:
 	// Converts format of this Image
 	void convertTo(Pixelformat format);
 
-	// Functions to save image. Only BMP format is supported for now!
-	void save(Path const& filename) const;
+	// Functions to save image.
+	void save(Path const& filename, Filetype ft = FT_BMP) const;
 
 	// Getters
 	inline ByteV getData(void) const { return data; }

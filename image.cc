@@ -5,6 +5,7 @@
 #include "assert.h"
 
 #include <SDL/SDL_image.h>
+#include <png.h>
 
 namespace Hpp
 {
@@ -171,13 +172,119 @@ void Image::convertTo(Pixelformat format)
 
 }
 
-void Image::save(Path const& filename) const
+void Image::save(Path const& filename, Filetype ft) const
 {
-	SDL_Surface* surf = convertToSDLSurface();
-	if (SDL_SaveBMP(surf, filename.toString().c_str()) != 0) {
-		throw Exception("Unable to save image \"" + filename.toString() + "\"! Reason: " + SDL_GetError());
+	if (ft == FT_BMP) {
+		SDL_Surface* surf = convertToSDLSurface();
+		if (SDL_SaveBMP(surf, filename.toString().c_str()) != 0) {
+			throw Exception("Unable to save image \"" + filename.toString() + "\"! Reason: " + SDL_GetError());
+		}
+		SDL_FreeSurface(surf);
+	} else if (ft == FT_PNG) {
+
+		FILE* fp = fopen(filename.toString().c_str(), "wb");
+		if (!fp) {
+			throw Exception("Unable to open PNG file \"" + filename.toString() + "\"!");
+		}
+
+		// Initialize PNG saving
+		png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+		if (!png_ptr) {
+			fclose(fp);
+			throw Exception("Unable to save PNG file!");
+		}
+		png_infop info_ptr = png_create_info_struct(png_ptr);
+		if (!info_ptr) {
+			png_destroy_write_struct(&png_ptr, NULL);
+			fclose(fp);
+			throw Exception("Unable to save PNG file!");
+		}
+		if (setjmp(png_jmpbuf(png_ptr))) {
+			png_destroy_write_struct(&png_ptr, NULL);
+			fclose(fp);
+			throw Exception("Unable to save PNG file!");
+		}
+
+		// Set file as target for PNG saving.
+		png_init_io(png_ptr, fp);
+
+		// Write PNG header. Always use 32 bit pixels
+		png_set_IHDR(png_ptr, info_ptr,
+		             width, height, 8, PNG_COLOR_TYPE_RGBA,
+		             PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+
+		png_write_info(png_ptr, info_ptr);
+
+		// Write image one row at a time.
+		png_bytep row = new png_byte[4 * width];
+		ByteV::const_iterator pdata_it = data.begin();
+		for (size_t y = 0; y < height; ++ y) {
+			// Fill row
+			for (size_t x = 0; x < width; ++ x) {
+				uint32_t red;
+				uint32_t green;
+				uint32_t blue;
+				uint32_t alpha;
+				#ifndef NDEBUG
+				red = 0;
+				green = 0;
+				blue = 0;
+				alpha = 0;
+				#endif
+				switch (format) {
+				case RGB:
+					red = *pdata_it; pdata_it ++;
+					green = *pdata_it; pdata_it ++;
+					blue = *pdata_it; pdata_it ++;
+					alpha = 255;
+					break;
+				case RGBA:
+					red = *pdata_it; pdata_it ++;
+					green = *pdata_it; pdata_it ++;
+					blue = *pdata_it; pdata_it ++;
+					alpha = *pdata_it; pdata_it ++;
+					break;
+				case GRAYSCALE:
+					red = *pdata_it;
+					green = *pdata_it;
+					blue = *pdata_it;
+					pdata_it ++;
+					alpha = 255;
+					break;
+				case GRAYSCALE_ALPHA:
+					red = *pdata_it;
+					green = *pdata_it;
+					blue = *pdata_it;
+					pdata_it ++;
+					alpha = *pdata_it; pdata_it ++;
+					break;
+				case ALPHA:
+					red = 255;
+					green = 255;
+					blue = 255;
+					alpha = *pdata_it; pdata_it ++;
+					break;
+				case DEPTH16:
+				case DEPTH24:
+				case DEPTH32:
+				case DEFAULT:
+					HppAssertAlways(false, "Fail!");
+				}
+				row[x*4 + 0] = red;
+				row[x*4 + 1] = green;
+				row[x*4 + 2] = blue;
+				row[x*4 + 3] = alpha;
+			}
+			png_write_row(png_ptr, row);
+		}
+		delete[] row;
+
+		// Finalize PNG saving
+		png_write_end(png_ptr, NULL);
+		fclose(fp);
+		png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
+		png_destroy_write_struct(&png_ptr, NULL);
 	}
-	SDL_FreeSurface(surf);
 }
 
 Image Image::getSubimage(IVector2 begin, IVector2 size) const
@@ -475,7 +582,6 @@ SDL_Surface* Image::convertToSDLSurface(void) const
 		case DEFAULT:
 			HppAssertAlways(false, "Fail!");
 		}
-// TODO: Is this really working for grayscale images?
 		uint32_t pixel = (((red >> pf->Rloss) << pf->Rshift) & pf->Rmask) |
 				 (((green >> pf->Gloss) << pf->Gshift) & pf->Gmask) |
 				 (((blue >> pf->Bloss) << pf->Bshift) & pf->Bmask) |
