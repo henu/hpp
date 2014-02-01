@@ -208,9 +208,30 @@ void Image::save(Path const& filename, Filetype ft) const
 		// Set file as target for PNG saving.
 		png_init_io(png_ptr, fp);
 
-		// Write PNG header. Always use 32 bit pixels
+		// Select format and write PNG header.
+		int png_format;
+		switch (format) {
+		case RGB:
+			png_format = PNG_COLOR_TYPE_RGB;
+			break;
+		case RGBA:
+			png_format = PNG_COLOR_TYPE_RGBA;
+			break;
+		case GRAYSCALE:
+			png_format = PNG_COLOR_TYPE_GRAY;
+			break;
+		case GRAYSCALE_ALPHA:
+			png_format = PNG_COLOR_TYPE_GRAY_ALPHA;
+			break;
+		case ALPHA:
+			png_format = PNG_COLOR_TYPE_GRAY_ALPHA;
+			break;
+		default:
+			HppAssertAlways(false, "Invalid image format!");
+			png_format = 0;
+		}
 		png_set_IHDR(png_ptr, info_ptr,
-		             width, height, 8, PNG_COLOR_TYPE_RGBA,
+		             width, height, 8, png_format,
 		             PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
 		png_write_info(png_ptr, info_ptr);
@@ -270,10 +291,21 @@ void Image::save(Path const& filename, Filetype ft) const
 				case DEFAULT:
 					HppAssertAlways(false, "Fail!");
 				}
-				row[x*4 + 0] = red;
-				row[x*4 + 1] = green;
-				row[x*4 + 2] = blue;
-				row[x*4 + 3] = alpha;
+				if (png_format == PNG_COLOR_TYPE_RGB) {
+					row[x*3 + 0] = red;
+					row[x*3 + 1] = green;
+					row[x*3 + 2] = blue;
+				} else if (png_format == PNG_COLOR_TYPE_RGBA) {
+					row[x*4 + 0] = red;
+					row[x*4 + 1] = green;
+					row[x*4 + 2] = blue;
+					row[x*4 + 3] = alpha;
+				} else if (png_format == PNG_COLOR_TYPE_GRAY) {
+					row[x] = (red + green + blue) / 3;
+				} else if (png_format == PNG_COLOR_TYPE_GRAY_ALPHA) {
+					row[x*2 + 0] = (red + green + blue) / 3;
+					row[x*2 + 1] = alpha;
+				}
 			}
 			png_write_row(png_ptr, row);
 		}
