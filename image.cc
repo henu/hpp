@@ -391,9 +391,10 @@ static void loadFromSDLSurface(SDL_Surface* surf,
 SDL_Surface* Image::convertToSDLSurface(void) const
 {
 	HppAssert(!data.empty(), "Image is not loaded!");
+
+	// SDL surfaces are always 32 bits. At least for now for now.
+	uint8_t bitspp = 32;
 	uint32_t flags = SDL_SWSURFACE;
-// TODO: Does this really work to other than 32bit images? No it does not work!
-	uint8_t bitspp = getBytesPerPixel() * 8;
 	// Masks
 	uint32_t rmask, gmask, bmask, amask;
 //	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -410,7 +411,7 @@ SDL_Surface* Image::convertToSDLSurface(void) const
 	#endif
 */
 
-// TODO: There is problem. This can be called only when display is opened!
+// TODO: There is a problem. This can be called only when display is opened!
 	SDL_Surface* surf = SDL_CreateRGBSurface(flags, width, height, bitspp,
 	                                         rmask, gmask, bmask, amask);
 	if (!surf) {
@@ -424,68 +425,64 @@ SDL_Surface* Image::convertToSDLSurface(void) const
 		throw Exception("Unable to lock SDL surface when converting image to SDL_Surface!");
 	}
 	ByteV::const_iterator pdata_it = data.begin();
-	for (size_t y = 0; y < height; y ++) {
-//		size_t offset = (height - y - 1) * width;
-		size_t offset = y * width;
-		for (size_t x = 0; x < width; x ++) {
-			uint32_t red;
-			uint32_t green;
-			uint32_t blue;
-			uint32_t alpha;
-			#ifndef NDEBUG
-			red = 0;
-			green = 0;
-			blue = 0;
-			alpha = 0;
-			#endif
-			switch (format) {
-			case RGB:
-				red = *pdata_it; pdata_it ++;
-				green = *pdata_it; pdata_it ++;
-				blue = *pdata_it; pdata_it ++;
-				alpha = 255;
-				break;
-			case RGBA:
-				red = *pdata_it; pdata_it ++;
-				green = *pdata_it; pdata_it ++;
-				blue = *pdata_it; pdata_it ++;
-				alpha = *pdata_it; pdata_it ++;
-				break;
-			case GRAYSCALE:
-				red = *pdata_it;
-				green = *pdata_it;
-				blue = *pdata_it;
-				pdata_it ++;
-				break;
-			case GRAYSCALE_ALPHA:
-				red = *pdata_it;
-				green = *pdata_it;
-				blue = *pdata_it;
-				pdata_it ++;
-				alpha = *pdata_it; pdata_it ++;
-				break;
-			case ALPHA:
-				red = 255;
-				green = 255;
-				blue = 255;
-				alpha = *pdata_it; pdata_it ++;
-				break;
-			case DEPTH16:
-			case DEPTH24:
-			case DEPTH32:
-			case DEFAULT:
-				HppAssert(false, "Fail!");
-			}
+	for (size_t offset = 0; offset < width * height; ++ offset) {
+		uint32_t red;
+		uint32_t green;
+		uint32_t blue;
+		uint32_t alpha;
+		#ifndef NDEBUG
+		red = 0;
+		green = 0;
+		blue = 0;
+		alpha = 0;
+		#endif
+		switch (format) {
+		case RGB:
+			red = *pdata_it; pdata_it ++;
+			green = *pdata_it; pdata_it ++;
+			blue = *pdata_it; pdata_it ++;
+			alpha = 255;
+			break;
+		case RGBA:
+			red = *pdata_it; pdata_it ++;
+			green = *pdata_it; pdata_it ++;
+			blue = *pdata_it; pdata_it ++;
+			alpha = *pdata_it; pdata_it ++;
+			break;
+		case GRAYSCALE:
+			red = *pdata_it;
+			green = *pdata_it;
+			blue = *pdata_it;
+			pdata_it ++;
+			alpha = 255;
+			break;
+		case GRAYSCALE_ALPHA:
+			red = *pdata_it;
+			green = *pdata_it;
+			blue = *pdata_it;
+			pdata_it ++;
+			alpha = *pdata_it; pdata_it ++;
+			break;
+		case ALPHA:
+			red = 255;
+			green = 255;
+			blue = 255;
+			alpha = *pdata_it; pdata_it ++;
+			break;
+		case DEPTH16:
+		case DEPTH24:
+		case DEPTH32:
+		case DEFAULT:
+			HppAssertAlways(false, "Fail!");
+		}
 // TODO: Is this really working for grayscale images?
-			uint32_t pixel = (((red >> pf->Rloss) << pf->Rshift) & pf->Rmask) |
-					 (((green >> pf->Gloss) << pf->Gshift) & pf->Gmask) |
-					 (((blue >> pf->Bloss) << pf->Bshift) & pf->Bmask) |
-					 (((alpha >> pf->Aloss) << pf->Ashift) & pf->Amask);
-			uint8_t* pixel_raw = reinterpret_cast< uint8_t* >(&pixel);
-			for (uint8_t byte = 0; byte < surf_bpp; byte ++) {
-				static_cast< uint8_t* >(surf->pixels)[offset * surf_bpp + byte] = pixel_raw[byte];
-			}
-			offset ++;
+		uint32_t pixel = (((red >> pf->Rloss) << pf->Rshift) & pf->Rmask) |
+				 (((green >> pf->Gloss) << pf->Gshift) & pf->Gmask) |
+				 (((blue >> pf->Bloss) << pf->Bshift) & pf->Bmask) |
+				 (((alpha >> pf->Aloss) << pf->Ashift) & pf->Amask);
+		uint8_t* pixel_raw = reinterpret_cast< uint8_t* >(&pixel);
+		for (uint8_t byte = 0; byte < surf_bpp; ++ byte) {
+			static_cast< uint8_t* >(surf->pixels)[offset * surf_bpp + byte] = pixel_raw[byte];
 		}
 	}
 	SDL_UnlockSurface(surf);
