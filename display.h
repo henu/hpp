@@ -10,6 +10,7 @@
 #include "mutex.h"
 #include "thread.h"
 #include "real.h"
+#include "ivector2.h"
 
 #include <SDL/SDL.h>
 #include <map>
@@ -69,6 +70,7 @@ public:
 	// Functions to get size and bpp of Display
 	inline static uint32_t getWidth(void) { return instance.width; }
 	inline static uint32_t getHeight(void) { return instance.height; }
+	inline static IVector2 getSize(void) { return IVector2(instance.width, instance.height); }
 	inline static uint8_t getBpp(void) { return instance.bpp; }
 
 	// Sets visibility of mouse

@@ -7,7 +7,7 @@
 #include <cmath>
 #include <string>
 #include <ostream>
-
+#include <vector>
 
 namespace Hpp
 {
@@ -16,6 +16,13 @@ class IVector2
 {
 
 public:
+
+	typedef std::vector< IVector2 > Vec;
+
+	static IVector2 const ONE;
+	static IVector2 const ZERO;
+	static IVector2 const X;
+	static IVector2 const Y;
 
 	// Constructors
 	inline IVector2(void);

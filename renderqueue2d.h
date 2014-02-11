@@ -10,6 +10,7 @@
 #include "display.h"
 #include "exception.h"
 #include "shaderprogramhandle.h"
+#include "ivector2.h"
 
 #include <stdint.h>
 #include <vector>
@@ -26,6 +27,7 @@ class Renderqueue2d : public NonCopyable
 public:
 
 	inline Renderqueue2d(uint32_t x = 0, uint32_t y = 0, uint32_t width = 0, uint32_t height = 0);
+	inline Renderqueue2d(IVector2 const& pos, IVector2 const& size = IVector2::ZERO);
 	inline ~Renderqueue2d(void);
 
 	inline void begin(void);
@@ -35,6 +37,9 @@ public:
 	inline uint32_t getHeight(void) const { return height; }
 	inline uint32_t getPositionX(void) const { return x; }
 	inline uint32_t getPositionY(void) const { return y; }
+
+	inline void setPosition(IVector2 const& pos);
+	inline void setSize(IVector2 const& size);
 
 	inline void renderSprite(Texture const* tex,
 	                         Vector2 const& pos,
@@ -109,6 +114,22 @@ rgb_forced_to_one(false)
 	}
 }
 
+Renderqueue2d::Renderqueue2d(IVector2 const& pos, IVector2 const& size) :
+x(pos.x), y(pos.y),
+width(size.x), height(size.y),
+programhandle(NULL),
+rendering_started(false),
+rgb_forced_to_one(false)
+{
+	// Set size
+	if (width == 0 && Display::getWidth() > x) {
+		width = Display::getWidth() - x;
+	}
+	if (height == 0 && Display::getHeight() > y) {
+		height = Display::getHeight() - y;
+	}
+}
+
 inline Renderqueue2d::~Renderqueue2d(void)
 {
 	if (rendering_started) {
@@ -172,6 +193,24 @@ inline void Renderqueue2d::end()
 	glViewport(0, 0, Display::getWidth(), Display::getHeight());
 
 	Display::popScissor();
+}
+
+inline void Renderqueue2d::setPosition(IVector2 const& pos)
+{
+	if (rendering_started) {
+		throw Exception("Unable to change position of Renderqueue2d, because rendering has been started!");
+	}
+	y = pos.x;
+	x = pos.y;
+}
+
+inline void Renderqueue2d::setSize(IVector2 const& size)
+{
+	if (rendering_started) {
+		throw Exception("Unable to change size of Renderqueue2d, because rendering has been started!");
+	}
+	width = size.x;
+	height = size.y;
 }
 
 inline void Renderqueue2d::renderSprite(Texture const* tex,

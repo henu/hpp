@@ -1,5 +1,7 @@
 #include "vector2.h"
 #include "vector3.h"
+#include "ivector2.h"
+#include "ivector3.h"
 #include "matrix3.h"
 #include "matrix4.h"
 #include "quaternion.h"
@@ -19,6 +21,17 @@ Vector3 const Vector3::ZERO(0, 0, 0);
 Vector3 const Vector3::X(1, 0, 0);
 Vector3 const Vector3::Y(0, 1, 0);
 Vector3 const Vector3::Z(0, 0, 1);
+
+IVector2 const IVector2::ONE(1, 1);
+IVector2 const IVector2::ZERO(0, 0);
+IVector2 const IVector2::X(1, 0);
+IVector2 const IVector2::Y(0, 1);
+
+IVector3 const IVector3::ONE(1, 1, 1);
+IVector3 const IVector3::ZERO(0, 0, 0);
+IVector3 const IVector3::X(1, 0, 0);
+IVector3 const IVector3::Y(0, 1, 0);
+IVector3 const IVector3::Z(0, 0, 1);
 
 Matrix3 const Matrix3::IDENTITY(1, 0, 0,
                                 0, 1, 0,

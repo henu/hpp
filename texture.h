@@ -12,6 +12,7 @@
 #include "exception.h"
 #include "assert.h"
 #include "noncopyable.h"
+#include "ivector2.h"
 
 #include <string>
 
@@ -68,6 +69,7 @@ public:
 	// Gets width/height of texture
 	inline uint16_t getWidth(void) const { HppAssert(loaded(), "Texture is not loaded!"); return width; }
 	inline uint16_t getHeight(void) const { HppAssert(loaded(), "Texture is not loaded!"); return height; }
+	inline IVector2 getSize(void) const { HppAssert(loaded(), "Texture is not loaded!"); return IVector2(width, height); }
 
 	// Function to bind/unbind texture. bind() can be
 	// called multiple times. Every call of bind()
