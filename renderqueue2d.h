@@ -74,10 +74,6 @@ private:
 
 	static Shaderprogram* program;
 
-	// Class-wide list of uniform and vertexattribute names
-	static Strings uniformnames;
-	static Strings vertexattributenames;
-
 	Shaderprogramhandle* programhandle;
 
 	bool rendering_started;

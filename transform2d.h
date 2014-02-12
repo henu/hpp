@@ -35,7 +35,7 @@ public:
 	inline Transform2D getRotScale(void) const;
 
 	// Modifiers. Rotation is counterclockwise when X is right and Y up.
-	inline void translate(Vector2 const& v) { transf = Matrix3::translMatrix(v) * transf; }
+	inline void translate(Vector2 const& v) { transf.cell(2) += v.x; transf.cell(5) += v.y; }
 	inline void rotate(Angle const& angle) { transf = Matrix3::rotMatrix2d(angle) * transf; }
 	inline void scale(Vector2 const& v) { transf = Matrix3::scaleMatrix(v) * transf; }
 

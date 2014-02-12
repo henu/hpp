@@ -41,18 +41,15 @@ std::string const Renderqueue2d::SHADER_FRG =
 "	#endif\n"
 "}\n";
 
-Strings Renderqueue2d::uniformnames;
-Strings Renderqueue2d::vertexattributenames;
-
 Shaderprogram* Renderqueue2d::program = NULL;
 
 void Renderqueue2d::initShaders(void)
 {
-	uniformnames.clear();
+	Strings uniformnames;
 	uniformnames.push_back("viewmat");
 	uniformnames.push_back("tex");
 
-	vertexattributenames.clear();
+	Strings vertexattributenames;
 	vertexattributenames.push_back("pos");
 	vertexattributenames.push_back("uv");
 	vertexattributenames.push_back("clr");
