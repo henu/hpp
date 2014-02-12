@@ -31,7 +31,7 @@ public:
 	inline ~Renderqueue2d(void);
 
 	inline void begin(void);
-	inline void end();
+	inline void end(void);
 
 	inline uint32_t getWidth(void) const { return width; }
 	inline uint32_t getHeight(void) const { return height; }
@@ -175,7 +175,7 @@ inline void Renderqueue2d::begin(void)
 
 }
 
-inline void Renderqueue2d::end()
+inline void Renderqueue2d::end(void)
 {
 	if (!rendering_started) {
 		throw Exception("Rendering has not been started!");
