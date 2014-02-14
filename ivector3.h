@@ -3,6 +3,7 @@
 
 #include "cast.h"
 #include "json.h"
+#include "real.h"
 
 #include <cmath>
 #include <string>
@@ -33,6 +34,9 @@ public:
 	// Copy constructor and assignment operator
 	inline IVector3(IVector3 const& v);
 	inline IVector3& operator=(IVector3 const& v);
+
+	inline Real length(void) const;
+	inline size_t lengthTo2(void) const;
 
 	// Miscellaneous operators
 	inline IVector3 operator+(IVector3 const& v) const;
@@ -113,6 +117,16 @@ inline IVector3& IVector3::operator=(IVector3 const& v)
 	y = v.y;
 	z = v.z;
 	return *this;
+}
+
+inline Real IVector3::length(void) const
+{
+	return sqrt(x*x + y*y + z*z);
+}
+
+inline size_t IVector3::lengthTo2(void) const
+{
+	return x*x + y*y + z*z;
 }
 
 inline IVector3 IVector3::operator+(IVector3 const& v) const
