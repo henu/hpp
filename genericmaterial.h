@@ -12,7 +12,6 @@
 #include "inc_gl.h"
 #include "assert.h"
 #include "texture.h"
-#include "texturemanager.h"
 #include "json.h"
 #include "exception.h"
 #include "shaderprogramhandle.h"
@@ -41,7 +40,7 @@ public:
 
 	// Constructor and destructor
 	inline GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures, bool use_glsl_version_330 = false);
-	inline GenericMaterial(Rawmaterial const& rawmat, bool twosided = false, bool use_glsl_version_330 = false);
+	inline GenericMaterial(Rawmaterial const& rawmat, std::map< std::string, Texture* > const& textures, bool twosided = false, bool use_glsl_version_330 = false);
 	inline GenericMaterial(bool use_glsl_version_330 = false);
 	inline virtual ~GenericMaterial(void);
 
@@ -302,7 +301,7 @@ rendering_light(NULL)
 	updateIsTranslucent();
 }
 
-inline GenericMaterial::GenericMaterial(Rawmaterial const& rawmat, bool twosided, bool use_glsl_version_330) :
+inline GenericMaterial::GenericMaterial(Rawmaterial const& rawmat, std::map< std::string, Texture* > const& textures, bool twosided, bool use_glsl_version_330) :
 use_glsl_version_330(use_glsl_version_330),
 color(rawmat.color),
 specular(rawmat.specular),
@@ -326,7 +325,11 @@ rendering_light(NULL)
 		colormap = rawmat.colormap_tex;
 		needs_uvs = true;
 	} else if (!rawmat.colormap.empty()) {
-		colormap = Texturemanager::getTexture(rawmat.colormap);
+		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(rawmat.colormap);
+		if (textures_find == textures.end()) {
+			throw Exception("Colormap \"" + rawmat.colormap + "\" not found!");
+		}
+		colormap = textures_find->second;
 		needs_uvs = true;
 	} else {
 		colormap = NULL;
@@ -335,7 +338,11 @@ rendering_light(NULL)
 		normalmap = rawmat.normalmap_tex;
 		needs_uvs = true;
 	} else if (!rawmat.normalmap.empty()) {
-		normalmap = Texturemanager::getTexture(rawmat.normalmap);
+		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(rawmat.normalmap);
+		if (textures_find == textures.end()) {
+			throw Exception("Normalmap \"" + rawmat.normalmap + "\" not found!");
+		}
+		normalmap = textures_find->second;
 		needs_uvs = true;
 	} else {
 		normalmap = NULL;
@@ -344,7 +351,11 @@ rendering_light(NULL)
 		specularmap = rawmat.specularmap_tex;
 		needs_uvs = true;
 	} else if (!rawmat.specularmap.empty()) {
-		specularmap = Texturemanager::getTexture(rawmat.specularmap);
+		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(rawmat.specularmap);
+		if (textures_find == textures.end()) {
+			throw Exception("Specularmap \"" + rawmat.specularmap + "\" not found!");
+		}
+		specularmap = textures_find->second;
 		needs_uvs = true;
 	} else {
 		specularmap = NULL;

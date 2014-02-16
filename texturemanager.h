@@ -23,20 +23,6 @@ class Texturemanager
 
 public:
 
-	// Checks if material exists
-	static bool textureExists(std::string const& name);
-
-	// Adds/deletes materials. Note, that if material already exists while
-	// adding new, the old one will be deleted.
-	static void addTexture(std::string const& name, Texture* texture);
-	static void deleteTexture(std::string const& name);
-
-	// Clears the whole manager
-	static void clear(void);
-
-	// Gets specific texture
-	static Texture* getTexture(std::string const& name);
-
 private:
 
 	inline static void addReleasableTexture(GLuint gl_texture);

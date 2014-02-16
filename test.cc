@@ -54,6 +54,7 @@
 #include "condition.h"
 #include "constants.h"
 #include "cores.h"
+#include "datamanagerbase.h"
 #include "debug.h"
 #include "decompressor.h"
 #include "event.h"
