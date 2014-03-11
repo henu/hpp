@@ -7,6 +7,7 @@
 #include "../unicode.h"
 #include "../assert.h"
 #include "../exception.h"
+#include "../ivector2.h"
 
 #include <vector>
 #include <algorithm>
@@ -37,10 +38,13 @@ public:
 
 	inline int32_t getPositionX(void) const { return x; }
 	inline int32_t getPositionY(void) const { return y; }
+	inline IVector2 getPosition(void) const { return IVector2(x, y); }
 	inline int32_t getAbsolutePositionX(void) const;
 	inline int32_t getAbsolutePositionY(void) const;
+	inline IVector2 getAbsolutePosition(void) const;
 	inline uint32_t getWidth(void) const { return width; }
 	inline uint32_t getHeight(void) const { return height; }
+	inline IVector2 getSize(void) const { return IVector2(width, height); }
 
 	// Size getters
 	inline uint32_t getMinWidth(void) const;
@@ -245,6 +249,12 @@ inline int32_t Widget::getAbsolutePositionY(void) const
 {
 	if (!parent) return y;
 	return y + parent->getAbsolutePositionY();
+}
+
+inline IVector2 Widget::getAbsolutePosition(void) const
+{
+	if (!parent) return getPosition();
+	return getPosition() + parent->getAbsolutePosition();
 }
 
 inline uint32_t Widget::getMinWidth(void) const
