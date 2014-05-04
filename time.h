@@ -4,6 +4,9 @@
 #include "assert.h"
 #include "exception.h"
 #include "cast.h"
+#include "serializable.h"
+#include "deserializable.h"
+#include "serialize.h"
 
 #include <stdint.h>
 #include <cmath>
@@ -77,7 +80,7 @@ private:
 
 };
 
-class Time
+class Time : public Serializable, public Deserializable
 {
 
 public:
@@ -102,6 +105,10 @@ public:
 	inline Time operator+=(Delay const& d);
 	inline Time operator-=(Delay const& d);
 
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual Json toJson(void) const;
+	inline virtual void constructFromJson(Json const& json);
+
 private:
 
 	static uint32_t const MLRD = 1000*1000*1000;
@@ -110,6 +117,10 @@ private:
 	uint32_t nsecs;
 
 	static inline std::string padWith(size_t num, size_t desired_len, char padder);
+
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual void doSerialize(ByteV& result, bool bigendian) const;
+	inline virtual void doDeserialize(std::istream& strm, bool bigendian);
 
 };
 
@@ -566,6 +577,27 @@ inline Time Time::operator-=(Delay const& d)
 	return *this = *this - d;
 }
 
+inline Json Time::toJson(void) const
+{
+	Json result = Json::newArray();
+	result.addItem(Json::newNumber(secs));
+	result.addItem(Json::newNumber(nsecs));
+	return result;
+}
+
+inline void Time::constructFromJson(Json const& json)
+{
+	// Check JSON validity
+	if (json.getType() != Json::ARRAY) throw Exception("JSON for Time must be an array!");
+	if (json.getArraySize() != 2) throw Exception("JSON for Time must contain exactly two numbers!");
+	for (size_t num_id = 0; num_id < 2; ++ num_id) {
+		if (json.getItem(num_id).getType() != Json::NUMBER) throw Exception("Unexpected non-number in JSON array for Time!");
+	}
+	// Construct
+	secs = json.getItem(0).getInteger();
+	nsecs = json.getItem(1).getInteger();
+}
+
 inline std::string Time::padWith(size_t num, size_t desired_len, char padder)
 {
 	std::string result = sizeToStr(num);
@@ -573,6 +605,23 @@ inline std::string Time::padWith(size_t num, size_t desired_len, char padder)
 		result = std::string(desired_len - result.size(), padder) + result;
 	}
 	return result;
+}
+
+inline void Time::doSerialize(ByteV& result, bool bigendian) const
+{
+	result += uInt64ToByteV(secs, bigendian);
+	result += uInt32ToByteV(nsecs, bigendian);
+}
+
+inline void Time::doDeserialize(std::istream& strm, bool bigendian)
+{
+	char buf[12];
+	strm.read(buf, 12);
+	if (strm.eof()) {
+		throw Exception("Unexpected end of data!");
+	}
+	secs = cStrToUInt64(buf, bigendian);
+	nsecs = cStrToUInt32(buf + 8, bigendian);
 }
 
 inline Time operator+(Time const& t, Delay const& d)
