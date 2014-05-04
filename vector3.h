@@ -42,7 +42,6 @@ public:
 
 	// Conversion functions
 	inline std::string toString(void) const;
-	inline Json toJson(void) const;
 
 	// Operators between Vector3s
 	inline Vector3 operator-(void) const;
@@ -70,6 +69,10 @@ public:
 	// one. The length of resulting vector might be smaller than this one,
 	// but not greater.
 	inline Vector3 perp(void) const;
+
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual Json toJson(void) const;
+	inline virtual void constructFromJson(Json const& json);
 
 	Real x, y, z;
 
@@ -127,28 +130,7 @@ inline Vector3::Vector3(std::string const& str)
 
 inline Vector3::Vector3(Json const& json)
 {
-	// Old method
-	if (json.getType() == Json::OBJECT) {
-		// Check JSON validity
-		if (!json.keyExists("x") || json.getMember("x").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"x\"!");
-		if (!json.keyExists("y") || json.getMember("y").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"y\"!");
-		if (!json.keyExists("z") || json.getMember("z").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"z\"!");
-		// Construct
-		x = json.getMember("x").getNumber();
-		y = json.getMember("y").getNumber();
-		z = json.getMember("z").getNumber();
-		return;
-	}
-	// Check JSON validity
-	if (json.getType() != Json::ARRAY) throw Exception("JSON for Vector3 must be an array!");
-	if (json.getArraySize() != 3) throw Exception("JSON for Vector3 must contain exactly three numbers!");
-	for (size_t num_id = 0; num_id < 3; ++ num_id) {
-		if (json.getItem(num_id).getType() != Json::NUMBER) throw Exception("Unexpected non-number in JSON array for Vector3!");
-	}
-	// Construct
-	x = json.getItem(0).getNumber();
-	y = json.getItem(1).getNumber();
-	z = json.getItem(2).getNumber();
+	constructFromJson(json);
 }
 
 inline Real Vector3::length(void) const
@@ -184,15 +166,6 @@ inline Vector3 Vector3::normalized(void) const
 inline std::string Vector3::toString(void) const
 {
 	return "(" + floatToStr(x) + ", " + floatToStr(y) + ", " + floatToStr(z) + ")";
-}
-
-inline Json Vector3::toJson(void) const
-{
-	Json result = Json::newArray();
-	result.addItem(Json::newNumber(x));
-	result.addItem(Json::newNumber(y));
-	result.addItem(Json::newNumber(z));
-	return result;
 }
 
 inline Vector3 Vector3::operator-(void) const
@@ -305,6 +278,41 @@ inline std::ostream& operator<<(std::ostream& strm, Vector3 const& v)
 inline Vector3 operator*(Real f, Vector3 const& v)
 {
 	return Vector3(f * v.x, f * v.y, f * v.z);
+}
+
+inline Json Vector3::toJson(void) const
+{
+	Json result = Json::newArray();
+	result.addItem(Json::newNumber(x));
+	result.addItem(Json::newNumber(y));
+	result.addItem(Json::newNumber(z));
+	return result;
+}
+
+inline void Vector3::constructFromJson(Json const& json)
+{
+	// Old method
+	if (json.getType() == Json::OBJECT) {
+		// Check JSON validity
+		if (!json.keyExists("x") || json.getMember("x").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"x\"!");
+		if (!json.keyExists("y") || json.getMember("y").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"y\"!");
+		if (!json.keyExists("z") || json.getMember("z").getType() != Json::NUMBER) throw Exception("JSON for Vector3 must contain number named \"z\"!");
+		// Construct
+		x = json.getMember("x").getNumber();
+		y = json.getMember("y").getNumber();
+		z = json.getMember("z").getNumber();
+		return;
+	}
+	// Check JSON validity
+	if (json.getType() != Json::ARRAY) throw Exception("JSON for Vector3 must be an array!");
+	if (json.getArraySize() != 3) throw Exception("JSON for Vector3 must contain exactly three numbers!");
+	for (size_t num_id = 0; num_id < 3; ++ num_id) {
+		if (json.getItem(num_id).getType() != Json::NUMBER) throw Exception("Unexpected non-number in JSON array for Vector3!");
+	}
+	// Construct
+	x = json.getItem(0).getNumber();
+	y = json.getItem(1).getNumber();
+	z = json.getItem(2).getNumber();
 }
 
 inline void Vector3::doSerialize(ByteV& result, bool bigendian) const

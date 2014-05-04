@@ -77,6 +77,10 @@ public:
 
 	inline Angle abs(void) const;
 
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual Json toJson(void) const { return Json::newNumber(rad); }
+	inline virtual void constructFromJson(Json const& json);
+
 private:
 
 	float rad;
@@ -265,6 +269,12 @@ inline Angle Angle::abs(void) const
 	Angle result = *this;
 	if (rad < 0) result.rad = -rad;
 	return result;
+}
+
+inline void Angle::constructFromJson(Json const& json)
+{
+	if (!json.getType() != Json::NUMBER) throw Exception("JSON for Angle must be a single number!");
+	rad = json.getNumber();
 }
 
 inline void Angle::doSerialize(ByteV& result, bool bigendian) const

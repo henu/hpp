@@ -47,6 +47,10 @@ public:
 	inline static RSAKey generatePrivateKey(size_t bits = 4096);
 	inline RSAKey generatePublicKey(void) const;
 
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual Json toJson(void) const;
+	inline virtual void constructFromJson(Json const& json);
+
 private:
 
 	RSA* rsa;
@@ -248,6 +252,21 @@ inline RSAKey RSAKey::generatePublicKey(void) const
 	result.rsa->n = BN_dup(rsa->n);
 
 	return result;
+}
+
+inline Json RSAKey::toJson(void) const
+{
+	ByteV bytes;
+	serialize(bytes);
+	return Json::newString(byteVToDStr(bytes));
+}
+
+inline void RSAKey::constructFromJson(Json const& json)
+{
+	// Check JSON validity
+	if (json.getType() != Json::STRING) throw Exception("JSON for RSAKey must be a string!");
+	ByteV bytes = dStrToByteV(json.getString());
+	deserialize(bytes);
 }
 
 inline void RSAKey::doSerialize(ByteV& result, bool bigendian) const

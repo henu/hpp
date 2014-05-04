@@ -1,6 +1,7 @@
 #ifndef HPP_SERIALIZABLE_H
 #define HPP_SERIALIZABLE_H
 
+#include "json.h"
 #include "bytev.h"
 
 namespace Hpp
@@ -11,9 +12,12 @@ class Serializable
 
 public:
 
-	// "result" is not cleared
+	// Serialize to bytes. "result" is not cleared
 	inline void serialize(ByteV& result, bool bigendian = true) const;
 	inline ByteV serialize(bool bigendian = true) const;
+
+	// Serialize to JSON
+	virtual Json toJson(void) const = 0;
 
 private:
 

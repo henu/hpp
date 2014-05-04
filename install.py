@@ -204,7 +204,7 @@ def clean(sources, libname):
 	os.remove('lib' + libname + '.so')
 
 def test():
-	runCommand('g++ -Wall -Wpointer-arith -Werror -ansi -pedantic -o /tmp/libhpp_tester test.cc 3dconstants.cc assert.cc -lcrypto')
+	runCommand('g++ -Wall -Wpointer-arith -Werror -ansi -pedantic -o /tmp/libhpp_tester test.cc 3dconstants.cc assert.cc json.cc -lcrypto')
 	runCommand('/tmp/libhpp_tester')
 	os.remove('/tmp/libhpp_tester')
 

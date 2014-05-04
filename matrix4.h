@@ -38,10 +38,6 @@ public:
 	               Real m, Real n, Real o, Real p);
 	inline Matrix4(Json const& json);
 
-	// Conversion functions
-	inline Json toJson(void) const;
-	inline ByteV toBytes(bool bigendian = true) const;
-
 	// Comparison operators
 	inline bool operator==(Matrix4 const& m) const;
 	inline bool operator!=(Matrix4 const& m) const;
@@ -101,6 +97,10 @@ public:
 	inline static Matrix4 orthographicProjectionMatrix(Real size_y,
 	                                                   Real aspectratio,
 	                                                   Real nearplane, Real farplane);
+
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual Json toJson(void) const;
+	inline virtual void constructFromJson(Json const& json);
 
 private:
 
@@ -205,32 +205,7 @@ inline Matrix4::Matrix4(Real a, Real b, Real c, Real d,
 
 inline Matrix4::Matrix4(Json const& json)
 {
-	// Check JSON validity
-	if (json.getType() != Json::ARRAY || json.getArraySize() != 16) throw Exception("JSON for Matrix4 must be array that has 16 numbers!");
-	for (uint8_t cell_id = 0; cell_id < 16; ++ cell_id) {
-		Json const& cell_json = json.getItem(cell_id);
-		if (cell_json.getType() != Json::NUMBER) throw Exception("Found non-number cell from Matrix4 JSON!");
-		cells[cell_id] = cell_json.getNumber();
-	}
-}
-
-inline Json Matrix4::toJson(void) const
-{
-	Json result = Json::newArray();
-	for (uint8_t cell_id = 0; cell_id < 16; ++ cell_id) {
-		result.addItem(Json::newNumber(cells[cell_id]));
-	}
-	return result;
-}
-
-inline ByteV Matrix4::toBytes(bool bigendian) const
-{
-	ByteV result;
-	result.reserve(4*16);
-	for (uint8_t cell_id = 0; cell_id < 16; cell_id ++) {
-		result += floatToByteV(cells[cell_id], bigendian);
-	}
-	return result;
+	constructFromJson(json);
 }
 
 inline bool Matrix4::operator==(Matrix4 const& m) const
@@ -367,78 +342,6 @@ inline Matrix4 Matrix4::inverse(void) const
 inline Real const* Matrix4::getCells(void) const
 {
 	return cells;
-}
-
-inline Real Matrix4::subdeterminant(uint8_t cell_id) const
-{
-	switch (cell_id) {
-	case 0:
-		return cells[5] * (cells[10]*cells[15] - cells[11]*cells[14])
-		       - cells[9] * (cells[6]*cells[15] - cells[7]*cells[14])
-		       + cells[13] * (cells[6]*cells[11] - cells[7]*cells[10]);
-	case 1:
-		return cells[4] * (cells[10]*cells[15] - cells[11]*cells[14])
-		       - cells[8] * (cells[6]*cells[15] - cells[7]*cells[14])
-		       + cells[12] * (cells[6]*cells[11] - cells[7]*cells[10]);
-	case 2:
-		return cells[4] * (cells[9]*cells[15] - cells[11]*cells[13])
-		       - cells[8] * (cells[5]*cells[15] - cells[7]*cells[13])
-		       + cells[12] * (cells[5]*cells[11] - cells[7]*cells[9]);
-	case 3:
-		return cells[4] * (cells[9]*cells[14] - cells[10]*cells[13])
-		       - cells[8] * (cells[5]*cells[14] - cells[6]*cells[13])
-		       + cells[12] * (cells[5]*cells[10] - cells[6]*cells[9]);
-	case 4:
-		return cells[1] * (cells[10]*cells[15] - cells[11]*cells[14])
-		       - cells[9] * (cells[2]*cells[15] - cells[3]*cells[14])
-		       + cells[13] * (cells[2]*cells[11] - cells[3]*cells[10]);
-	case 5:
-		return cells[0] * (cells[10]*cells[15] - cells[11]*cells[14])
-		       - cells[8] * (cells[2]*cells[15] - cells[3]*cells[14])
-		       + cells[12] * (cells[2]*cells[11] - cells[3]*cells[10]);
-	case 6:
-		return cells[0] * (cells[9]*cells[15] - cells[11]*cells[13])
-		       - cells[8] * (cells[1]*cells[15] - cells[3]*cells[13])
-		       + cells[12] * (cells[1]*cells[11] - cells[3]*cells[9]);
-	case 7:
-		return cells[0] * (cells[9]*cells[14] - cells[10]*cells[13])
-		       - cells[8] * (cells[1]*cells[14] - cells[2]*cells[13])
-		       + cells[12] * (cells[1]*cells[10] - cells[2]*cells[9]);
-	case 8:
-		return cells[1] * (cells[6]*cells[15] - cells[7]*cells[14])
-		       - cells[5] * (cells[2]*cells[15] - cells[3]*cells[14])
-		       + cells[13] * (cells[2]*cells[7] - cells[3]*cells[6]);
-	case 9:
-		return cells[0] * (cells[6]*cells[15] - cells[7]*cells[14])
-		       - cells[4] * (cells[2]*cells[15] - cells[3]*cells[14])
-		       + cells[12] * (cells[2]*cells[7] - cells[3]*cells[6]);
-	case 10:
-		return cells[0] * (cells[5]*cells[15] - cells[7]*cells[13])
-		       - cells[4] * (cells[1]*cells[15] - cells[3]*cells[13])
-		       + cells[12] * (cells[1]*cells[7] - cells[3]*cells[5]);
-	case 11:
-		return cells[0] * (cells[5]*cells[14] - cells[6]*cells[13])
-		       - cells[4] * (cells[1]*cells[14] - cells[2]*cells[13])
-		       + cells[12] * (cells[1]*cells[6] - cells[2]*cells[5]);
-	case 12:
-		return cells[1] * (cells[6]*cells[11] - cells[7]*cells[10])
-		       - cells[5] * (cells[2]*cells[11] - cells[3]*cells[10])
-		       + cells[9] * (cells[2]*cells[7] - cells[3]*cells[6]);
-	case 13:
-		return cells[0] * (cells[6]*cells[11] - cells[7]*cells[10])
-		       - cells[4] * (cells[2]*cells[11] - cells[3]*cells[10])
-		       + cells[8] * (cells[2]*cells[7] - cells[3]*cells[6]);
-	case 14:
-		return cells[0] * (cells[5]*cells[11] - cells[7]*cells[9])
-		       - cells[4] * (cells[1]*cells[11] - cells[3]*cells[9])
-		       + cells[8] * (cells[1]*cells[7] - cells[3]*cells[5]);
-	case 15:
-		return cells[0] * (cells[5]*cells[10] - cells[6]*cells[9])
-		       - cells[4] * (cells[1]*cells[10] - cells[2]*cells[9])
-		       + cells[8] * (cells[1]*cells[6] - cells[2]*cells[5]);
-	}
-	HppAssert(false, "Cell ID overflow!");
-	return 0;
 }
 
 inline Matrix4 Matrix4::operator+(Matrix4 const& m) const
@@ -667,6 +570,98 @@ inline Matrix4 Matrix4::orthographicProjectionMatrix(Real size_y,
 	               0,          2 / size_y, 0,           0,
 	               0,          0,          -2 / size_z, (farplane + nearplane) / -size_z,
 	               0,          0,          0,           1);
+}
+
+inline Json Matrix4::toJson(void) const
+{
+	Json result = Json::newArray();
+	for (uint8_t cell_id = 0; cell_id < 16; ++ cell_id) {
+		result.addItem(Json::newNumber(cells[cell_id]));
+	}
+	return result;
+}
+
+inline void Matrix4::constructFromJson(Json const& json)
+{
+	// Check JSON validity
+	if (json.getType() != Json::ARRAY || json.getArraySize() != 16) throw Exception("JSON for Matrix4 must be array that has 16 numbers!");
+	for (uint8_t cell_id = 0; cell_id < 16; ++ cell_id) {
+		Json const& cell_json = json.getItem(cell_id);
+		if (cell_json.getType() != Json::NUMBER) throw Exception("Found non-number cell from Matrix4 JSON!");
+		cells[cell_id] = cell_json.getNumber();
+	}
+}
+
+inline Real Matrix4::subdeterminant(uint8_t cell_id) const
+{
+	switch (cell_id) {
+	case 0:
+		return cells[5] * (cells[10]*cells[15] - cells[11]*cells[14])
+		       - cells[9] * (cells[6]*cells[15] - cells[7]*cells[14])
+		       + cells[13] * (cells[6]*cells[11] - cells[7]*cells[10]);
+	case 1:
+		return cells[4] * (cells[10]*cells[15] - cells[11]*cells[14])
+		       - cells[8] * (cells[6]*cells[15] - cells[7]*cells[14])
+		       + cells[12] * (cells[6]*cells[11] - cells[7]*cells[10]);
+	case 2:
+		return cells[4] * (cells[9]*cells[15] - cells[11]*cells[13])
+		       - cells[8] * (cells[5]*cells[15] - cells[7]*cells[13])
+		       + cells[12] * (cells[5]*cells[11] - cells[7]*cells[9]);
+	case 3:
+		return cells[4] * (cells[9]*cells[14] - cells[10]*cells[13])
+		       - cells[8] * (cells[5]*cells[14] - cells[6]*cells[13])
+		       + cells[12] * (cells[5]*cells[10] - cells[6]*cells[9]);
+	case 4:
+		return cells[1] * (cells[10]*cells[15] - cells[11]*cells[14])
+		       - cells[9] * (cells[2]*cells[15] - cells[3]*cells[14])
+		       + cells[13] * (cells[2]*cells[11] - cells[3]*cells[10]);
+	case 5:
+		return cells[0] * (cells[10]*cells[15] - cells[11]*cells[14])
+		       - cells[8] * (cells[2]*cells[15] - cells[3]*cells[14])
+		       + cells[12] * (cells[2]*cells[11] - cells[3]*cells[10]);
+	case 6:
+		return cells[0] * (cells[9]*cells[15] - cells[11]*cells[13])
+		       - cells[8] * (cells[1]*cells[15] - cells[3]*cells[13])
+		       + cells[12] * (cells[1]*cells[11] - cells[3]*cells[9]);
+	case 7:
+		return cells[0] * (cells[9]*cells[14] - cells[10]*cells[13])
+		       - cells[8] * (cells[1]*cells[14] - cells[2]*cells[13])
+		       + cells[12] * (cells[1]*cells[10] - cells[2]*cells[9]);
+	case 8:
+		return cells[1] * (cells[6]*cells[15] - cells[7]*cells[14])
+		       - cells[5] * (cells[2]*cells[15] - cells[3]*cells[14])
+		       + cells[13] * (cells[2]*cells[7] - cells[3]*cells[6]);
+	case 9:
+		return cells[0] * (cells[6]*cells[15] - cells[7]*cells[14])
+		       - cells[4] * (cells[2]*cells[15] - cells[3]*cells[14])
+		       + cells[12] * (cells[2]*cells[7] - cells[3]*cells[6]);
+	case 10:
+		return cells[0] * (cells[5]*cells[15] - cells[7]*cells[13])
+		       - cells[4] * (cells[1]*cells[15] - cells[3]*cells[13])
+		       + cells[12] * (cells[1]*cells[7] - cells[3]*cells[5]);
+	case 11:
+		return cells[0] * (cells[5]*cells[14] - cells[6]*cells[13])
+		       - cells[4] * (cells[1]*cells[14] - cells[2]*cells[13])
+		       + cells[12] * (cells[1]*cells[6] - cells[2]*cells[5]);
+	case 12:
+		return cells[1] * (cells[6]*cells[11] - cells[7]*cells[10])
+		       - cells[5] * (cells[2]*cells[11] - cells[3]*cells[10])
+		       + cells[9] * (cells[2]*cells[7] - cells[3]*cells[6]);
+	case 13:
+		return cells[0] * (cells[6]*cells[11] - cells[7]*cells[10])
+		       - cells[4] * (cells[2]*cells[11] - cells[3]*cells[10])
+		       + cells[8] * (cells[2]*cells[7] - cells[3]*cells[6]);
+	case 14:
+		return cells[0] * (cells[5]*cells[11] - cells[7]*cells[9])
+		       - cells[4] * (cells[1]*cells[11] - cells[3]*cells[9])
+		       + cells[8] * (cells[1]*cells[7] - cells[3]*cells[5]);
+	case 15:
+		return cells[0] * (cells[5]*cells[10] - cells[6]*cells[9])
+		       - cells[4] * (cells[1]*cells[10] - cells[2]*cells[9])
+		       + cells[8] * (cells[1]*cells[6] - cells[2]*cells[5]);
+	}
+	HppAssert(false, "Cell ID overflow!");
+	return 0;
 }
 
 inline Real Matrix4::complement(uint8_t cell_id) const

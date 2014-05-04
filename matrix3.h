@@ -37,10 +37,6 @@ public:
 	               Real g, Real h, Real i);
 	inline Matrix3(Json const& json);
 
-	// Conversion functions
-	inline Json toJson(void) const;
-	inline ByteV toBytes(bool bigendian = true) const;
-
 	// Comparison operators
 	inline bool operator==(Matrix3 const& m) const;
 	inline bool operator!=(Matrix3 const& m) const;
@@ -84,6 +80,10 @@ public:
 	// Static function for generating various special matrices.
 	static inline Matrix3 translMatrix(Vector2 const& v);
 	static inline Matrix3 scaleMatrix(Vector2 const& v);
+
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual Json toJson(void) const;
+	inline virtual void constructFromJson(Json const& json);
 
 private:
 
@@ -162,32 +162,7 @@ inline Matrix3::Matrix3(Real a, Real b, Real c,
 
 inline Matrix3::Matrix3(Json const& json)
 {
-	// Check JSON validity
-	if (json.getType() != Json::ARRAY || json.getArraySize() != 9) throw Exception("JSON for Matrix3 must be array that has 9 numbers!");
-	for (uint8_t cell_id = 0; cell_id < 9; ++ cell_id) {
-		Json const& cell_json = json.getItem(cell_id);
-		if (cell_json.getType() != Json::NUMBER) throw Exception("Found non-number cell from Matrix3 JSON!");
-		cells[cell_id] = cell_json.getNumber();
-	}
-}
-
-inline Json Matrix3::toJson(void) const
-{
-	Json result = Json::newArray();
-	for (uint8_t cell_id = 0; cell_id < 9; ++ cell_id) {
-		result.addItem(Json::newNumber(cells[cell_id]));
-	}
-	return result;
-}
-
-inline ByteV Matrix3::toBytes(bool bigendian) const
-{
-	ByteV result;
-	result.reserve(4*9);
-	for (uint8_t cell_id = 0; cell_id < 9; cell_id ++) {
-		result += floatToByteV(cells[cell_id], bigendian);
-	}
-	return result;
+	constructFromJson(json);
 }
 
 inline bool Matrix3::operator==(Matrix3 const& m) const
@@ -477,6 +452,26 @@ inline Matrix3 Matrix3::scaleMatrix(Vector2 const& v)
 	return Matrix3(v.x, 0,   0,
 	               0,   v.y, 0,
 	               0,   0,   1);
+}
+
+inline Json Matrix3::toJson(void) const
+{
+	Json result = Json::newArray();
+	for (uint8_t cell_id = 0; cell_id < 9; ++ cell_id) {
+		result.addItem(Json::newNumber(cells[cell_id]));
+	}
+	return result;
+}
+
+inline void Matrix3::constructFromJson(Json const& json)
+{
+	// Check JSON validity
+	if (json.getType() != Json::ARRAY || json.getArraySize() != 9) throw Exception("JSON for Matrix3 must be array that has 9 numbers!");
+	for (uint8_t cell_id = 0; cell_id < 9; ++ cell_id) {
+		Json const& cell_json = json.getItem(cell_id);
+		if (cell_json.getType() != Json::NUMBER) throw Exception("Found non-number cell from Matrix3 JSON!");
+		cells[cell_id] = cell_json.getNumber();
+	}
 }
 
 inline Real Matrix3::subdeterminant(uint8_t cell_id) const

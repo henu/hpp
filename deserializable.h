@@ -1,6 +1,7 @@
 #ifndef HPP_DESERIALIZABLE_H
 #define HPP_DESERIALIZABLE_H
 
+#include "json.h"
 #include "bytevreaderbuf.h"
 #include "bytev.h"
 #include "exception.h"
@@ -13,9 +14,13 @@ class Deserializable
 
 public:
 
+	// Deserialize from bytes
 	inline void deserialize(ByteV const& bytes, bool bigendian = true);
 	inline void deserialize(ByteV::const_iterator& bytes_it, ByteV::const_iterator const& bytes_end, bool bigendian = true);
 	inline void deserialize(std::istream& strm, bool bigendian = true);
+
+	// Deserialize from JSON
+	virtual void constructFromJson(Json const& json) = 0;
 
 private:
 

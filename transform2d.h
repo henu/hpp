@@ -58,7 +58,9 @@ public:
 	// Get how Transform sees the given absolute position
 	inline Vector2 getRelativePositionTo(Vector2 const& pos) const;
 
-	inline Json toJson(void) const;
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual Json toJson(void) const;
+	inline virtual void constructFromJson(Json const& json);
 
 private:
 
@@ -90,25 +92,9 @@ transf(m)
 {
 }
 
-inline Transform2D::Transform2D(Json const& json) :
-transf(Matrix3::IDENTITY)
+inline Transform2D::Transform2D(Json const& json)
 {
-	size_t arg_id = 0;
-	while (arg_id < json.getArraySize()) {
-		std::string arg = json.getItem(arg_id ++).getString();
-		if (arg == "matrix") {
-			transf = Matrix3(json.getItem(arg_id ++));
-		} else if (arg == "translate") {
-			translate(Vector2(json.getItem(arg_id ++)));
-		} else if (arg == "rotate") {
-			Angle rot_angle(json.getItem(arg_id ++).getNumber());
-			rotate(rot_angle);
-		} else if (arg == "scale") {
-			scale(Vector2(json.getItem(arg_id ++)));
-		} else {
-			throw Exception("Invalid transform command in JSON: " + arg);
-		}
-	}
+	constructFromJson(json);
 }
 
 inline void Transform2D::reset(void)
@@ -199,6 +185,27 @@ inline Json Transform2D::toJson(void) const
 	result.addItem(Json::newString("matrix"));
 	result.addItem(transf.toJson());
 	return result;
+}
+
+inline void Transform2D::constructFromJson(Json const& json)
+{
+	transf = Matrix3::IDENTITY;
+	size_t arg_id = 0;
+	while (arg_id < json.getArraySize()) {
+		std::string arg = json.getItem(arg_id ++).getString();
+		if (arg == "matrix") {
+			transf = Matrix3(json.getItem(arg_id ++));
+		} else if (arg == "translate") {
+			translate(Vector2(json.getItem(arg_id ++)));
+		} else if (arg == "rotate") {
+			Angle rot_angle(json.getItem(arg_id ++).getNumber());
+			rotate(rot_angle);
+		} else if (arg == "scale") {
+			scale(Vector2(json.getItem(arg_id ++)));
+		} else {
+			throw Exception("Invalid transform command in JSON: " + arg);
+		}
+	}
 }
 
 inline void Transform2D::doSerialize(ByteV& result, bool bigendian) const
