@@ -91,6 +91,7 @@ public:
 	inline uint64_t getSeconds(void) const { return secs; }
 	inline uint32_t getNanoseconds(void) const { HppAssert(nsecs < MLRD, "Too many nanoseconds!"); return nsecs; }
 
+	// Converts timestamp to string using same formatting as strftime().
 	inline std::string toString(std::string const& format = "%F %T") const;
 
 	// Comparison operators
