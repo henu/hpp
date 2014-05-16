@@ -432,7 +432,6 @@ HppAssert(false, "Timezone conversions to other timezones not implemented yet!")
 	}
 }
 
-
 inline std::string Time::toString(std::string const& format, std::string const& timezone) const
 {
 	#ifndef WIN32
