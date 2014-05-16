@@ -7,6 +7,8 @@
 #include "serializable.h"
 #include "deserializable.h"
 #include "serialize.h"
+#include "printonce.h"
+#include "misc.h"
 
 #include <stdint.h>
 #include <cmath>
@@ -87,11 +89,19 @@ public:
 
 	inline Time(void) { }
 	inline Time(uint64_t secs, uint32_t nsecs) : secs(secs), nsecs(nsecs) { }
+	// All numbers are in traditional human readable format
+	inline Time(uint16_t year, uint8_t month, uint8_t day,
+	            uint8_t hour = 0, uint8_t minute = 0, uint8_t second = 0,
+	            uint32_t nanoseconds = 0,
+	            std::string const& timezone = "");
 
 	inline uint64_t getSeconds(void) const { return secs; }
 	inline uint32_t getNanoseconds(void) const { HppAssert(nsecs < MLRD, "Too many nanoseconds!"); return nsecs; }
 
-	inline std::string toString(std::string const& format = "%F %T") const;
+	// Converts timestamp to string using same formatting as
+	// strftime(). By default, local time is used. Another
+	// timezone can be defined by using "timezone" parameter.
+	inline std::string toString(std::string const& format = "%F %T", std::string const& timezone = "") const;
 
 	// Comparison operators
 	inline bool operator==(Time const& t) const;
@@ -136,22 +146,18 @@ inline std::ostream& operator<<(std::ostream& strm, Delay const& d);
 
 inline Time now(void)
 {
+	// First get time in UTC. Both clock_gettime() of Linux and
+	// GetSystemTimeAsFileTime() of Windows return in UTC.
 	uint32_t const MLRD = 1000*1000*1000;
 	(void)MLRD;
 	#ifndef WIN32
 	timespec time_now;
-/*
-	clockid_t clock_id;
-	if (clock_getcpuclockid(0, &clock_id) != 0) {
-		throw Exception("Unable to get time now, because clock ID is not known!");
-	}
-*/
 	if (clock_gettime(CLOCK_REALTIME, &time_now) != 0) {
 		throw Exception("Unable to get time now, because time retrival has failed!");
 	}
 	HppAssert(time_now.tv_sec != 0, "clock_gettime() says the unix time is now zero!");
 	HppAssert(time_now.tv_nsec < MLRD, "clock_gettime() gives too many nanoseconds!");
-	return Time(time_now.tv_sec, time_now.tv_nsec);
+	Time result(time_now.tv_sec, time_now.tv_nsec);
 	#else
 	FILETIME time_now;
 	GetSystemTimeAsFileTime(&time_now);
@@ -160,8 +166,10 @@ inline Time now(void)
 	time_now_64 = time_now_64 - 11644473600LL;
 	uint64_t secs = time_now_64 / uint64_t(10000000);
 	uint32_t nsecs = (time_now_64 % 10000000) * 100;
-	return Time(secs, nsecs);
+	Time result(secs, nsecs);
 	#endif
+
+	return result;
 }
 
 inline Delay Delay::fromSecondsAsDouble(double secs)
@@ -374,14 +382,81 @@ inline bool Delay::operator>=(Delay const& d) const
 	return d <= *this;
 }
 
-inline std::string Time::toString(std::string const& format) const
+inline Time::Time(uint16_t year, uint8_t month, uint8_t day,
+                  uint8_t hour, uint8_t minute, uint8_t second,
+                  uint32_t nanoseconds,
+                  std::string const& timezone) :
+nsecs(nanoseconds)
+{
+	if (year < 1970) throw Hpp::Exception("Year must be at least 1970!");
+	if (month < 1 || month > 12) throw Hpp::Exception("Month must be from range 1 - 12!");
+	if (day < 1 || day > 31) throw Hpp::Exception("Day must be from range 1 - 31!");
+	if (hour > 23) throw Hpp::Exception("Hour must be from range 0 - 23!");
+	if (minute > 59) throw Hpp::Exception("Minute must be from range 0 - 59!");
+	if (second > 61) throw Hpp::Exception("Second must be from range 0 - 61!");
+	if (nanoseconds > 999999) throw Hpp::Exception("Nanoseconds must be from range 0 - 999999!");
+
+	// Convert to Unix timestamp
+	struct tm timeinfo;
+	timeinfo.tm_sec = second;
+	timeinfo.tm_min = minute;
+	timeinfo.tm_hour = hour;
+	timeinfo.tm_mday = day;
+	timeinfo.tm_mon = month - 1;
+	timeinfo.tm_year = year - 1900;
+	timeinfo.tm_isdst = -1;
+
+	time_t unixtimestamp = mktime(&timeinfo);
+	if (unixtimestamp < 0) {
+		throw Hpp::Exception("Unable to construct Time object from given date numbers!");
+	}
+
+	secs = unixtimestamp;
+
+	// Do possible timezone conversions
+	if (timezone.empty()) {
+		// mktime() has already put this to local time.
+	} else {
+		std::string timezone_l = toLower(timezone);
+		if (timezone_l == "utc" || timezone_l == "gmt") {
+			time_t secs_tt = secs;
+			struct tm timeinfo2;
+// TODO: This does not work! Fix it! Try for example timegm() or timelocal()!
+HppAssert(false, "Conversion to UTC or GMT is buggy!")
+			gmtime_r(&secs_tt, &timeinfo2);
+			secs += timeinfo2.tm_gmtoff;
+		} else {
+// TODO: Code this!
+HppAssert(false, "Timezone conversions to other timezones not implemented yet!");
+		}
+	}
+}
+
+
+inline std::string Time::toString(std::string const& format, std::string const& timezone) const
 {
 	#ifndef WIN32
 	uint64_t datebuf_size = format.size() * 2 + 16;
 	char* datebuf = new char[datebuf_size];
 	tm dateobj;
-	time_t time_now = secs;
-	strftime(datebuf, datebuf_size, format.c_str(), gmtime_r(&time_now, &dateobj));
+	time_t secs_tt = secs;
+
+	// Do possible timezone conversion
+	if (timezone.empty()) {
+		struct tm timeinfo;
+		localtime_r(&secs_tt, &timeinfo);
+		secs_tt += timeinfo.tm_gmtoff;
+	} else {
+		std::string timezone_l = toLower(timezone);
+		if (timezone_l == "utc" || timezone_l == "gmt") {
+			// Already in UTC, so nothing needs to be done :)
+		} else {
+// TODO: Code this!
+HppAssert(false, "Timezone conversions to other timezones not implemented yet!");
+		}
+	}
+
+	strftime(datebuf, datebuf_size, format.c_str(), gmtime_r(&secs_tt, &dateobj));
 	std::string result(datebuf);
 	delete[] datebuf;
 	return result;
@@ -410,7 +485,6 @@ inline std::string Time::toString(std::string const& format) const
 // TODO: Is now daylight savings time?
 	t.tm_isdst = 0;
 
-// TODO: Support time zone!
 	// Because strftime is buggy, the conversion
 	// is done manually as best as we can
 	std::string result = format;

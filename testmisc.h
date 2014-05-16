@@ -198,6 +198,46 @@ inline void testMisc(void)
 		}
 	}
 
+	// Test Time
+	{
+		Time t1 = now();
+		size_t year = strToSize(t1.toString("%Y"));
+		size_t month = strToSize(t1.toString("%m"));
+		size_t day = strToSize(t1.toString("%d"));
+		size_t hour = strToSize(t1.toString("%H"));
+		size_t minute = strToSize(t1.toString("%M"));
+		size_t second = strToSize(t1.toString("%S"));
+
+		Time t2(year, month, day, hour, minute, second);
+		HppAssert(year == strToSize(t2.toString("%Y")), "Years do not match! Dates are " + t1.toString() + " and " + t2.toString() + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+		HppAssert(month == strToSize(t2.toString("%m")), "Months do not match! Dates are " + t1.toString() + " and " + t2.toString() + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+		HppAssert(day == strToSize(t2.toString("%d")), "Days do not match! Dates are " + t1.toString() + " and " + t2.toString() + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+		HppAssert(hour == strToSize(t2.toString("%H")), "Hours do not match! Dates are " + t1.toString() + " and " + t2.toString() + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+		HppAssert(minute == strToSize(t2.toString("%M")), "Minutes do not match! Dates are " + t1.toString() + " and " + t2.toString() + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+		HppAssert(second == strToSize(t2.toString("%S")), "Seconds do not match! Dates are " + t1.toString() + " and " + t2.toString() + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+
+		// TODO: Uncomment this when timezone conversions in Time() constructor work!
+		/*
+		size_t year2 = strToSize(t1.toString("%Y", "UTC"));
+		size_t month2 = strToSize(t1.toString("%m", "UTC"));
+		size_t day2 = strToSize(t1.toString("%d", "UTC"));
+		size_t hour2 = strToSize(t1.toString("%H", "UTC"));
+		size_t minute2 = strToSize(t1.toString("%M", "UTC"));
+		size_t second2 = strToSize(t1.toString("%S", "UTC"));
+
+		Time t3(year2, month2, day2, hour2, minute2, second2, 0, "UTC");
+		HppAssert(year2 == strToSize(t3.toString("%Y", "UTC")), "Years do not match! Dates are " + t1.toString("%F %T", "UTC") + " and " + t2.toString("%F %T", "UTC") + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+		HppAssert(month2 == strToSize(t3.toString("%m", "UTC")), "Months do not match! Dates are " + t1.toString("%F %T", "UTC") + " and " + t2.toString("%F %T", "UTC") + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+		HppAssert(day2 == strToSize(t3.toString("%d", "UTC")), "Days do not match! Dates are " + t1.toString("%F %T", "UTC") + " and " + t2.toString("%F %T", "UTC") + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+		HppAssert(hour2 == strToSize(t3.toString("%H", "UTC")), "Hours do not match! Dates are " + t1.toString("%F %T", "UTC") + " and " + t2.toString("%F %T", "UTC") + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+		HppAssert(minute2 == strToSize(t3.toString("%M", "UTC")), "Minutes do not match! Dates are " + t1.toString("%F %T", "UTC") + " and " + t2.toString("%F %T", "UTC") + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+		HppAssert(second2 == strToSize(t3.toString("%S", "UTC")), "Seconds do not match! Dates are " + t1.toString("%F %T", "UTC") + " and " + t2.toString("%F %T", "UTC") + ", and difference is " + floatToStr((t2 - t1).getSecondsAsDouble()) + " seconds.");
+
+		HppAssert(t1.getSeconds() == t2.getSeconds(), "Seconds #1 and #2 do not match! Seconds are: " + sizeToStr(t1.getSeconds()) + "/" + sizeToStr(t2.getSeconds()) + "/" + sizeToStr(t3.getSeconds()));
+		HppAssert(t1.getSeconds() == t3.getSeconds(), "Seconds #1 and #3 do not match! Seconds are: " + sizeToStr(t1.getSeconds()) + "/" + sizeToStr(t2.getSeconds()) + "/" + sizeToStr(t3.getSeconds()));
+		*/
+	}
+
 }
 
 }
