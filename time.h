@@ -419,12 +419,17 @@ nsecs(nanoseconds)
 	} else {
 		std::string timezone_l = toLower(timezone);
 		if (timezone_l == "utc" || timezone_l == "gmt") {
+			#ifndef WIN32
 			time_t secs_tt = secs;
 			struct tm timeinfo2;
 // TODO: This does not work! Fix it! Try for example timegm() or timelocal()!
-HppAssert(false, "Conversion to UTC or GMT is buggy!")
+HppAssert(false, "Conversion to UTC or GMT is buggy!");
 			gmtime_r(&secs_tt, &timeinfo2);
 			secs += timeinfo2.tm_gmtoff;
+			#else
+// TODO: Code this
+HppAssert(false, "Conversion to UTC or GMT not implemented on Windows!");
+			#endif
 		} else {
 // TODO: Code this!
 HppAssert(false, "Timezone conversions to other timezones not implemented yet!");
