@@ -38,9 +38,11 @@ public:
 
 	static uint16_t const NUMBER_OF_UNIFORMS = 14;
 
+	typedef std::map< std::string, GenericMaterial* > Map;
+
 	// Constructor and destructor
-	inline GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures, bool use_glsl_version_330 = false);
-	inline GenericMaterial(Rawmaterial const& rawmat, std::map< std::string, Texture* > const& textures, bool twosided = false, bool use_glsl_version_330 = false);
+	inline GenericMaterial(Path const& path, Texture::Map const& textures, bool use_glsl_version_330 = false);
+	inline GenericMaterial(Rawmaterial const& rawmat, Texture::Map const& textures, bool twosided = false, bool use_glsl_version_330 = false);
 	inline GenericMaterial(bool use_glsl_version_330 = false);
 	inline virtual ~GenericMaterial(void);
 
@@ -206,7 +208,7 @@ private:
 
 };
 
-inline GenericMaterial::GenericMaterial(Path const& path, std::map< std::string, Texture* > const& textures, bool use_glsl_version_330) :
+inline GenericMaterial::GenericMaterial(Path const& path, Texture::Map const& textures, bool use_glsl_version_330) :
 use_glsl_version_330(use_glsl_version_330),
 color(Color(1, 1, 1)),
 specular(Color(0, 0, 0)),
@@ -264,7 +266,7 @@ rendering_light(NULL)
 
 	if (json.keyExists("colormap")) {
 		std::string colormap_name = json.getMember("colormap").getString();
-		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(colormap_name);
+		Texture::Map::const_iterator textures_find = textures.find(colormap_name);
 		if (textures_find == textures.end()) {
 			throw Exception("Colormap \"" + colormap_name + "\" not found!");
 		}
@@ -272,7 +274,7 @@ rendering_light(NULL)
 	}
 	if (json.keyExists("normalmap")) {
 		std::string normalmap_name = json.getMember("normalmap").getString();
-		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(normalmap_name);
+		Texture::Map::const_iterator textures_find = textures.find(normalmap_name);
 		if (textures_find == textures.end()) {
 			throw Exception("Normalmap \"" + normalmap_name + "\" not found!");
 		}
@@ -280,7 +282,7 @@ rendering_light(NULL)
 	}
 	if (json.keyExists("specularmap")) {
 		std::string specularmap_name = json.getMember("specularmap").getString();
-		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(specularmap_name);
+		Texture::Map::const_iterator textures_find = textures.find(specularmap_name);
 		if (textures_find == textures.end()) {
 			throw Exception("Specularmap \"" + specularmap_name + "\" not found!");
 		}
@@ -301,7 +303,7 @@ rendering_light(NULL)
 	updateIsTranslucent();
 }
 
-inline GenericMaterial::GenericMaterial(Rawmaterial const& rawmat, std::map< std::string, Texture* > const& textures, bool twosided, bool use_glsl_version_330) :
+inline GenericMaterial::GenericMaterial(Rawmaterial const& rawmat, Texture::Map const& textures, bool twosided, bool use_glsl_version_330) :
 use_glsl_version_330(use_glsl_version_330),
 color(rawmat.color),
 specular(rawmat.specular),
@@ -325,7 +327,7 @@ rendering_light(NULL)
 		colormap = rawmat.colormap_tex;
 		needs_uvs = true;
 	} else if (!rawmat.colormap.empty()) {
-		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(rawmat.colormap);
+		Texture::Map::const_iterator textures_find = textures.find(rawmat.colormap);
 		if (textures_find == textures.end()) {
 			throw Exception("Colormap \"" + rawmat.colormap + "\" not found!");
 		}
@@ -338,7 +340,7 @@ rendering_light(NULL)
 		normalmap = rawmat.normalmap_tex;
 		needs_uvs = true;
 	} else if (!rawmat.normalmap.empty()) {
-		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(rawmat.normalmap);
+		Texture::Map::const_iterator textures_find = textures.find(rawmat.normalmap);
 		if (textures_find == textures.end()) {
 			throw Exception("Normalmap \"" + rawmat.normalmap + "\" not found!");
 		}
@@ -351,7 +353,7 @@ rendering_light(NULL)
 		specularmap = rawmat.specularmap_tex;
 		needs_uvs = true;
 	} else if (!rawmat.specularmap.empty()) {
-		std::map< std::string, Texture* >::const_iterator textures_find = textures.find(rawmat.specularmap);
+		Texture::Map::const_iterator textures_find = textures.find(rawmat.specularmap);
 		if (textures_find == textures.end()) {
 			throw Exception("Specularmap \"" + rawmat.specularmap + "\" not found!");
 		}

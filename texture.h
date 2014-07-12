@@ -15,6 +15,7 @@
 #include "ivector2.h"
 
 #include <string>
+#include <map>
 
 namespace Hpp
 {
@@ -39,6 +40,8 @@ public:
 	static Flags const CLAMP_TO_EDGE_HORIZONTALLY = 0x0400;
 	static Flags const CLAMP_TO_EDGE_VERTICALLY   = 0x0800;
 	static Flags const CLAMP_TO_EDGE              = 0x0C00;
+
+	typedef std::map< std::string, Texture* > Map;
 
 
 	// ----------------------------------------
