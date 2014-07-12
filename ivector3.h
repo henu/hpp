@@ -4,6 +4,8 @@
 #include "cast.h"
 #include "json.h"
 #include "real.h"
+#include "serializable.h"
+#include "deserializable.h"
 
 #include <cmath>
 #include <string>
@@ -13,7 +15,7 @@
 namespace Hpp
 {
 
-class IVector3
+class IVector3 : public Serializable, public Deserializable
 {
 
 public:
@@ -51,7 +53,6 @@ public:
 
 	// Conversion functions
 	inline std::string toString(void) const;
-	inline Json toJson(void) const;
 
 	// For comparison
 	inline bool operator==(IVector3 const& v) const;
@@ -61,6 +62,16 @@ public:
 	inline bool operator<(IVector3 const& v) const;
 
 	ssize_t x, y, z;
+
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual Json toJson(void) const;
+	inline virtual void constructFromJson(Json const& json);
+
+private:
+
+	// Virtual functions needed by superclasses Serializable and Deserializable
+	inline virtual void doSerialize(ByteV& result, bool bigendian) const;
+	inline virtual void doDeserialize(std::istream& strm, bool bigendian);
 
 };
 
@@ -94,16 +105,7 @@ x(x), y(y), z(z)
 
 inline IVector3::IVector3(Json const& json)
 {
-	// Check JSON validity
-	if (json.getType() != Json::ARRAY) throw Exception("JSON for IVector3 must be an array!");
-	if (json.getArraySize() != 3) throw Exception("JSON for IVector3 must contain exactly two numbers!");
-	for (size_t num_id = 0; num_id < 3; ++ num_id) {
-		if (json.getItem(num_id).getType() != Json::NUMBER) throw Exception("Unexpected non-number in JSON array for IVector3!");
-	}
-	// Construct
-	x = json.getItem(0).getInteger();
-	y = json.getItem(1).getInteger();
-	z = json.getItem(2).getInteger();
+	constructFromJson(json);
 }
 
 inline IVector3::IVector3(IVector3 const& v) :
@@ -194,15 +196,6 @@ inline std::string IVector3::toString(void) const
 	return "(" + ssizeToStr(x) + ", " + ssizeToStr(y) + ", " + ssizeToStr(z) + ")";
 }
 
-inline Json IVector3::toJson(void) const
-{
-	Json result = Json::newArray();
-	result.addItem(Json::newNumber(int64_t(x)));
-	result.addItem(Json::newNumber(int64_t(y)));
-	result.addItem(Json::newNumber(int64_t(z)));
-	return result;
-}
-
 inline bool IVector3::operator==(IVector3 const& v) const
 {
 	return x == v.x && y == v.y && z == v.z;
@@ -223,6 +216,48 @@ inline bool IVector3::operator<(IVector3 const& v) const
 	return false;
 }
 
+inline Json IVector3::toJson(void) const
+{
+	Json result = Json::newArray();
+	result.addItem(Json::newNumber(int64_t(x)));
+	result.addItem(Json::newNumber(int64_t(y)));
+	result.addItem(Json::newNumber(int64_t(z)));
+	return result;
+}
+
+inline void IVector3::constructFromJson(Json const& json)
+{
+	// Check JSON validity
+	if (json.getType() != Json::ARRAY) throw Exception("JSON for IVector3 must be an array!");
+	if (json.getArraySize() != 3) throw Exception("JSON for IVector3 must contain exactly two numbers!");
+	for (size_t num_id = 0; num_id < 3; ++ num_id) {
+		if (json.getItem(num_id).getType() != Json::NUMBER) throw Exception("Unexpected non-number in JSON array for IVector3!");
+	}
+	// Construct
+	x = json.getItem(0).getInteger();
+	y = json.getItem(1).getInteger();
+	z = json.getItem(2).getInteger();
+}
+
+inline void IVector3::doSerialize(ByteV& result, bool bigendian) const
+{
+	result += int64ToByteV(x, bigendian);
+	result += int64ToByteV(y, bigendian);
+	result += int64ToByteV(z, bigendian);
+}
+
+inline void IVector3::doDeserialize(std::istream& strm, bool bigendian)
+{
+	char buf[24];
+	strm.read(buf, 24);
+	if (strm.eof()) {
+		throw Exception("Unexpected end of data!");
+	}
+	x = cStrToInt64(buf, bigendian);
+	y = cStrToInt64(buf + 8, bigendian);
+	z = cStrToInt64(buf + 16, bigendian);
+}
+
 inline std::ostream& operator<<(std::ostream& strm, IVector3 const& v)
 {
 	return strm << v.toString();
@@ -231,4 +266,3 @@ inline std::ostream& operator<<(std::ostream& strm, IVector3 const& v)
 }
 
 #endif
-
