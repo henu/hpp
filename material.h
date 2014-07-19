@@ -34,6 +34,8 @@ public:
 	static Flags const ADDITIVE_RENDERING	= 0x01;
 	static Flags const AMBIENT_ENABLED	= 0x02;
 
+	typedef std::vector< Material* > Vec;
+
 	// Different types of alpha rendering. Types are numbered so they can
 	// be sorted based on the complexity of alpha renderin type.
 // TODO: Use these in future!
