@@ -16,6 +16,8 @@ class Camera
 
 public:
 
+	inline virtual ~Camera(void) { }
+
 	virtual Camera* clone(void) const = 0;
 
 	inline void setTransform(Transform const& transf);

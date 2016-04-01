@@ -7,6 +7,7 @@
 #include <strings.h>
 #include <cstring>
 #include <errno.h>
+#include <unistd.h>
 #ifndef WIN32
 #include <arpa/inet.h>
 #endif

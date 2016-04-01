@@ -6,6 +6,7 @@
 
 #include <errno.h>
 #include <iostream>
+#include <unistd.h>
 #ifndef WIN32
 #include <netdb.h>
 #endif
