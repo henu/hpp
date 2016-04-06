@@ -15,7 +15,7 @@
 		},
 
 		"main": {
-			"libs": "-lpthread -lrt",
+			"libs": "-lpthread -lrt -lz",
 			"deb_deps": [ "libc6-dev" ],
 			"headers": [
 				"gui/autogridcontainer.h",
