@@ -34,6 +34,9 @@ double Equation::eval(Params const& params)
 		case SUM:
 			node->value = node->data.oper2.param[0]->value + node->data.oper2.param[1]->value;
 			break;
+		case MINUS:
+			node->value = node->data.oper2.param[0]->value - node->data.oper2.param[1]->value;
+			break;
 		case MULTIPLY:
 			node->value = node->data.oper2.param[0]->value * node->data.oper2.param[1]->value;
 			break;
@@ -59,8 +62,17 @@ double Equation::eval(Params const& params)
 				node->value = params_find->second;
 			}
 			break;
+		case ABS:
+			node->value = fabs(node->data.oper1.param->value);
+			break;
 		case LOG:
 			node->value = log(node->data.oper1.param->value);
+			break;
+		case SIN:
+			node->value = sin(node->data.oper1.param->value);
+			break;
+		case COS:
+			node->value = cos(node->data.oper1.param->value);
 			break;
 		default:
 			HppAssert(false, "Invalid node type!");
@@ -135,6 +147,25 @@ Equation::EqNode* Equation::parseString(std::string eq)
 		}
 		EqNode* result = new EqNode;
 		result->type = SUM;
+		result->data.oper2.param[0] = param[0];
+		result->data.oper2.param[1] = param[1];
+		return result;
+	}
+
+	// Check for minus
+	pos = findStringFromEquation(eq, "-");
+	if (pos != std::string::npos) {
+		EqNode* param[2] = { NULL, NULL };
+		try {
+			param[0] = parseString(eq.substr(0, pos));
+			param[1] = parseString(eq.substr(pos + 1));
+		}
+		catch ( ... ) {
+			releaseNode(param[0]);
+			throw;
+		}
+		EqNode* result = new EqNode;
+		result->type = MINUS;
 		result->data.oper2.param[0] = param[0];
 		result->data.oper2.param[1] = param[1];
 		return result;
@@ -245,11 +276,38 @@ Equation::EqNode* Equation::parseString(std::string eq)
 		}
 	}
 
+	// Check for function "abs"
+	if (eq.size() >= 5 && eq.substr(0, 4) == "abs(" && *eq.rbegin() == ')') {
+		EqNode* param = parseString(eq.substr(4, eq.size() - 5));
+		EqNode* result = new EqNode;
+		result->type = ABS;
+		result->data.oper1.param = param;
+		return result;
+	}
+
 	// Check for function "log"
 	if (eq.size() >= 5 && eq.substr(0, 4) == "log(" && *eq.rbegin() == ')') {
 		EqNode* param = parseString(eq.substr(4, eq.size() - 5));
 		EqNode* result = new EqNode;
 		result->type = LOG;
+		result->data.oper1.param = param;
+		return result;
+	}
+
+	// Check for function "sin"
+	if (eq.size() >= 5 && eq.substr(0, 4) == "sin(" && *eq.rbegin() == ')') {
+		EqNode* param = parseString(eq.substr(4, eq.size() - 5));
+		EqNode* result = new EqNode;
+		result->type = SIN;
+		result->data.oper1.param = param;
+		return result;
+	}
+
+	// Check for function "cos"
+	if (eq.size() >= 5 && eq.substr(0, 4) == "cos(" && *eq.rbegin() == ')') {
+		EqNode* param = parseString(eq.substr(4, eq.size() - 5));
+		EqNode* result = new EqNode;
+		result->type = COS;
 		result->data.oper1.param = param;
 		return result;
 	}
@@ -294,13 +352,17 @@ void Equation::releaseNode(EqNode* node)
 	case NUMBER:
 		break;
 	case SUM:
+	case MINUS:
 	case MULTIPLY:
 	case DIVISION:
 	case POWER:
 		releaseNode(node->data.oper2.param[0]);
 		releaseNode(node->data.oper2.param[1]);
 		break;
+	case ABS:
 	case LOG:
+	case SIN:
+	case COS:
 		releaseNode(node->data.oper1.param);
 		break;
 	case VARIABLE:
@@ -318,6 +380,7 @@ void Equation::makeOrder(CalcOrder& order, EqNode* node)
 	case NUMBER:
 		break;
 	case SUM:
+	case MINUS:
 	case MULTIPLY:
 	case DIVISION:
 	case POWER:
@@ -328,7 +391,10 @@ void Equation::makeOrder(CalcOrder& order, EqNode* node)
 	case VARIABLE:
 		order.push_back(node);
 		break;
+	case ABS:
 	case LOG:
+	case SIN:
+	case COS:
 		makeOrder(order, node->data.oper1.param);
 		order.push_back(node);
 		break;
@@ -344,6 +410,8 @@ std::string Equation::nodeToString(EqNode const* node, Params const& params)
 		return floatToStr(node->value);
 	case SUM:
 		return "(" + nodeToString(node->data.oper2.param[0], params) + " + " + nodeToString(node->data.oper2.param[1], params) + ")";
+	case MINUS:
+		return "(" + nodeToString(node->data.oper2.param[0], params) + " - " + nodeToString(node->data.oper2.param[1], params) + ")";
 	case MULTIPLY:
 		return "(" + nodeToString(node->data.oper2.param[0], params) + " * " + nodeToString(node->data.oper2.param[1], params) + ")";
 	case DIVISION:
@@ -360,8 +428,14 @@ std::string Equation::nodeToString(EqNode const* node, Params const& params)
 				return floatToStr(params_find->second);
 			}
 		}
+	case ABS:
+		return "abs(" + nodeToString(node->data.oper1.param, params) + ")";
 	case LOG:
 		return "log(" + nodeToString(node->data.oper1.param, params) + ")";
+	case SIN:
+		return "sin(" + nodeToString(node->data.oper1.param, params) + ")";
+	case COS:
+		return "cos(" + nodeToString(node->data.oper1.param, params) + ")";
 	default:
 		HppAssert(false, "Invalid node type!");
 	}

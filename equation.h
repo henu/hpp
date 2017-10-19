@@ -29,7 +29,7 @@ public:
 private:
 
 	// Type for the member of equation
-	enum EqNodeType { NUMBER, SUM, MULTIPLY, DIVISION, POWER, VARIABLE, LOG };
+	enum EqNodeType { NUMBER, SUM, MINUS, MULTIPLY, DIVISION, POWER, VARIABLE, ABS, LOG, SIN, COS };
 	struct EqNode {
 		EqNodeType type;
 		double value;
