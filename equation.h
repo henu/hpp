@@ -55,7 +55,7 @@ private:
 	CalcOrder order;
 
 	// Parses equation in string format and returns it equation tree format.
-	static EqNode* parseString(std::string eq);
+	static EqNode* parseString(std::string::const_iterator& it, std::string::const_iterator const& end);
 
 	static size_t findStringFromEquation(std::string const& eq, std::string const& value);
 

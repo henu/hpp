@@ -11,11 +11,11 @@ namespace Hpp
 Equation::Equation(std::string const& eq)
 {
 	// Form equation tree
-	root = parseString(eq);
+	std::string::const_iterator eq_it = eq.begin();
+	root = parseString(eq_it, eq.end());
 
 	// Find calculation order
 	makeOrder(order, root);
-
 }
 
 Equation::~Equation(void)
@@ -103,218 +103,190 @@ std::string Equation::toString(Params const& params)
 	return nodeToString(root, params);
 }
 
-Equation::EqNode* Equation::parseString(std::string eq)
+Equation::EqNode* Equation::parseString(std::string::const_iterator& it, std::string::const_iterator const& end)
 {
+	CalcOrder operands;
+	std::vector< char > operators;
 
-	// Remove brackets and whitespace from the end and beginning
-	std::string::iterator eq_begin = eq.begin();
-	std::string::reverse_iterator eq_rbegin = eq.rbegin();
-	size_t eq_left = eq.size();
-	while (eq_left > 0) {
+	try {
+		while (true) {
 
-		if (*eq_begin == ' ' || *eq_begin == '\t' || *eq_begin == '\n') {
-			eq_begin ++;
-			eq_left --;
-		} else if (*eq_rbegin == ' ' || *eq_rbegin == '\t' || *eq_rbegin == '\n') {
-			eq_rbegin ++;
-			eq_left --;
-		} else if ((*eq_begin == '(' && *eq_rbegin == ')') ||
-		           (*eq_begin == '[' && *eq_rbegin == ']') ||
-		           (*eq_begin == '{' && *eq_rbegin == '}')) {
-			eq_begin ++;
-			eq_rbegin ++;
-			eq_left -= 2;
-		} else {
-			break;
-		}
-	}
-	eq = std::string(eq_begin, eq_begin + eq_left);
+			// Skip whitespace
+			while (it != end && (*it == ' ' || *it == '\t' || *it == '\n')) {
+				++ it;
+			}
+			if (it == end) {
+				throw Exception("Empty equation operand!");
+			}
 
-	size_t pos;
-	size_t pos2;
+			// Start by reading an operand
 
-	// Check for sum
-	pos = findStringFromEquation(eq, "+");
-	if (pos != std::string::npos) {
-		EqNode* param[2] = { NULL, NULL };
-		try {
-			param[0] = parseString(eq.substr(0, pos));
-			param[1] = parseString(eq.substr(pos + 1));
-		}
-		catch ( ... ) {
-			releaseNode(param[0]);
-			throw;
-		}
-		EqNode* result = new EqNode;
-		result->type = SUM;
-		result->data.oper2.param[0] = param[0];
-		result->data.oper2.param[1] = param[1];
-		return result;
-	}
+// TODO: Support special case of unary minus operator
+			// Opening bracket
+			if (*it == '(') {
+				char bracket = *it;
+				++ it;
 
-	// Check for minus
-	pos = findStringFromEquation(eq, "-");
-	if (pos != std::string::npos) {
-		EqNode* param[2] = { NULL, NULL };
-		try {
-			param[0] = parseString(eq.substr(0, pos));
-			param[1] = parseString(eq.substr(pos + 1));
-		}
-		catch ( ... ) {
-			releaseNode(param[0]);
-			throw;
-		}
-		EqNode* result = new EqNode;
-		result->type = MINUS;
-		result->data.oper2.param[0] = param[0];
-		result->data.oper2.param[1] = param[1];
-		return result;
-	}
-
-	// Check for multiply or division
-	pos = findStringFromEquation(eq, "*");
-	pos2 = findStringFromEquation(eq, "/");
-	if (pos != std::string::npos &&
-	    (pos2 == std::string::npos || pos < pos2)) {
-		EqNode* param[2] = { NULL, NULL };
-		try {
-			param[0] = parseString(eq.substr(0, pos));
-			param[1] = parseString(eq.substr(pos + 1));
-		}
-		catch ( ... ) {
-			releaseNode(param[0]);
-			throw;
-		}
-		EqNode* result = new EqNode;
-		result->type = MULTIPLY;
-		result->data.oper2.param[0] = param[0];
-		result->data.oper2.param[1] = param[1];
-		return result;
-	} else if (pos2 != std::string::npos) {
-		EqNode* param[2] = { NULL, NULL };
-		try {
-			param[0] = parseString(eq.substr(0, pos2));
-			param[1] = parseString(eq.substr(pos2 + 1));
-		}
-		catch ( ... ) {
-			releaseNode(param[0]);
-			throw;
-		}
-		EqNode* result = new EqNode;
-		result->type = DIVISION;
-		result->data.oper2.param[0] = param[0];
-		result->data.oper2.param[1] = param[1];
-		return result;
-	}
-
-	// Check for power
-	pos = findStringFromEquation(eq, "^");
-	if (pos != std::string::npos) {
-		EqNode* param[2] = { NULL, NULL };
-		try {
-			param[0] = parseString(eq.substr(0, pos));
-			param[1] = parseString(eq.substr(pos + 1));
-		}
-		catch ( ... ) {
-			releaseNode(param[0]);
-			throw;
-		}
-		EqNode* result = new EqNode;
-		result->type = POWER;
-		result->data.oper2.param[0] = param[0];
-		result->data.oper2.param[1] = param[1];
-		return result;
-	}
-
-	// Check for number
-	if (!eq.empty()) {
-		bool is_num = true;
-		bool dot_found = false;
-		for (std::string::const_iterator eq_it = eq.begin();
-		     eq_it != eq.end();
-		     eq_it ++) {
-			char c = *eq_it;
-			if (c >= '0' && c <= '9') {
-			} else if (c == '.' && !dot_found) {
-				dot_found = true;
+				operands.push_back(parseString(it, end));
+				if (it == end) {
+					throw Exception("Unclosed bracket!");
+				} else if (*it != ')') {
+					throw Exception("Unclosed bracket!");
+				}
+				++ it;
+			}
+			// Number
+			else if ((*it >= '0' && *it <= '9') || *it == '.') {
+				std::string num_str(1, *it);
+				bool dot_met = (*it == '.');
+				++ it;
+				while (it != end && ((*it >= '0' && *it <= '9') || (!dot_met && *it == '.'))) {
+					num_str += *it;
+					++ it;
+				}
+				EqNode* num = new EqNode;
+				num->type = NUMBER;
+				num->value = strToFloat(num_str);
+				operands.push_back(num);
+			}
+			// "abs()" function
+			else if (end - it >= 4 && std::string(it, it + 4) == "abs(") {
+				it += 4;
+				EqNode* param = parseString(it, end);
+				EqNode* func = new EqNode;
+				func->type = ABS;
+				func->data.oper1.param = param;
+				operands.push_back(func);
+				if (it == end || *it != ')') {
+					throw Exception("Unclosed bracket!");
+				}
+				++ it;
+			}
+			// "log()" function
+			else if (end - it >= 4 && std::string(it, it + 4) == "log(") {
+				it += 4;
+				EqNode* param = parseString(it, end);
+				EqNode* func = new EqNode;
+				func->type = LOG;
+				func->data.oper1.param = param;
+				operands.push_back(func);
+				if (it == end || *it != ')') {
+					throw Exception("Unclosed bracket!");
+				}
+				++ it;
+			}
+			// "sin()" function
+			else if (end - it >= 4 && std::string(it, it + 4) == "sin(") {
+				it += 4;
+				EqNode* param = parseString(it, end);
+				EqNode* func = new EqNode;
+				func->type = SIN;
+				func->data.oper1.param = param;
+				operands.push_back(func);
+				if (it == end || *it != ')') {
+					throw Exception("Unclosed bracket!");
+				}
+				++ it;
+			}
+			// "cos()" function
+			else if (end - it >= 4 && std::string(it, it + 4) == "cos(") {
+				it += 4;
+				EqNode* param = parseString(it, end);
+				EqNode* func = new EqNode;
+				func->type = COS;
+				func->data.oper1.param = param;
+				operands.push_back(func);
+				if (it == end || *it != ')') {
+					throw Exception("Unclosed bracket!");
+				}
+				++ it;
+			}
+			// Variable
+			else if ((*it >= 'a' && *it <= 'z') || (*it >= 'A' && *it <= 'Z') || *it == '_') {
+				std::string var_name(1, *it);
+				++ it;
+				while (it != end && ((*it >= 'a' && *it <= 'z') || (*it >= 'A' && *it <= 'Z') || *it == '_') || (*it >= '0' && *it <= '9')) {
+					var_name += *it;
+					++ it;
+				}
+				EqNode* var = new EqNode;
+				var->type = VARIABLE;
+				var->data.name.name = new std::string(var_name);
+				operands.push_back(var);
 			} else {
-				is_num = false;
+				throw Exception("Unsupported operand!");
+			}
+
+			// Skip whitespace
+			while (it != end && (*it == ' ' || *it == '\t' || *it == '\n')) {
+				++ it;
+			}
+
+			// Read operator, or skip if there is no operators left
+			if (it == end || *it == ')') {
 				break;
 			}
-		}
-		if (is_num) {
-			EqNode* result = new EqNode;
-			result->type = NUMBER;
-			result->value = strToFloat(eq);
-			return result;
+			char oper = *it;
+			if (oper != '+' && oper != '-' && oper != '*' && oper != '/' && oper != '^') {
+				throw Exception("Invalid operator!");
+			}
+			operators.push_back(oper);
+			++ it;
 		}
 	}
+	catch (...) {
+		for (unsigned i = 0; i < operands.size(); ++ i) {
+			releaseNode(operands[i]);
+		}
+		throw;
+	}
 
-	// Check for variable name
-	if (!eq.empty()) {
-		bool is_name = true;
-		for (std::string::const_iterator eq_it = eq.begin();
-		     eq_it != eq.end();
-		     eq_it ++) {
-			char c = *eq_it;
-			if ((c >= 'a' && c <= 'z') ||
-			    (c >= 'A' && c <= 'Z') ||
-			    c == '_' ||
-			    (eq_it != eq.begin() && c >= '0' && c <= '9')) {
-			} else {
-				is_name = false;
-				break;
+	// Combine operands and operators. Loop and find
+	// strongest operators and combine them first.
+	while (operands.size() > 1) {
+		HppAssert(operands.size() - 1 = operators.size(), "Operators/operands mismatch!");
+
+		// Find strongest operator
+		char strongest_operator = operators[0];
+		unsigned strongest_operator_i = 0;
+		for (unsigned operator_i = 1; operator_i < operators.size(); ++ operator_i) {
+			char oper = operators[operator_i];
+			if (oper == '^') {
+				if (strongest_operator != '^') {
+					strongest_operator = oper;
+					strongest_operator_i = operator_i;
+				}
+			} else if (oper == '*' || oper == '/') {
+				if (strongest_operator == '+' || strongest_operator == '-') {
+					strongest_operator = oper;
+					strongest_operator_i = operator_i;
+				}
 			}
 		}
-		if (is_name) {
-			std::string* name;
-			name = new std::string(eq);
-			EqNode* result = new EqNode;
-			result->type = VARIABLE;
-			result->data.name.name = name;
-			return result;
+
+		// Convert to node
+		EqNode* oper = new EqNode;
+		if (strongest_operator == '+') {
+			oper->type = SUM;
+		} else if (strongest_operator == '-') {
+			oper->type = MINUS;
+		} else if (strongest_operator == '*') {
+			oper->type = MULTIPLY;
+		} else if (strongest_operator == '/') {
+			oper->type = DIVISION;
+		} else if (strongest_operator == '^') {
+			oper->type = POWER;
 		}
+		oper->data.oper2.param[0] = operands[strongest_operator_i];
+		oper->data.oper2.param[1] = operands[strongest_operator_i + 1];
+
+		// Replace operand in list and remove used operator
+		operands[strongest_operator_i] = oper;
+		operands.erase(operands.begin() + strongest_operator_i + 1);
+		operators.erase(operators.begin() + strongest_operator_i);
 	}
 
-	// Check for function "abs"
-	if (eq.size() >= 5 && eq.substr(0, 4) == "abs(" && *eq.rbegin() == ')') {
-		EqNode* param = parseString(eq.substr(4, eq.size() - 5));
-		EqNode* result = new EqNode;
-		result->type = ABS;
-		result->data.oper1.param = param;
-		return result;
-	}
-
-	// Check for function "log"
-	if (eq.size() >= 5 && eq.substr(0, 4) == "log(" && *eq.rbegin() == ')') {
-		EqNode* param = parseString(eq.substr(4, eq.size() - 5));
-		EqNode* result = new EqNode;
-		result->type = LOG;
-		result->data.oper1.param = param;
-		return result;
-	}
-
-	// Check for function "sin"
-	if (eq.size() >= 5 && eq.substr(0, 4) == "sin(" && *eq.rbegin() == ')') {
-		EqNode* param = parseString(eq.substr(4, eq.size() - 5));
-		EqNode* result = new EqNode;
-		result->type = SIN;
-		result->data.oper1.param = param;
-		return result;
-	}
-
-	// Check for function "cos"
-	if (eq.size() >= 5 && eq.substr(0, 4) == "cos(" && *eq.rbegin() == ')') {
-		EqNode* param = parseString(eq.substr(4, eq.size() - 5));
-		EqNode* result = new EqNode;
-		result->type = COS;
-		result->data.oper1.param = param;
-		return result;
-	}
-
-	throw Exception("Unable to parse \"" + eq + "\"!");
-	return NULL;
-
+	return operands[0];
 }
 
 size_t Equation::findStringFromEquation(std::string const& eq, std::string const& value)
